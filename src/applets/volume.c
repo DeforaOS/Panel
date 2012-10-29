@@ -205,8 +205,10 @@ static Volume * _volume_new(PanelAppletHelper * helper)
 			|| (err = snd_mixer_selem_register(volume->mixer, NULL,
 				       	NULL)) != 0
 			|| (err = snd_mixer_load(volume->mixer)) != 0)
-		fprintf(stderr, "%s: %s: %s\n", "Panel", volume->device,
-			       	snd_strerror(err));
+	{
+		error_set_code(1, "%s: %s", volume->device, snd_strerror(err));
+		volume->helper->error(NULL, NULL, 1);
+	}
 	else
 		for(elem = snd_mixer_first_elem(volume->mixer); elem != NULL;
 				elem = snd_mixer_elem_next(elem))
