@@ -209,14 +209,21 @@ static GtkWidget * _main_applications(Main * main)
 
 static void _applications_on_activate(gpointer data)
 {
-	char const * program = data;
+	char * program = data;
+	char * p;
 
 	if(program == NULL)
 		return;
+	if((program = strdup(program)) == NULL)
+		return; /* XXX report error */
+	/* XXX crude way to ignore %f, %F, %u and %U */
+	if((p = strchr(program, '%')) != NULL)
+		*p = '\0';
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"", __func__, program);
 #endif
 	g_spawn_command_line_async(program, NULL);
+	free(program);
 }
 
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
@@ -425,7 +432,7 @@ static gboolean _on_idle(gpointer data)
 		config_reset(config);
 		if(config_load(config, name) != 0)
 		{
-			error_print("Panel"); /* XXX use the error helper */
+			main->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
 		q = config_get(config, section, "Name");
