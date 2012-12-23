@@ -292,6 +292,7 @@ static void _applications_on_activate_directory(Config * config)
 	int flags = G_SPAWN_SEARCH_PATH;
 	GError * error = NULL;
 
+	/* XXX this may not might the correct key */
 	if((directory = config_get(config, section, "Path")) == NULL)
 		return;
 	if((argv[2] = strdup(directory)) == NULL)
