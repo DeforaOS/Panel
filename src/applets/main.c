@@ -166,6 +166,9 @@ static void _main_destroy(Main * main)
 /* helpers */
 /* main_applications */
 static void _applications_on_activate(gpointer data);
+static void _applications_on_activate_application(Config * config);
+static void _applications_on_activate_directory(Config * config);
+static void _applications_on_activate_url(Config * config);
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus);
 
 static GtkWidget * _main_applications(Main * main)
@@ -190,12 +193,14 @@ static GtkWidget * _main_applications(Main * main)
 					"Icon"));
 		if((q = config_get(config, section, "Comment")) != NULL)
 			gtk_widget_set_tooltip_text(menuitem, q);
-		if((q = config_get(config, section, "Exec")) != NULL)
+		if((q = config_get(config, section, "Type")) != NULL
+				&& strcmp(q, "Application") == 0
+				&& config_get(config, section, "Exec") == NULL)
+			gtk_widget_set_sensitive(menuitem, FALSE);
+		else
 			g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
 					G_CALLBACK(_applications_on_activate),
 					config);
-		else
-			gtk_widget_set_sensitive(menuitem, FALSE);
 		if((q = config_get(config, section, "Categories")) == NULL)
 		{
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -220,15 +225,30 @@ static void _applications_on_activate(gpointer data)
 {
 	Config * config = data;
 	const char section[] = "Desktop Entry";
+	char const * q;
+
+	if((q = config_get(config, section, "Type")) == NULL)
+		return;
+	else if(strcmp(q, "Application") == 0)
+		_applications_on_activate_application(config);
+	else if(strcmp(q, "Directory") == 0)
+		_applications_on_activate_directory(config);
+	else if(strcmp(q, "URL") == 0)
+		_applications_on_activate_url(config);
+}
+
+static void _applications_on_activate_application(Config * config)
+{
+	const char section[] = "Desktop Entry";
 	char * program;
 	char * p;
 	char const * q;
 	pid_t pid;
 	GError * error = NULL;
 
-	if((program = config_get(config, section, "Exec")) == NULL)
+	if((q = config_get(config, section, "Exec")) == NULL)
 		return;
-	if((program = strdup(program)) == NULL)
+	if((program = strdup(q)) == NULL)
 		return; /* XXX report error */
 	/* XXX crude way to ignore %f, %F, %u and %U */
 	if((p = strchr(program, '%')) != NULL)
@@ -261,6 +281,48 @@ static void _applications_on_activate(gpointer data)
 	else if(pid < 0)
 		fprintf(stderr, "%s: %s\n", program, strerror(errno));
 	free(program);
+}
+
+static void _applications_on_activate_directory(Config * config)
+{
+	const char section[] = "Desktop Entry";
+	char const * directory;
+	/* XXX open with the default file manager instead */
+	char * argv[] = { "browser", "--", NULL, NULL };
+	int flags = G_SPAWN_SEARCH_PATH;
+	GError * error = NULL;
+
+	if((directory = config_get(config, section, "Path")) == NULL)
+		return;
+	if((argv[2] = strdup(directory)) == NULL)
+		fprintf(stderr, "%s: %s\n", directory, strerror(errno));
+	else if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
+			!= TRUE)
+	{
+		fprintf(stderr, "%s: %s\n", directory, error->message);
+		g_error_free(error);
+	}
+}
+
+static void _applications_on_activate_url(Config * config)
+{
+	const char section[] = "Desktop Entry";
+	char const * url;
+	/* XXX open with the default web browser instead */
+	char * argv[] = { "surfer", "--", NULL, NULL };
+	int flags = G_SPAWN_SEARCH_PATH;
+	GError * error = NULL;
+
+	if((url = config_get(config, section, "URL")) == NULL)
+		return;
+	if((argv[2] = strdup(url)) == NULL)
+		fprintf(stderr, "%s: %s\n", url, strerror(errno));
+	else if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
+			!= TRUE)
+	{
+		fprintf(stderr, "%s: %s\n", url, error->message);
+		g_error_free(error);
+	}
 }
 
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
@@ -473,8 +535,11 @@ static gboolean _on_idle(gpointer data)
 			continue;
 		}
 		/* skip this entry if it has an unknown type */
-		if((q = config_get(config, section, "Type")) == NULL
-				|| strcmp(q, "Application") != 0)
+		if((q = config_get(config, section, "Type")) == NULL)
+			continue;
+		if(strcmp(q, "Application") != 0
+				&& strcmp(q, "Directory") != 0
+				&& strcmp(q, "URL") != 0)
 			continue;
 		/* skip this entry if there is no name defined */
 		if((q = config_get(config, section, "Name")) == NULL)
