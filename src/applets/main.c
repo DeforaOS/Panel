@@ -435,10 +435,17 @@ static gboolean _on_idle(gpointer data)
 			main->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
+		/* skip this entry if there is no name defined */
 		if((q = config_get(config, section, "Name")) == NULL)
 			continue;
+		/* skip this entry if should not be displayed at all */
 		if((q = config_get(config, section, "NoDisplay")) != NULL
 				&& strcmp(q, "true") == 0)
+			continue;
+		/* skip this entry if the binary cannot be executed */
+		if((q = config_get(config, section, "TryExec")) != NULL
+				&& access(q, X_OK) != 0
+				&& errno == ENOENT)
 			continue;
 		main->apps = g_slist_insert_sorted(main->apps, config,
 				_idle_apps_compare);
