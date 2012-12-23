@@ -435,8 +435,10 @@ static gboolean _on_idle(gpointer data)
 			main->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
-		q = config_get(config, section, "Name");
-		if(q == NULL)
+		if((q = config_get(config, section, "Name")) == NULL)
+			continue;
+		if((q = config_get(config, section, "NoDisplay")) != NULL
+				&& strcmp(q, "true") == 0)
 			continue;
 		main->apps = g_slist_insert_sorted(main->apps, config,
 				_idle_apps_compare);
