@@ -27,6 +27,14 @@
 #include "../../config.h"
 #define _(string) gettext(string)
 
+/* constants */
+#ifndef PREFIX
+# define PREFIX		"/usr/local"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+
 /* XXX to avoid pointless warnings with GCC */
 #define main _main
 
@@ -288,7 +296,7 @@ static GtkWidget * _main_image(char const * name)
 			&& (name != NULL && (len = strlen(name)) > 4)
 			&& (strcmp(&name[len - 4], ".png") == 0
 				|| strcmp(&name[len - 4], ".xpm") == 0)
-			&& (buf = string_new_append(PREFIX, "/share/pixmaps/",
+			&& (buf = string_new_append(DATADIR, "/pixmaps/",
 					name, NULL)) != NULL)
 	{
 		pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width, height,
@@ -409,7 +417,7 @@ static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
 static gboolean _on_idle(gpointer data)
 {
 	Main * main = data;
-	const char path[] = PREFIX "/share/applications";
+	const char path[] = DATADIR "/applications";
 	DIR * dir;
 	int fd;
 	struct stat st;
@@ -578,7 +586,7 @@ static void _on_suspend(gpointer data)
 static gboolean _on_timeout(gpointer data)
 {
 	Main * main = data;
-	const char path[] = PREFIX "/share/applications";
+	const char path[] = DATADIR "/applications";
 	struct stat st;
 
 	if(stat(path, &st) != 0)
