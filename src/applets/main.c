@@ -303,6 +303,7 @@ static void _applications_on_activate_directory(Config * config)
 		fprintf(stderr, "%s: %s\n", directory, error->message);
 		g_error_free(error);
 	}
+	free(argv[2]);
 }
 
 static void _applications_on_activate_url(Config * config)
@@ -324,6 +325,7 @@ static void _applications_on_activate_url(Config * config)
 		fprintf(stderr, "%s: %s\n", url, error->message);
 		g_error_free(error);
 	}
+	free(argv[2]);
 }
 
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
