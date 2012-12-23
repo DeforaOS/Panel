@@ -17,6 +17,7 @@
 
 #include <sys/stat.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -213,6 +214,9 @@ static void _applications_on_activate(gpointer data)
 	const char section[] = "Desktop Entry";
 	char * program;
 	char * p;
+	char const * q;
+	pid_t pid;
+	GError * error = NULL;
 
 	if((program = config_get(config, section, "Exec")) == NULL)
 		return;
@@ -224,7 +228,30 @@ static void _applications_on_activate(gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"", __func__, program);
 #endif
-	g_spawn_command_line_async(program, NULL);
+	if((q = config_get(config, section, "Path")) == NULL)
+	{
+		/* execute the program directly */
+		if(g_spawn_command_line_async(program, &error) != TRUE)
+		{
+			fprintf(stderr, "%s: %s\n", program, error->message);
+			g_error_free(error);
+		}
+	}
+	else if((pid = fork()) == 0)
+	{
+		/* change the current working directory */
+		if(chdir(q) != 0)
+			fprintf(stderr, "%s: %s: %s\n", program, q,
+					strerror(errno));
+		else if(g_spawn_command_line_async(program, &error) != TRUE)
+		{
+			fprintf(stderr, "%s: %s\n", program, error->message);
+			g_error_free(error);
+		}
+		exit(0);
+	}
+	else if(pid < 0)
+		fprintf(stderr, "%s: %s\n", program, strerror(errno));
 	free(program);
 }
 
