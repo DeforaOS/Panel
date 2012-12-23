@@ -464,6 +464,10 @@ static gboolean _on_idle(gpointer data)
 			main->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
+		/* skip this entry if it has an unknown type */
+		if((q = config_get(config, section, "Type")) != NULL
+				&& strcmp(q, "Application") != 0)
+			continue;
 		/* skip this entry if there is no name defined */
 		if((q = config_get(config, section, "Name")) == NULL)
 			continue;
