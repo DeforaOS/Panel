@@ -184,7 +184,7 @@ static GtkWidget * _main_applications(Main * main)
 		if((q = config_get(config, section, "Exec")) != NULL)
 			g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
 					G_CALLBACK(_applications_on_activate),
-					(gpointer)q);
+					config);
 		else
 			gtk_widget_set_sensitive(menuitem, FALSE);
 		if((q = config_get(config, section, "Categories")) == NULL)
@@ -209,10 +209,12 @@ static GtkWidget * _main_applications(Main * main)
 
 static void _applications_on_activate(gpointer data)
 {
-	char * program = data;
+	Config * config = data;
+	const char section[] = "Desktop Entry";
+	char * program;
 	char * p;
 
-	if(program == NULL)
+	if((program = config_get(config, section, "Exec")) == NULL)
 		return;
 	if((program = strdup(program)) == NULL)
 		return; /* XXX report error */
