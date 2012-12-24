@@ -77,6 +77,8 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 /* useful */
 static char const * _helper_config_get(Panel * panel, char const * section,
 		char const * variable);
+static int _helper_config_set(Panel * panel, char const * section,
+		char const * variable, char const * value);
 static int _helper_error(Panel * panel, char const * message, int ret);
 static void _helper_about_dialog(Panel * panel);
 static int _helper_lock(Panel * panel);
@@ -157,8 +159,10 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->type = type;
 	helper->icon_size = iconsize;
 	helper->config_get = _helper_config_get;
+	helper->config_set = _helper_config_set;
 	helper->error = _helper_error;
 	helper->about_dialog = _helper_about_dialog;
+	helper->lock = _helper_lock;
 	helper->logout_dialog = _helper_logout_dialog;
 	helper->position_menu = _helper_position_menu;
 	helper->rotate_screen = _helper_rotate_screen;
@@ -177,6 +181,19 @@ static char const * _helper_config_get(Panel * panel, char const * section,
 			variable);
 #endif
 	return config_get(panel->config, section, variable);
+}
+
+
+/* helper_config_set */
+static int _helper_config_set(Panel * panel, char const * section,
+		char const * variable, char const * value)
+{
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\", \"%s\")\n", __func__,
+			section, variable, value);
+#endif
+	/* setting but _not_ saving the configuration */
+	return config_set(panel->config, section, variable, value);
 }
 
 
