@@ -1310,17 +1310,10 @@ static char const * _panel_get_plugins(Panel * panel, PanelPosition position)
 #ifndef EMBEDDED
 	char const * plugins = "main,desktop,lock,logout,pager,tasks"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock";
-	char const * top = "main,lock,logout,separator,phone,spacer"
-		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock";
-	char const * bottom = "desktop,tasks,pager";
 #else /* EMBEDDED */
 	char const * plugins = "main,desktop,keyboard,tasks,spacer"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
-	char const * top = "phone,spacer"
-		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
-		",close";
-	char const * bottom = "main,keyboard,desktop,tasks";
 #endif
 	char const * p = NULL;
 
@@ -1669,6 +1662,7 @@ static int _panel_helper_suspend(Panel * panel)
 	int fd;
 	char * suspend[] = { "/usr/bin/sudo", "sudo", "/usr/bin/apm", "-s",
 		NULL };
+	int flags = G_SPAWN_FILE_AND_ARGV_ZERO;
 	GError * error = NULL;
 #endif
 
@@ -1681,10 +1675,9 @@ static int _panel_helper_suspend(Panel * panel)
 	{
 		write(fd, "mem\n", 4);
 		close(fd);
-		return 0;
 	}
-	if(g_spawn_async(NULL, suspend, NULL, G_SPAWN_FILE_AND_ARGV_ZERO, NULL,
-				NULL, NULL, &error) != TRUE)
+	else if(g_spawn_async(NULL, suspend, NULL, flags, NULL, NULL, NULL,
+				&error) != TRUE)
 	{
 		panel_error(panel, error->message, 1);
 		g_error_free(error);
