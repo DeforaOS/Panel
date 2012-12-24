@@ -69,8 +69,8 @@ desktop.so: $(desktop_OBJS)
 	$(CCSHARED) -o desktop.so $(desktop_OBJS) $(desktop_LDFLAGS)
 
 embed_OBJS = embed.o
-embed_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
-embed_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+embed_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
+embed_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
 
 embed.so: $(embed_OBJS)
 	$(CCSHARED) -o embed.so $(embed_OBJS) $(embed_LDFLAGS)
