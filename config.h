@@ -1,5 +1,5 @@
 #define PACKAGE "Panel"
-#define VERSION "0.2.16"
+#define VERSION "0.2.17"
 
 #ifndef PREFIX
 # define PREFIX "/usr/local"
