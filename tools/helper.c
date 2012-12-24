@@ -41,6 +41,9 @@ struct _Panel
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
+#ifndef LIBDIR
+# define LIBDIR		PREFIX "/lib"
+#endif
 
 
 static char const * _authors[] =
@@ -77,7 +80,7 @@ static void _helper_shutdown_dialog(Panel * panel);
 /* applet_list */
 static int _applet_list(void)
 {
-	char const path[] = PREFIX "/lib/Panel/applets";
+	char const path[] = LIBDIR "/Panel/applets";
 	DIR * dir;
 	struct dirent * de;
 	size_t len;
