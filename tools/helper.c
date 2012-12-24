@@ -71,6 +71,7 @@ static char const * _helper_config_get(Panel * panel, char const * section,
 		char const * variable);
 static int _helper_error(Panel * panel, char const * message, int ret);
 static void _helper_about_dialog(Panel * panel);
+static void _helper_logout_dialog(Panel * panel);
 static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in);
 static void _helper_shutdown_dialog(Panel * panel);
@@ -147,6 +148,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->config_get = _helper_config_get;
 	helper->error = _helper_error;
 	helper->about_dialog = _helper_about_dialog;
+	helper->logout_dialog = _helper_logout_dialog;
 	helper->position_menu = _helper_position_menu;
 	helper->shutdown_dialog = _helper_shutdown_dialog;
 }
@@ -194,6 +196,39 @@ static void _helper_about_dialog(Panel * panel)
 			"http://www.defora.org/");
 	gtk_window_set_position(GTK_WINDOW(dialog),
 			GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+}
+
+
+/* helper_logout_dialog */
+static void _helper_logout_dialog(Panel * panel)
+{
+	GtkWidget * dialog;
+	GtkWidget * widget;
+	const char message[] = "This will log you out of the current session,"
+		" therefore closing any application currently opened"
+		" and losing any unsaved data.\n"
+		"Do you really want to proceed?";
+
+	dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_NONE,
+#if GTK_CHECK_VERSION(2, 6, 0)
+			"%s", "Logout");
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+#endif
+			"%s", message);
+	gtk_dialog_add_buttons(GTK_DIALOG(dialog), GTK_STOCK_CANCEL,
+			GTK_RESPONSE_CANCEL, NULL);
+	widget = gtk_button_new_with_label("Logout");
+	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_icon_name(
+				"gnome-logout", GTK_ICON_SIZE_BUTTON));
+	gtk_widget_show_all(widget);
+	gtk_dialog_add_action_widget(GTK_DIALOG(dialog), widget,
+			GTK_RESPONSE_ACCEPT);
+	gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_window_set_title(GTK_WINDOW(dialog), "Logout");
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(dialog);
 }
