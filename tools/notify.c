@@ -110,7 +110,12 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,
 				_notify_on_timeout, &panel);
+	panel.source = 0;
 	gtk_main();
+	if(panel.timeout != 0)
+		g_source_remove(panel.timeout);
+	if(panel.source != 0)
+		g_source_remove(panel.source);
 	return 0;
 }
 

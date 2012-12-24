@@ -19,6 +19,12 @@ static char const _license[] =
 
 
 
+#ifdef __NetBSD__
+# include <sys/param.h>
+# include <sys/sysctl.h>
+#else
+# include <fcntl.h>
+#endif
 #include <dirent.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,6 +41,7 @@ struct _Panel
 	Config * config;
 	GtkWidget * window;
 	gint timeout;
+	guint source;
 };
 
 
@@ -72,11 +79,13 @@ static char const * _helper_config_get(Panel * panel, char const * section,
 		char const * variable);
 static int _helper_error(Panel * panel, char const * message, int ret);
 static void _helper_about_dialog(Panel * panel);
+static int _helper_lock(Panel * panel);
 static void _helper_logout_dialog(Panel * panel);
 static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in);
 static void _helper_rotate_screen(Panel * panel);
 static void _helper_shutdown_dialog(Panel * panel);
+static int _helper_suspend(Panel * panel);
 
 
 /* functions */
@@ -154,6 +163,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->position_menu = _helper_position_menu;
 	helper->rotate_screen = _helper_rotate_screen;
 	helper->shutdown_dialog = _helper_shutdown_dialog;
+	helper->suspend = _helper_suspend;
 }
 
 
@@ -201,6 +211,37 @@ static void _helper_about_dialog(Panel * panel)
 			GTK_WIN_POS_CENTER_ALWAYS);
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(dialog);
+}
+
+
+/* helper_lock */
+static gboolean _lock_on_idle(gpointer data);
+
+static int _helper_lock(Panel * panel)
+{
+	panel->source = g_idle_add(_lock_on_idle, panel);
+	return 0;
+}
+
+static gboolean _lock_on_idle(gpointer data)
+{
+	/* XXX code duplicated from panel.c */
+	/* FIXME default to calling XActivateScreenSaver() */
+	Panel * panel = data;
+	char const * command = "xset s activate";
+	char const * p;
+	GError * error = NULL;
+
+	panel->source = 0;
+	if((p = config_get(panel->config, "lock", "command")) != NULL)
+		command = p;
+	if(g_spawn_command_line_async(command, &error) != TRUE)
+	{
+		/* XXX will also call perror() */
+		_helper_error(panel, error->message, 1);
+		g_error_free(error);
+	}
+	return FALSE;
 }
 
 
@@ -305,4 +346,42 @@ static void _helper_shutdown_dialog(Panel * panel)
 	gtk_window_set_title(GTK_WINDOW(dialog), "Shutdown");
 	gtk_dialog_run(GTK_DIALOG(dialog));
 	gtk_widget_destroy(dialog);
+}
+
+
+/* helper_suspend */
+static int _helper_suspend(Panel * panel)
+{
+	/* XXX code duplicated from panel.c */
+#ifdef __NetBSD__
+	int sleep_state = 3;
+#else
+	int fd;
+	char * suspend[] = { "/usr/bin/sudo", "sudo", "/usr/bin/apm", "-s",
+		NULL };
+	int flags = G_SPAWN_FILE_AND_ARGV_ZERO;
+	GError * error = NULL;
+#endif
+
+#ifdef __NetBSD__
+	if(sysctlbyname("machdep.sleep_state", NULL, NULL, &sleep_state,
+				sizeof(sleep_state)) != 0)
+		return -_helper_error(panel, "sysctl", 1);
+#else
+	if((fd = open("/sys/power/state", O_WRONLY)) >= 0)
+	{
+		write(fd, "mem\n", 4);
+		close(fd);
+	}
+	else if(g_spawn_async(NULL, suspend, NULL, flags, NULL, NULL, NULL,
+				&error) != TRUE)
+	{
+		/* XXX will also call perror() */
+		_helper_error(panel, error->message, 1);
+		g_error_free(error);
+		return -1;
+	}
+#endif
+	_helper_lock(panel); /* XXX may already be suspended */
+	return 0;
 }

@@ -95,7 +95,10 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	gtk_container_add(GTK_CONTAINER(panel.window), box);
 	gtk_widget_show_all(panel.window);
 	panel.timeout = 0;
+	panel.source = 0;
 	gtk_main();
+	if(panel.source != 0)
+		g_source_remove(panel.source);
 	return 0;
 }
 
