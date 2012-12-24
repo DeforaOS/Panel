@@ -26,6 +26,7 @@ static char const _license[] =
 #include <gtk/gtk.h>
 #include <System.h>
 #include <Desktop.h>
+#include <Desktop/Browser.h>
 
 
 /* types */
@@ -74,6 +75,7 @@ static void _helper_about_dialog(Panel * panel);
 static void _helper_logout_dialog(Panel * panel);
 static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in);
+static void _helper_rotate_screen(Panel * panel);
 static void _helper_shutdown_dialog(Panel * panel);
 
 
@@ -150,6 +152,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->about_dialog = _helper_about_dialog;
 	helper->logout_dialog = _helper_logout_dialog;
 	helper->position_menu = _helper_position_menu;
+	helper->rotate_screen = _helper_rotate_screen;
 	helper->shutdown_dialog = _helper_shutdown_dialog;
 }
 
@@ -253,6 +256,14 @@ static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 	gtk_window_get_size(GTK_WINDOW(panel->window), &sx, &sy);
 	*y += sy;
 	*push_in = TRUE;
+}
+
+
+/* helper_rotate_screen */
+static void _helper_rotate_screen(Panel * panel)
+{
+	desktop_message_send(DESKTOP_CLIENT_MESSAGE, DESKTOP_MESSAGE_SET_LAYOUT,
+			DESKTOP_LAYOUT_TOGGLE, 0);
 }
 
 
