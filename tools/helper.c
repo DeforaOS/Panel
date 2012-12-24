@@ -14,8 +14,6 @@ static char const _license[] =
 "\n"
 "You should have received a copy of the GNU General Public License\n"
 "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
-/* TODO:
- * - implement all remaining helpers */
 
 
 
@@ -85,6 +83,7 @@ static int _helper_lock(Panel * panel);
 static void _helper_logout_dialog(Panel * panel);
 static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in);
+static void _helper_preferences_dialog(Panel * panel);
 static void _helper_rotate_screen(Panel * panel);
 static void _helper_shutdown_dialog(Panel * panel);
 static int _helper_suspend(Panel * panel);
@@ -165,6 +164,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->lock = _helper_lock;
 	helper->logout_dialog = _helper_logout_dialog;
 	helper->position_menu = _helper_position_menu;
+	helper->preferences_dialog = _helper_preferences_dialog;
 	helper->rotate_screen = _helper_rotate_screen;
 	helper->shutdown_dialog = _helper_shutdown_dialog;
 	helper->suspend = _helper_suspend;
@@ -314,6 +314,13 @@ static void _helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 	gtk_window_get_size(GTK_WINDOW(panel->window), &sx, &sy);
 	*y += sy;
 	*push_in = TRUE;
+}
+
+
+/* helper_preferences_dialog */
+static void _helper_preferences_dialog(Panel * panel)
+{
+	/* XXX do not do anything for now */
 }
 
 
