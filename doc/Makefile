@@ -41,6 +41,7 @@ panel-notify.html: panel-notify.xml
 
 clean:
 	$(RM) -- $(panel.1_OBJS) $(panel.html_OBJS) $(panelctl.1_OBJS) $(panelctl.html_OBJS) $(panel-embed.1_OBJS) $(panel-embed.html_OBJS) $(panel-message.1_OBJS) $(panel-message.html_OBJS) $(panel-notify.1_OBJS) $(panel-notify.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-notify.html"
 
 distclean: clean
 	$(RM) -- $(TARGETS)

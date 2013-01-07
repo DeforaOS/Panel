@@ -17,6 +17,7 @@ fr.mo: Panel.pot fr.po
 
 clean:
 	$(RM) -- $(Panel.pot_OBJS) $(fr.mo_OBJS)
+	./gettext.sh -c -P "$(PREFIX)" -- "fr.mo"
 
 distclean: clean
 	$(RM) -- $(TARGETS)

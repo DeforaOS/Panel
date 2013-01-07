@@ -22,10 +22,12 @@ Panel.pc: Panel.pc.in ../config.sh
 clean:
 	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) clean) || exit; done
 	$(RM) -- $(Panel.pc_OBJS)
+	./pkgconfig.sh -c -P "$(PREFIX)" -- "Panel.pc"
 
 distclean:
 	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) distclean) || exit; done
 	$(RM) -- $(Panel.pc_OBJS)
+	./pkgconfig.sh -c -P "$(PREFIX)" -- "Panel.pc"
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
