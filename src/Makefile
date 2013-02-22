@@ -11,7 +11,7 @@ CFLAGSF	= -W
 CFLAGS	= -Wall -g -O2 -pedantic
 RM	= rm -f
 LN	= ln -f
-MKDIR	= mkdir -p
+MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 
 
