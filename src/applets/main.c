@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -289,7 +289,7 @@ static void _applications_on_activate_directory(Config * config)
 	char const * directory;
 	/* XXX open with the default file manager instead */
 	char * argv[] = { "browser", "--", NULL, NULL };
-	int flags = G_SPAWN_SEARCH_PATH;
+	GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
 	GError * error = NULL;
 
 	/* XXX this may not might the correct key */
@@ -312,7 +312,7 @@ static void _applications_on_activate_url(Config * config)
 	char const * url;
 	/* XXX open with the default web browser instead */
 	char * argv[] = { "surfer", "--", NULL, NULL };
-	int flags = G_SPAWN_SEARCH_PATH;
+	GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
 	GError * error = NULL;
 
 	if((url = config_get(config, section, "URL")) == NULL)

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 static char const _license[] =
 "This program is free software: you can redistribute it and/or modify\n"
@@ -1662,7 +1662,7 @@ static int _panel_helper_suspend(Panel * panel)
 	int fd;
 	char * suspend[] = { "/usr/bin/sudo", "sudo", "/usr/bin/apm", "-s",
 		NULL };
-	int flags = G_SPAWN_FILE_AND_ARGV_ZERO;
+	GSpawnFlags flags = G_SPAWN_FILE_AND_ARGV_ZERO;
 	GError * error = NULL;
 #endif
 
