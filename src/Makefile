@@ -18,7 +18,7 @@ INSTALL	= install
 all: subdirs $(TARGETS)
 
 subdirs:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE)) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE)) || exit; done
 
 panel_OBJS = panel.o window.o main.o
 panel_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libSystem libDesktop`
@@ -57,16 +57,16 @@ run.o: run.c
 	$(CC) $(run_CFLAGS) -c run.c
 
 clean:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) clean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
 	$(RM) -- $(panel_OBJS) $(panelctl_OBJS) $(run_OBJS)
 
 distclean:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) distclean) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) distclean) || exit; done
 	$(RM) -- $(panel_OBJS) $(panelctl_OBJS) $(run_OBJS)
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) install) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 -- panel $(DESTDIR)$(BINDIR)/panel
 	$(MKDIR) $(DESTDIR)$(BINDIR)
@@ -75,7 +75,7 @@ install: $(TARGETS)
 	$(INSTALL) -m 0755 -- run $(DESTDIR)$(BINDIR)/run
 
 uninstall:
-	@for i in $(SUBDIRS); do (cd $$i && $(MAKE) uninstall) || exit; done
+	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
 	$(RM) -- $(DESTDIR)$(BINDIR)/panel
 	$(RM) -- $(DESTDIR)$(BINDIR)/panelctl
 	$(RM) -- $(DESTDIR)$(BINDIR)/run
