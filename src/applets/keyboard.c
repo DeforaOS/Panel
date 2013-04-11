@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,9 +134,6 @@ static Keyboard * _keyboard_init(PanelAppletHelper * helper,
 				_keyboard_on_toggled), keyboard);
 	image = gtk_image_new_from_icon_name(applet.icon, helper->icon_size);
 	gtk_container_add(GTK_CONTAINER(keyboard->button), image);
-	/* FIXME de-register on destroy */
-	desktop_message_register(KEYBOARD_CLIENT_MESSAGE, _keyboard_on_message,
-			keyboard);
 	gtk_widget_show_all(keyboard->button);
 	keyboard->source = g_idle_add(_init_idle, keyboard);
 	*widget = keyboard->button;
@@ -195,6 +192,10 @@ static gboolean _init_idle(gpointer data)
 				_keyboard_on_removed), NULL);
 	gtk_container_add(GTK_CONTAINER(keyboard->window), keyboard->socket);
 	gtk_widget_show(keyboard->socket);
+	/* listen to desktop messages */
+	gtk_widget_realize(keyboard->window);
+	desktop_message_register(keyboard->window, KEYBOARD_CLIENT_MESSAGE,
+			_keyboard_on_message, keyboard);
 	return FALSE;
 }
 

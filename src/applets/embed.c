@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,7 +208,9 @@ static int _embed_on_idle(gpointer data)
 	g_object_ref(embed->vbox);
 	gtk_container_add(GTK_CONTAINER(embed->window), embed->vbox);
 	gtk_widget_show(embed->vbox);
-	desktop_message_register(PANEL_CLIENT_MESSAGE,
+	/* listen to desktop messages */
+	gtk_widget_realize(embed->window);
+	desktop_message_register(embed->window, PANEL_CLIENT_MESSAGE,
 			_embed_on_desktop_message, embed);
 	return FALSE;
 }

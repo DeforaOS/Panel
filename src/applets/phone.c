@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,5 +139,6 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous)
 {
 	if(previous != NULL)
 		return;
-	desktop_message_register(PHONE_EMBED_MESSAGE, _on_message, widget);
+	desktop_message_register(widget, PHONE_EMBED_MESSAGE, _on_message,
+			widget);
 }
