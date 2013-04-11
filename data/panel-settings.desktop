@@ -1,5 +1,6 @@
 [Desktop Entry]
-Name=Panel settings
+Name=Panel
+Comment=Preferences for the panel
 Exec=panelctl -S
 Icon=panel-settings
 Type=Application
