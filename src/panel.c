@@ -261,7 +261,8 @@ Panel * panel_new(PanelPrefs const * prefs)
 		panel_window_set_keep_above(panel->bottom, above);
 	}
 	/* messages */
-	desktop_message_register(PANEL_CLIENT_MESSAGE, _new_on_message, panel);
+	desktop_message_register(NULL, PANEL_CLIENT_MESSAGE, _new_on_message,
+			panel);
 	/* manage root window events */
 	gdk_window_set_events(panel->root, gdk_window_get_events(
 				panel->root) | GDK_PROPERTY_CHANGE_MASK);
