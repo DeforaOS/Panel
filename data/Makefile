@@ -34,7 +34,7 @@ install: $(TARGETS)
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "Panel.pc"
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/applications
-	$(INSTALL) -m 0644 -- panel-settings.desktop $(DESTDIR)$(PREFIX)/share/applications/panel-settings.desktop
+	$(INSTALL) -m 0644 panel-settings.desktop $(DESTDIR)$(PREFIX)/share/applications/panel-settings.desktop
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done

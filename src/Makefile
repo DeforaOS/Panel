@@ -68,11 +68,11 @@ distclean:
 install: $(TARGETS)
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- panel $(DESTDIR)$(BINDIR)/panel
+	$(INSTALL) -m 0755 panel $(DESTDIR)$(BINDIR)/panel
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- panelctl $(DESTDIR)$(BINDIR)/panelctl
+	$(INSTALL) -m 0755 panelctl $(DESTDIR)$(BINDIR)/panelctl
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- run $(DESTDIR)$(BINDIR)/run
+	$(INSTALL) -m 0755 run $(DESTDIR)$(BINDIR)/run
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done

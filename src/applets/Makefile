@@ -327,63 +327,63 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- battery.so $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so
+	$(INSTALL) -m 0644 battery.so $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- bluetooth.so $(DESTDIR)$(LIBDIR)/Panel/applets/bluetooth.so
+	$(INSTALL) -m 0644 bluetooth.so $(DESTDIR)$(LIBDIR)/Panel/applets/bluetooth.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- clock.so $(DESTDIR)$(LIBDIR)/Panel/applets/clock.so
+	$(INSTALL) -m 0644 clock.so $(DESTDIR)$(LIBDIR)/Panel/applets/clock.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- close.so $(DESTDIR)$(LIBDIR)/Panel/applets/close.so
+	$(INSTALL) -m 0644 close.so $(DESTDIR)$(LIBDIR)/Panel/applets/close.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- cpu.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpu.so
+	$(INSTALL) -m 0644 cpu.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpu.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- cpufreq.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpufreq.so
+	$(INSTALL) -m 0644 cpufreq.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpufreq.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- desktop.so $(DESTDIR)$(LIBDIR)/Panel/applets/desktop.so
+	$(INSTALL) -m 0644 desktop.so $(DESTDIR)$(LIBDIR)/Panel/applets/desktop.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- embed.so $(DESTDIR)$(LIBDIR)/Panel/applets/embed.so
+	$(INSTALL) -m 0644 embed.so $(DESTDIR)$(LIBDIR)/Panel/applets/embed.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- gps.so $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
+	$(INSTALL) -m 0644 gps.so $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- gsm.so $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
+	$(INSTALL) -m 0644 gsm.so $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- keyboard.so $(DESTDIR)$(LIBDIR)/Panel/applets/keyboard.so
+	$(INSTALL) -m 0644 keyboard.so $(DESTDIR)$(LIBDIR)/Panel/applets/keyboard.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- lock.so $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
+	$(INSTALL) -m 0644 lock.so $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- logout.so $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
+	$(INSTALL) -m 0644 logout.so $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- main.so $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
+	$(INSTALL) -m 0644 main.so $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
+	$(INSTALL) -m 0644 memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- mixer.so $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
+	$(INSTALL) -m 0644 mixer.so $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- pager.so $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
+	$(INSTALL) -m 0644 pager.so $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- phone.so $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
+	$(INSTALL) -m 0644 phone.so $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- player.so $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
+	$(INSTALL) -m 0644 player.so $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- rotate.so $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
+	$(INSTALL) -m 0644 rotate.so $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- separator.so $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
+	$(INSTALL) -m 0644 separator.so $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- spacer.so $(DESTDIR)$(LIBDIR)/Panel/applets/spacer.so
+	$(INSTALL) -m 0644 spacer.so $(DESTDIR)$(LIBDIR)/Panel/applets/spacer.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- swap.so $(DESTDIR)$(LIBDIR)/Panel/applets/swap.so
+	$(INSTALL) -m 0644 swap.so $(DESTDIR)$(LIBDIR)/Panel/applets/swap.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- systray.so $(DESTDIR)$(LIBDIR)/Panel/applets/systray.so
+	$(INSTALL) -m 0644 systray.so $(DESTDIR)$(LIBDIR)/Panel/applets/systray.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- tasks.so $(DESTDIR)$(LIBDIR)/Panel/applets/tasks.so
+	$(INSTALL) -m 0644 tasks.so $(DESTDIR)$(LIBDIR)/Panel/applets/tasks.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- title.so $(DESTDIR)$(LIBDIR)/Panel/applets/title.so
+	$(INSTALL) -m 0644 title.so $(DESTDIR)$(LIBDIR)/Panel/applets/title.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- usb.so $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
+	$(INSTALL) -m 0644 usb.so $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- volume.so $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
+	$(INSTALL) -m 0644 volume.so $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 -- wpa_supplicant.so $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
+	$(INSTALL) -m 0644 wpa_supplicant.so $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so

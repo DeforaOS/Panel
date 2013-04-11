@@ -65,11 +65,11 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- panel-embed $(DESTDIR)$(BINDIR)/panel-embed
+	$(INSTALL) -m 0755 panel-embed $(DESTDIR)$(BINDIR)/panel-embed
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- panel-message $(DESTDIR)$(BINDIR)/panel-message
+	$(INSTALL) -m 0755 panel-message $(DESTDIR)$(BINDIR)/panel-message
 	$(MKDIR) $(DESTDIR)$(BINDIR)
-	$(INSTALL) -m 0755 -- panel-notify $(DESTDIR)$(BINDIR)/panel-notify
+	$(INSTALL) -m 0755 panel-notify $(DESTDIR)$(BINDIR)/panel-notify
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(BINDIR)/panel-embed

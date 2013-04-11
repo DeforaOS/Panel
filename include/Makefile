@@ -15,7 +15,7 @@ distclean: clean
 
 install:
 	$(MKDIR) $(DESTDIR)$(PREFIX)/include/Desktop
-	$(INSTALL) -m 0644 -- Panel.h $(DESTDIR)$(PREFIX)/include/Desktop/Panel.h
+	$(INSTALL) -m 0644 Panel.h $(DESTDIR)$(PREFIX)/include/Desktop/Panel.h
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/include/Desktop/Panel.h
