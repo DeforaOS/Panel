@@ -82,11 +82,11 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	phone->helper = helper;
 	socket = gtk_socket_new();
-	g_signal_connect(G_OBJECT(socket), "plug-added", G_CALLBACK(
-				_on_plug_added), NULL);
-	g_signal_connect(G_OBJECT(socket), "plug-removed", G_CALLBACK(
-				_on_plug_removed), NULL);
-	g_signal_connect(G_OBJECT(socket), "screen-changed", G_CALLBACK(
+	g_signal_connect(socket, "plug-added", G_CALLBACK(_on_plug_added),
+			NULL);
+	g_signal_connect(socket, "plug-removed", G_CALLBACK(_on_plug_removed),
+			NULL);
+	g_signal_connect(socket, "screen-changed", G_CALLBACK(
 				_on_screen_changed), NULL);
 	*widget = socket;
 	return phone;
@@ -139,6 +139,6 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous)
 {
 	if(previous != NULL)
 		return;
-	desktop_message_register(widget, PHONE_EMBED_MESSAGE, _on_message,
+	desktop_message_register(NULL, PHONE_EMBED_MESSAGE, _on_message,
 			widget);
 }
