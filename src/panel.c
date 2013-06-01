@@ -104,7 +104,7 @@ static char const * _authors[] =
 };
 
 static char const _copyright[] =
-"Copyright (c) 2004-2012 DeforaOS Project <contact@defora.org>";
+"Copyright (c) 2004-2013 DeforaOS Project <contact@defora.org>";
 
 static const struct
 {
