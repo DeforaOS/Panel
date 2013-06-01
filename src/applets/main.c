@@ -128,7 +128,11 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Main * main;
 	GtkWidget * ret;
+	GtkWidget * hbox;
 	GtkWidget * image;
+	char const * p;
+	PangoFontDescription * bold;
+	GtkWidget * label;
 
 	if((main = malloc(sizeof(*main))) == NULL)
 		return NULL;
@@ -137,15 +141,28 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	main->idle = g_idle_add(_on_idle, main);
 	main->refresh_mti = 0;
 	ret = gtk_button_new();
+	hbox = gtk_hbox_new(FALSE, 4);
 	image = gtk_image_new_from_icon_name("gnome-main-menu",
 			helper->icon_size);
-	gtk_button_set_image(GTK_BUTTON(ret), image);
+	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);
+	/* add some text if configured so */
+	if((p = helper->config_get(helper->panel, "main", "text")) != NULL
+			&& strlen(p) > 0)
+	{
+		bold = pango_font_description_new();
+		pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
+		label = gtk_label_new(p);
+		gtk_widget_modify_font(label, bold);
+		pango_font_description_free(bold);
+		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+	}
 	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, _("Main menu"));
 #endif
 	g_signal_connect_swapped(G_OBJECT(ret), "clicked", G_CALLBACK(
 				_on_clicked), main);
+	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	gtk_widget_show_all(ret);
 	*widget = ret;
 	return main;
