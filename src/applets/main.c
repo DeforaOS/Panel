@@ -31,6 +31,9 @@
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
+#ifndef BINDIR
+# define BINDIR		PREFIX "/bin"
+#endif
 #ifndef DATADIR
 # define DATADIR	PREFIX "/share"
 #endif
@@ -634,9 +637,8 @@ static void _on_rotate(gpointer data)
 static void _on_run(gpointer data)
 {
 	Main * main = data;
-	char * argv[] = { "run", NULL };
-	GSpawnFlags flags = G_SPAWN_SEARCH_PATH
-		| G_SPAWN_STDOUT_TO_DEV_NULL
+	char * argv[] = { BINDIR "/run", NULL };
+	GSpawnFlags flags = G_SPAWN_STDOUT_TO_DEV_NULL
 		| G_SPAWN_STDERR_TO_DEV_NULL;
 	GError * error = NULL;
 
