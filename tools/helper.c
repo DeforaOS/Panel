@@ -53,9 +53,7 @@ struct _Panel
 
 	/* dialogs */
 	GtkWidget * ab_window;
-#ifndef EMBEDDED
 	GtkWidget * lo_window;
-#endif
 	GtkWidget * sh_window;
 };
 
@@ -179,6 +177,8 @@ static int _error(char const * message, int ret)
 static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 		PanelAppletType type, GtkIconSize iconsize)
 {
+	char const * p;
+
 	memset(helper, 0, sizeof(*helper));
 	helper->panel = panel;
 	helper->type = type;
@@ -188,7 +188,16 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->error = _panel_helper_error;
 	helper->about_dialog = _panel_helper_about_dialog;
 	helper->lock = _panel_helper_lock;
-	helper->logout_dialog = _panel_helper_logout_dialog;
+#ifndef EMBEDDED
+	if((p = config_get(panel->config, NULL, "logout")) == NULL
+			|| strtol(p, NULL, 0) != 0)
+#else
+	if((p = config_get(panel->config, NULL, "logout")) != NULL
+			&& strtol(p, NULL, 0) != 0)
+#endif
+		helper->logout_dialog = _panel_helper_logout_dialog;
+	else
+		helper->logout_dialog = NULL;
 	helper->position_menu = _panel_helper_position_menu_widget;
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
 	helper->rotate_screen = _panel_helper_rotate_screen;

@@ -122,9 +122,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	panel.root_width = rect.width;
 	panel.source = 0;
 	panel.ab_window = NULL;
-#ifndef EMBEDDED
 	panel.lo_window = NULL;
-#endif
 	panel.sh_window = NULL;
 	gtk_main();
 	if(panel.source != 0)

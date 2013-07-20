@@ -42,9 +42,7 @@ static int _panel_helper_config_set(Panel * panel, char const * section,
 static int _panel_helper_error(Panel * panel, char const * message, int ret);
 static void _panel_helper_about_dialog(Panel * panel);
 static int _panel_helper_lock(Panel * panel);
-#ifndef EMBEDDED
 static void _panel_helper_logout_dialog(Panel * panel);
-#endif
 #ifndef HELPER_POSITION_MENU_WIDGET
 static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in, PanelPosition position);
@@ -165,7 +163,6 @@ static gboolean _lock_on_idle(gpointer data)
 }
 
 
-#ifndef EMBEDDED
 /* panel_helper_logout_dialog */
 static gboolean _logout_dialog_on_closex(gpointer data);
 static void _logout_dialog_on_response(GtkWidget * widget, gint response);
@@ -235,7 +232,6 @@ static void _logout_dialog_on_response(GtkWidget * widget, gint response)
 #endif
 	}
 }
-#endif
 
 
 #ifndef HELPER_POSITION_MENU_WIDGET

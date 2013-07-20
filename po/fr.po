@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-07-20 05:00+0200\n"
+"POT-Creation-Date: 2013-07-20 05:17+0200\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -25,7 +25,7 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:271 ../src/panel.c:460 ../src/panel.c:465
+#: ../src/applets/battery.c:271 ../src/panel.c:463 ../src/panel.c:468
 #: ../src/run.c:216 ../src/run.c:222
 msgid "Error"
 msgstr "Erreur"
@@ -120,8 +120,8 @@ msgstr "Verrouiller l'écran"
 msgid "logout: Logging out is disabled"
 msgstr "logout: Se déconnecter est désactivé"
 
-#: ../src/applets/logout.c:79 ../src/helper.c:189 ../src/helper.c:201
-#: ../src/helper.c:210
+#: ../src/applets/logout.c:79 ../src/helper.c:186 ../src/helper.c:198
+#: ../src/helper.c:207
 msgid "Logout"
 msgstr "Déconnexion"
 
@@ -221,15 +221,15 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
-#: ../src/helper.c:111
+#: ../src/helper.c:109
 msgid "Panel for the DeforaOS desktop"
 msgstr "Panel pour l'environnement DeforaOS"
 
-#: ../src/helper.c:119
+#: ../src/helper.c:117
 msgid "translator-credits"
 msgstr "Pierre Pronchery <khorben@defora.org>"
 
-#: ../src/helper.c:175
+#: ../src/helper.c:172
 msgid ""
 "This will log you out of the current session, therefore closing any "
 "application currently opened and losing any unsaved data.\n"
@@ -240,7 +240,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:332
+#: ../src/helper.c:328
 msgid ""
 "This will shutdown your device, therefore closing any application currently "
 "opened and losing any unsaved data.\n"
@@ -251,7 +251,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:337
+#: ../src/helper.c:333
 msgid ""
 "This will shutdown your computer, therefore closing any application "
 "currently opened and losing any unsaved data.\n"
@@ -262,11 +262,11 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:352 ../src/helper.c:364 ../src/helper.c:373
+#: ../src/helper.c:348 ../src/helper.c:360 ../src/helper.c:369
 msgid "Shutdown"
 msgstr "Arrêter"
 
-#: ../src/helper.c:363
+#: ../src/helper.c:359
 msgid "Restart"
 msgstr "Redémarrer"
 
@@ -284,51 +284,51 @@ msgstr ""
 "  -x\tIcônes de la taille de menus\n"
 "  -m\tMoniteur à utiliser (par défaut : 0)\n"
 
-#: ../src/panel.c:113
+#: ../src/panel.c:111
 msgid "Large"
 msgstr "Grande"
 
-#: ../src/panel.c:115
+#: ../src/panel.c:113
 msgid "Small"
 msgstr "Petite"
 
-#: ../src/panel.c:117
+#: ../src/panel.c:115
 msgid "Smaller"
 msgstr "Très petite"
 
-#: ../src/panel.c:588
+#: ../src/panel.c:591
 msgid "Panel preferences"
 msgstr "Préférences du Panel"
 
-#: ../src/panel.c:604
+#: ../src/panel.c:607
 msgid "General"
 msgstr "Général"
 
-#: ../src/panel.c:608
+#: ../src/panel.c:611
 msgid "Applets"
 msgstr "Greffons"
 
-#: ../src/panel.c:637
+#: ../src/panel.c:640
 msgid "Applets:"
 msgstr "Greffons :"
 
-#: ../src/panel.c:717
+#: ../src/panel.c:720
 msgid "Top panel:"
 msgstr "Panneau supérieur :"
 
-#: ../src/panel.c:723 ../src/panel.c:727 ../src/panel.c:758 ../src/panel.c:762
+#: ../src/panel.c:726 ../src/panel.c:730 ../src/panel.c:761 ../src/panel.c:765
 msgid "Default"
 msgstr "Par défaut"
 
-#: ../src/panel.c:752
+#: ../src/panel.c:755
 msgid "Bottom panel:"
 msgstr "Panneau inférieur :"
 
-#: ../src/panel.c:859
+#: ../src/panel.c:862
 msgid "Accept focus"
 msgstr "Autoriser le focus"
 
-#: ../src/panel.c:863
+#: ../src/panel.c:866
 msgid "Keep above other windows"
 msgstr "Conserver au dessus des fenêtres"
 
@@ -384,7 +384,7 @@ msgstr "Usage: run\n"
 msgid "Invalid panel size"
 msgstr "Taille invalide pour le panel"
 
-#: ../tools/notify.c:168
+#: ../tools/notify.c:166
 msgid ""
 "Usage: panel-notify [-L|-S|-X|-x][-t timeout] applet...\n"
 "       panel-notify -l\n"
@@ -404,7 +404,7 @@ msgstr ""
 "  -t\tDurée d'affichage (0 : illimité)\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/test.c:139
+#: ../tools/test.c:137
 msgid ""
 "Usage: panel-test [-L|-S|-X|-x] applet...\n"
 "       panel-test -l\n"

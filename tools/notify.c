@@ -137,9 +137,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	panel.root_width = rect.width;
 	panel.source = 0;
 	panel.ab_window = NULL;
-#ifndef EMBEDDED
 	panel.lo_window = NULL;
-#endif
 	panel.sh_window = NULL;
 	gtk_main();
 	if(panel.timeout != 0)

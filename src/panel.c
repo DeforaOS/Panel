@@ -88,9 +88,7 @@ struct _Panel
 
 	/* dialogs */
 	GtkWidget * ab_window;
-#ifndef EMBEDDED
 	GtkWidget * lo_window;
-#endif
 	GtkWidget * sh_window;
 };
 
@@ -171,10 +169,15 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->top_helper.about_dialog = _panel_helper_about_dialog;
 	panel->top_helper.lock = _panel_helper_lock;
 #ifndef EMBEDDED
-	panel->top_helper.logout_dialog = _panel_helper_logout_dialog;
+	if((p = config_get(panel->config, NULL, "logout")) == NULL
+			|| strtol(p, NULL, 0) != 0)
 #else
-	panel->top_helper.logout_dialog = NULL;
+	if((p = config_get(panel->config, NULL, "logout")) != NULL
+			&& strtol(p, NULL, 0) != 0)
 #endif
+		panel->top_helper.logout_dialog = _panel_helper_logout_dialog;
+	else
+		panel->top_helper.logout_dialog = NULL;
 	panel->top_helper.position_menu = _panel_helper_position_menu_top;
 	panel->top_helper.preferences_dialog = _panel_helper_preferences_dialog;
 	panel->top_helper.rotate_screen = _panel_helper_rotate_screen;
