@@ -21,12 +21,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
+#include <libintl.h>
 #include <gtk/gtk.h>
 #include <System.h>
 #include <Desktop.h>
 #include "../src/panel.h"
 #include "../config.h"
+#define _(string) gettext(string)
 
+/* constants */
 #ifdef PACKAGE
 # undef PACKAGE
 #endif
@@ -38,6 +42,12 @@
 #endif
 #ifndef LIBDIR
 # define LIBDIR		PREFIX "/lib"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
 #endif
 
 
@@ -126,9 +136,9 @@ static int _test(GtkIconSize iconsize, char * applets[])
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: panel-test [-L|-S|-X|-x] applet...\n"
+	fputs(_("Usage: panel-test [-L|-S|-X|-x] applet...\n"
 "       panel-test -l\n"
-"  -l	Lists the plug-ins available\n", stderr);
+"  -l	Lists the plug-ins available\n"), stderr);
 	return 1;
 }
 
@@ -142,6 +152,9 @@ int main(int argc, char * argv[])
 	GtkIconSize huge;
 	int o;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
 	if((huge = gtk_icon_size_from_name("panel-huge"))
 			== GTK_ICON_SIZE_INVALID)

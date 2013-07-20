@@ -23,7 +23,6 @@
 #include <System.h>
 #include <Desktop.h>
 #include <Desktop/Browser.h>
-#define _(string) string
 
 #ifndef PREFIX
 # define PREFIX		"/usr/local"

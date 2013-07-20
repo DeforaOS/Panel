@@ -24,3 +24,5 @@
 ../src/panelctl.c
 ../src/run.c
 ../src/window.c
+../tools/notify.c
+../tools/test.c

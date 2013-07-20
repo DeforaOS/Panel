@@ -22,12 +22,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <locale.h>
+#include <libintl.h>
 #include <gtk/gtk.h>
 #include <System.h>
 #include <Desktop.h>
 #include "../src/panel.h"
 #include "../config.h"
+#define _(string) gettext(string)
 
+/* constants */
 #ifdef PACKAGE
 # undef PACKAGE
 #endif
@@ -39,6 +43,12 @@
 #endif
 #ifndef LIBDIR
 # define LIBDIR		PREFIX "/lib"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
 #endif
 
 
@@ -155,14 +165,14 @@ static gboolean _notify_on_timeout(gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: panel-notify [-L|-S|-X|-x][-t timeout] applet...\n"
+	fputs(_("Usage: panel-notify [-L|-S|-X|-x][-t timeout] applet...\n"
 "       panel-notify -l\n"
 "  -L	Use icons the size of a large toolbar\n"
 "  -S	Use icons the size of a small toolbar\n"
 "  -X	Use huge icons\n"
 "  -x	Use icons the size of menus\n"
 "  -t	Time to wait before disappearing (0: unlimited)\n"
-"  -l	Lists the plug-ins available\n", stderr);
+"  -l	Lists the plug-ins available\n"), stderr);
 	return 1;
 }
 
@@ -178,6 +188,9 @@ int main(int argc, char * argv[])
 	int o;
 	char * p;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
 	if((huge = gtk_icon_size_from_name("panel-huge"))
 			== GTK_ICON_SIZE_INVALID)
