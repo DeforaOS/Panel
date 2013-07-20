@@ -78,6 +78,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/panelctl.c \
 		$(PACKAGE)-$(VERSION)/src/run.c \
 		$(PACKAGE)-$(VERSION)/src/Makefile \
+		$(PACKAGE)-$(VERSION)/src/helper.c \
 		$(PACKAGE)-$(VERSION)/src/panel.h \
 		$(PACKAGE)-$(VERSION)/src/window.h \
 		$(PACKAGE)-$(VERSION)/src/project.conf \

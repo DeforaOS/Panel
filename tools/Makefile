@@ -51,10 +51,10 @@ embed.o: embed.c ../include/Panel.h ../config.h
 message.o: message.c ../include/Panel.h
 	$(CC) $(panel-message_CFLAGS) -c message.c
 
-notify.o: notify.c helper.c ../src/panel.h ../config.h
+notify.o: notify.c helper.c ../src/helper.c ../src/panel.h ../config.h
 	$(CC) $(panel-notify_CFLAGS) -c notify.c
 
-test.o: test.c helper.c ../src/panel.h ../config.h
+test.o: test.c helper.c ../src/helper.c ../src/panel.h ../config.h
 	$(CC) $(panel-test_CFLAGS) -c test.c
 
 clean:

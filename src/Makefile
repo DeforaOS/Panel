@@ -41,7 +41,7 @@ run_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libSystem gtk+-2.0`
 run: $(run_OBJS)
 	$(CC) -o run $(run_OBJS) $(run_LDFLAGS)
 
-panel.o: panel.c panel.h window.h ../include/Panel.h ../config.h
+panel.o: panel.c panel.h window.h ../include/Panel.h helper.c ../config.h
 	$(CC) $(panel_CFLAGS) -c panel.c
 
 window.o: window.c panel.h window.h

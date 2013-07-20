@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-06-11 23:40+0200\n"
+"POT-Creation-Date: 2013-07-20 04:54+0200\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -25,7 +25,7 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:271 ../src/panel.c:483 ../src/panel.c:488
+#: ../src/applets/battery.c:271 ../src/panel.c:460 ../src/panel.c:465
 #: ../src/run.c:216 ../src/run.c:222
 msgid "Error"
 msgstr "Erreur"
@@ -112,7 +112,7 @@ msgstr "Hauteur :"
 msgid "Keep ratio"
 msgstr "Respecter les proportions"
 
-#: ../src/applets/lock.c:81 ../src/applets/main.c:450
+#: ../src/applets/lock.c:81 ../src/applets/main.c:453
 msgid "Lock screen"
 msgstr "Verrouiller l'écran"
 
@@ -120,36 +120,36 @@ msgstr "Verrouiller l'écran"
 msgid "logout: Logging out is disabled"
 msgstr "logout: Se déconnecter est désactivé"
 
-#: ../src/applets/logout.c:79 ../src/panel.c:1459 ../src/panel.c:1466
-#: ../src/panel.c:1475
+#: ../src/applets/logout.c:79 ../src/helper.c:189 ../src/helper.c:201
+#: ../src/helper.c:210
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: ../src/applets/main.c:161
+#: ../src/applets/main.c:164
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: ../src/applets/main.c:431
+#: ../src/applets/main.c:434
 msgid "Applications"
 msgstr "Programmes"
 
-#: ../src/applets/main.c:437
+#: ../src/applets/main.c:440
 msgid "Run..."
 msgstr "Exécuter..."
 
-#: ../src/applets/main.c:456
+#: ../src/applets/main.c:459
 msgid "Rotate"
 msgstr "Réorienter"
 
-#: ../src/applets/main.c:464
+#: ../src/applets/main.c:467
 msgid "Logout..."
 msgstr "Déconnecter..."
 
-#: ../src/applets/main.c:472
+#: ../src/applets/main.c:475
 msgid "Suspend"
 msgstr "Suspendre"
 
-#: ../src/applets/main.c:478
+#: ../src/applets/main.c:481
 msgid "Shutdown..."
 msgstr "Arrêter..."
 
@@ -221,6 +221,55 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
+#: ../src/helper.c:111
+msgid "Panel for the DeforaOS desktop"
+msgstr "Panel pour l'environnement DeforaOS"
+
+#: ../src/helper.c:119
+msgid "translator-credits"
+msgstr "Pierre Pronchery <khorben@defora.org>"
+
+#: ../src/helper.c:175
+msgid ""
+"This will log you out of the current session, therefore closing any "
+"application currently opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+"La session en cours va être terminée, fermant toute application actuellement "
+"en cours d'exécution, avec la perte potentielle des données non encore "
+"sauvegardées.\n"
+"Voulez-vous continuer?"
+
+#: ../src/helper.c:332
+msgid ""
+"This will shutdown your device, therefore closing any application currently "
+"opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+"Votre appareil va être éteint, fermant toute application actuellement en "
+"cours d'exécution, avec la perte potentielle des données non encore "
+"sauvegardées.\n"
+"Voulez-vous continuer?"
+
+#: ../src/helper.c:337
+msgid ""
+"This will shutdown your computer, therefore closing any application "
+"currently opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+"Votre ordinateur va être éteint, fermant toute application actuellement en "
+"cours d'exécution, avec la perte potentielle des données non encore "
+"sauvegardées.\n"
+"Voulez-vous continuer?"
+
+#: ../src/helper.c:352 ../src/helper.c:364 ../src/helper.c:373
+msgid "Shutdown"
+msgstr "Arrêter"
+
+#: ../src/helper.c:363
+msgid "Restart"
+msgstr "Redémarrer"
+
 #: ../src/main.c:47
 msgid ""
 "Usage: panel [-L|-S|-x][-m monitor]\n"
@@ -235,102 +284,53 @@ msgstr ""
 "  -x\tIcônes de la taille de menus\n"
 "  -m\tMoniteur à utiliser (par défaut : 0)\n"
 
-#: ../src/panel.c:117
+#: ../src/panel.c:113
 msgid "Large"
 msgstr "Grande"
 
-#: ../src/panel.c:119
+#: ../src/panel.c:115
 msgid "Small"
 msgstr "Petite"
 
-#: ../src/panel.c:121
+#: ../src/panel.c:117
 msgid "Smaller"
 msgstr "Très petite"
 
-#: ../src/panel.c:611
+#: ../src/panel.c:588
 msgid "Panel preferences"
 msgstr "Préférences du Panel"
 
-#: ../src/panel.c:627
+#: ../src/panel.c:604
 msgid "General"
 msgstr "Général"
 
-#: ../src/panel.c:631
+#: ../src/panel.c:608
 msgid "Applets"
 msgstr "Greffons"
 
-#: ../src/panel.c:660
+#: ../src/panel.c:637
 msgid "Applets:"
 msgstr "Greffons :"
 
-#: ../src/panel.c:740
+#: ../src/panel.c:717
 msgid "Top panel:"
 msgstr "Panneau supérieur :"
 
-#: ../src/panel.c:746 ../src/panel.c:750 ../src/panel.c:781 ../src/panel.c:785
+#: ../src/panel.c:723 ../src/panel.c:727 ../src/panel.c:758 ../src/panel.c:762
 msgid "Default"
 msgstr "Par défaut"
 
-#: ../src/panel.c:775
+#: ../src/panel.c:752
 msgid "Bottom panel:"
 msgstr "Panneau inférieur :"
 
-#: ../src/panel.c:882
+#: ../src/panel.c:859
 msgid "Accept focus"
 msgstr "Autoriser le focus"
 
-#: ../src/panel.c:886
+#: ../src/panel.c:863
 msgid "Keep above other windows"
 msgstr "Conserver au dessus des fenêtres"
-
-#: ../src/panel.c:1382
-msgid "Panel for the DeforaOS desktop"
-msgstr "Panel pour l'environnement DeforaOS"
-
-#: ../src/panel.c:1389
-msgid "translator-credits"
-msgstr "Pierre Pronchery <khorben@defora.org>"
-
-#: ../src/panel.c:1445
-msgid ""
-"This will log you out of the current session, therefore closing any "
-"application currently opened and losing any unsaved data.\n"
-"Do you really want to proceed?"
-msgstr ""
-"La session en cours va être terminée, fermant toute application actuellement "
-"en cours d'exécution, avec la perte potentielle des données non encore "
-"sauvegardées.\n"
-"Voulez-vous continuer?"
-
-#: ../src/panel.c:1575
-msgid ""
-"This will shutdown your device, therefore closing any application currently "
-"opened and losing any unsaved data.\n"
-"Do you really want to proceed?"
-msgstr ""
-"Votre appareil va être éteint, fermant toute application actuellement en "
-"cours d'exécution, avec la perte potentielle des données non encore "
-"sauvegardées.\n"
-"Voulez-vous continuer?"
-
-#: ../src/panel.c:1580
-msgid ""
-"This will shutdown your computer, therefore closing any application "
-"currently opened and losing any unsaved data.\n"
-"Do you really want to proceed?"
-msgstr ""
-"Votre ordinateur va être éteint, fermant toute application actuellement en "
-"cours d'exécution, avec la perte potentielle des données non encore "
-"sauvegardées.\n"
-"Voulez-vous continuer?"
-
-#: ../src/panel.c:1594 ../src/panel.c:1601 ../src/panel.c:1610
-msgid "Shutdown"
-msgstr "Arrêter"
-
-#: ../src/panel.c:1600
-msgid "Restart"
-msgstr "Redémarrer"
 
 #: ../src/panelctl.c:60
 msgid ""

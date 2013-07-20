@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ static int _usage(void);
 static int _test(GtkIconSize iconsize, char * applets[])
 {
 	Panel panel;
+	PanelWindow top;
 	char * filename;
 	GtkWidget * box;
 	GtkWidget * widget;
@@ -60,9 +61,17 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	PanelAppletHelper helper;
 	PanelAppletDefinition * pad;
 	PanelApplet * pa;
+	GdkScreen * screen;
+	GdkWindow * root;
+	GdkRectangle rect;
 
 	if((panel.config = config_new()) == NULL)
 		return error_print(PACKAGE);
+	if(gtk_icon_size_lookup(iconsize, &rect.width, &rect.height) == TRUE)
+		top.height = rect.height;
+	else
+		top.height = 72;
+	panel.top = &top;
 	if((filename = _config_get_filename()) != NULL
 			&& config_load(panel.config, filename) != 0)
 		error_print(PACKAGE);
@@ -95,7 +104,18 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	gtk_container_add(GTK_CONTAINER(panel.window), box);
 	gtk_widget_show_all(panel.window);
 	panel.timeout = 0;
+	/* root window */
+	screen = gdk_screen_get_default();
+	root = gdk_screen_get_root_window(screen);
+	gdk_screen_get_monitor_geometry(screen, 0, &rect);
+	panel.root_height = rect.height;
+	panel.root_width = rect.width;
 	panel.source = 0;
+	panel.ab_window = NULL;
+#ifndef EMBEDDED
+	panel.lo_window = NULL;
+#endif
+	panel.sh_window = NULL;
 	gtk_main();
 	if(panel.source != 0)
 		g_source_remove(panel.source);

@@ -18,6 +18,7 @@
 ../src/applets/tasks.c
 ../src/applets/title.c
 ../src/applets/usb.c
+../src/helper.c
 ../src/main.c
 ../src/panel.c
 ../src/panelctl.c
