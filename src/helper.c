@@ -205,7 +205,7 @@ static void _panel_helper_logout_dialog(Panel * panel)
 	gtk_window_set_position(GTK_WINDOW(panel->lo_window),
 			GTK_WIN_POS_CENTER_ALWAYS);
 	gtk_window_set_title(GTK_WINDOW(panel->lo_window), _("Logout"));
-	g_signal_connect(panel->lo_window, "delete-event", G_CALLBACK(
+	g_signal_connect_swapped(panel->lo_window, "delete-event", G_CALLBACK(
 				_logout_dialog_on_closex), panel);
 	g_signal_connect(panel->lo_window, "response", G_CALLBACK(
 				_logout_dialog_on_response), panel);
