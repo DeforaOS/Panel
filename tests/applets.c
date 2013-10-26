@@ -51,7 +51,7 @@ static int _applets(void)
 	PanelAppletDefinition * pad;
 
 	if((dir = opendir(path)) == NULL)
-		return -_perror("../src/applets", 1);
+		return -_perror(path, 1);
 	while((de = readdir(dir)) != NULL)
 	{
 		if((len = strlen(de->d_name)) < sizeof(ext))
