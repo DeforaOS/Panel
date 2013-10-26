@@ -28,7 +28,8 @@
 static int _applets(void);
 
 static int _dlerror(char const * message, int ret);
-static int _error(char const * message, int ret);
+static int _error(char const * message, char const * error, int ret);
+static int _perror(char const * message, int ret);
 
 
 /* functions */
@@ -50,7 +51,7 @@ static int _applets(void)
 	PanelAppletDefinition * pad;
 
 	if((dir = opendir(path)) == NULL)
-		return -_error("../src/applets", 1);
+		return -_perror("../src/applets", 1);
 	while((de = readdir(dir)) != NULL)
 	{
 		if((len = strlen(de->d_name)) < sizeof(ext))
@@ -59,7 +60,7 @@ static int _applets(void)
 			continue;
 		if((s = malloc(sizeof(path) + len + 1)) == NULL)
 		{
-			ret += _error(de->d_name, 1);
+			ret += _perror(de->d_name, 1);
 			continue;
 		}
 		snprintf(s, sizeof(path) + len + 1, "%s/%s", path, de->d_name);
@@ -71,8 +72,13 @@ static int _applets(void)
 		}
 		if((pad = dlsym(p, "applet")) == NULL)
 			ret += _dlerror(s, 1);
+		else if(pad->icon == NULL)
+			ret += _error(s, "No icon defined", 1);
 		else
-			printf("%s: %s\n", de->d_name, pad->name);
+			printf("\n%s: %s (%s)\n%s\n", de->d_name, pad->name,
+					pad->icon, (pad->description != NULL)
+					? pad->description
+					: "(no description)");
 		free(s);
 		dlclose(p);
 	}
@@ -84,14 +90,25 @@ static int _applets(void)
 /* dlerror */
 static int _dlerror(char const * message, int ret)
 {
+	fputs("applets: ", stderr);
 	fprintf(stderr, "%s: %s\n", message, dlerror());
 	return ret;
 }
 
 
 /* error */
-static int _error(char const * message, int ret)
+static int _error(char const * message, char const * error, int ret)
 {
+	fputs("applets: ", stderr);
+	fprintf(stderr, "%s: %s\n", message, error);
+	return ret;
+}
+
+
+/* perror */
+static int _perror(char const * message, int ret)
+{
+	fputs("applets: ", stderr);
 	perror(message);
 	return ret;
 }
