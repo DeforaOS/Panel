@@ -1,4 +1,4 @@
-TARGETS	= applets
+TARGETS	= applets tests.log
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
@@ -24,11 +24,15 @@ applets_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 applets: $(applets_OBJS)
 	$(CC) -o applets $(applets_OBJS) $(applets_LDFLAGS)
 
+tests.log: applets tests.sh
+	./tests.sh -P "$(PREFIX)" -- "tests.log"
+
 applets.o: applets.c
 	$(CC) $(applets_CFLAGS) -c applets.c
 
 clean:
-	$(RM) -- $(applets_OBJS)
+	$(RM) -- $(applets_OBJS) $(tests.log_OBJS)
+	./tests.sh -c -P "$(PREFIX)" -- "tests.log"
 
 distclean: clean
 	$(RM) -- $(TARGETS)

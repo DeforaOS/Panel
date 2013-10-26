@@ -117,6 +117,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/applets.c \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/embed.c \
 		$(PACKAGE)-$(VERSION)/tools/message.c \
