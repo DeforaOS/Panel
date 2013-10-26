@@ -1,6 +1,6 @@
 PACKAGE	= Panel
 VERSION	= 0.2.18
-SUBDIRS	= data doc include po src tools
+SUBDIRS	= data doc include po src tests tools
 RM	= rm -f
 LN	= ln -f
 TAR	= tar -czvf
@@ -115,6 +115,9 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/Makefile \
 		$(PACKAGE)-$(VERSION)/src/applets/tasks.atoms \
 		$(PACKAGE)-$(VERSION)/src/applets/project.conf \
+		$(PACKAGE)-$(VERSION)/tests/applets.c \
+		$(PACKAGE)-$(VERSION)/tests/Makefile \
+		$(PACKAGE)-$(VERSION)/tests/project.conf \
 		$(PACKAGE)-$(VERSION)/tools/embed.c \
 		$(PACKAGE)-$(VERSION)/tools/message.c \
 		$(PACKAGE)-$(VERSION)/tools/notify.c \
