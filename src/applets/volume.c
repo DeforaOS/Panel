@@ -84,6 +84,7 @@ PanelAppletDefinition applet =
 
 
 /* prototypes */
+#if GTK_CHECK_VERSION(2, 12, 0)
 static Volume * _volume_new(PanelAppletHelper * helper);
 static void _volume_delete(Volume * volume);
 
@@ -96,6 +97,7 @@ static int _volume_match(Volume * volume, mixer_devinfo_t * md);
 /* callbacks */
 static void _on_value_changed(gpointer data);
 static gboolean _on_volume_timeout(gpointer data);
+#endif
 
 
 /* functions */
@@ -105,7 +107,6 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	Volume * volume;
 	GtkWidget * vbox;
-	gdouble value;
 
 	if((volume = _volume_new(helper)) == NULL)
 		return NULL;
@@ -126,7 +127,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	else
 	{
 		volume->button = gtk_volume_button_new();
-		g_object_set(G_OBJECT(volume->button), "size",
+		g_object_set(volume->button, "size",
 				helper->icon_size, NULL);
 		g_signal_connect_swapped(volume->button, "value-changed",
 				G_CALLBACK(_on_value_changed), volume);
@@ -141,6 +142,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 }
 
 
+#if GTK_CHECK_VERSION(2, 12, 0)
 /* volume_destroy */
 static void _volume_destroy(Volume * volume)
 {
@@ -430,3 +432,4 @@ static gboolean _on_volume_timeout(gpointer data)
 					volume->progress), value);
 	return TRUE;
 }
+#endif
