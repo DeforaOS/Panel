@@ -127,6 +127,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	else
 	{
 		volume->button = gtk_volume_button_new();
+		/* FIXME doesn't like registered sizes */
 		g_object_set(volume->button, "size",
 				helper->icon_size, NULL);
 		g_signal_connect_swapped(volume->button, "value-changed",
