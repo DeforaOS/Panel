@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,6 +122,14 @@ static Run * _run_new(void)
 	gtk_file_filter_add_mime_type(filter, "application/x-executable");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(widget), filter);
 	gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(widget), filter);
+	filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(filter, _("Perl scripts"));
+	gtk_file_filter_add_mime_type(filter, "application/x-perl");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(widget), filter);
+	filter = gtk_file_filter_new();
+	gtk_file_filter_set_name(filter, _("Python scripts"));
+	gtk_file_filter_add_mime_type(filter, "text/x-python");
+	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(widget), filter);
 	filter = gtk_file_filter_new();
 	gtk_file_filter_set_name(filter, _("Shell scripts"));
 	gtk_file_filter_add_mime_type(filter, "application/x-shellscript");
@@ -291,14 +299,14 @@ static void _on_run_execute(gpointer data)
 	GError * error = NULL;
 
 	path = gtk_entry_get_text(GTK_ENTRY(run->entry));
-	if((argv[3] = strdup(path)) == NULL)
+	if((argv_shell[3] = strdup(path)) == NULL)
 	{
 		_run_error(run, strerror(errno), 1);
 		return;
 	}
 	if(run->terminal)
 	{
-		argv_xterm[5] = argv[3];
+		argv_xterm[5] = argv_shell[3];
 		argv = argv_xterm;
 	}
 	if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, &run->pid,
@@ -306,8 +314,10 @@ static void _on_run_execute(gpointer data)
 	{
 		_run_error(run, error->message, 1);
 		g_error_free(error);
+		free(argv_shell[3]);
 		return;
 	}
+	free(argv_shell[3]);
 	gtk_widget_hide(run->window);
 	g_child_watch_add(run->pid, _execute_watch, run);
 	run->source = g_timeout_add(30000, _execute_timeout, run);
