@@ -138,7 +138,7 @@ static Run * _run_new(void)
 	gtk_file_filter_set_name(filter, _("All files"));
 	gtk_file_filter_add_pattern(filter, "*");
 	gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(widget), filter);
-	g_signal_connect(G_OBJECT(widget), "response", G_CALLBACK(
+	g_signal_connect(widget, "response", G_CALLBACK(
 				_on_run_choose_activate), run);
 	widget = gtk_file_chooser_button_new_with_dialog(widget);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 4);
