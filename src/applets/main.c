@@ -163,8 +163,7 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, _("Main menu"));
 #endif
-	g_signal_connect_swapped(G_OBJECT(ret), "clicked", G_CALLBACK(
-				_on_clicked), main);
+	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked), main);
 	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	gtk_widget_show_all(ret);
 	*widget = ret;
