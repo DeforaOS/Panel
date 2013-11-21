@@ -77,7 +77,9 @@ typedef struct _PanelApplet
 
 	/* widgets */
 	GtkWidget * image;
+#ifndef EMBEDDED
 	GtkWidget * label;
+#endif
 } WPA;
 
 
@@ -147,9 +149,11 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->image = gtk_image_new_from_stock(GTK_STOCK_DISCONNECT,
 			helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->image, FALSE, TRUE, 0);
+#ifndef EMBEDDED
 	wpa->label = gtk_label_new(" ");
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
+#endif
 	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, "Wireless networking");
@@ -192,7 +196,9 @@ static gboolean _init_timeout(gpointer data)
 	{
 		gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 				GTK_STOCK_DISCONNECT, wpa->helper->icon_size);
+#ifndef EMBEDDED
 		gtk_label_set_text(GTK_LABEL(wpa->label), "Not running");
+#endif
 		return wpa->helper->error(NULL, path, TRUE);
 	}
 	/* create the local socket */
@@ -228,7 +234,9 @@ static gboolean _init_timeout(gpointer data)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() connected\n", __func__);
 #endif
+#ifndef EMBEDDED
 		gtk_label_set_text(GTK_LABEL(wpa->label), de->d_name);
+#endif
 		wpa->channel = g_io_channel_unix_new(wpa->fd);
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() %p\n", __func__,
@@ -264,7 +272,9 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 {
 	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "error",
 			wpa->helper->icon_size);
+#ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), "Error");
+#endif
 	return wpa->helper->error(NULL, message, ret);
 }
 
@@ -535,7 +545,9 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
+#ifndef EMBEDDED
 				gtk_label_set_text(GTK_LABEL(wpa->label), ssid);
+#endif
 			}
 		}
 		i = j;
@@ -574,8 +586,10 @@ static gboolean _read_status(WPA * wpa, char const * buf, size_t cnt)
 					? GTK_STOCK_CONNECT
 					: GTK_STOCK_DISCONNECT,
 					wpa->helper->icon_size);
+#ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
 			gtk_label_set_text(GTK_LABEL(wpa->label), value);
+#endif
 		i = j;
 	}
 	free(p);
