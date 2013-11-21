@@ -144,7 +144,6 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	/* widgets */
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
-	ret = gtk_button_new();
 	hbox = gtk_hbox_new(FALSE, 4);
 	wpa->image = gtk_image_new_from_stock(GTK_STOCK_DISCONNECT,
 			helper->icon_size);
@@ -154,17 +153,24 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
-	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
-#if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(ret, "Wireless networking");
-#endif
-	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked), wpa);
-	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	if(_init_timeout(wpa) != FALSE)
 		wpa->source = g_timeout_add(5000, _init_timeout, wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
-	*widget = ret;
+	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
+		*widget = hbox;
+	else
+	{
+		ret = gtk_button_new();
+		gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+		gtk_widget_set_tooltip_text(ret, "Wireless networking");
+#endif
+		g_signal_connect_swapped(ret, "clicked", G_CALLBACK(
+					_on_clicked), wpa);
+		gtk_container_add(GTK_CONTAINER(ret), hbox);
+		*widget = ret;
+	}
 	return wpa;
 }
 
