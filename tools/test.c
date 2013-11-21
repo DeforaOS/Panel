@@ -30,13 +30,12 @@
 #include "../config.h"
 #define _(string) gettext(string)
 
-/* constants */
-#ifdef PACKAGE
-# undef PACKAGE
+#ifndef PROGNAME
+# define PROGNAME	"panel-test"
 #endif
-#define PACKAGE "panel-test"
 #include "helper.c"
 
+/* constants */
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -76,7 +75,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	GdkRectangle rect;
 
 	if((panel.config = config_new()) == NULL)
-		return error_print(PACKAGE);
+		return error_print(PROGNAME);
 	if(gtk_icon_size_lookup(iconsize, &rect.width, &rect.height) == TRUE)
 		top.height = rect.height;
 	else
@@ -84,7 +83,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	panel.top = &top;
 	if((filename = _config_get_filename()) != NULL
 			&& config_load(panel.config, filename) != 0)
-		error_print(PACKAGE);
+		error_print(PROGNAME);
 	free(filename);
 	panel.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	g_signal_connect(G_OBJECT(panel.window), "delete-event", G_CALLBACK(
@@ -97,7 +96,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 		if((plugin = plugin_new(LIBDIR, "Panel", "applets", applets[i]))
 				== NULL)
 		{
-			error_print(PACKAGE);
+			error_print(PROGNAME);
 			continue;
 		}
 		if((pad = plugin_lookup(plugin, "applet")) == NULL)
@@ -134,9 +133,9 @@ static int _test(GtkIconSize iconsize, char * applets[])
 /* usage */
 static int _usage(void)
 {
-	fputs(_("Usage: panel-test [-L|-S|-X|-x] applet...\n"
-"       panel-test -l\n"
-"  -l	Lists the plug-ins available\n"), stderr);
+	fprintf(stderr, _("Usage: %s [-L|-S|-X|-x] applet...\n"
+"       %s -l\n"
+"  -l	Lists the plug-ins available\n"), PROGNAME, PROGNAME);
 	return 1;
 }
 
