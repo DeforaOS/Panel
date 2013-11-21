@@ -101,7 +101,7 @@ static void _panel_destroy(Panel * panel);
 
 #define HELPER_POSITION_MENU_WIDGET
 #include "../src/helper.c"
-static int _panel_append(Panel * panel, unsigned int window,
+static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet);
 
 /* PanelWindow */
@@ -205,10 +205,13 @@ static void _panel_destroy(Panel * panel)
 
 
 /* panel_append */
-static int _panel_append(Panel * panel, unsigned int window,
+static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)
 {
-	return _panel_window_append(&panel->top, &panel->helper, applet);
+	if(position == PANEL_POSITION_TOP)
+		return _panel_window_append(&panel->top, &panel->helper,
+				applet);
+	return -1;
 }
 
 
