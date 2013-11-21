@@ -91,6 +91,8 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 /* useful */
 #define HELPER_POSITION_MENU_WIDGET
 #include "../src/helper.c"
+static int _helper_append(PanelAppletHelper * helper, char const * applet,
+		GtkWidget * box);
 
 
 /* public */
@@ -208,4 +210,29 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown_dialog = _panel_helper_shutdown_dialog;
 	helper->suspend = _panel_helper_suspend;
+}
+
+
+/* useful */
+/* helper_append */
+static int _helper_append(PanelAppletHelper * helper, char const * applet,
+		GtkWidget * box)
+{
+	Plugin * plugin;
+	PanelAppletDefinition * pad;
+	PanelApplet * pa;
+	GtkWidget * widget;
+
+	if((plugin = plugin_new(LIBDIR, "Panel", "applets", applet)) == NULL)
+		return error_print(PROGNAME);
+	if((pad = plugin_lookup(plugin, "applet")) == NULL)
+	{
+		plugin_delete(plugin);
+		return error_print(PROGNAME);
+	}
+	widget = NULL;
+	if((pa = pad->init(helper, &widget)) != NULL && widget != NULL)
+		gtk_box_pack_start(GTK_BOX(box), widget, pad->expand, pad->fill,
+				0);
+	return 0;
 }

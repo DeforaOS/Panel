@@ -64,12 +64,8 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	PanelWindow top;
 	char * filename;
 	GtkWidget * box;
-	GtkWidget * widget;
 	size_t i;
-	Plugin * plugin;
 	PanelAppletHelper helper;
-	PanelAppletDefinition * pad;
-	PanelApplet * pa;
 	GdkScreen * screen;
 	GdkWindow * root;
 	GdkRectangle rect;
@@ -92,24 +88,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	box = gtk_hbox_new(FALSE, 4);
 	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
-	{
-		if((plugin = plugin_new(LIBDIR, "Panel", "applets", applets[i]))
-				== NULL)
-		{
-			error_print(PROGNAME);
-			continue;
-		}
-		if((pad = plugin_lookup(plugin, "applet")) == NULL)
-		{
-			plugin_delete(plugin);
-			continue;
-		}
-		widget = NULL;
-		if((pa = pad->init(&helper, &widget)) != NULL
-				&& widget != NULL)
-			gtk_box_pack_start(GTK_BOX(box), widget, pad->expand,
-					pad->fill, 0);
-	}
+		_helper_append(&helper, applets[i], box);
 	gtk_container_add(GTK_CONTAINER(panel.window), box);
 	gtk_widget_show_all(panel.window);
 	panel.timeout = 0;
