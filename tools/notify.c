@@ -32,10 +32,9 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifdef PACKAGE
-# undef PACKAGE
+#ifndef PROGNAME
+# define PROGNAME	"panel-notify"
 #endif
-#define PACKAGE "panel-notify"
 #include "helper.c"
 
 #ifndef PREFIX
@@ -80,7 +79,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	GdkRectangle rect;
 
 	if((panel.config = config_new()) == NULL)
-		return error_print("panel-notify");
+		return error_print(PROGNAME);
 	if(gtk_icon_size_lookup(iconsize, &rect.width, &rect.height) == TRUE)
 		top.height = rect.height + 8;
 	else
@@ -88,7 +87,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	panel.top = &top;
 	if((filename = _config_get_filename()) != NULL
 			&& config_load(panel.config, filename) != 0)
-		error_print("panel-notify");
+		error_print(PROGNAME);
 	free(filename);
 	panel.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -109,7 +108,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 		if((plugin = plugin_new(LIBDIR, "Panel", "applets", applets[i]))
 				== NULL)
 		{
-			error_print(PACKAGE);
+			error_print(PROGNAME);
 			continue;
 		}
 		if((pad = plugin_lookup(plugin, "applet")) == NULL)
@@ -163,14 +162,14 @@ static gboolean _notify_on_timeout(gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fputs(_("Usage: panel-notify [-L|-S|-X|-x][-t timeout] applet...\n"
-"       panel-notify -l\n"
+	fprintf(stderr, _("Usage: %s [-L|-S|-X|-x][-t timeout] applet...\n"
+"       %s -l\n"
 "  -L	Use icons the size of a large toolbar\n"
 "  -S	Use icons the size of a small toolbar\n"
 "  -X	Use huge icons\n"
 "  -x	Use icons the size of menus\n"
 "  -t	Time to wait before disappearing (0: unlimited)\n"
-"  -l	Lists the plug-ins available\n"), stderr);
+"  -l	Lists the plug-ins available\n"), PROGNAME, PROGNAME);
 	return 1;
 }
 
