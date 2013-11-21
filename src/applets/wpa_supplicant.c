@@ -32,6 +32,14 @@
 #include <errno.h>
 #include "Panel.h"
 
+/* constants */
+#ifndef TMPDIR
+# define TMPDIR			"/tmp"
+#endif
+#ifndef WPA_SUPPLICANT_PATH
+# define WPA_SUPPLICANT_PATH	"/var/run/wpa_supplicant"
+#endif
+
 
 /* wpa_supplicant */
 /* private */
@@ -155,7 +163,7 @@ static gboolean _init_timeout(gpointer data)
 {
 	int ret = TRUE;
 	WPA * wpa = data;
-	char const path[] = "/var/run/wpa_supplicant";
+	char const path[] = WPA_SUPPLICANT_PATH;
 	DIR * dir;
 	struct dirent * de;
 	struct stat st;
@@ -166,7 +174,7 @@ static gboolean _init_timeout(gpointer data)
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
 	snprintf(wpa->path, sizeof(wpa->path), "%s",
-			"/tmp/panel_wpa_supplicant.XXXXXX");
+			TMPDIR "/panel_wpa_supplicant.XXXXXX");
 	if(mktemp(wpa->path) == NULL)
 	{
 		wpa->helper->error(NULL, "mktemp", 1);
@@ -313,11 +321,11 @@ static int _wpa_start(WPA * wpa)
 static void _wpa_stop(WPA * wpa)
 {
 	size_t i;
-	char ** p;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	/* de-register the event sources */
 	if(wpa->source != 0)
 		g_source_remove(wpa->source);
 	wpa->source = 0;
@@ -327,16 +335,19 @@ static void _wpa_stop(WPA * wpa)
 	if(wpa->wr_source != 0)
 		g_source_remove(wpa->wr_source);
 	wpa->wr_source = 0;
+	/* free the command queue */
 	for(i = 0; i < wpa->queue_cnt; i++)
 		free(wpa->queue[i].buf);
 	free(wpa->queue);
 	wpa->queue = NULL;
 	wpa->queue_cnt = 0;
-	for(p = wpa->networks; p != NULL && *p != NULL; p++)
-		free(*p);
+	/* free the network list */
+	for(i = 0; i < wpa->networks_cnt; i++)
+		free(wpa->networks[i]);
 	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
+	/* close and remove the socket */
 	if(wpa->channel != NULL)
 	{
 		g_io_channel_shutdown(wpa->channel, TRUE, NULL);
@@ -362,7 +373,7 @@ static void _on_clicked(gpointer data)
 	WPA * wpa = data;
 	GtkWidget * menu;
 	GtkWidget * menuitem;
-	char ** p;
+	size_t i;
 
 	menu = gtk_menu_new();
 	/* FIXME summarize the status instead */
@@ -372,9 +383,9 @@ static void _on_clicked(gpointer data)
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* FIXME add a list of actions */
-	for(p = wpa->networks; p != NULL && *p != NULL; p++)
+	for(i = 0; i < wpa->networks_cnt; i++)
 	{
-		menuitem = gtk_image_menu_item_new_with_label(*p);
+		menuitem = gtk_image_menu_item_new_with_label(wpa->networks[i]);
 		gtk_widget_set_sensitive(menuitem, FALSE);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
@@ -473,9 +484,9 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 	char flags[80];
 	int res;
 
-	for(n = wpa->networks; n != NULL && *n != NULL; n++)
-		free(*n);
-	free(n);
+	for(i = 0; i < wpa->networks_cnt; i++)
+		free(wpa->networks[i]);
+	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	for(i = 0; i < cnt;)
@@ -501,14 +512,13 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			/* FIXME store the scan results instead */
 			if((n = realloc(wpa->networks, sizeof(*n)
 							* (wpa->networks_cnt
-								+ 2))) != NULL)
+								+ 1))) != NULL)
 			{
 				wpa->networks = n;
 				/* XXX ignore errors */
 				wpa->networks[wpa->networks_cnt] = strdup(ssid);
 				if(wpa->networks[wpa->networks_cnt] != NULL)
 					wpa->networks_cnt++;
-				wpa->networks[wpa->networks_cnt] = NULL;
 			}
 #endif
 			if(strcmp(flags, "[CURRENT]") == 0)
