@@ -23,7 +23,12 @@
 #include <System.h>
 #include <Desktop.h>
 #include <Desktop/Browser.h>
+#include "../config.h"
 
+/* constants */
+#ifndef PROGNAME
+# define PROGNAME	PACKAGE
+#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -93,7 +98,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 /* panel_error */
 int panel_error(Panel * panel, char const * message, int ret)
 {
-	fputs(PACKAGE ": ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	perror(message);
 	return ret;
 }
