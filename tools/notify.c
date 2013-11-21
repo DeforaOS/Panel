@@ -82,7 +82,6 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	for(i = 0; applets[i] != NULL; i++)
 		_helper_append(&helper, &panel.top, applets[i]);
 	gtk_widget_show_all(panel.top.window);
-	panel.timeout = 0;
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,
 				_notify_on_timeout, &panel);

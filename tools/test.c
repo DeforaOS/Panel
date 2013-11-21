@@ -70,7 +70,6 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	for(i = 0; applets[i] != NULL; i++)
 		_helper_append(&helper, &panel.top, applets[i]);
 	gtk_widget_show_all(panel.top.window);
-	panel.timeout = 0;
 	gtk_main();
 	panel_destroy(&panel);
 	return 0;

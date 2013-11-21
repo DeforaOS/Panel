@@ -67,7 +67,7 @@ struct _Panel
 	GtkWidget * window;
 	PanelWindow top;
 
-	gint timeout;
+	guint timeout;
 	gint root_width;		/* width of the root window	*/
 	gint root_height;		/* height of the root window	*/
 	guint source;
@@ -137,6 +137,7 @@ int panel_init(Panel * panel, GtkIconSize iconsize)
 	free(filename);
 	panel_window_init(&panel->top, iconsize);
 	panel->window = panel->top.window;
+	panel->timeout = 0;
 	panel->source = 0;
 	panel->ab_window = NULL;
 	panel->lo_window = NULL;
