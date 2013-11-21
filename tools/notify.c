@@ -98,7 +98,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 			GTK_WIN_POS_CENTER_ALWAYS);
 	g_signal_connect(G_OBJECT(panel.window), "delete-event", G_CALLBACK(
 				gtk_main_quit), NULL);
-	gtk_window_set_title(GTK_WINDOW(panel.window), "Applet notifier");
+	gtk_window_set_title(GTK_WINDOW(panel.window), _("Notification"));
 	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
 		_helper_append(&helper, &top, applets[i]);

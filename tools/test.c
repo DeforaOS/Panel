@@ -86,7 +86,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	panel.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	g_signal_connect(G_OBJECT(panel.window), "delete-event", G_CALLBACK(
 				gtk_main_quit), NULL);
-	gtk_window_set_title(GTK_WINDOW(panel.window), "Applet tester");
+	gtk_window_set_title(GTK_WINDOW(panel.window), _("Applet tester"));
 	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
 		_helper_append(&helper, &top, applets[i]);

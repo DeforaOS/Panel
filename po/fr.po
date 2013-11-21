@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-21 04:19+0100\n"
+"POT-Creation-Date: 2013-11-21 05:03+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -402,7 +402,7 @@ msgstr "Impossible d'obtenir le XID"
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s commande [arguments...]\n"
 
-#: ../tools/helper.c:136
+#: ../tools/helper.c:152
 msgid "Applets available:"
 msgstr "Applets disponibles :"
 
@@ -423,7 +423,11 @@ msgstr "Information"
 msgid "Usage: %s [-EIQW][-T title][-t timeout] message\n"
 msgstr "Usage: %s [-EIQW][-T titre][-t durée] message\n"
 
-#: ../tools/notify.c:165
+#: ../tools/notify.c:101
+msgid "Notification"
+msgstr "Notification"
+
+#: ../tools/notify.c:145
 #, c-format
 msgid ""
 "Usage: %s [-L|-S|-X|-x][-t timeout] applet...\n"
@@ -444,7 +448,11 @@ msgstr ""
 "  -t\tDurée d'affichage (0 : illimité)\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/test.c:136
+#: ../tools/test.c:89
+msgid "Applet tester"
+msgstr "Testeur d'applets"
+
+#: ../tools/test.c:116
 #, c-format
 msgid ""
 "Usage: %s [-L|-S|-X|-x] applet...\n"
