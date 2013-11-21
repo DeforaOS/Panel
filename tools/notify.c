@@ -65,7 +65,6 @@ static int _usage(void);
 static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 {
 	Panel panel;
-	PanelWindow top;
 	char * filename;
 	size_t i;
 	PanelAppletHelper helper;
@@ -73,37 +72,24 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	GdkWindow * root;
 	GdkRectangle rect;
 
-	if((panel.config = config_new()) == NULL)
-		return error_print(PROGNAME);
-	if(gtk_icon_size_lookup(iconsize, &rect.width, &rect.height) == TRUE)
-		top.height = rect.height + 8;
-	else
-		top.height = 72;
-	top.applets = NULL;
-	top.applets_cnt = 0;
-	top.box = gtk_hbox_new(FALSE, 4);
-	panel.top = &top;
+	panel_init(&panel, iconsize);
 	if((filename = _config_get_filename()) != NULL
 			&& config_load(panel.config, filename) != 0)
 		error_print(PROGNAME);
 	free(filename);
-	panel.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	gtk_window_set_has_resize_grip(GTK_WINDOW(panel.window), FALSE);
+	gtk_window_set_has_resize_grip(GTK_WINDOW(panel.top.window), FALSE);
 #endif
-	gtk_container_set_border_width(GTK_CONTAINER(panel.window), 4);
-	gtk_window_set_accept_focus(GTK_WINDOW(panel.window), FALSE);
-	gtk_window_set_decorated(GTK_WINDOW(panel.window), FALSE);
-	gtk_window_set_position(GTK_WINDOW(panel.window),
+	gtk_container_set_border_width(GTK_CONTAINER(panel.top.window), 4);
+	gtk_window_set_accept_focus(GTK_WINDOW(panel.top.window), FALSE);
+	gtk_window_set_decorated(GTK_WINDOW(panel.top.window), FALSE);
+	gtk_window_set_position(GTK_WINDOW(panel.top.window),
 			GTK_WIN_POS_CENTER_ALWAYS);
-	g_signal_connect(G_OBJECT(panel.window), "delete-event", G_CALLBACK(
-				gtk_main_quit), NULL);
-	gtk_window_set_title(GTK_WINDOW(panel.window), _("Notification"));
+	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Notification"));
 	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
-		_helper_append(&helper, &top, applets[i]);
-	gtk_container_add(GTK_CONTAINER(panel.window), top.box);
-	gtk_widget_show_all(panel.window);
+		_helper_append(&helper, &panel.top, applets[i]);
+	gtk_widget_show_all(panel.top.window);
 	panel.timeout = 0;
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,
@@ -114,15 +100,8 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	gdk_screen_get_monitor_geometry(screen, 0, &rect);
 	panel.root_height = rect.height;
 	panel.root_width = rect.width;
-	panel.source = 0;
-	panel.ab_window = NULL;
-	panel.lo_window = NULL;
-	panel.sh_window = NULL;
 	gtk_main();
-	if(panel.timeout != 0)
-		g_source_remove(panel.timeout);
-	if(panel.source != 0)
-		g_source_remove(panel.source);
+	panel_destroy(&panel);
 	return 0;
 }
 
