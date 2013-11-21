@@ -65,15 +65,10 @@ static int _usage(void);
 static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 {
 	Panel panel;
-	char * filename;
 	size_t i;
 	PanelAppletHelper helper;
 
 	panel_init(&panel, iconsize);
-	if((filename = _config_get_filename()) != NULL
-			&& config_load(panel.config, filename) != 0)
-		error_print(PROGNAME);
-	free(filename);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_window_set_has_resize_grip(GTK_WINDOW(panel.top.window), FALSE);
 #endif

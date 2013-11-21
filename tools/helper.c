@@ -124,12 +124,17 @@ static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
 /* panel_init */
 int panel_init(Panel * panel, GtkIconSize iconsize)
 {
+	char * filename;
 	GdkScreen * screen;
 	GdkWindow * root;
 	GdkRectangle rect;
 
 	if((panel->config = config_new()) == NULL)
 		return -1;
+	if((filename = _config_get_filename()) != NULL
+			&& config_load(panel->config, filename) != 0)
+		error_print(PROGNAME);
+	free(filename);
 	panel_window_init(&panel->top, iconsize);
 	panel->window = panel->top.window;
 	panel->source = 0;
