@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-21 02:26+0100\n"
+"POT-Creation-Date: 2013-11-21 02:35+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -391,6 +391,15 @@ msgstr "Usage: run\n"
 #: ../src/window.c:66
 msgid "Invalid panel size"
 msgstr "Taille invalide pour le panel"
+
+#: ../tools/embed.c:112
+msgid "Could not obtain the XID"
+msgstr "Impossible d'obtenir le XID"
+
+#: ../tools/embed.c:151
+#, c-format
+msgid "Usage: %s command [arguments...]\n"
+msgstr "Usage: %s commande [arguments...]\n"
 
 #: ../tools/message.c:81
 msgid "Question"

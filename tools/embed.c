@@ -19,12 +19,25 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <locale.h>
+#include <libintl.h>
 #include <Desktop.h>
 #include "../include/Panel.h"
+#include "../config.h"
+#define _(string) gettext(string)
 
 /* constants */
 #ifndef PROGNAME
 # define PROGNAME	"panel-embed"
+#endif
+#ifndef PREFIX
+# define PREFIX		"/usr/local"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
 #endif
 
 
@@ -96,7 +109,7 @@ static gboolean _embed_on_can_read(GIOChannel * channel, GIOCondition condition,
 			g_free(str);
 			if(str[0] == '\0' || *p != '\n')
 			{
-				_error("Could not obtain the XID", 1);
+				_error(_("Could not obtain the XID"), 1);
 				break;
 			}
 #ifdef DEBUG
@@ -135,7 +148,7 @@ static int _error(char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, "Usage: %s command [arguments...]\n", PROGNAME);
+	fprintf(stderr, _("Usage: %s command [arguments...]\n"), PROGNAME);
 	return 1;
 }
 
@@ -147,6 +160,9 @@ int main(int argc, char * argv[])
 {
 	int o;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
 	while((o = getopt(argc, argv, "")) != -1)
 		switch(o)
