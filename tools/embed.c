@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,11 @@
 #include <stdio.h>
 #include <Desktop.h>
 #include "../include/Panel.h"
+
+/* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panel-embed"
+#endif
 
 
 /* private */
@@ -122,7 +127,7 @@ static void _embed_on_child(GPid pid, gint status, gpointer data)
 /* error */
 static int _error(char const * message, int ret)
 {
-	fprintf(stderr, "%s%s\n", "panel-embed: ", message);
+	fprintf(stderr, "%s%s\n", PROGNAME ": ", message);
 	return ret;
 }
 
@@ -130,7 +135,7 @@ static int _error(char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: panel-embed command [arguments...]\n", stderr);
+	fprintf(stderr, "Usage: %s command [arguments...]\n", PROGNAME);
 	return 1;
 }
 
