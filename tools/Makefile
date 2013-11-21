@@ -18,14 +18,14 @@ INSTALL	= install
 all: $(TARGETS)
 
 panel-embed_OBJS = embed.o
-panel-embed_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+panel-embed_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
 panel-embed_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 panel-embed: $(panel-embed_OBJS)
 	$(CC) -o panel-embed $(panel-embed_OBJS) $(panel-embed_LDFLAGS)
 
 panel-message_OBJS = message.o
-panel-message_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+panel-message_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
 panel-message_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 panel-message: $(panel-message_OBJS)
