@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,9 @@ static void _wpa_destroy(Wpa * wpa);
 
 static int _wpa_error(Wpa * wpa, char const * message, int ret);
 static int _wpa_queue(Wpa * wpa, WpaCommand command, ...);
-static int _wpa_reset(Wpa * wpa, gboolean connect);
+static int _wpa_reset(Wpa * wpa);
+static int _wpa_start(Wpa * wpa);
+static void _wpa_stop(Wpa * wpa);
 
 /* callbacks */
 static gboolean _on_timeout(gpointer data);
@@ -221,7 +223,7 @@ static gboolean _init_timeout(gpointer data)
 /* wpa_destroy */
 static void _wpa_destroy(Wpa * wpa)
 {
-	_wpa_reset(wpa, FALSE);
+	_wpa_stop(wpa);
 	object_delete(wpa);
 }
 
@@ -275,7 +277,26 @@ static int _wpa_queue(Wpa * wpa, WpaCommand command, ...)
 
 
 /* wpa_reset */
-static int _wpa_reset(Wpa * wpa, gboolean connect)
+static int _wpa_reset(Wpa * wpa)
+{
+	_wpa_stop(wpa);
+	return _wpa_start(wpa);
+}
+
+
+/* wpa_start */
+static int _wpa_start(Wpa * wpa)
+{
+	/* reconnect to the daemon */
+	if(_init_timeout(wpa) == FALSE)
+		return 0;
+	wpa->source = g_timeout_add(5000, _init_timeout, wpa);
+	return 0;
+}
+
+
+/* wpa_stop */
+static void _wpa_stop(Wpa * wpa)
 {
 	size_t i;
 
@@ -308,13 +329,6 @@ static int _wpa_reset(Wpa * wpa, gboolean connect)
 	wpa->fd = -1;
 	if(unlink(wpa->path) != 0)
 		wpa->helper->error(NULL, wpa->path, 1);
-	if(connect != TRUE)
-		return 0;
-	/* reconnect to the daemon */
-	if(_init_timeout(wpa) == FALSE)
-		return 0;
-	wpa->source = g_timeout_add(5000, _init_timeout, wpa);
-	return 0;
 }
 
 
@@ -370,7 +384,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		case G_IO_STATUS_EOF:
 		default: /* should not happen */
 			wpa->source = 0;
-			_wpa_reset(wpa, TRUE);
+			_wpa_reset(wpa);
 			return FALSE;
 	}
 	if(ret == TRUE)
@@ -500,7 +514,7 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 		case G_IO_STATUS_EOF:
 		default: /* should not happen */
 			wpa->source = 0;
-			_wpa_reset(wpa, TRUE);
+			_wpa_reset(wpa);
 			return FALSE;
 	}
 	if(entry->buf_cnt != 0)
