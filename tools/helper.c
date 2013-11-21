@@ -39,9 +39,23 @@
 
 /* private */
 /* types */
+struct _PanelApplet
+{
+	Plugin * plugin;
+	PanelAppletDefinition * pad;
+	PanelApplet * pa;
+};
+
 typedef struct _PanelWindow
 {
 	int height;
+
+	/* applets */
+	PanelApplet * applets;
+	size_t applets_cnt;
+
+	/* widgets */
+	GtkWidget * box;
 } PanelWindow;
 
 struct _Panel
@@ -91,8 +105,8 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 /* useful */
 #define HELPER_POSITION_MENU_WIDGET
 #include "../src/helper.c"
-static int _helper_append(PanelAppletHelper * helper, char const * applet,
-		GtkWidget * box);
+static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
+		char const * applet);
 
 
 /* public */
@@ -215,24 +229,29 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 
 /* useful */
 /* helper_append */
-static int _helper_append(PanelAppletHelper * helper, char const * applet,
-		GtkWidget * box)
+static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
+		char const * applet)
 {
-	Plugin * plugin;
-	PanelAppletDefinition * pad;
 	PanelApplet * pa;
 	GtkWidget * widget;
 
-	if((plugin = plugin_new(LIBDIR, "Panel", "applets", applet)) == NULL)
+	if((pa = realloc(window->applets, sizeof(*pa)
+					* (window->applets_cnt + 1))) == NULL)
 		return error_print(PROGNAME);
-	if((pad = plugin_lookup(plugin, "applet")) == NULL)
+	window->applets = pa;
+	pa = &window->applets[window->applets_cnt];
+	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
+			== NULL)
+		return error_print(PROGNAME);
+	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL)
 	{
-		plugin_delete(plugin);
+		plugin_delete(pa->plugin);
 		return error_print(PROGNAME);
 	}
 	widget = NULL;
-	if((pa = pad->init(helper, &widget)) != NULL && widget != NULL)
-		gtk_box_pack_start(GTK_BOX(box), widget, pad->expand, pad->fill,
-				0);
+	if((pa->pa = pa->pad->init(helper, &widget)) != NULL && widget != NULL)
+		gtk_box_pack_start(GTK_BOX(window->box), widget,
+				pa->pad->expand, pa->pad->fill, 0);
+	window->applets_cnt++;
 	return 0;
 }

@@ -63,7 +63,6 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	Panel panel;
 	PanelWindow top;
 	char * filename;
-	GtkWidget * box;
 	size_t i;
 	PanelAppletHelper helper;
 	GdkScreen * screen;
@@ -76,6 +75,9 @@ static int _test(GtkIconSize iconsize, char * applets[])
 		top.height = rect.height;
 	else
 		top.height = 72;
+	top.applets = NULL;
+	top.applets_cnt = 0;
+	top.box = gtk_hbox_new(FALSE, 4);
 	panel.top = &top;
 	if((filename = _config_get_filename()) != NULL
 			&& config_load(panel.config, filename) != 0)
@@ -85,11 +87,10 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	g_signal_connect(G_OBJECT(panel.window), "delete-event", G_CALLBACK(
 				gtk_main_quit), NULL);
 	gtk_window_set_title(GTK_WINDOW(panel.window), "Applet tester");
-	box = gtk_hbox_new(FALSE, 4);
 	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
-		_helper_append(&helper, applets[i], box);
-	gtk_container_add(GTK_CONTAINER(panel.window), box);
+		_helper_append(&helper, &top, applets[i]);
+	gtk_container_add(GTK_CONTAINER(panel.window), top.box);
 	gtk_widget_show_all(panel.window);
 	panel.timeout = 0;
 	/* root window */
