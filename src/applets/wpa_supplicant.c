@@ -40,6 +40,11 @@
 # define WPA_SUPPLICANT_PATH	"/var/run/wpa_supplicant"
 #endif
 
+/* portability */
+#ifndef SUN_LEN
+# define SUN_LEN(su)		sizeof(struct sockaddr_un)
+#endif
+
 
 /* wpa_supplicant */
 /* private */
@@ -190,16 +195,20 @@ static gboolean _init_timeout(gpointer data)
 		gtk_label_set_text(GTK_LABEL(wpa->label), "Not running");
 		return wpa->helper->error(NULL, path, TRUE);
 	}
+	/* create the local socket */
 	if((wpa->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
 		return _wpa_error(wpa, "socket", TRUE);
+	memset(&lu, 0, sizeof(lu));
 	snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", wpa->path);
 	lu.sun_family = AF_LOCAL;
-	if(bind(wpa->fd, (struct sockaddr *)&lu, sizeof(lu)) != 0)
+	if(bind(wpa->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
 		close(wpa->fd);
 		unlink(wpa->path);
 		return _wpa_error(wpa, wpa->path, TRUE);
 	}
+	/* connect to the wpa_supplicant daemon */
+	memset(&ru, 0, sizeof(ru));
 	ru.sun_family = AF_UNIX;
 	while((de = readdir(dir)) != NULL)
 	{
@@ -211,7 +220,7 @@ static gboolean _init_timeout(gpointer data)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, de->d_name);
 #endif
-		if(connect(wpa->fd, (struct sockaddr *)&ru, sizeof(ru)) != 0)
+		if(connect(wpa->fd, (struct sockaddr *)&ru, SUN_LEN(&ru)) != 0)
 		{
 			wpa->helper->error(NULL, "connect", 1);
 			continue;
