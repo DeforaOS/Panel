@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@
 #define _(string) gettext(string)
 
 /* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panel"
+#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -44,11 +47,11 @@
 /* usage */
 static int _usage(void)
 {
-	fputs(_("Usage: panel [-L|-S|-x][-m monitor]\n"
+	fprintf(stderr, _("Usage: %s [-L|-S|-x][-m monitor]\n"
 "  -L	Use icons the size of a large toolbar\n"
 "  -m	Monitor to use (default: 0)\n"
 "  -S	Use icons the size of a small toolbar\n"
-"  -x	Use icons the size of menus\n"), stderr);
+"  -x	Use icons the size of menus\n"), PROGNAME);
 	return 1;
 }
 
