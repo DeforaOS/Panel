@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,8 +69,8 @@ typedef struct _PanelAppletDefinition
 
 typedef enum _PanelMessage
 {
-	PANEL_MESSAGE_SHOW = 0,
-	PANEL_MESSAGE_EMBED
+	PANEL_MESSAGE_SHOW = 0,		/* PanelMessageShow, gboolean visible */
+	PANEL_MESSAGE_EMBED		/* Window */
 } PanelMessage;
 
 typedef enum _PanelMessageShow
