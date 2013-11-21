@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,26 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <locale.h>
+#include <libintl.h>
 #include <Desktop.h>
 #include "../include/Panel.h"
+#include "../config.h"
+#define _(string) gettext(string)
+
+/* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panel-message"
+#endif
+#ifndef PREFIX
+# define PREFIX         "/usr/local"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
+#endif
 
 
 /* private */
@@ -55,23 +73,23 @@ static int _message(unsigned int timeout, GtkMessageType type,
 		case GTK_MESSAGE_ERROR:
 			stock = GTK_STOCK_DIALOG_ERROR;
 			if(title == NULL)
-				title = "Error";
+				title = _("Error");
 			break;
 		case GTK_MESSAGE_QUESTION:
 			stock = GTK_STOCK_DIALOG_QUESTION;
 			if(title == NULL)
-				title = "Question";
+				title = _("Question");
 			break;
 		case GTK_MESSAGE_WARNING:
 			stock = GTK_STOCK_DIALOG_WARNING;
 			if(title == NULL)
-				title = "Warning";
+				title = _("Warning");
 			break;
 		case GTK_MESSAGE_INFO:
 		default:
 			stock = GTK_STOCK_DIALOG_INFO;
 			if(title == NULL)
-				title = "Information";
+				title = _("Information");
 			break;
 	}
 	plug = gtk_plug_new(0);
@@ -123,8 +141,8 @@ static gboolean _message_on_timeout(gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: panel-message [-EIQW][-T title][-t timeout] message\n",
-			stderr);
+	fprintf(stderr, _("Usage: %s [-EIQW][-T title][-t timeout] message\n"),
+			PROGNAME);
 	return 1;
 }
 
@@ -140,6 +158,9 @@ int main(int argc, char * argv[])
 	int o;
 	char * p;
 
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
 	while((o = getopt(argc, argv, "EIQT:Wt:")) != -1)
 		switch(o)
