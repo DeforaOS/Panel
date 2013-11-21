@@ -88,16 +88,17 @@ static char const * _authors[] =
 
 /* public */
 /* prototypes */
-int panel_init(Panel * panel, GtkIconSize iconsize);
-void panel_destroy(Panel * panel);
-
-void panel_window_init(PanelWindow * panel, GtkIconSize iconsize);
-void panel_window_destroy(PanelWindow * panel);
 int panel_window_get_height(PanelWindow * panel);
 
 
 /* private */
 /* prototypes */
+static int _panel_init(Panel * panel, GtkIconSize iconsize);
+static void _panel_destroy(Panel * panel);
+
+static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize);
+static void _panel_window_destroy(PanelWindow * panel);
+
 static int _applet_list(void);
 static char * _config_get_filename(void);
 
@@ -121,8 +122,33 @@ static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
 
 /* public */
 /* functions */
+/* panel_error */
+int panel_error(Panel * panel, char const * message, int ret)
+{
+	fputs(PROGNAME ": ", stderr);
+	perror(message);
+	return ret;
+}
+
+
+/* panel_show_preferences */
+void panel_show_preferences(Panel * panel, gboolean show)
+{
+	/* XXX just a stub */
+}
+
+
+/* panel_window_get_height */
+int panel_window_get_height(PanelWindow * panel)
+{
+	return panel->height;
+}
+
+
+/* private */
+/* functions */
 /* panel_init */
-int panel_init(Panel * panel, GtkIconSize iconsize)
+static int _panel_init(Panel * panel, GtkIconSize iconsize)
 {
 	char * filename;
 	GdkScreen * screen;
@@ -135,7 +161,7 @@ int panel_init(Panel * panel, GtkIconSize iconsize)
 			&& config_load(panel->config, filename) != 0)
 		error_print(PROGNAME);
 	free(filename);
-	panel_window_init(&panel->top, iconsize);
+	_panel_window_init(&panel->top, iconsize);
 	panel->window = panel->top.window;
 	panel->timeout = 0;
 	panel->source = 0;
@@ -153,13 +179,13 @@ int panel_init(Panel * panel, GtkIconSize iconsize)
 
 
 /* panel_destroy */
-void panel_destroy(Panel * panel)
+static void _panel_destroy(Panel * panel)
 {
 	if(panel->timeout != 0)
 		g_source_remove(panel->timeout);
 	if(panel->source != 0)
 		g_source_remove(panel->source);
-	panel_window_destroy(&panel->top);
+	_panel_window_destroy(&panel->top);
 	if(panel->ab_window != NULL)
 		gtk_widget_destroy(panel->ab_window);
 	if(panel->lo_window != NULL)
@@ -169,24 +195,8 @@ void panel_destroy(Panel * panel)
 }
 
 
-/* panel_error */
-int panel_error(Panel * panel, char const * message, int ret)
-{
-	fputs(PROGNAME ": ", stderr);
-	perror(message);
-	return ret;
-}
-
-
-/* panel_show_preferences */
-void panel_show_preferences(Panel * panel, gboolean show)
-{
-	/* XXX just a stub */
-}
-
-
 /* panel_window_init */
-void panel_window_init(PanelWindow * panel, GtkIconSize iconsize)
+static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize)
 {
 	GdkRectangle rect;
 
@@ -205,7 +215,7 @@ void panel_window_init(PanelWindow * panel, GtkIconSize iconsize)
 
 
 /* panel_window_destroy */
-void panel_window_destroy(PanelWindow * panel)
+static void _panel_window_destroy(PanelWindow * panel)
 {
 	size_t i;
 	PanelApplet * pa;
@@ -221,14 +231,6 @@ void panel_window_destroy(PanelWindow * panel)
 }
 
 
-/* panel_window_get_height */
-int panel_window_get_height(PanelWindow * panel)
-{
-	return panel->height;
-}
-
-
-/* functions */
 /* applet_list */
 static int _applet_list(void)
 {
