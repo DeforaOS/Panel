@@ -44,6 +44,10 @@
 #define _(string) gettext(string)
 #define N_(string) (string)
 
+/* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panel"
+#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -362,14 +366,16 @@ static void _idle_load(Panel * panel, PanelPosition position)
 		if(q[i] == '\0')
 		{
 			if(panel_load(panel, position, q) != 0)
-				error_print(PACKAGE); /* we can ignore errors */
+				/* ignore errors */
+				error_print(PROGNAME);
 			break;
 		}
 		if(q[i++] != ',')
 			continue;
 		q[i - 1] = '\0';
 		if(panel_load(panel, position, q) != 0)
-			error_print(PACKAGE); /* we can ignore errors */
+			/* ignore errors */
+			error_print(PROGNAME);
 		q += i;
 		i = 0;
 	}
@@ -477,10 +483,10 @@ int panel_error(Panel * panel, char const * message, int ret)
 static int _error_text(char const * message, int ret)
 {
 	if(message == NULL)
-		error_print(PACKAGE);
+		error_print(PROGNAME);
 	else
 	{
-		fputs(PACKAGE ": ", stderr);
+		fputs(PROGNAME ": ", stderr);
 		perror(message);
 	}
 	return ret;
