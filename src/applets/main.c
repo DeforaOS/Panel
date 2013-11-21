@@ -217,7 +217,7 @@ static GtkWidget * _main_applications(Main * main)
 				&& config_get(config, section, "Exec") == NULL)
 			gtk_widget_set_sensitive(menuitem, FALSE);
 		else
-			g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
+			g_signal_connect_swapped(menuitem, "activate",
 					G_CALLBACK(_applications_on_activate),
 					config);
 		if((q = config_get(config, section, "Categories")) == NULL)
@@ -437,49 +437,49 @@ static void _on_clicked(gpointer data)
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = _main_menuitem(_("Run..."), GTK_STOCK_EXECUTE);
-	g_signal_connect_swapped(G_OBJECT(menuitem), "activate", G_CALLBACK(
-				_on_run), main);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_run),
+			main);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
-	g_signal_connect_swapped(G_OBJECT(menuitem), "activate", G_CALLBACK(
-				_on_about), main);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_about),
+			main);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* lock screen */
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = _main_menuitem(_("Lock screen"), "gnome-lockscreen");
-	g_signal_connect_swapped(G_OBJECT(menuitem), "activate", G_CALLBACK(
-				_on_lock), main);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_lock),
+			main);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 #ifdef EMBEDDED
 	/* rotate screen */
 	menuitem = _main_menuitem(_("Rotate"), GTK_STOCK_REFRESH); /* XXX */
-	g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-			G_CALLBACK(_on_rotate), data);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_rotate),
+			data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 #endif
 	/* logout */
 	if(main->helper->logout_dialog != NULL)
 	{
 		menuitem = _main_menuitem(_("Logout..."), "gnome-logout");
-		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-				G_CALLBACK(_on_logout), data);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_on_logout), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	/* suspend */
 	if(main->helper->suspend != NULL)
 	{
 		menuitem = _main_menuitem(_("Suspend"), "gtk-media-pause");
-		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-				G_CALLBACK(_on_suspend), data);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_on_suspend), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	/* shutdown */
 	menuitem = _main_menuitem(_("Shutdown..."), "gnome-shutdown");
-	g_signal_connect_swapped(G_OBJECT(menuitem), "activate", G_CALLBACK(
-				_on_shutdown), data);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_shutdown),
+			data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
