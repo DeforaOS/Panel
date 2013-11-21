@@ -59,6 +59,9 @@ typedef struct _PanelApplet
 	WPAEntry * queue;
 	size_t queue_cnt;
 
+	char ** networks;
+	size_t networks_cnt;
+
 	/* widgets */
 	GtkWidget * image;
 	GtkWidget * label;
@@ -76,6 +79,7 @@ static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
 
 /* callbacks */
+static void _on_clicked(gpointer data);
 static gboolean _on_timeout(gpointer data);
 static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data);
@@ -106,8 +110,9 @@ static gboolean _init_timeout(gpointer data);
 static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	WPA * wpa;
-	PangoFontDescription * bold;
+	GtkWidget * ret;
 	GtkWidget * hbox;
+	PangoFontDescription * bold;
 
 	if((wpa = object_new(sizeof(*wpa))) == NULL)
 		return NULL;
@@ -119,9 +124,12 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->wr_source = 0;
 	wpa->queue = NULL;
 	wpa->queue_cnt = 0;
+	wpa->networks = NULL;
+	wpa->networks_cnt = 0;
 	/* widgets */
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
+	ret = gtk_button_new();
 	hbox = gtk_hbox_new(FALSE, 4);
 	wpa->image = gtk_image_new_from_stock(GTK_STOCK_DISCONNECT,
 			helper->icon_size);
@@ -129,11 +137,17 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->label = gtk_label_new(" ");
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
+	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+	gtk_widget_set_tooltip_text(ret, "Wireless networking");
+#endif
+	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked), wpa);
+	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	if(_init_timeout(wpa) != FALSE)
 		wpa->source = g_timeout_add(5000, _init_timeout, wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
-	*widget = hbox;
+	*widget = ret;
 	return wpa;
 }
 
@@ -299,6 +313,7 @@ static int _wpa_start(WPA * wpa)
 static void _wpa_stop(WPA * wpa)
 {
 	size_t i;
+	char ** p;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
@@ -317,6 +332,11 @@ static void _wpa_stop(WPA * wpa)
 	free(wpa->queue);
 	wpa->queue = NULL;
 	wpa->queue_cnt = 0;
+	for(p = wpa->networks; p != NULL && *p != NULL; p++)
+		free(*p);
+	free(wpa->networks);
+	wpa->networks = NULL;
+	wpa->networks_cnt = 0;
 	if(wpa->channel != NULL)
 	{
 		g_io_channel_shutdown(wpa->channel, TRUE, NULL);
@@ -333,6 +353,45 @@ static void _wpa_stop(WPA * wpa)
 
 
 /* callbacks */
+/* on_clicked */
+static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
+		gboolean * push_in, gpointer data);
+
+static void _on_clicked(gpointer data)
+{
+	WPA * wpa = data;
+	GtkWidget * menu;
+	GtkWidget * menuitem;
+	char ** p;
+
+	menu = gtk_menu_new();
+	/* FIXME summarize the status instead */
+	menuitem = gtk_image_menu_item_new_with_label("Network list");
+	gtk_widget_set_sensitive(menuitem, FALSE);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	menuitem = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* FIXME add a list of actions */
+	for(p = wpa->networks; p != NULL && *p != NULL; p++)
+	{
+		menuitem = gtk_image_menu_item_new_with_label(*p);
+		gtk_widget_set_sensitive(menuitem, FALSE);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	}
+	gtk_widget_show_all(menu);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
+			wpa, 0, gtk_get_current_event_time());
+}
+
+static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
+		gboolean * push_in, gpointer data)
+{
+	WPA * wpa = data;
+
+	wpa->helper->position_menu(wpa->helper->panel, menu, x, y, push_in);
+}
+
+
 /* on_timeout */
 static gboolean _on_timeout(gpointer data)
 {
@@ -341,6 +400,8 @@ static gboolean _on_timeout(gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	if(wpa->networks == NULL)
+		_wpa_queue(wpa, WC_LIST_NETWORKS);
 	_wpa_queue(wpa, WC_STATUS);
 	return TRUE;
 }
@@ -401,6 +462,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 
 static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 {
+	char ** n;
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -411,6 +473,11 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 	char flags[80];
 	int res;
 
+	for(n = wpa->networks; n != NULL && *n != NULL; n++)
+		free(*n);
+	free(n);
+	wpa->networks = NULL;
+	wpa->networks_cnt = 0;
 	for(i = 0; i < cnt;)
 	{
 		for(j = i; j < cnt; j++)
@@ -424,16 +491,34 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%u\t%79[^\t]\t%79[^\t]\t%79s", &u, ssid,
-						bssid, flags)) == 4)
+		if((res = sscanf(p, "%u %79[^\t] %79[^\t] %79s", &u, ssid,
+						bssid, flags)) >= 3)
+		{
+			ssid[sizeof(ssid) - 1] = '\0';
+#ifdef DEBUG
+			fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
+#else
+			/* FIXME store the scan results instead */
+			if((n = realloc(wpa->networks, sizeof(*n)
+							* (wpa->networks_cnt
+								+ 2))) != NULL)
+			{
+				wpa->networks = n;
+				/* XXX ignore errors */
+				wpa->networks[wpa->networks_cnt] = strdup(ssid);
+				if(wpa->networks[wpa->networks_cnt] != NULL)
+					wpa->networks_cnt++;
+				wpa->networks[wpa->networks_cnt] = NULL;
+			}
+#endif
 			if(strcmp(flags, "[CURRENT]") == 0)
 			{
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
 				gtk_label_set_text(GTK_LABEL(wpa->label), ssid);
-				break;
 			}
+		}
 		i = j;
 	}
 	free(p);
