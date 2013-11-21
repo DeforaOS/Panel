@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-11-21 02:35+0100\n"
+"POT-Creation-Date: 2013-11-21 02:39+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -306,11 +306,11 @@ msgstr "Général"
 
 #: ../src/panel.c:611
 msgid "Applets"
-msgstr "Greffons"
+msgstr "Applets"
 
 #: ../src/panel.c:640
 msgid "Applets:"
-msgstr "Greffons :"
+msgstr "Applets :"
 
 #: ../src/panel.c:720
 msgid "Top panel:"
@@ -400,6 +400,10 @@ msgstr "Impossible d'obtenir le XID"
 #, c-format
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s commande [arguments...]\n"
+
+#: ../tools/helper.c:136
+msgid "Applets available:"
+msgstr "Applets disponibles :"
 
 #: ../tools/message.c:81
 msgid "Question"

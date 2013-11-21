@@ -133,7 +133,7 @@ static int _applet_list(void)
 	char const ext[] = ".so";
 #endif
 
-	puts("Applets available:");
+	puts(_("Applets available:"));
 	if((dir = opendir(path)) == NULL)
 		return _error(path, 1);
 	while((de = readdir(dir)) != NULL)
