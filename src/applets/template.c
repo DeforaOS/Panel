@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ static void _template_destroy(Template * template);
 PanelAppletDefinition applet =
 {
 	"Template",
-	NULL,
+	"image-missing",
 	NULL,
 	_template_init,
 	_template_destroy,
