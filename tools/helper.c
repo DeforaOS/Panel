@@ -124,6 +124,10 @@ static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
 /* panel_init */
 int panel_init(Panel * panel, GtkIconSize iconsize)
 {
+	GdkScreen * screen;
+	GdkWindow * root;
+	GdkRectangle rect;
+
 	if((panel->config = config_new()) == NULL)
 		return -1;
 	panel_window_init(&panel->top, iconsize);
@@ -132,6 +136,12 @@ int panel_init(Panel * panel, GtkIconSize iconsize)
 	panel->ab_window = NULL;
 	panel->lo_window = NULL;
 	panel->sh_window = NULL;
+	/* root window */
+	screen = gdk_screen_get_default();
+	root = gdk_screen_get_root_window(screen);
+	gdk_screen_get_monitor_geometry(screen, 0, &rect);
+	panel->root_height = rect.height;
+	panel->root_width = rect.width;
 	return 0;
 }
 

@@ -64,9 +64,6 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	char * filename;
 	size_t i;
 	PanelAppletHelper helper;
-	GdkScreen * screen;
-	GdkWindow * root;
-	GdkRectangle rect;
 
 	panel_init(&panel, iconsize);
 	if((filename = _config_get_filename()) != NULL
@@ -79,12 +76,6 @@ static int _test(GtkIconSize iconsize, char * applets[])
 		_helper_append(&helper, &panel.top, applets[i]);
 	gtk_widget_show_all(panel.top.window);
 	panel.timeout = 0;
-	/* root window */
-	screen = gdk_screen_get_default();
-	root = gdk_screen_get_root_window(screen);
-	gdk_screen_get_monitor_geometry(screen, 0, &rect);
-	panel.root_height = rect.height;
-	panel.root_width = rect.width;
 	gtk_main();
 	panel_destroy(&panel);
 	return 0;
