@@ -66,9 +66,8 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 {
 	Panel panel;
 	size_t i;
-	PanelAppletHelper helper;
 
-	_panel_init(&panel, iconsize);
+	_panel_init(&panel, PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_window_set_has_resize_grip(GTK_WINDOW(panel.top.window), FALSE);
 #endif
@@ -78,9 +77,8 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	gtk_window_set_position(GTK_WINDOW(panel.top.window),
 			GTK_WIN_POS_CENTER_ALWAYS);
 	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Notification"));
-	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
-		_helper_append(&helper, &panel.top, applets[i]);
+		_panel_append(&panel, 0, applets[i]);
 	gtk_widget_show_all(panel.top.window);
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,

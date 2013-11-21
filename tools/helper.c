@@ -62,6 +62,7 @@ typedef struct _PanelWindow
 struct _Panel
 {
 	Config * config;
+	PanelAppletHelper helper;
 
 	/* FIXME should not be needed */
 	GtkWidget * window;
@@ -93,11 +94,22 @@ int panel_window_get_height(PanelWindow * panel);
 
 /* private */
 /* prototypes */
-static int _panel_init(Panel * panel, GtkIconSize iconsize);
+/* Panel */
+static int _panel_init(Panel * panel, PanelAppletType type,
+		GtkIconSize iconsize);
 static void _panel_destroy(Panel * panel);
 
+#define HELPER_POSITION_MENU_WIDGET
+#include "../src/helper.c"
+static int _panel_append(Panel * panel, unsigned int window,
+		char const * applet);
+
+/* PanelWindow */
 static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize);
 static void _panel_window_destroy(PanelWindow * panel);
+
+static int _panel_window_append(PanelWindow * window,
+		PanelAppletHelper * helper, char const * applet);
 
 static int _applet_list(void);
 static char * _config_get_filename(void);
@@ -112,12 +124,6 @@ static gboolean _panel_window_on_closex(void);
 /* essential */
 static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 		PanelAppletType type, GtkIconSize iconsize);
-
-/* useful */
-#define HELPER_POSITION_MENU_WIDGET
-#include "../src/helper.c"
-static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
-		char const * applet);
 
 
 /* public */
@@ -147,8 +153,10 @@ int panel_window_get_height(PanelWindow * panel)
 
 /* private */
 /* functions */
+/* Panel */
 /* panel_init */
-static int _panel_init(Panel * panel, GtkIconSize iconsize)
+static int _panel_init(Panel * panel, PanelAppletType type,
+		GtkIconSize iconsize)
 {
 	char * filename;
 	GdkScreen * screen;
@@ -174,6 +182,7 @@ static int _panel_init(Panel * panel, GtkIconSize iconsize)
 	gdk_screen_get_monitor_geometry(screen, 0, &rect);
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
+	_helper_init(&panel->helper, panel, type, iconsize);
 	return 0;
 }
 
@@ -195,6 +204,15 @@ static void _panel_destroy(Panel * panel)
 }
 
 
+/* panel_append */
+static int _panel_append(Panel * panel, unsigned int window,
+		char const * applet)
+{
+	return _panel_window_append(&panel->top, &panel->helper, applet);
+}
+
+
+/* PanelWindow */
 /* panel_window_init */
 static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize)
 {
@@ -228,6 +246,35 @@ static void _panel_window_destroy(PanelWindow * panel)
 	}
 	free(panel->applets);
 	gtk_widget_destroy(panel->window);
+}
+
+
+/* panel_window_append */
+static int _panel_window_append(PanelWindow * window,
+		PanelAppletHelper * helper, char const * applet)
+{
+	PanelApplet * pa;
+	GtkWidget * widget;
+
+	if((pa = realloc(window->applets, sizeof(*pa)
+					* (window->applets_cnt + 1))) == NULL)
+		return error_print(PROGNAME);
+	window->applets = pa;
+	pa = &window->applets[window->applets_cnt];
+	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
+			== NULL)
+		return error_print(PROGNAME);
+	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL)
+	{
+		plugin_delete(pa->plugin);
+		return error_print(PROGNAME);
+	}
+	widget = NULL;
+	if((pa->pa = pa->pad->init(helper, &widget)) != NULL && widget != NULL)
+		gtk_box_pack_start(GTK_BOX(window->box), widget,
+				pa->pad->expand, pa->pad->fill, 0);
+	window->applets_cnt++;
+	return 0;
 }
 
 
@@ -324,33 +371,6 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 
 
 /* useful */
-/* helper_append */
-static int _helper_append(PanelAppletHelper * helper, PanelWindow * window,
-		char const * applet)
-{
-	PanelApplet * pa;
-	GtkWidget * widget;
-
-	if((pa = realloc(window->applets, sizeof(*pa)
-					* (window->applets_cnt + 1))) == NULL)
-		return error_print(PROGNAME);
-	window->applets = pa;
-	pa = &window->applets[window->applets_cnt];
-	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
-			== NULL)
-		return error_print(PROGNAME);
-	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL)
-	{
-		plugin_delete(pa->plugin);
-		return error_print(PROGNAME);
-	}
-	widget = NULL;
-	if((pa->pa = pa->pad->init(helper, &widget)) != NULL && widget != NULL)
-		gtk_box_pack_start(GTK_BOX(window->box), widget,
-				pa->pad->expand, pa->pad->fill, 0);
-	window->applets_cnt++;
-	return 0;
-}
 
 
 /* callbacks */

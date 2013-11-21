@@ -64,11 +64,10 @@ static int _test(GtkIconSize iconsize, char * applets[])
 	size_t i;
 	PanelAppletHelper helper;
 
-	_panel_init(&panel, iconsize);
+	_panel_init(&panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Applet tester"));
-	_helper_init(&helper, &panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
-		_helper_append(&helper, &panel.top, applets[i]);
+		_panel_append(&panel, 0, applets[i]);
 	gtk_widget_show_all(panel.top.window);
 	gtk_main();
 	_panel_destroy(&panel);
