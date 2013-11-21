@@ -48,7 +48,7 @@ panel-test: $(panel-test_OBJS)
 embed.o: embed.c ../include/Panel.h ../config.h
 	$(CC) $(panel-embed_CFLAGS) -c embed.c
 
-message.o: message.c ../include/Panel.h
+message.o: message.c ../include/Panel.h ../config.h
 	$(CC) $(panel-message_CFLAGS) -c message.c
 
 notify.o: notify.c helper.c ../src/helper.c ../src/panel.h ../config.h
