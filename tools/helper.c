@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <gtk/gtk.h>
 #include <System.h>
 #include <Desktop.h>
@@ -261,16 +262,16 @@ static int _panel_window_append(PanelWindow * window,
 
 	if((pa = realloc(window->applets, sizeof(*pa)
 					* (window->applets_cnt + 1))) == NULL)
-		return error_print(PROGNAME);
+		return -error_set_code(1, "%s", strerror(errno));
 	window->applets = pa;
 	pa = &window->applets[window->applets_cnt];
 	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
 			== NULL)
-		return error_print(PROGNAME);
+		return -1;
 	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL)
 	{
 		plugin_delete(pa->plugin);
-		return error_print(PROGNAME);
+		return -1;
 	}
 	widget = NULL;
 	if((pa->pa = pa->pad->init(helper, &widget)) != NULL && widget != NULL)

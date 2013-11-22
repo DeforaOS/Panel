@@ -78,7 +78,8 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 			GTK_WIN_POS_CENTER_ALWAYS);
 	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Notification"));
 	for(i = 0; applets[i] != NULL; i++)
-		_panel_append(&panel, 0, applets[i]);
+		if(_panel_append(&panel, 0, applets[i]) != 0)
+			error_print(PROGNAME);
 	gtk_widget_show_all(panel.top.window);
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,
