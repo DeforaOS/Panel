@@ -723,17 +723,39 @@ static void _on_suspend(gpointer data)
 
 
 /* on_timeout */
+static gboolean _timeout_path(Main * main, char const * path);
+
 static gboolean _on_timeout(gpointer data)
 {
 	Main * main = data;
-	const char path[] = DATADIR "/applications";
-	struct stat st;
+	gboolean ret = TRUE;
+	char const * path;
+	char * p;
+	size_t i;
+	size_t j;
 
-	/* FIXME check each directory in XDG_DATA_DIRS */
-	if(stat(path, &st) != 0)
-		return TRUE;
-	if(st.st_mtime == main->refresh_mti)
-		return TRUE;
+	if((path = getenv("XDG_DATA_DIRS")) != NULL
+			&& strlen(path) > 0
+			&& (p = strdup(path)) != NULL)
+	{
+		for(i = 0, j = 0; ret == TRUE; i++)
+			if(p[i] == '\0')
+			{
+				ret = _timeout_path(main, &p[j]);
+				break;
+			}
+			else if(p[i] == ':')
+			{
+				p[i] = '\0';
+				ret = _timeout_path(main, &p[j]);
+				j = i + 1;
+			}
+		free(p);
+	}
+	else
+		ret = _timeout_path(main, DATADIR);
+	if(ret != FALSE)
+		return ret;
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() resetting the menu\n", __func__);
 #endif
@@ -741,5 +763,28 @@ static gboolean _on_timeout(gpointer data)
 	g_slist_free(main->apps);
 	main->apps = NULL;
 	g_idle_add(_on_idle, main);
-	return FALSE;
+	return ret;
+}
+
+static gboolean _timeout_path(Main * main, char const * path)
+{
+	const char applications[] = "/applications";
+	char * p;
+	size_t len;
+	struct stat st;
+
+	len = strlen(path) + sizeof(applications);
+	if((p = malloc(len)) == NULL)
+	{
+		main->helper->error(NULL, path, 1);
+		return TRUE;
+	}
+	snprintf(p, len, "%s%s", path, applications);
+	if(stat(p, &st) != 0)
+	{
+		free(p);
+		return TRUE;
+	}
+	free(p);
+	return (st.st_mtime > main->refresh_mti) ? FALSE : TRUE;
 }
