@@ -62,7 +62,6 @@ static int _test(GtkIconSize iconsize, char * applets[])
 {
 	Panel panel;
 	size_t i;
-	PanelAppletHelper helper;
 
 	_panel_init(&panel, PANEL_APPLET_TYPE_NORMAL, iconsize);
 	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Applet tester"));
