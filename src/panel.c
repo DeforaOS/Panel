@@ -508,35 +508,16 @@ static void _error_on_response(GtkWidget * widget)
 int panel_load(Panel * panel, PanelPosition position, char const * applet)
 {
 	PanelWindow * window;
-	PanelAppletHelper * helper;
-	Plugin * plugin;
-	PanelAppletDefinition * pad;
-	PanelApplet * pa;
-	GtkWidget * widget = NULL;
-	GtkWidget * vbox;
 
 	if(position == PANEL_POSITION_BOTTOM && panel->bottom != NULL)
-	{
 		window = panel->bottom;
-		helper = &panel->bottom_helper;
-	}
 	else if(position == PANEL_POSITION_TOP && panel->top != NULL)
-	{
 		window = panel->top;
-		helper = &panel->top_helper;
-	}
 	else
+		return -error_set_code(1, "%s", "Invalid panel position");
+	if(panel_window_append(window, applet) != 0)
 		return -1;
-	if((plugin = plugin_new(LIBDIR, PACKAGE, "applets", applet)) == NULL)
-		return -1;
-	if((pad = plugin_lookup(plugin, "applet")) == NULL
-			|| pad->init == NULL || pad->destroy == NULL
-			|| (pa = pad->init(helper, &widget)) == NULL)
-	{
-		plugin_delete(plugin);
-		return -1;
-	}
-	panel_window_append(window, widget, pad->expand, pad->fill);
+#if 0 /* FIXME re-implement */
 	if(pad->settings != NULL
 			&& (widget = pad->settings(pa, FALSE, FALSE)) != NULL)
 	{
@@ -550,6 +531,7 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 		gtk_notebook_append_page(GTK_NOTEBOOK(panel->pr_notebook),
 				vbox, gtk_label_new(pad->name));
 	}
+#endif
 	return 0;
 }
 
@@ -570,10 +552,11 @@ static void _preferences_on_bottom_up(gpointer data);
 static gboolean _preferences_on_closex(gpointer data);
 static void _preferences_on_response(GtkWidget * widget, gint response,
 		gpointer data);
-static void _preferences_on_cancel(gpointer data);
+static void _preferences_on_response_apply(gpointer data);
+static void _preferences_on_response_cancel(gpointer data);
 static void _cancel_general(Panel * panel);
 static void _cancel_applets(Panel * panel);
-static void _preferences_on_ok(gpointer data);
+static void _preferences_on_response_ok(gpointer data);
 static void _preferences_on_top_add(gpointer data);
 static void _preferences_on_top_down(gpointer data);
 static void _preferences_on_top_remove(gpointer data);
@@ -597,6 +580,7 @@ static void _show_preferences_window(Panel * panel)
 	panel->pr_window = gtk_dialog_new_with_buttons(_("Panel preferences"),
 			NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
 			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+			GTK_STOCK_APPLY, GTK_RESPONSE_APPLY,
 			GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(panel->pr_window), 400, 300);
 	gtk_window_set_position(GTK_WINDOW(panel->pr_window),
@@ -622,7 +606,7 @@ static void _show_preferences_window(Panel * panel)
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_notebook, TRUE, TRUE, 0);
 	/* FIXME implement a way to enable plug-ins per panel (and in order) */
-	_preferences_on_cancel(panel);
+	_preferences_on_response_cancel(panel);
 	gtk_widget_show_all(vbox);
 }
 
@@ -945,21 +929,107 @@ static gboolean _preferences_on_closex(gpointer data)
 {
 	Panel * panel = data;
 
-	_preferences_on_cancel(panel);
+	_preferences_on_response_cancel(panel);
 	return TRUE;
 }
 
 static void _preferences_on_response(GtkWidget * widget, gint response,
 		gpointer data)
 {
-	gtk_widget_hide(widget);
-	if(response == GTK_RESPONSE_OK)
-		_preferences_on_ok(data);
-	else if(response == GTK_RESPONSE_CANCEL)
-		_preferences_on_cancel(data);
+	if(response == GTK_RESPONSE_APPLY)
+		_preferences_on_response_apply(data);
+	else
+	{
+		if(response == GTK_RESPONSE_OK)
+			_preferences_on_response_ok(data);
+		else if(response == GTK_RESPONSE_CANCEL)
+			_preferences_on_response_cancel(data);
+		gtk_widget_hide(widget);
+	}
 }
 
-static void _preferences_on_cancel(gpointer data)
+static void _preferences_on_response_apply(gpointer data)
+{
+	Panel * panel = data;
+	gint i;
+	gint cnt = sizeof(_panel_sizes) / sizeof(*_panel_sizes);
+	GtkTreeModel * model;
+	GtkTreeIter iter;
+	gboolean valid;
+	gchar * p;
+	String * value;
+	String * sep;
+	GtkWidget * widget;
+	PanelAppletDefinition * pad;
+	PanelApplet * pa;
+
+	/* general */
+	config_set(panel->config, NULL, "accept_focus",
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+					panel->pr_accept_focus)) ? "1" : "0");
+	config_set(panel->config, NULL, "keep_above",
+			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+					panel->pr_keep_above)) ? "1" : "0");
+	/* top panel */
+	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_top_size)))
+			>= 0 && i <= cnt)
+		config_set(panel->config, NULL, "top_size", (i > 0)
+				? _panel_sizes[i - 1].name : NULL);
+	model = GTK_TREE_MODEL(panel->pr_top_store);
+	value = NULL;
+	sep = "";
+	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, &iter))
+	{
+		gtk_tree_model_get(model, &iter, 0, &p, -1);
+		string_append(&value, sep);
+		string_append(&value, p);
+		sep = ",";
+		g_free(p);
+	}
+	config_set(panel->config, NULL, "top", value);
+	string_delete(value);
+	/* bottom panel */
+	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_bottom_size)))
+			>= 0 && i <= cnt)
+		config_set(panel->config, NULL, "bottom_size", (i > 0)
+				? _panel_sizes[i - 1].name : NULL);
+	model = GTK_TREE_MODEL(panel->pr_bottom_store);
+	value = NULL;
+	sep = "";
+	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, &iter))
+	{
+		gtk_tree_model_get(model, &iter, 0, &p, -1);
+		string_append(&value, sep);
+		string_append(&value, p);
+		sep = ",";
+		g_free(p);
+	}
+	config_set(panel->config, NULL, "bottom", value);
+	string_delete(value);
+	/* XXX applets should be known from Panel already */
+	cnt = gtk_notebook_get_n_pages(GTK_NOTEBOOK(panel->pr_notebook));
+	for(i = 1; i < cnt; i++)
+	{
+		widget = gtk_notebook_get_nth_page(GTK_NOTEBOOK(
+					panel->pr_notebook), i);
+		if(widget == NULL || (pad = g_object_get_data(G_OBJECT(widget),
+						"definition")) == NULL
+				|| (pa = g_object_get_data(G_OBJECT(widget),
+						"applet")) == NULL)
+			continue;
+		pad->settings(pa, TRUE, FALSE);
+	}
+#if 0 /* FIXME crashes the panel */
+	if(panel->top != NULL)
+		panel_window_remove_all(panel->top);
+	if(panel->bottom != NULL)
+		panel_window_remove_all(panel->bottom);
+#endif
+}
+
+static void _preferences_on_response_cancel(gpointer data)
 {
 	Panel * panel = data;
 	char const * p;
@@ -1098,81 +1168,13 @@ static void _cancel_applets(Panel * panel)
 	free(q);
 }
 
-static void _preferences_on_ok(gpointer data)
+static void _preferences_on_response_ok(gpointer data)
 {
 	Panel * panel = data;
-	gint i;
-	gint cnt = sizeof(_panel_sizes) / sizeof(*_panel_sizes);
-	GtkTreeModel * model;
-	GtkTreeIter iter;
-	gboolean valid;
-	gchar * p;
-	String * value;
-	String * sep;
 	char * filename;
-	GtkWidget * widget;
-	PanelAppletDefinition * pad;
-	PanelApplet * pa;
 
 	gtk_widget_hide(panel->pr_window);
-	/* general */
-	config_set(panel->config, NULL, "accept_focus",
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-					panel->pr_accept_focus)) ? "1" : "0");
-	config_set(panel->config, NULL, "keep_above",
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-					panel->pr_keep_above)) ? "1" : "0");
-	/* top panel */
-	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_top_size)))
-			>= 0 && i <= cnt)
-		config_set(panel->config, NULL, "top_size", (i > 0)
-				? _panel_sizes[i - 1].name : NULL);
-	model = GTK_TREE_MODEL(panel->pr_top_store);
-	value = NULL;
-	sep = "";
-	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
-			valid = gtk_tree_model_iter_next(model, &iter))
-	{
-		gtk_tree_model_get(model, &iter, 0, &p, -1);
-		string_append(&value, sep);
-		string_append(&value, p);
-		sep = ",";
-		g_free(p);
-	}
-	config_set(panel->config, NULL, "top", value);
-	string_delete(value);
-	/* bottom panel */
-	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_bottom_size)))
-			>= 0 && i <= cnt)
-		config_set(panel->config, NULL, "bottom_size", (i > 0)
-				? _panel_sizes[i - 1].name : NULL);
-	model = GTK_TREE_MODEL(panel->pr_bottom_store);
-	value = NULL;
-	sep = "";
-	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
-			valid = gtk_tree_model_iter_next(model, &iter))
-	{
-		gtk_tree_model_get(model, &iter, 0, &p, -1);
-		string_append(&value, sep);
-		string_append(&value, p);
-		sep = ",";
-		g_free(p);
-	}
-	config_set(panel->config, NULL, "bottom", value);
-	string_delete(value);
-	/* XXX applets should be known from Panel already */
-	cnt = gtk_notebook_get_n_pages(GTK_NOTEBOOK(panel->pr_notebook));
-	for(i = 1; i < cnt; i++)
-	{
-		widget = gtk_notebook_get_nth_page(GTK_NOTEBOOK(
-					panel->pr_notebook), i);
-		if(widget == NULL || (pad = g_object_get_data(G_OBJECT(widget),
-						"definition")) == NULL
-				|| (pa = g_object_get_data(G_OBJECT(widget),
-						"applet")) == NULL)
-			continue;
-		pad->settings(pa, TRUE, FALSE);
-	}
+	_preferences_on_response_apply(panel);
 	if((filename = _config_get_filename()) != NULL)
 		config_save(panel->config, filename);
 	free(filename);

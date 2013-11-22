@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,51 @@
 
 
 #include <System.h>
+#include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
 #include "window.h"
+#include "../config.h"
 #define _(string) gettext(string)
 #define N_(string) (string)
+
+/* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panel"
+#endif
+#ifndef PREFIX
+# define PREFIX		"/usr/local"
+#endif
+#ifndef LIBDIR
+# define LIBDIR		PREFIX "/lib"
+#endif
 
 
 /* PanelWindow */
 /* private */
 /* types */
+struct _PanelApplet
+{
+	Plugin * plugin;
+	PanelAppletDefinition * pad;
+	PanelApplet * pa;
+	GtkWidget * widget;
+};
+
 struct _PanelWindow
 {
-	PanelAppletHelper * helper;
-
 	PanelPosition position;
 	gint height;
 	GdkRectangle root;
 
+	/* applets */
+	PanelAppletHelper * helper;
+	PanelApplet * applets;
+	size_t applets_cnt;
+
+	/* widgets */
 	GtkWidget * window;
 	GtkWidget * hbox;
 };
@@ -69,6 +95,8 @@ PanelWindow * panel_window_new(PanelPosition position,
 	if((panel = object_new(sizeof(*panel))) == NULL)
 		return NULL;
 	panel->helper = helper;
+	panel->applets = NULL;
+	panel->applets_cnt = 0;
 	panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	panel->height = icon_height + (PANEL_BORDER_WIDTH * 4);
 #ifdef DEBUG
@@ -98,6 +126,7 @@ PanelWindow * panel_window_new(PanelPosition position,
 /* panel_window_delete */
 void panel_window_delete(PanelWindow * panel)
 {
+	panel_window_remove_all(panel);
 	gtk_widget_destroy(panel->window);
 	object_delete(panel);
 }
@@ -127,10 +156,52 @@ void panel_window_set_keep_above(PanelWindow * panel, gboolean keep)
 
 /* useful */
 /* panel_window_append */
-void panel_window_append(PanelWindow * panel, GtkWidget * widget,
-		gboolean expand, gboolean fill)
+int panel_window_append(PanelWindow * panel, char const * applet)
 {
-	gtk_box_pack_start(GTK_BOX(panel->hbox), widget, expand, fill, 0);
+	PanelAppletHelper * helper = panel->helper;
+	PanelApplet * pa;
+
+	if((pa = realloc(panel->applets, sizeof(*pa)
+					* (panel->applets_cnt + 1))) == NULL)
+		return -error_set_code(1, "%s", strerror(errno));
+	panel->applets = pa;
+	pa = &panel->applets[panel->applets_cnt];
+	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
+			== NULL)
+		return -1;
+	pa->widget = NULL;
+	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL
+			|| (pa->pa = pa->pad->init(helper, &pa->widget)) == NULL
+			|| pa->widget == NULL)
+	{
+		if(pa->pa != NULL)
+			pa->pad->destroy(pa->pa);
+		plugin_delete(pa->plugin);
+		return -1;
+	}
+	gtk_box_pack_start(GTK_BOX(panel->hbox), pa->widget, pa->pad->expand,
+			pa->pad->fill, 0);
+	panel->applets_cnt++;
+	return 0;
+}
+
+
+/* panel_window_remove_all */
+void panel_window_remove_all(PanelWindow * panel)
+{
+	size_t i;
+	PanelApplet * pa;
+
+	for(i = 0; i < panel->applets_cnt; i++)
+	{
+		pa = &panel->applets[i];
+		gtk_widget_destroy(pa->widget);
+		pa->pad->destroy(pa->pa);
+		plugin_delete(pa->plugin);
+	}
+	free(panel->applets);
+	panel->applets = NULL;
+	panel->applets_cnt = 0;
 }
 
 

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,9 @@ void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept);
 void panel_window_set_keep_above(PanelWindow * panel, gboolean keep);
 
 /* useful */
-void panel_window_append(PanelWindow * panel, GtkWidget * widget,
-		gboolean expand, gboolean fill);
+int panel_window_append(PanelWindow * panel, char const * applet);
+void panel_window_remove_all(PanelWindow * panel);
+
 void panel_window_reset(PanelWindow * panel, PanelPosition position,
 		GdkRectangle * root);
 void panel_window_show(PanelWindow * panel, gboolean show);

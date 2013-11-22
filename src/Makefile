@@ -44,10 +44,10 @@ run: $(run_OBJS)
 panel.o: panel.c panel.h window.h ../include/Panel.h helper.c ../config.h
 	$(CC) $(panel_CFLAGS) -c panel.c
 
-window.o: window.c panel.h window.h
+window.o: window.c ../include/Panel.h panel.h window.h
 	$(CC) $(panel_CFLAGS) -c window.c
 
-main.o: main.c panel.h ../config.h
+main.o: main.c ../include/Panel.h panel.h ../config.h
 	$(CC) $(panel_CFLAGS) -c main.c
 
 panelctl.o: panelctl.c ../include/Panel.h panel.h ../config.h
