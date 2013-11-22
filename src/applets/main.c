@@ -163,7 +163,8 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, _("Main menu"));
 #endif
-	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked), main);
+	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked),
+			main);
 	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	gtk_widget_show_all(ret);
 	*widget = ret;
@@ -478,8 +479,8 @@ static void _on_clicked(gpointer data)
 	}
 	/* shutdown */
 	menuitem = _main_menuitem(_("Shutdown..."), "gnome-shutdown");
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_shutdown),
-			data);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_on_shutdown), data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
@@ -496,12 +497,63 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 
 
 /* on_idle */
+static void _idle_path(Main * main, char const * path);
+static void _idle_path_do(Main * main, char const * path);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
 
 static gboolean _on_idle(gpointer data)
 {
 	Main * main = data;
-	const char path[] = DATADIR "/applications";
+	char const * path;
+	char * p;
+	size_t i;
+	size_t j;
+
+	if(main->apps != NULL)
+		return FALSE;
+	if((path = getenv("XDG_DATA_DIRS")) != NULL
+			&& strlen(path) > 0
+			&& (p = strdup(path)) != NULL)
+	{
+		for(i = 0, j = 0;; i++)
+			if(p[i] == '\0')
+			{
+				_idle_path(main, &p[j]);
+				break;
+			}
+			else if(p[i] == ':')
+			{
+				p[i] = '\0';
+				_idle_path(main, &p[j]);
+				j = i + 1;
+			}
+		free(p);
+	}
+	else
+		_idle_path(main, DATADIR);
+	g_timeout_add(1000, _on_timeout, main);
+	return FALSE;
+}
+
+static void _idle_path(Main * main, char const * path)
+{
+	const char applications[] = "/applications";
+	char * p;
+	size_t len;
+
+	len = strlen(path) + sizeof(applications);
+	if((p = malloc(len)) == NULL)
+	{
+		main->helper->error(NULL, path, 1);
+		return;
+	}
+	snprintf(p, len, "%s%s", path, applications);
+	_idle_path_do(main, p);
+	free(p);
+}
+
+static void _idle_path_do(Main * main, char const * path)
+{
 	DIR * dir;
 	int fd;
 	struct stat st;
@@ -514,8 +566,6 @@ static gboolean _on_idle(gpointer data)
 	Config * config = NULL;
 	String const * q;
 
-	if(main->apps != NULL)
-		return FALSE;
 #if defined(__sun__)
 	if((fd = open(path, O_RDONLY)) < 0
 			|| fstat(fd, &st) != 0
@@ -525,8 +575,13 @@ static gboolean _on_idle(gpointer data)
 			|| (fd = dirfd(dir)) < 0
 			|| fstat(fd, &st) != 0)
 #endif
-		return main->helper->error(NULL, path, FALSE);
-	main->refresh_mti = st.st_mtime;
+	{
+		if(errno != ENOENT)
+			main->helper->error(NULL, path, 1);
+		return;
+	}
+	if(st.st_mtime > main->refresh_mti)
+		main->refresh_mti = st.st_mtime;
 	while((de = readdir(dir)) != NULL)
 	{
 		if(de->d_name[0] == '.')
@@ -537,21 +592,22 @@ static gboolean _on_idle(gpointer data)
 		if(len < sizeof(ext) || strncmp(&de->d_name[len - sizeof(ext)
 					+ 1], ext, sizeof(ext)) != 0)
 			continue;
-		if((p = realloc(name, sizeof(path) + len + 1)) == NULL)
+		if((p = realloc(name, strlen(path) + len + 2)) == NULL)
 		{
 			main->helper->error(NULL, path, 1);
 			continue;
 		}
 		name = p;
-		snprintf(name, sizeof(path) + len + 1, "%s/%s", path,
+		snprintf(name, strlen(path) + len + 2, "%s/%s", path,
 				de->d_name);
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, name);
 #endif
-		if(config == NULL && (config = config_new()) == NULL)
-			continue; /* XXX report error */
-		config_reset(config);
-		if(config_load(config, name) != 0)
+		if(config != NULL)
+			config_reset(config);
+		else
+			config = config_new();
+		if(config == NULL || config_load(config, name) != 0)
 		{
 			main->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
@@ -583,8 +639,6 @@ static gboolean _on_idle(gpointer data)
 	closedir(dir);
 	if(config != NULL)
 		config_delete(config);
-	g_timeout_add(1000, _on_timeout, main);
-	return FALSE;
 }
 
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
@@ -675,6 +729,7 @@ static gboolean _on_timeout(gpointer data)
 	const char path[] = DATADIR "/applications";
 	struct stat st;
 
+	/* FIXME check each directory in XDG_DATA_DIRS */
 	if(stat(path, &st) != 0)
 		return TRUE;
 	if(st.st_mtime == main->refresh_mti)
