@@ -103,7 +103,7 @@ static GtkWidget * _lock_settings(Lock * lock, gboolean apply, gboolean reset)
 	char const * p;
 
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(%p, %s, %s)\n", __func__, (void*)applet,
+	fprintf(stderr, "DEBUG: %s(%p, %s, %s)\n", __func__, (void *)lock,
 			apply ? "TRUE" : "FALSE", reset ? "TRUE" : "FALSE");
 #endif
 	if(lock->pr_box == NULL)
