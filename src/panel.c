@@ -337,7 +337,9 @@ static gboolean _on_idle(gpointer data)
 {
 	Panel * panel = data;
 
-	panel_show_preferences(panel, FALSE);
+	panel->source = 0;
+	if(panel->pr_window == NULL)
+		panel_show_preferences(panel, FALSE);
 	if(panel->top != NULL)
 		_idle_load(panel, PANEL_POSITION_TOP);
 	if(panel->bottom != NULL)
@@ -1026,6 +1028,8 @@ static void _preferences_on_response_apply(gpointer data)
 		panel_window_remove_all(panel->top);
 	if(panel->bottom != NULL)
 		panel_window_remove_all(panel->bottom);
+	if(panel->source == 0)
+		panel->source = g_idle_add(_on_idle, panel);
 #endif
 }
 
