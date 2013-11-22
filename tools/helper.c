@@ -53,6 +53,7 @@ typedef struct _PanelWindow
 	int height;
 
 	/* applets */
+	PanelAppletHelper * helper;
 	PanelApplet * applets;
 	size_t applets_cnt;
 
@@ -107,11 +108,11 @@ static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet);
 
 /* PanelWindow */
-static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize);
+static void _panel_window_init(PanelWindow * panel,
+		PanelAppletHelper * helper);
 static void _panel_window_destroy(PanelWindow * panel);
 
-static int _panel_window_append(PanelWindow * window,
-		PanelAppletHelper * helper, char const * applet);
+static int _panel_window_append(PanelWindow * window, char const * applet);
 
 static int _applet_list(void);
 static char * _config_get_filename(void);
@@ -171,7 +172,8 @@ static int _panel_init(Panel * panel, PanelAppletType type,
 			&& config_load(panel->config, filename) != 0)
 		error_print(PROGNAME);
 	free(filename);
-	_panel_window_init(&panel->top, iconsize);
+	_helper_init(&panel->helper, panel, type, iconsize);
+	_panel_window_init(&panel->top, &panel->helper);
 	panel->window = panel->top.window;
 	panel->timeout = 0;
 	panel->source = 0;
@@ -184,7 +186,6 @@ static int _panel_init(Panel * panel, PanelAppletType type,
 	gdk_screen_get_monitor_geometry(screen, 0, &rect);
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
-	_helper_init(&panel->helper, panel, type, iconsize);
 	return 0;
 }
 
@@ -211,22 +212,23 @@ static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)
 {
 	if(position == PANEL_POSITION_TOP)
-		return _panel_window_append(&panel->top, &panel->helper,
-				applet);
+		return _panel_window_append(&panel->top, applet);
 	return -error_set_code(1, "%s", "Invalid panel position");
 }
 
 
 /* PanelWindow */
 /* panel_window_init */
-static void _panel_window_init(PanelWindow * panel, GtkIconSize iconsize)
+static void _panel_window_init(PanelWindow * panel, PanelAppletHelper * helper)
 {
 	GdkRectangle rect;
 
-	if(gtk_icon_size_lookup(iconsize, &rect.width, &rect.height) == TRUE)
+	if(gtk_icon_size_lookup(helper->icon_size, &rect.width, &rect.height)
+			== TRUE)
 		panel->height = rect.height + 8;
 	else
 		panel->height = 72;
+	panel->helper = helper;
 	panel->applets = NULL;
 	panel->applets_cnt = 0;
 	panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -256,9 +258,9 @@ static void _panel_window_destroy(PanelWindow * panel)
 
 
 /* panel_window_append */
-static int _panel_window_append(PanelWindow * window,
-		PanelAppletHelper * helper, char const * applet)
+static int _panel_window_append(PanelWindow * window, char const * applet)
 {
+	PanelAppletHelper * helper = window->helper;
 	PanelApplet * pa;
 
 	if((pa = realloc(window->applets, sizeof(*pa)
