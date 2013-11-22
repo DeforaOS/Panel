@@ -45,6 +45,7 @@ struct _PanelApplet
 	Plugin * plugin;
 	PanelAppletDefinition * pad;
 	PanelApplet * pa;
+	GtkWidget * widget;
 };
 
 typedef struct _PanelWindow
@@ -212,7 +213,7 @@ static int _panel_append(Panel * panel, PanelPosition position,
 	if(position == PANEL_POSITION_TOP)
 		return _panel_window_append(&panel->top, &panel->helper,
 				applet);
-	return -1;
+	return -error_set_code(1, "%s", "Invalid panel position");
 }
 
 
@@ -245,6 +246,7 @@ static void _panel_window_destroy(PanelWindow * panel)
 	for(i = 0; i < panel->applets_cnt; i++)
 	{
 		pa = &panel->applets[i];
+		gtk_widget_destroy(pa->widget);
 		pa->pad->destroy(pa->pa);
 		plugin_delete(pa->plugin);
 	}
@@ -258,7 +260,6 @@ static int _panel_window_append(PanelWindow * window,
 		PanelAppletHelper * helper, char const * applet)
 {
 	PanelApplet * pa;
-	GtkWidget * widget;
 
 	if((pa = realloc(window->applets, sizeof(*pa)
 					* (window->applets_cnt + 1))) == NULL)
@@ -268,15 +269,18 @@ static int _panel_window_append(PanelWindow * window,
 	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
 			== NULL)
 		return -1;
-	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL)
+	pa->widget = NULL;
+	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL
+			|| (pa->pa = pa->pad->init(helper, &pa->widget)) == NULL
+			|| pa->widget == NULL)
 	{
+		if(pa->pa != NULL)
+			pa->pad->destroy(pa->pa);
 		plugin_delete(pa->plugin);
 		return -1;
 	}
-	widget = NULL;
-	if((pa->pa = pa->pad->init(helper, &widget)) != NULL && widget != NULL)
-		gtk_box_pack_start(GTK_BOX(window->box), widget,
-				pa->pad->expand, pa->pad->fill, 0);
+	gtk_box_pack_start(GTK_BOX(window->box), pa->widget, pa->pad->expand,
+			pa->pad->fill, 0);
 	window->applets_cnt++;
 	return 0;
 }
