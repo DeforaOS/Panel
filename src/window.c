@@ -62,7 +62,7 @@ struct _PanelWindow
 
 	/* widgets */
 	GtkWidget * window;
-	GtkWidget * hbox;
+	GtkWidget * box;
 };
 
 
@@ -79,7 +79,7 @@ static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 /* public */
 /* functions */
 /* panel_window_new */
-PanelWindow * panel_window_new(PanelPosition position,
+PanelWindow * panel_window_new(PanelWindowPosition position,
 		PanelAppletHelper * helper, GdkRectangle * root)
 {
 	PanelWindow * panel;
@@ -98,25 +98,69 @@ PanelWindow * panel_window_new(PanelPosition position,
 	panel->applets = NULL;
 	panel->applets_cnt = 0;
 	panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 4);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_window_set_has_resize_grip(GTK_WINDOW(panel->window), FALSE);
+#endif
 	panel->height = icon_height + (PANEL_BORDER_WIDTH * 4);
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %u height=%d\n", __func__, position,
 			panel->height);
 #endif
+	switch(position)
+	{
+		case PANEL_WINDOW_POSITION_TOP:
+		case PANEL_WINDOW_POSITION_BOTTOM:
 #if GTK_CHECK_VERSION(2, 6, 0)
-	gtk_window_set_focus_on_map(GTK_WINDOW(panel->window), FALSE);
+			gtk_window_set_focus_on_map(GTK_WINDOW(panel->window),
+					FALSE);
 #endif
-	gtk_window_set_type_hint(GTK_WINDOW(panel->window),
-			GDK_WINDOW_TYPE_HINT_DOCK);
-	gtk_window_stick(GTK_WINDOW(panel->window));
+			gtk_window_set_type_hint(GTK_WINDOW(panel->window),
+					GDK_WINDOW_TYPE_HINT_DOCK);
+			gtk_window_stick(GTK_WINDOW(panel->window));
+#if GTK_CHECK_VERSION(3, 0, 0)
+			panel->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+#else
+			panel->box = gtk_hbox_new(FALSE, 2);
+#endif
+			break;
+		case PANEL_WINDOW_POSITION_LEFT:
+		case PANEL_WINDOW_POSITION_RIGHT:
+#if GTK_CHECK_VERSION(2, 6, 0)
+			gtk_window_set_focus_on_map(GTK_WINDOW(panel->window),
+					FALSE);
+#endif
+			gtk_window_set_type_hint(GTK_WINDOW(panel->window),
+					GDK_WINDOW_TYPE_HINT_DOCK);
+			gtk_window_stick(GTK_WINDOW(panel->window));
+#if GTK_CHECK_VERSION(3, 0, 0)
+			panel->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
+#else
+			panel->box = gtk_vbox_new(FALSE, 2);
+#endif
+			break;
+		case PANEL_WINDOW_POSITION_CENTER:
+			gtk_window_set_position(GTK_WINDOW(panel->window),
+					GTK_WIN_POS_CENTER_ALWAYS);
+		case PANEL_WINDOW_POSITION_FLOATING:
+			gtk_window_set_accept_focus(GTK_WINDOW(panel->window),
+					FALSE);
+			gtk_window_set_decorated(GTK_WINDOW(panel->window),
+					FALSE);
+		case PANEL_WINDOW_POSITION_MANAGED:
+#if GTK_CHECK_VERSION(3, 0, 0)
+			panel->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
+#else
+			panel->box = gtk_hbox_new(FALSE, 2);
+#endif
+			break;
+	}
 	g_signal_connect(panel->window, "configure-event", G_CALLBACK(
 				_panel_window_on_configure_event), panel);
 	g_signal_connect(panel->window, "delete-event", G_CALLBACK(
 				_panel_window_on_closex), NULL);
-	panel->hbox = gtk_hbox_new(FALSE, 2);
-	gtk_container_add(GTK_CONTAINER(panel->window), panel->hbox);
-	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 4);
-	gtk_widget_show_all(panel->hbox);
+	gtk_container_add(GTK_CONTAINER(panel->window), panel->box);
+	gtk_widget_show_all(panel->box);
 	panel_window_reset(panel, position, root);
 	panel_window_show(panel, TRUE);
 	return panel;
@@ -166,7 +210,7 @@ int panel_window_append(PanelWindow * panel, char const * applet)
 		return -error_set_code(1, "%s", strerror(errno));
 	panel->applets = pa;
 	pa = &panel->applets[panel->applets_cnt];
-	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
+	if((pa->plugin = plugin_new(LIBDIR, PACKAGE, "applets", applet))
 			== NULL)
 		return -1;
 	pa->widget = NULL;
@@ -179,7 +223,7 @@ int panel_window_append(PanelWindow * panel, char const * applet)
 		plugin_delete(pa->plugin);
 		return -1;
 	}
-	gtk_box_pack_start(GTK_BOX(panel->hbox), pa->widget, pa->pad->expand,
+	gtk_box_pack_start(GTK_BOX(panel->box), pa->widget, pa->pad->expand,
 			pa->pad->fill, 0);
 	panel->applets_cnt++;
 	return 0;

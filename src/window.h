@@ -23,11 +23,23 @@
 
 /* PanelWindow */
 /* types */
+typedef enum _PanelWindowPosition
+{
+	PANEL_WINDOW_POSITION_BOTTOM = 0,
+	PANEL_WINDOW_POSITION_TOP,
+	PANEL_WINDOW_POSITION_LEFT,
+	PANEL_WINDOW_POSITION_RIGHT,
+	PANEL_WINDOW_POSITION_CENTER,
+	PANEL_WINDOW_POSITION_FLOATING,
+	PANEL_WINDOW_POSITION_MANAGED
+} PanelWindowPosition;
+# define PANEL_WINDOW_POSITION_DEFAULT PANEL_WINDOW_POSITION_BOTTOM
+
 typedef struct _PanelWindow PanelWindow;
 
 
 /* functions */
-PanelWindow * panel_window_new(PanelPosition position,
+PanelWindow * panel_window_new(PanelWindowPosition position,
 		PanelAppletHelper * helper, GdkRectangle * root);
 void panel_window_delete(PanelWindow * panel);
 

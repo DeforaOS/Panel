@@ -230,7 +230,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	/* top panel */
 	if(config_get(panel->config, NULL, "top") != NULL)
 	{
-		panel->top = panel_window_new(PANEL_POSITION_TOP,
+		panel->top = panel_window_new(PANEL_WINDOW_POSITION_TOP,
 				&panel->top_helper, &rect);
 		panel_window_set_accept_focus(panel->top, focus);
 		panel_window_set_keep_above(panel->top, above);
@@ -239,7 +239,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	if(config_get(panel->config, NULL, "bottom") != NULL
 			|| config_get(panel->config, NULL, "top") == NULL)
 	{
-		panel->bottom = panel_window_new(PANEL_POSITION_BOTTOM,
+		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
 				&panel->bottom_helper, &rect);
 		panel_window_set_accept_focus(panel->bottom, focus);
 		panel_window_set_keep_above(panel->bottom, above);

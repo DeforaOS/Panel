@@ -76,7 +76,7 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 	gtk_window_set_decorated(GTK_WINDOW(panel.top.window), FALSE);
 	gtk_window_set_position(GTK_WINDOW(panel.top.window),
 			GTK_WIN_POS_CENTER_ALWAYS);
-	gtk_window_set_title(GTK_WINDOW(panel.top.window), _("Notification"));
+	_panel_set_title(&panel, _("Notification"));
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
 			error_print(PROGNAME);

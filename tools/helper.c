@@ -99,6 +99,8 @@ static int _panel_init(Panel * panel, PanelAppletType type,
 		GtkIconSize iconsize);
 static void _panel_destroy(Panel * panel);
 
+static void _panel_set_title(Panel * panel, char const * title);
+
 #define HELPER_POSITION_MENU_WIDGET
 #include "../src/helper.c"
 static int _panel_append(Panel * panel, PanelPosition position,
@@ -204,6 +206,13 @@ static void _panel_destroy(Panel * panel)
 }
 
 
+/* panel_set_title */
+static void _panel_set_title(Panel * panel, char const * title)
+{
+	gtk_window_set_title(GTK_WINDOW(panel->top.window), title);
+}
+
+
 /* panel_append */
 static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)
@@ -265,7 +274,7 @@ static int _panel_window_append(PanelWindow * window, char const * applet)
 		return -error_set_code(1, "%s", strerror(errno));
 	window->applets = pa;
 	pa = &window->applets[window->applets_cnt];
-	if((pa->plugin = plugin_new(LIBDIR, "Panel", "applets", applet))
+	if((pa->plugin = plugin_new(LIBDIR, PACKAGE, "applets", applet))
 			== NULL)
 		return -1;
 	pa->widget = NULL;
