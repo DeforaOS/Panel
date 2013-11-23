@@ -531,6 +531,9 @@ static gboolean _on_idle(gpointer data)
 	}
 	else
 		_idle_path(main, DATADIR);
+	/* FIXME fallback to "$HOME/.local/share" if not set */
+	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
+		_idle_path(main, path);
 	g_timeout_add(1000, _on_timeout, main);
 	return FALSE;
 }
@@ -754,6 +757,10 @@ static gboolean _on_timeout(gpointer data)
 	}
 	else
 		ret = _timeout_path(main, DATADIR);
+	/* FIXME fallback to "$HOME/.local/share" if not set */
+	if(ret == TRUE && (path = getenv("XDG_DATA_HOME")) != NULL
+			&& strlen(path) > 0)
+		ret = _timeout_path(main, path);
 	if(ret != FALSE)
 		return ret;
 #ifdef DEBUG
