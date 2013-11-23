@@ -27,9 +27,6 @@
 #include "../config.h"
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	PACKAGE
-#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
