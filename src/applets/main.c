@@ -497,6 +497,7 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 
 
 /* on_idle */
+static void _idle_home(Main * main);
 static void _idle_path(Main * main, char const * path);
 static void _idle_path_do(Main * main, char const * path);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
@@ -531,11 +532,36 @@ static gboolean _on_idle(gpointer data)
 	}
 	else
 		_idle_path(main, DATADIR);
-	/* FIXME fallback to "$HOME/.local/share" if not set */
-	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
-		_idle_path(main, path);
+	_idle_home(main);
 	g_timeout_add(1000, _on_timeout, main);
 	return FALSE;
+}
+
+static void _idle_home(Main * main)
+{
+	char const fallback[] = ".local/share";
+	char const * path;
+	char const * homedir;
+	size_t len;
+	char * p;
+
+	/* FIXME fallback to "$HOME/.local/share" if not set */
+	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
+	{
+		_idle_path(main, path);
+		return;
+	}
+	if((homedir = getenv("HOME")) == NULL)
+		homedir = g_get_home_dir();
+	len = strlen(homedir) + 1 + sizeof(fallback);
+	if((p = malloc(len)) == NULL)
+	{
+		main->helper->error(NULL, homedir, 1);
+		return;
+	}
+	snprintf(p, len, "%s/%s", homedir, fallback);
+	_idle_path(main, p);
+	free(p);
 }
 
 static void _idle_path(Main * main, char const * path)
