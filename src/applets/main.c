@@ -585,8 +585,11 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 
 
 /* on_idle */
-static void _idle_path(Main * main, char const * path);
+static int _idle_access(Main * main, char const * path, int mode);
+static int _idle_access_path(Main * main, char const * path,
+		char const * filename, int mode);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
+static void _idle_path(Main * main, char const * path);
 
 static gboolean _on_idle(gpointer data)
 {
@@ -597,6 +600,73 @@ static gboolean _on_idle(gpointer data)
 	_main_xdg_dirs(main, _idle_path);
 	g_timeout_add(1000, _on_timeout, main);
 	return FALSE;
+}
+
+static int _idle_access(Main * main, char const * path, int mode)
+{
+	int ret = -1;
+	char const * p;
+	char * q;
+	size_t i;
+	size_t j;
+
+	if(path[0] == '/')
+		return access(path, mode);
+	if((p = getenv("PATH")) == NULL)
+		return 0;
+	if((q = strdup(p)) == NULL)
+	{
+		main->helper->error(NULL, path, 1);
+		return 0;
+	}
+	errno = ENOENT;
+	for(i = 0, j = 0;; i++)
+		if(q[i] == '\0')
+		{
+			ret = _idle_access_path(main, &q[j], path, mode);
+			break;
+		}
+		else if(q[i] == ':')
+		{
+			q[i] = '\0';
+			if((ret = _idle_access_path(main, &q[j], path, mode))
+					== 0)
+				break;
+			j = i + 1;
+		}
+	free(q);
+	return ret;
+}
+
+static int _idle_access_path(Main * main, char const * path,
+		char const * filename, int mode)
+{
+	int ret;
+	char * p;
+	size_t len;
+
+	len = strlen(path) + 1 + strlen(filename) + 1;
+	if((p = malloc(len)) == NULL)
+		return -main->helper->error(NULL, path, 1);
+	snprintf(p, len, "%s/%s", path, filename);
+	ret = access(p, mode);
+	free(p);
+	return ret;
+}
+
+static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
+{
+	Config * ca = (Config *)a;
+	Config * cb = (Config *)b;
+	char const * cap;
+	char const * cbp;
+	const char section[] = "Desktop Entry";
+	const char variable[] = "Name";
+
+	/* these should not fail */
+	cap = config_get(ca, section, variable);
+	cbp = config_get(cb, section, variable);
+	return string_compare(cap, cbp);
 }
 
 static void _idle_path(Main * main, char const * path)
@@ -675,7 +745,7 @@ static void _idle_path(Main * main, char const * path)
 			continue;
 		/* skip this entry if the binary cannot be executed */
 		if((q = config_get(config, section, "TryExec")) != NULL
-				&& access(q, X_OK) != 0
+				&& _idle_access(main, q, X_OK) != 0
 				&& errno == ENOENT)
 			continue;
 		main->apps = g_slist_insert_sorted(main->apps, config,
@@ -686,21 +756,6 @@ static void _idle_path(Main * main, char const * path)
 	closedir(dir);
 	if(config != NULL)
 		config_delete(config);
-}
-
-static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
-{
-	Config * ca = (Config *)a;
-	Config * cb = (Config *)b;
-	char const * cap;
-	char const * cbp;
-	const char section[] = "Desktop Entry";
-	const char variable[] = "Name";
-
-	/* these should not fail */
-	cap = config_get(ca, section, variable);
-	cbp = config_get(cb, section, variable);
-	return string_compare(cap, cbp);
 }
 
 
