@@ -763,6 +763,7 @@ static gboolean _on_timeout(gpointer data)
 	size_t i;
 	size_t j;
 
+	/* FIXME code duplicated from _on_idle() */
 	if((path = getenv("XDG_DATA_DIRS")) != NULL
 			&& strlen(path) > 0
 			&& (p = strdup(path)) != NULL)
