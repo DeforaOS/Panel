@@ -94,6 +94,9 @@ static GtkWidget * _main_applications(Main * main);
 static GtkWidget * _main_image(char const * name);
 static GtkWidget * _main_menuitem(char const * label, char const * stock);
 
+static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
+			char const * path));
+
 /* callbacks */
 static void _on_about(gpointer data);
 static void _on_clicked(gpointer data);
@@ -410,6 +413,90 @@ static GtkWidget * _main_menuitem(char const * label, char const * stock)
 }
 
 
+/* main_xdg_dirs */
+static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
+			char const * path));
+static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
+			char const * path), char const * path);
+
+static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
+			char const * path))
+{
+	char const * path;
+	char * p;
+	size_t i;
+	size_t j;
+
+	if((path = getenv("XDG_DATA_DIRS")) != NULL
+			&& strlen(path) > 0
+			&& (p = strdup(path)) != NULL)
+	{
+		for(i = 0, j = 0;; i++)
+			if(p[i] == '\0')
+			{
+				_xdg_dirs_path(main, callback, &p[j]);
+				break;
+			}
+			else if(p[i] == ':')
+			{
+				p[i] = '\0';
+				_xdg_dirs_path(main, callback, &p[j]);
+				j = i + 1;
+			}
+		free(p);
+	}
+	else
+		_xdg_dirs_path(main, callback, DATADIR);
+	_xdg_dirs_home(main, callback);
+}
+
+static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
+			char const * path))
+{
+	char const fallback[] = ".local/share";
+	char const * path;
+	char const * homedir;
+	size_t len;
+	char * p;
+
+	/* FIXME fallback to "$HOME/.local/share" if not set */
+	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
+	{
+		_xdg_dirs_path(main, callback, path);
+		return;
+	}
+	if((homedir = getenv("HOME")) == NULL)
+		homedir = g_get_home_dir();
+	len = strlen(homedir) + 1 + sizeof(fallback);
+	if((p = malloc(len)) == NULL)
+	{
+		main->helper->error(NULL, homedir, 1);
+		return;
+	}
+	snprintf(p, len, "%s/%s", homedir, fallback);
+	_xdg_dirs_path(main, callback, p);
+	free(p);
+}
+
+static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
+			char const * path), char const * path)
+{
+	const char applications[] = "/applications";
+	char * p;
+	size_t len;
+
+	len = strlen(path) + sizeof(applications);
+	if((p = malloc(len)) == NULL)
+	{
+		main->helper->error(NULL, path, 1);
+		return;
+	}
+	snprintf(p, len, "%s%s", path, applications);
+	callback(main, p);
+	free(p);
+}
+
+
 /* callbacks */
 /* on_about */
 static void _on_about(gpointer data)
@@ -497,91 +584,21 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 
 
 /* on_idle */
-static void _idle_home(Main * main);
 static void _idle_path(Main * main, char const * path);
-static void _idle_path_do(Main * main, char const * path);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
 
 static gboolean _on_idle(gpointer data)
 {
 	Main * main = data;
-	char const * path;
-	char * p;
-	size_t i;
-	size_t j;
 
 	if(main->apps != NULL)
 		return FALSE;
-	if((path = getenv("XDG_DATA_DIRS")) != NULL
-			&& strlen(path) > 0
-			&& (p = strdup(path)) != NULL)
-	{
-		for(i = 0, j = 0;; i++)
-			if(p[i] == '\0')
-			{
-				_idle_path(main, &p[j]);
-				break;
-			}
-			else if(p[i] == ':')
-			{
-				p[i] = '\0';
-				_idle_path(main, &p[j]);
-				j = i + 1;
-			}
-		free(p);
-	}
-	else
-		_idle_path(main, DATADIR);
-	_idle_home(main);
+	_main_xdg_dirs(main, _idle_path);
 	g_timeout_add(1000, _on_timeout, main);
 	return FALSE;
 }
 
-static void _idle_home(Main * main)
-{
-	char const fallback[] = ".local/share";
-	char const * path;
-	char const * homedir;
-	size_t len;
-	char * p;
-
-	/* FIXME fallback to "$HOME/.local/share" if not set */
-	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
-	{
-		_idle_path(main, path);
-		return;
-	}
-	if((homedir = getenv("HOME")) == NULL)
-		homedir = g_get_home_dir();
-	len = strlen(homedir) + 1 + sizeof(fallback);
-	if((p = malloc(len)) == NULL)
-	{
-		main->helper->error(NULL, homedir, 1);
-		return;
-	}
-	snprintf(p, len, "%s/%s", homedir, fallback);
-	_idle_path(main, p);
-	free(p);
-}
-
 static void _idle_path(Main * main, char const * path)
-{
-	const char applications[] = "/applications";
-	char * p;
-	size_t len;
-
-	len = strlen(path) + sizeof(applications);
-	if((p = malloc(len)) == NULL)
-	{
-		main->helper->error(NULL, path, 1);
-		return;
-	}
-	snprintf(p, len, "%s%s", path, applications);
-	_idle_path_do(main, p);
-	free(p);
-}
-
-static void _idle_path_do(Main * main, char const * path)
 {
 	DIR * dir;
 	int fd;
