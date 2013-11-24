@@ -50,6 +50,7 @@ typedef struct _PanelApplet
 	PanelAppletHelper * helper;
 	GSList * apps;
 	guint idle;
+	gboolean refresh;
 	time_t refresh_mti;
 } Main;
 
@@ -769,44 +770,16 @@ static void _on_suspend(gpointer data)
 
 
 /* on_timeout */
-static gboolean _timeout_path(Main * main, char const * path);
+static void _timeout_path(Main * main, char const * path);
 
 static gboolean _on_timeout(gpointer data)
 {
 	Main * main = data;
-	gboolean ret = TRUE;
-	char const * path;
-	char * p;
-	size_t i;
-	size_t j;
 
-	/* FIXME code duplicated from _on_idle() */
-	if((path = getenv("XDG_DATA_DIRS")) != NULL
-			&& strlen(path) > 0
-			&& (p = strdup(path)) != NULL)
-	{
-		for(i = 0, j = 0; ret == TRUE; i++)
-			if(p[i] == '\0')
-			{
-				ret = _timeout_path(main, &p[j]);
-				break;
-			}
-			else if(p[i] == ':')
-			{
-				p[i] = '\0';
-				ret = _timeout_path(main, &p[j]);
-				j = i + 1;
-			}
-		free(p);
-	}
-	else
-		ret = _timeout_path(main, DATADIR);
-	/* FIXME fallback to "$HOME/.local/share" if not set */
-	if(ret == TRUE && (path = getenv("XDG_DATA_HOME")) != NULL
-			&& strlen(path) > 0)
-		ret = _timeout_path(main, path);
-	if(ret != FALSE)
-		return ret;
+	main->refresh = FALSE;
+	_main_xdg_dirs(main, _timeout_path);
+	if(main->refresh == FALSE)
+		return TRUE;
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() resetting the menu\n", __func__);
 #endif
@@ -814,28 +787,14 @@ static gboolean _on_timeout(gpointer data)
 	g_slist_free(main->apps);
 	main->apps = NULL;
 	g_idle_add(_on_idle, main);
-	return ret;
+	return FALSE;
 }
 
-static gboolean _timeout_path(Main * main, char const * path)
+static void _timeout_path(Main * main, char const * path)
 {
-	const char applications[] = "/applications";
-	char * p;
-	size_t len;
 	struct stat st;
 
-	len = strlen(path) + sizeof(applications);
-	if((p = malloc(len)) == NULL)
-	{
-		main->helper->error(NULL, path, 1);
-		return TRUE;
-	}
-	snprintf(p, len, "%s%s", path, applications);
-	if(stat(p, &st) != 0)
-	{
-		free(p);
-		return TRUE;
-	}
-	free(p);
-	return (st.st_mtime > main->refresh_mti) ? FALSE : TRUE;
+	if(stat(path, &st) != 0)
+		return;
+	main->refresh = (st.st_mtime > main->refresh_mti) ? TRUE : FALSE;
 }
