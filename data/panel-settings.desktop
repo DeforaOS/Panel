@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Panel
 Comment=Preferences for the panel
+TryExec=panelctl
 Exec=panelctl -S
 Icon=panel-settings
 Type=Application
