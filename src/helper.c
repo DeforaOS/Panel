@@ -293,8 +293,8 @@ static void _panel_helper_position_menu_widget(Panel * panel, GtkMenu * menu,
 #endif
 	if(req.height <= 0)
 		return;
-	gtk_window_get_position(GTK_WINDOW(panel->window), x, y);
-	gtk_window_get_size(GTK_WINDOW(panel->window), &sx, &sy);
+	panel_window_get_position(panel->top, x, y);
+	panel_window_get_size(panel->top, &sx, &sy);
 	*y += sy;
 	*push_in = TRUE;
 }

@@ -24,6 +24,7 @@
 #include <System.h>
 #include <Desktop.h>
 #include <Desktop/Browser.h>
+#include "../src/window.h"
 #include "../config.h"
 
 /* constants */
@@ -37,36 +38,12 @@
 
 /* private */
 /* types */
-struct _PanelApplet
-{
-	Plugin * plugin;
-	PanelAppletDefinition * pad;
-	PanelApplet * pa;
-	GtkWidget * widget;
-};
-
-typedef struct _PanelWindow
-{
-	int height;
-
-	/* applets */
-	PanelAppletHelper * helper;
-	PanelApplet * applets;
-	size_t applets_cnt;
-
-	/* widgets */
-	GtkWidget * window;
-	GtkWidget * box;
-} PanelWindow;
-
 struct _Panel
 {
 	Config * config;
 	PanelAppletHelper helper;
 
-	/* FIXME should not be needed */
-	GtkWidget * window;
-	PanelWindow top;
+	PanelWindow * top;
 
 	guint timeout;
 	gint root_width;		/* width of the root window	*/
@@ -80,6 +57,7 @@ struct _Panel
 };
 
 
+/* constants */
 static char const * _authors[] =
 {
 	"Pierre Pronchery <khorben@defora.org>",
@@ -87,16 +65,10 @@ static char const * _authors[] =
 };
 
 
-/* public */
-/* prototypes */
-int panel_window_get_height(PanelWindow * panel);
-
-
-/* private */
 /* prototypes */
 /* Panel */
-static int _panel_init(Panel * panel, PanelAppletType type,
-		GtkIconSize iconsize);
+static int _panel_init(Panel * panel, PanelWindowPosition position,
+		PanelAppletType type, GtkIconSize iconsize);
 static void _panel_destroy(Panel * panel);
 
 static void _panel_set_title(Panel * panel, char const * title);
@@ -105,22 +77,12 @@ static void _panel_set_title(Panel * panel, char const * title);
 #include "../src/helper.c"
 static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet);
-
-/* PanelWindow */
-static void _panel_window_init(PanelWindow * panel,
-		PanelAppletHelper * helper);
-static void _panel_window_destroy(PanelWindow * panel);
-
-static int _panel_window_append(PanelWindow * window, char const * applet);
+static void _panel_show(Panel * panel, gboolean show);
 
 static int _applet_list(void);
 static char * _config_get_filename(void);
 
 static int _error(char const * message, int ret);
-
-/* callbacks */
-static gboolean _panel_window_on_closex(void);
-
 
 /* helper */
 /* essential */
@@ -146,19 +108,12 @@ void panel_show_preferences(Panel * panel, gboolean show)
 }
 
 
-/* panel_window_get_height */
-int panel_window_get_height(PanelWindow * panel)
-{
-	return panel->height;
-}
-
-
 /* private */
 /* functions */
 /* Panel */
 /* panel_init */
-static int _panel_init(Panel * panel, PanelAppletType type,
-		GtkIconSize iconsize)
+static int _panel_init(Panel * panel, PanelWindowPosition position,
+		PanelAppletType type, GtkIconSize iconsize)
 {
 	char * filename;
 	GdkScreen * screen;
@@ -171,20 +126,20 @@ static int _panel_init(Panel * panel, PanelAppletType type,
 			&& config_load(panel->config, filename) != 0)
 		error_print(PROGNAME);
 	free(filename);
-	_helper_init(&panel->helper, panel, type, iconsize);
-	_panel_window_init(&panel->top, &panel->helper);
-	panel->window = panel->top.window;
-	panel->timeout = 0;
-	panel->source = 0;
-	panel->ab_window = NULL;
-	panel->lo_window = NULL;
-	panel->sh_window = NULL;
 	/* root window */
 	screen = gdk_screen_get_default();
 	root = gdk_screen_get_root_window(screen);
 	gdk_screen_get_monitor_geometry(screen, 0, &rect);
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
+	/* panel window */
+	_helper_init(&panel->helper, panel, type, iconsize);
+	panel->top = panel_window_new(position, &panel->helper, &rect);
+	panel->timeout = 0;
+	panel->source = 0;
+	panel->ab_window = NULL;
+	panel->lo_window = NULL;
+	panel->sh_window = NULL;
 	return 0;
 }
 
@@ -196,7 +151,7 @@ static void _panel_destroy(Panel * panel)
 		g_source_remove(panel->timeout);
 	if(panel->source != 0)
 		g_source_remove(panel->source);
-	_panel_window_destroy(&panel->top);
+	panel_window_delete(panel->top);
 	if(panel->ab_window != NULL)
 		gtk_widget_destroy(panel->ab_window);
 	if(panel->lo_window != NULL)
@@ -209,7 +164,7 @@ static void _panel_destroy(Panel * panel)
 /* panel_set_title */
 static void _panel_set_title(Panel * panel, char const * title)
 {
-	gtk_window_set_title(GTK_WINDOW(panel->top.window), title);
+	panel_window_set_title(panel->top, title);
 }
 
 
@@ -218,79 +173,15 @@ static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)
 {
 	if(position == PANEL_POSITION_TOP)
-		return _panel_window_append(&panel->top, applet);
+		return panel_window_append(panel->top, applet);
 	return -error_set_code(1, "%s", "Invalid panel position");
 }
 
 
-/* PanelWindow */
-/* panel_window_init */
-static void _panel_window_init(PanelWindow * panel, PanelAppletHelper * helper)
+/* panel_show */
+static void _panel_show(Panel * panel, gboolean show)
 {
-	GdkRectangle rect;
-
-	if(gtk_icon_size_lookup(helper->icon_size, &rect.width, &rect.height)
-			== TRUE)
-		panel->height = rect.height + 8;
-	else
-		panel->height = 72;
-	panel->helper = helper;
-	panel->applets = NULL;
-	panel->applets_cnt = 0;
-	panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	g_signal_connect(panel->window, "delete-event", G_CALLBACK(
-				_panel_window_on_closex), NULL);
-	panel->box = gtk_hbox_new(FALSE, 4);
-	gtk_container_add(GTK_CONTAINER(panel->window), panel->box);
-}
-
-
-/* panel_window_destroy */
-static void _panel_window_destroy(PanelWindow * panel)
-{
-	size_t i;
-	PanelApplet * pa;
-
-	for(i = 0; i < panel->applets_cnt; i++)
-	{
-		pa = &panel->applets[i];
-		gtk_widget_destroy(pa->widget);
-		pa->pad->destroy(pa->pa);
-		plugin_delete(pa->plugin);
-	}
-	free(panel->applets);
-	gtk_widget_destroy(panel->window);
-}
-
-
-/* panel_window_append */
-static int _panel_window_append(PanelWindow * window, char const * applet)
-{
-	PanelAppletHelper * helper = window->helper;
-	PanelApplet * pa;
-
-	if((pa = realloc(window->applets, sizeof(*pa)
-					* (window->applets_cnt + 1))) == NULL)
-		return -error_set_code(1, "%s", strerror(errno));
-	window->applets = pa;
-	pa = &window->applets[window->applets_cnt];
-	if((pa->plugin = plugin_new(LIBDIR, PACKAGE, "applets", applet))
-			== NULL)
-		return -1;
-	pa->widget = NULL;
-	if((pa->pad = plugin_lookup(pa->plugin, "applet")) == NULL
-			|| (pa->pa = pa->pad->init(helper, &pa->widget)) == NULL
-			|| pa->widget == NULL)
-	{
-		if(pa->pa != NULL)
-			pa->pad->destroy(pa->pa);
-		plugin_delete(pa->plugin);
-		return -1;
-	}
-	gtk_box_pack_start(GTK_BOX(window->box), pa->widget, pa->pad->expand,
-			pa->pad->fill, 0);
-	window->applets_cnt++;
-	return 0;
+	panel_window_show(panel->top, show);
 }
 
 
@@ -383,16 +274,4 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown_dialog = _panel_helper_shutdown_dialog;
 	helper->suspend = _panel_helper_suspend;
-}
-
-
-/* useful */
-
-
-/* callbacks */
-/* panel_window_on_closex */
-static gboolean _panel_window_on_closex(void)
-{
-	gtk_main_quit();
-	return TRUE;
 }

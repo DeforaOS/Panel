@@ -51,7 +51,7 @@ struct _PanelApplet
 
 struct _PanelWindow
 {
-	PanelPosition position;
+	PanelWindowPosition position;
 	gint height;
 	GdkRectangle root;
 
@@ -71,7 +71,7 @@ static void _panel_window_reset(PanelWindow * panel);
 static void _panel_window_reset_strut(PanelWindow * panel);
 
 /* callbacks */
-static gboolean _panel_window_on_closex(void);
+static gboolean _panel_window_on_closex(gpointer data);
 static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 		GdkEvent * event, gpointer data);
 
@@ -123,6 +123,8 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 #else
 			panel->box = gtk_hbox_new(FALSE, 2);
 #endif
+			g_signal_connect(panel->window, "configure-event",
+					G_CALLBACK(_panel_window_on_configure_event), panel);
 			break;
 		case PANEL_WINDOW_POSITION_LEFT:
 		case PANEL_WINDOW_POSITION_RIGHT:
@@ -138,6 +140,8 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 #else
 			panel->box = gtk_vbox_new(FALSE, 2);
 #endif
+			g_signal_connect(panel->window, "configure-event",
+					G_CALLBACK(_panel_window_on_configure_event), panel);
 			break;
 		case PANEL_WINDOW_POSITION_CENTER:
 			gtk_window_set_position(GTK_WINDOW(panel->window),
@@ -155,14 +159,11 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 #endif
 			break;
 	}
-	g_signal_connect(panel->window, "configure-event", G_CALLBACK(
-				_panel_window_on_configure_event), panel);
-	g_signal_connect(panel->window, "delete-event", G_CALLBACK(
-				_panel_window_on_closex), NULL);
+	g_signal_connect_swapped(panel->window, "delete-event", G_CALLBACK(
+				_panel_window_on_closex), panel);
 	gtk_container_add(GTK_CONTAINER(panel->window), panel->box);
 	gtk_widget_show_all(panel->box);
 	panel_window_reset(panel, position, root);
-	panel_window_show(panel, TRUE);
 	return panel;
 }
 
@@ -184,6 +185,20 @@ int panel_window_get_height(PanelWindow * panel)
 }
 
 
+/* panel_window_get_position */
+void panel_window_get_position(PanelWindow * panel, gint * x, gint * y)
+{
+	gtk_window_get_position(GTK_WINDOW(panel->window), x, y);
+}
+
+
+/* panel_window_get_size */
+void panel_window_get_size(PanelWindow * panel, gint * width, gint * height)
+{
+	gtk_window_get_size(GTK_WINDOW(panel->window), width, height);
+}
+
+
 /* panel_window_set_accept_focus */
 void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept)
 {
@@ -195,6 +210,13 @@ void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept)
 void panel_window_set_keep_above(PanelWindow * panel, gboolean keep)
 {
 	gtk_window_set_keep_above(GTK_WINDOW(panel->window), keep);
+}
+
+
+/* panel_window_set_title */
+void panel_window_set_title(PanelWindow * panel, char const * title)
+{
+	gtk_window_set_title(GTK_WINDOW(panel->window), title);
 }
 
 
@@ -225,6 +247,7 @@ int panel_window_append(PanelWindow * panel, char const * applet)
 	}
 	gtk_box_pack_start(GTK_BOX(panel->box), pa->widget, pa->pad->expand,
 			pa->pad->fill, 0);
+	gtk_widget_show(pa->widget);
 	panel->applets_cnt++;
 	return 0;
 }
@@ -250,7 +273,7 @@ void panel_window_remove_all(PanelWindow * panel)
 
 
 /* panel_window_reset */
-void panel_window_reset(PanelWindow * panel, PanelPosition position,
+void panel_window_reset(PanelWindow * panel, PanelWindowPosition position,
 		GdkRectangle * root)
 {
 	panel->position = position;
@@ -274,14 +297,32 @@ void panel_window_show(PanelWindow * panel, gboolean show)
 /* panel_window_reset */
 static void _panel_window_reset(PanelWindow * panel)
 {
-	gtk_window_resize(GTK_WINDOW(panel->window), panel->root.width,
-			panel->height);
-	if(panel->position == PANEL_POSITION_TOP)
-		gtk_window_move(GTK_WINDOW(panel->window), panel->root.x, 0);
-	else
-		gtk_window_move(GTK_WINDOW(panel->window), panel->root.x,
-				panel->root.y + panel->root.height
-				- panel->height);
+	switch(panel->position)
+	{
+		case PANEL_WINDOW_POSITION_TOP:
+			gtk_window_move(GTK_WINDOW(panel->window),
+					panel->root.x, 0);
+			gtk_window_resize(GTK_WINDOW(panel->window),
+					panel->root.width, panel->height);
+			break;
+		case PANEL_WINDOW_POSITION_BOTTOM:
+			gtk_window_move(GTK_WINDOW(panel->window),
+					panel->root.x,
+					panel->root.y + panel->root.height
+					- panel->height);
+			gtk_window_resize(GTK_WINDOW(panel->window),
+					panel->root.width, panel->height);
+			break;
+#if 0 /* FIXME implement */
+		case PANEL_WINDOW_POSITION_LEFT:
+		case PANEL_WINDOW_POSITION_RIGHT:
+			break;
+#endif
+		case PANEL_WINDOW_POSITION_CENTER:
+		case PANEL_WINDOW_POSITION_FLOATING:
+		case PANEL_WINDOW_POSITION_MANAGED:
+			break;
+	}
 }
 
 
@@ -302,15 +343,24 @@ static void _panel_window_reset_strut(PanelWindow * panel)
 	/* FIXME check that this code is correct */
 	switch(panel->position)
 	{
-		case PANEL_POSITION_TOP:
+		case PANEL_WINDOW_POSITION_TOP:
 			strut[2] = panel->height;
 			strut[8] = panel->root.x;
 			strut[9] = panel->root.x + panel->root.width;
 			break;
-		case PANEL_POSITION_BOTTOM:
+		case PANEL_WINDOW_POSITION_BOTTOM:
 			strut[3] = panel->height;
 			strut[10] = panel->root.x;
 			strut[11] = panel->root.x + panel->root.width;
+			break;
+#if 0 /* FIXME implement */
+		case PANEL_WINDOW_POSITION_LEFT:
+		case PANEL_WINDOW_POSITION_RIGHT:
+			break;
+#endif
+		case PANEL_WINDOW_POSITION_CENTER:
+		case PANEL_WINDOW_POSITION_FLOATING:
+		case PANEL_WINDOW_POSITION_MANAGED:
 			break;
 	}
 	cardinal = gdk_atom_intern("CARDINAL", FALSE);
@@ -325,9 +375,12 @@ static void _panel_window_reset_strut(PanelWindow * panel)
 
 /* callbacks */
 /* panel_window_on_closex */
-static gboolean _panel_window_on_closex(void)
+static gboolean _panel_window_on_closex(gpointer data)
 {
-	/* ignore delete events */
+	PanelWindow * panel = data;
+
+	panel_window_show(panel, FALSE);
+	gtk_main_quit();
 	return TRUE;
 }
 
@@ -347,8 +400,9 @@ static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 			panel->height);
 #endif
 	/* move to the proper position again if necessary */
-	if((panel->position == PANEL_POSITION_TOP && cevent->y != panel->root.y)
-			|| (panel->position == PANEL_POSITION_BOTTOM
+	if((panel->position == PANEL_WINDOW_POSITION_TOP
+				&& cevent->y != panel->root.y)
+			|| (panel->position == PANEL_WINDOW_POSITION_BOTTOM
 				&& cevent->y + cevent->height
 				!= panel->root.height))
 		_panel_window_reset(panel);

@@ -45,14 +45,18 @@ void panel_window_delete(PanelWindow * panel);
 
 /* accessors */
 int panel_window_get_height(PanelWindow * panel);
+void panel_window_get_position(PanelWindow * panel, gint * x, gint * y);
+void panel_window_get_size(PanelWindow * panel, gint * width, gint * height);
+
 void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept);
 void panel_window_set_keep_above(PanelWindow * panel, gboolean keep);
+void panel_window_set_title(PanelWindow * panel, char const * title);
 
 /* useful */
 int panel_window_append(PanelWindow * panel, char const * applet);
 void panel_window_remove_all(PanelWindow * panel);
 
-void panel_window_reset(PanelWindow * panel, PanelPosition position,
+void panel_window_reset(PanelWindow * panel, PanelWindowPosition position,
 		GdkRectangle * root);
 void panel_window_show(PanelWindow * panel, gboolean show);
 

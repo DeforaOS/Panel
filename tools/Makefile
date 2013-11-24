@@ -6,9 +6,9 @@ SBINDIR	= $(PREFIX)/sbin
 CC	= cc
 CPPFLAGSF=
 CPPFLAGS=
-CFLAGSF	= -W `pkg-config --cflags libSystem libDesktop`
+CFLAGSF	= -W `pkg-config --cflags libDesktop`
 CFLAGS	= -Wall -g -O2
-LDFLAGSF= `pkg-config --libs libSystem libDesktop`
+LDFLAGSF= `pkg-config --libs libDesktop`
 RM	= rm -f
 LN	= ln -f
 MKDIR	= mkdir -m 0755 -p
@@ -33,14 +33,14 @@ panel-message: $(panel-message_OBJS)
 
 panel-notify_OBJS = notify.o
 panel-notify_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
-panel-notify_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+panel-notify_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L../src -Wl,-rpath,$(LIBDIR) -lPanel
 
 panel-notify: $(panel-notify_OBJS)
 	$(CC) -o panel-notify $(panel-notify_OBJS) $(panel-notify_LDFLAGS)
 
 panel-test_OBJS = test.o
 panel-test_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
-panel-test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+panel-test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L../src -Wl,-rpath,$(LIBDIR) -lPanel
 
 panel-test: $(panel-test_OBJS)
 	$(CC) -o panel-test $(panel-test_OBJS) $(panel-test_LDFLAGS)
