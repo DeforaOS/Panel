@@ -623,7 +623,6 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	GtkWidget * widget;
 	size_t i;
 
-	/* FIXME this needs a restart to apply */
 	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 	vbox = gtk_vbox_new(FALSE, 4);
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 4);
