@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,9 @@
 #define _(string) gettext(string)
 
 /* constants */
+#ifndef PROGNAME
+# define PROGNAME	"panelctl"
+#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -57,12 +60,12 @@ static int _panelctl(PanelMessageShow what, gboolean show)
 /* usage */
 static int _usage(void)
 {
-	fputs(_("Usage: panelctl [-B|-S|-T|-b|-t]\n"
+	fprintf(stderr, _("Usage: %s [-B|-S|-T|-b|-t]\n"
 "  -B	Show the bottom panel\n"
 "  -S	Display or change settings\n"
 "  -T	Show the top panel\n"
 "  -b	Hide the bottom panel\n"
-"  -t	Hide the top panel\n"), stderr);
+"  -t	Hide the top panel\n"), PROGNAME);
 	return 1;
 }
 
