@@ -442,7 +442,6 @@ void panel_delete(Panel * panel)
 {
 	if(panel->source != 0)
 		g_source_remove(panel->source);
-	/* FIXME destroy plugins as well */
 	if(panel->top != NULL)
 		panel_window_delete(panel->top);
 	if(panel->bottom != NULL)
