@@ -509,6 +509,7 @@ static void _error_on_response(GtkWidget * widget)
 /* panel_load */
 int panel_load(Panel * panel, PanelPosition position, char const * applet)
 {
+	int ret;
 	PanelWindow * window;
 
 	if(position == PANEL_POSITION_BOTTOM && panel->bottom != NULL)
@@ -517,8 +518,7 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 		window = panel->top;
 	else
 		return -error_set_code(1, "%s", "Invalid panel position");
-	if(panel_window_append(window, applet) != 0)
-		return -1;
+	ret = panel_window_append(window, applet);
 #if 0 /* FIXME re-implement */
 	if(pad->settings != NULL
 			&& (widget = pad->settings(pa, FALSE, FALSE)) != NULL)
@@ -534,7 +534,8 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 				vbox, gtk_label_new(pad->name));
 	}
 #endif
-	return 0;
+	panel_window_show(window, TRUE);
+	return (ret == 0) ? 0 : -1;
 }
 
 
