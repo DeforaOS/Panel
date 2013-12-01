@@ -642,8 +642,14 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	switch(status)
 	{
 		case G_IO_STATUS_NORMAL:
-			if(strcmp(buf, "OK\n") == 0)
+			if(cnt == 3 && strncmp(buf, "OK\n", cnt) == 0)
 				break;
+			if(cnt == 5 && strncmp(buf, "FAIL\n", cnt) == 0)
+			{
+				/* FIXME improve the error message */
+				wpa->helper->error(NULL, "An error occured", 0);
+				break;
+			}
 			if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
