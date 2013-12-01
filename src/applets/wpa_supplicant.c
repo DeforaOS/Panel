@@ -100,6 +100,7 @@ typedef struct _PanelApplet
 #ifndef EMBEDDED
 	GtkWidget * label;
 #endif
+	GtkListStore * store;
 } WPA;
 
 
@@ -172,6 +173,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
+	wpa->store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -431,6 +433,7 @@ static void _wpa_stop(WPA * wpa)
 	wpa->queue = NULL;
 	wpa->queue_cnt = 0;
 	/* free the network list */
+	gtk_list_store_clear(wpa->store);
 	for(i = 0; i < wpa->networks_cnt; i++)
 		free(wpa->networks[i].name);
 	free(wpa->networks);
@@ -454,6 +457,8 @@ static void _wpa_stop(WPA * wpa)
 
 /* callbacks */
 /* on_clicked */
+static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
+static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 /* callbacks */
@@ -467,13 +472,50 @@ static void _on_clicked(gpointer data)
 	WPA * wpa = data;
 	GtkWidget * menu;
 	GtkWidget * menuitem;
-	GtkWidget * submenu;
 	GtkWidget * image;
-	GSList * group;
-	size_t i;
 
 	menu = gtk_menu_new();
 	/* FIXME summarize the status instead */
+	_clicked_network_list(wpa, menu);
+	/* reassociate */
+	menuitem = gtk_image_menu_item_new_with_label("Reassociate");
+#if GTK_CHECK_VERSION(2, 12, 0)
+	image = gtk_image_new_from_stock(GTK_STOCK_DISCARD, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
+#endif
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_reassociate), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* rescan */
+	menuitem = gtk_image_menu_item_new_with_label("Rescan");
+	image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_rescan), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* save configuration */
+	menuitem = gtk_image_menu_item_new_with_label("Save configuration");
+	image = gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_save_configuration), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* view */
+	_clicked_network_view(wpa, menu);
+	gtk_widget_show_all(menu);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
+			wpa, 0, gtk_get_current_event_time());
+}
+
+static void _clicked_network_list(WPA * wpa, GtkWidget * menu)
+{
+	GtkWidget * menuitem;
+	GtkWidget * submenu;
+	GSList * group;
+	size_t i;
+
+	if(wpa->networks_cnt == 0)
+		return;
 	/* network list */
 	menuitem = gtk_image_menu_item_new_with_label("Network list");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -486,12 +528,8 @@ static void _on_clicked(gpointer data)
 	g_signal_connect(menuitem, "toggled", G_CALLBACK(
 				_clicked_on_network_toggled), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
-	/* network list: separator (if relevant) */
-	if(wpa->networks_cnt > 0)
-	{
-		menuitem = gtk_separator_menu_item_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
-	}
+	menuitem = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
 	/* network list: every known network */
 	for(i = 0; i < wpa->networks_cnt; i++)
 	{
@@ -508,35 +546,33 @@ static void _on_clicked(gpointer data)
 					_clicked_on_network_toggled), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
 	}
-	/* actions */
+	/* separator */
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	/* actions: reassociate */
-	menuitem = gtk_image_menu_item_new_with_label("Reassociate");
-#if GTK_CHECK_VERSION(2, 12, 0)
-	image = gtk_image_new_from_stock(GTK_STOCK_DISCARD, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
-#endif
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_clicked_on_reassociate), wpa);
+}
+
+static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
+{
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	GtkWidget * menuitem;
+	GtkTreeIter iter;
+	gboolean valid;
+	gchar * bssid;
+	gchar * ssid;
+
+	if((valid = gtk_tree_model_get_iter_first(model, &iter)) == FALSE)
+		return;
+	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	/* actions: rescan */
-	menuitem = gtk_image_menu_item_new_with_label("Rescan");
-	image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_clicked_on_rescan), wpa);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	/* actions: save configuration */
-	menuitem = gtk_image_menu_item_new_with_label("Save configuration");
-	image = gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_clicked_on_save_configuration), wpa);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	gtk_widget_show_all(menu);
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
-			wpa, 0, gtk_get_current_event_time());
+	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
+	{
+		gtk_tree_model_get(model, &iter, 0, &bssid, 1, &ssid, -1);
+		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
+				? ssid : bssid);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		g_free(bssid);
+		g_free(ssid);
+	}
 }
 
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
@@ -613,9 +649,7 @@ static gboolean _on_timeout(gpointer data)
 #endif
 	}
 	_wpa_queue(wpa, WC_STATUS);
-#ifdef DEBUG
 	_wpa_queue(wpa, WC_SCAN_RESULTS);
-#endif
 	return TRUE;
 }
 
@@ -660,7 +694,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
 				_read_scan_results(wpa, buf, cnt);
-			else if(entry->command == WC_STATUS)
+			else
+				/* XXX may not always be relevant */
 				_read_status(wpa, buf, cnt);
 			break;
 		case G_IO_STATUS_ERROR:
@@ -776,7 +811,9 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char flags1[32];
 	char flags2[32];
 	char ssid[80];
+	GtkTreeIter iter;
 
+	gtk_list_store_clear(wpa->store);
 	for(i = 0; i < cnt;)
 	{
 		for(j = i; j < cnt; j++)
@@ -790,9 +827,9 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%17s %u %u [%31[^]]][%31[^]] %79s", bssid,
+		if((res = sscanf(p, "%17s %u %u [%31[^]]][%31[^]]] %79s", bssid,
 						&frequency, &level, flags1,
-						flags2, ssid)) == 6)
+						flags2, ssid)) >= 3)
 		{
 			bssid[sizeof(bssid) - 1] = '\0';
 			flags1[sizeof(flags1) - 1] = '\0';
@@ -803,6 +840,11 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags1, flags2, ssid);
 #endif
+			gtk_list_store_append(wpa->store, &iter);
+			gtk_list_store_set(wpa->store, &iter, 0, bssid, -1);
+			if(res == 6)
+				gtk_list_store_set(wpa->store, &iter, 1, ssid,
+						-1);
 		}
 		i = j;
 	}
@@ -836,11 +878,15 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 		variable[sizeof(variable) - 1] = '\0';
 		value[sizeof(value) - 1] = '\0';
 		if(strcmp(variable, "wpa_state") == 0)
+		{
 			gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 					(strcmp(value, "COMPLETED") == 0)
 					? GTK_STOCK_CONNECT
 					: GTK_STOCK_DISCONNECT,
 					wpa->helper->icon_size);
+			if(strcmp(value, "SCANNING") == 0)
+				_wpa_queue(wpa, WC_SCAN_RESULTS);
+		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
 			gtk_label_set_text(GTK_LABEL(wpa->label), value);
