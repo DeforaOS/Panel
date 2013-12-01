@@ -329,11 +329,17 @@ static gboolean _start_timeout(gpointer data)
 		return wpa->helper->error(NULL, path, TRUE);
 	}
 	/* create the local socket */
+	memset(&lu, 0, sizeof(lu));
+	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", wpa->path)
+			>= sizeof(lu.sun_path))
+	{
+		unlink(wpa->path);
+		/* XXX make sure this error is explicit enough */
+		return _wpa_error(wpa, wpa->path, TRUE);
+	}
+	lu.sun_family = AF_LOCAL;
 	if((wpa->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
 		return _wpa_error(wpa, "socket", TRUE);
-	memset(&lu, 0, sizeof(lu));
-	snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", wpa->path);
-	lu.sun_family = AF_LOCAL;
 	if(bind(wpa->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
 		close(wpa->fd);
