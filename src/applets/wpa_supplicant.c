@@ -301,7 +301,7 @@ static int _wpa_start(WPA * wpa)
 
 static gboolean _start_timeout(gpointer data)
 {
-	int ret = TRUE;
+	gboolean ret = TRUE;
 	WPA * wpa = data;
 	char const path[] = WPA_SUPPLICANT_PATH;
 	char const * p;
