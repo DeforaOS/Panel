@@ -614,6 +614,8 @@ static gboolean _read_status(WPA * wpa, char const * buf, size_t cnt)
 #endif
 		if(sscanf(p, "%79[^=]=%79[^\n]", variable, value) != 2)
 			continue;
+		variable[sizeof(variable) - 1] = '\0';
+		value[sizeof(value) - 1] = '\0';
 		if(strcmp(variable, "wpa_state") == 0)
 			gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 					(strcmp(value, "COMPLETED") == 0)
