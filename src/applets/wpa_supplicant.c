@@ -464,7 +464,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	int ret = FALSE;
 	WPA * wpa = data;
 	WPAEntry * entry = &wpa->queue[0];
-	char buf[256]; /* XXX in wpa */
+	char buf[1024]; /* XXX in wpa */
 	gsize cnt;
 	GError * error = NULL;
 	GIOStatus status;
