@@ -121,8 +121,6 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* wpa_init */
-static gboolean _init_timeout(gpointer data);
-
 static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	WPA * wpa;
@@ -154,8 +152,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
-	if(_init_timeout(wpa) != FALSE)
-		wpa->source = g_timeout_add(5000, _init_timeout, wpa);
+	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
 	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
@@ -175,7 +172,90 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	return wpa;
 }
 
-static gboolean _init_timeout(gpointer data)
+
+/* wpa_destroy */
+static void _wpa_destroy(WPA * wpa)
+{
+	_wpa_stop(wpa);
+	object_delete(wpa);
+}
+
+
+/* wpa_error */
+static int _wpa_error(WPA * wpa, char const * message, int ret)
+{
+	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "error",
+			wpa->helper->icon_size);
+#ifndef EMBEDDED
+	gtk_label_set_text(GTK_LABEL(wpa->label), "Error");
+#endif
+	return wpa->helper->error(NULL, message, ret);
+}
+
+
+/* wpa_queue */
+static int _wpa_queue(WPA * wpa, WPACommand command, ...)
+{
+	char const * cmd = NULL;
+	WPAEntry * p;
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
+#endif
+	if(wpa->channel == NULL)
+		return -1;
+	switch(command)
+	{
+		case WC_LIST_NETWORKS:
+			cmd = "LIST_NETWORKS";
+			break;
+		case WC_STATUS:
+			cmd = "STATUS-VERBOSE";
+			break;
+	}
+	if(cmd == NULL)
+		return -1;
+	if((p = realloc(wpa->queue, sizeof(*p) * (wpa->queue_cnt + 1))) == NULL)
+		return -1;
+	wpa->queue = p;
+	p = &wpa->queue[wpa->queue_cnt];
+	p->command = command;
+	p->buf = strdup(cmd);
+	p->buf_cnt = strlen(cmd);
+	if(p->buf == NULL)
+		return -1;
+	if(wpa->queue_cnt++ == 0)
+		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
+				_on_watch_can_write, wpa);
+	return 0;
+}
+
+
+/* wpa_reset */
+static int _wpa_reset(WPA * wpa)
+{
+	_wpa_stop(wpa);
+	return _wpa_start(wpa);
+}
+
+
+/* wpa_start */
+static gboolean _start_timeout(gpointer data);
+
+static int _wpa_start(WPA * wpa)
+{
+	if(wpa->source != 0)
+		g_source_remove(wpa->source);
+	wpa->source = 0;
+	/* reconnect to the daemon */
+	if(_start_timeout(wpa) == FALSE)
+		return 0;
+	/* try again every five seconds */
+	wpa->source = g_timeout_add(5000, _start_timeout, wpa);
+	return 0;
+}
+
+static gboolean _start_timeout(gpointer data)
 {
 	int ret = TRUE;
 	WPA * wpa = data;
@@ -267,83 +347,6 @@ static gboolean _init_timeout(gpointer data)
 	}
 	closedir(dir);
 	return ret;
-}
-
-
-/* wpa_destroy */
-static void _wpa_destroy(WPA * wpa)
-{
-	_wpa_stop(wpa);
-	object_delete(wpa);
-}
-
-
-/* wpa_error */
-static int _wpa_error(WPA * wpa, char const * message, int ret)
-{
-	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "error",
-			wpa->helper->icon_size);
-#ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(wpa->label), "Error");
-#endif
-	return wpa->helper->error(NULL, message, ret);
-}
-
-
-/* wpa_queue */
-static int _wpa_queue(WPA * wpa, WPACommand command, ...)
-{
-	char const * cmd = NULL;
-	WPAEntry * p;
-
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
-#endif
-	if(wpa->channel == NULL)
-		return -1;
-	switch(command)
-	{
-		case WC_LIST_NETWORKS:
-			cmd = "LIST_NETWORKS";
-			break;
-		case WC_STATUS:
-			cmd = "STATUS-VERBOSE";
-			break;
-	}
-	if(cmd == NULL)
-		return -1;
-	if((p = realloc(wpa->queue, sizeof(*p) * (wpa->queue_cnt + 1))) == NULL)
-		return -1;
-	wpa->queue = p;
-	p = &wpa->queue[wpa->queue_cnt];
-	p->command = command;
-	p->buf = strdup(cmd);
-	p->buf_cnt = strlen(cmd);
-	if(p->buf == NULL)
-		return -1;
-	if(wpa->queue_cnt++ == 0)
-		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
-				_on_watch_can_write, wpa);
-	return 0;
-}
-
-
-/* wpa_reset */
-static int _wpa_reset(WPA * wpa)
-{
-	_wpa_stop(wpa);
-	return _wpa_start(wpa);
-}
-
-
-/* wpa_start */
-static int _wpa_start(WPA * wpa)
-{
-	/* reconnect to the daemon */
-	if(_init_timeout(wpa) == FALSE)
-		return 0;
-	wpa->source = g_timeout_add(5000, _init_timeout, wpa);
-	return 0;
 }
 
 
@@ -483,7 +486,6 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			_wpa_error(wpa, error->message, 1);
 		case G_IO_STATUS_EOF:
 		default: /* should not happen */
-			wpa->source = 0;
 			_wpa_reset(wpa);
 			return FALSE;
 	}
@@ -501,7 +503,9 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 
 static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 {
+#ifndef DEBUG
 	char ** n;
+#endif
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -640,7 +644,6 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 			_wpa_error(wpa, error->message, 1);
 		case G_IO_STATUS_EOF:
 		default: /* should not happen */
-			wpa->source = 0;
 			_wpa_reset(wpa);
 			return FALSE;
 	}
