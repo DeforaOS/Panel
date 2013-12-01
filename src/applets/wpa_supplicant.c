@@ -693,12 +693,9 @@ static gboolean _on_timeout(gpointer data)
 	if(wpa->networks == NULL)
 	{
 		_wpa_queue(wpa, WC_LIST_NETWORKS);
-#ifdef DEBUG
-		_wpa_queue(wpa, WC_SCAN);
-#endif
+		_wpa_queue(wpa, WC_SCAN_RESULTS);
 	}
 	_wpa_queue(wpa, WC_STATUS);
-	_wpa_queue(wpa, WC_SCAN_RESULTS);
 	return TRUE;
 }
 
