@@ -52,7 +52,8 @@
 /* types */
 typedef enum _WPACommand
 {
-	WC_LIST_NETWORKS = 0,
+	WC_ENABLE_NETWORK = 0,		/* unsigned int id */
+	WC_LIST_NETWORKS,
 	WC_REASSOCIATE,
 	WC_SCAN,
 	WC_SCAN_RESULTS,
@@ -64,7 +65,7 @@ typedef struct _WPANetwork
 {
 	unsigned int id;
 	char * name;
-	int current;
+	int enabled;
 } WPANetwork;
 
 typedef struct _WPAEntry
@@ -91,6 +92,7 @@ typedef struct _PanelApplet
 
 	WPANetwork * networks;
 	size_t networks_cnt;
+	ssize_t networks_cur;
 
 	/* widgets */
 	GtkWidget * image;
@@ -156,6 +158,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->queue_cnt = 0;
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
+	wpa->networks_cur = -1;
 	/* widgets */
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
@@ -225,6 +228,10 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 	va_start(ap, command);
 	switch(command)
 	{
+		case WC_ENABLE_NETWORK:
+			u = va_arg(ap, unsigned int);
+			cmd = g_strdup_printf("ENABLE_NETWORK %u", u);
+			break;
 		case WC_LIST_NETWORKS:
 			cmd = strdup("LIST_NETWORKS");
 			break;
@@ -425,6 +432,7 @@ static void _wpa_stop(WPA * wpa)
 	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
+	wpa->networks_cur = -1;
 	/* close and remove the socket */
 	if(wpa->channel != NULL)
 	{
@@ -454,15 +462,30 @@ static void _on_clicked(gpointer data)
 	GtkWidget * menu;
 	GtkWidget * menuitem;
 	GtkWidget * submenu;
-	GSList * group = NULL;
+	GSList * group;
 	size_t i;
 
 	menu = gtk_menu_new();
 	/* FIXME summarize the status instead */
+	/* network list */
 	menuitem = gtk_image_menu_item_new_with_label("Network list");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	submenu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
+	/* network list: any network */
+	menuitem = gtk_radio_menu_item_new_with_label(NULL, "Any network");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem), TRUE);
+	group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(menuitem));
+	g_signal_connect(menuitem, "toggled", G_CALLBACK(
+				_clicked_on_network_toggled), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
+	/* network list: separator (if relevant) */
+	if(wpa->networks_cnt > 0)
+	{
+		menuitem = gtk_separator_menu_item_new();
+		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
+	}
+	/* network list: every known network */
 	for(i = 0; i < wpa->networks_cnt; i++)
 	{
 		menuitem = gtk_radio_menu_item_new_with_label(group,
@@ -471,7 +494,7 @@ static void _on_clicked(gpointer data)
 					menuitem));
 		g_object_set_data(G_OBJECT(menuitem), "network",
 				&wpa->networks[i]);
-		if(wpa->networks[i].current != 0)
+		if(i == wpa->networks_cur)
 			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 						menuitem), TRUE);
 		g_signal_connect(menuitem, "toggled", G_CALLBACK(
@@ -493,14 +516,28 @@ static void _on_clicked(gpointer data)
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
-	WPANetwork * network = g_object_get_data(G_OBJECT(widget), "network");
+	WPANetwork * network;
 	size_t i;
 
-	if(network == NULL)
+	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)) == FALSE)
 		return;
+	if((network = g_object_get_data(G_OBJECT(widget), "network")) == NULL)
+	{
+		/* enable every network again */
+		for(i = 0; i < wpa->networks_cnt; i++)
+			_wpa_queue(wpa, WC_ENABLE_NETWORK, i);
+		_wpa_queue(wpa, WC_LIST_NETWORKS);
+		return;
+	}
+	/* select this network */
 	for(i = 0; i < wpa->networks_cnt; i++)
-		wpa->networks[i].current = 0;
-	network->current = 1;
+		if(network == &wpa->networks[i])
+		{
+			network->enabled = 1;
+			wpa->networks_cur = i;
+		}
+		else
+			wpa->networks[i].enabled = 0;
 	_wpa_queue(wpa, WC_SELECT_NETWORK, network->id);
 }
 
@@ -612,6 +649,7 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
+	wpa->networks_cur = -1;
 	for(i = 0; i < cnt;)
 	{
 		for(j = i; j < cnt; j++)
@@ -625,7 +663,7 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%u %79[^\t] %79[^\t] %79s", &u, ssid,
+		if((res = sscanf(p, "%u %79[^\t] %79[^\t] [%79[^]]", &u, ssid,
 						bssid, flags)) >= 3)
 		{
 			ssid[sizeof(ssid) - 1] = '\0';
@@ -642,13 +680,18 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 				/* XXX ignore errors */
 				n->id = u;
 				n->name = strdup(ssid);
-				n->current = 0;
+				n->enabled = 1;
 				if(n->name != NULL)
 					wpa->networks_cnt++;
 			}
-			if(res > 3 && strcmp(flags, "[CURRENT]") == 0)
+			if(res > 3 && strcmp(flags, "DISABLED") == 0)
+				n->enabled = 0;
+			else if(res >= 3 && wpa->networks_cur < 0)
+				/* XXX may not be the only one enabled */
+				wpa->networks_cur = wpa->networks_cnt - 1;
+			if(res > 3 && strcmp(flags, "CURRENT") == 0)
 			{
-				n->current = 0;
+				wpa->networks_cur = wpa->networks_cnt - 1;
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
