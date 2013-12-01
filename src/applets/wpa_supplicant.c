@@ -62,7 +62,8 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 
-	char path[36];
+	/* FIXME dynamically allocate instead */
+	char path[256];
 	guint source;
 	int fd;
 	GIOChannel * channel;
