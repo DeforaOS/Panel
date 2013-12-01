@@ -55,6 +55,7 @@ typedef enum _WPACommand
 	WC_ENABLE_NETWORK = 0,		/* unsigned int id */
 	WC_LIST_NETWORKS,
 	WC_REASSOCIATE,
+	WC_SAVE_CONFIGURATION,
 	WC_SCAN,
 	WC_SCAN_RESULTS,
 	WC_SELECT_NETWORK,		/* unsigned int id */
@@ -237,6 +238,9 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 			break;
 		case WC_REASSOCIATE:
 			cmd = strdup("REASSOCIATE");
+			break;
+		case WC_SAVE_CONFIGURATION:
+			cmd = strdup("SAVE_CONFIG");
 			break;
 		case WC_SCAN:
 			cmd = strdup("SCAN");
@@ -455,6 +459,8 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 /* callbacks */
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data);
 static void _clicked_on_reassociate(gpointer data);
+static void _clicked_on_rescan(gpointer data);
+static void _clicked_on_save_configuration(gpointer data);
 
 static void _on_clicked(gpointer data)
 {
@@ -462,6 +468,7 @@ static void _on_clicked(gpointer data)
 	GtkWidget * menu;
 	GtkWidget * menuitem;
 	GtkWidget * submenu;
+	GtkWidget * image;
 	GSList * group;
 	size_t i;
 
@@ -504,9 +511,22 @@ static void _on_clicked(gpointer data)
 	/* actions */
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* actions: reassociate */
 	menuitem = gtk_menu_item_new_with_label("Reassociate");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_reassociate), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* actions: rescan */
+	menuitem = gtk_menu_item_new_with_label("Rescan");
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_rescan), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	/* actions: save configuration */
+	menuitem = gtk_image_menu_item_new_with_label("Save configuration");
+	image = gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_save_configuration), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
@@ -546,6 +566,20 @@ static void _clicked_on_reassociate(gpointer data)
 	WPA * wpa = data;
 
 	_wpa_queue(wpa, WC_REASSOCIATE);
+}
+
+static void _clicked_on_rescan(gpointer data)
+{
+	WPA * wpa = data;
+
+	_wpa_queue(wpa, WC_SCAN);
+}
+
+static void _clicked_on_save_configuration(gpointer data)
+{
+	WPA * wpa = data;
+
+	_wpa_queue(wpa, WC_SAVE_CONFIGURATION);
 }
 
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
