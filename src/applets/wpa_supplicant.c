@@ -196,7 +196,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 /* wpa_queue */
 static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 {
-	char const * cmd = NULL;
+	char * cmd = NULL;
 	WPAEntry * p;
 
 #ifdef DEBUG
@@ -207,23 +207,24 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 	switch(command)
 	{
 		case WC_LIST_NETWORKS:
-			cmd = "LIST_NETWORKS";
+			cmd = strdup("LIST_NETWORKS");
 			break;
 		case WC_STATUS:
-			cmd = "STATUS-VERBOSE";
+			cmd = strdup("STATUS-VERBOSE");
 			break;
 	}
 	if(cmd == NULL)
 		return -1;
 	if((p = realloc(wpa->queue, sizeof(*p) * (wpa->queue_cnt + 1))) == NULL)
+	{
+		free(cmd);
 		return -1;
+	}
 	wpa->queue = p;
 	p = &wpa->queue[wpa->queue_cnt];
 	p->command = command;
-	p->buf = strdup(cmd);
+	p->buf = cmd;
 	p->buf_cnt = strlen(cmd);
-	if(p->buf == NULL)
-		return -1;
 	if(wpa->queue_cnt++ == 0)
 		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
@@ -234,6 +235,9 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 /* wpa_reset */
 static int _wpa_reset(WPA * wpa)
 {
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s()\n", __func__);
+#endif
 	_wpa_stop(wpa);
 	return _wpa_start(wpa);
 }
@@ -648,7 +652,10 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 			return FALSE;
 	}
 	if(entry->buf_cnt != 0)
-		return TRUE;
+	{
+		_wpa_reset(wpa);
+		return FALSE;
+	}
 	wpa->rd_source = g_io_add_watch(wpa->channel, G_IO_IN,
 			_on_watch_can_read, wpa);
 	wpa->wr_source = 0;
