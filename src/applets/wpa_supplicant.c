@@ -726,9 +726,6 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			}
 			if(res > 3 && strcmp(flags, "DISABLED") == 0)
 				n->enabled = 0;
-			else if(res >= 3 && wpa->networks_cur < 0)
-				/* XXX may not be the only one enabled */
-				wpa->networks_cur = wpa->networks_cnt - 1;
 			if(res > 3 && strcmp(flags, "CURRENT") == 0)
 			{
 				wpa->networks_cur = wpa->networks_cnt - 1;
@@ -743,6 +740,21 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 		i = j;
 	}
 	free(p);
+	if(wpa->networks_cur < 0)
+	{
+		/* determine if only one network is enabled */
+		for(i = 0, j = 0; i < wpa->networks_cnt; i++)
+			if(wpa->networks[i].enabled)
+				j++;
+		if(wpa->networks_cnt > 1 && j == 1)
+			for(i = 0, j = 0; i < wpa->networks_cnt; i++)
+				if(wpa->networks[i].enabled)
+				{
+					/* set as the current network */
+					wpa->networks_cur = i;
+					break;
+				}
+	}
 }
 
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
