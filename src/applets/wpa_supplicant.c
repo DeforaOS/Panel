@@ -173,7 +173,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
-	wpa->store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_STRING);
+	wpa->store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_UINT,
+			G_TYPE_UINT, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -555,9 +556,11 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 {
 	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
 	GtkWidget * menuitem;
+	GtkWidget * image;
 	GtkTreeIter iter;
 	gboolean valid;
 	gchar * bssid;
+	guint level;
 	gchar * ssid;
 
 	if((valid = gtk_tree_model_get_iter_first(model, &iter)) == FALSE)
@@ -566,9 +569,15 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
 	{
-		gtk_tree_model_get(model, &iter, 0, &bssid, 1, &ssid, -1);
+		gtk_tree_model_get(model, &iter, 0, &bssid, 2, &level,
+				3, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
+		/* FIXME use the relevant icon (and our own) */
+		image = gtk_image_new_from_icon_name("phone-signal-00",
+				GTK_ICON_SIZE_MENU);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
+				image);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 		g_free(bssid);
 		g_free(ssid);
@@ -841,9 +850,10 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					flags1, flags2, ssid);
 #endif
 			gtk_list_store_append(wpa->store, &iter);
-			gtk_list_store_set(wpa->store, &iter, 0, bssid, -1);
+			gtk_list_store_set(wpa->store, &iter, 0, bssid,
+					1, frequency, 2, level, -1);
 			if(res == 6)
-				gtk_list_store_set(wpa->store, &iter, 1, ssid,
+				gtk_list_store_set(wpa->store, &iter, 3, ssid,
 						-1);
 		}
 		i = j;
