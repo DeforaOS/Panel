@@ -494,7 +494,7 @@ static void _on_clicked(gpointer data)
 					menuitem));
 		g_object_set_data(G_OBJECT(menuitem), "network",
 				&wpa->networks[i]);
-		if(i == wpa->networks_cur)
+		if(wpa->networks_cur >= 0 && i == (size_t)wpa->networks_cur)
 			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 						menuitem), TRUE);
 		g_signal_connect(menuitem, "toggled", G_CALLBACK(
