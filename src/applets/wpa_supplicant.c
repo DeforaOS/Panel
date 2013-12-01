@@ -338,7 +338,7 @@ static gboolean _start_timeout(gpointer data)
 	/* create the local socket */
 	memset(&lu, 0, sizeof(lu));
 	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", wpa->path)
-			>= sizeof(lu.sun_path))
+			>= (int)sizeof(lu.sun_path))
 	{
 		unlink(wpa->path);
 		/* XXX make sure this error is explicit enough */
