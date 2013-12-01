@@ -179,6 +179,7 @@ static gboolean _init_timeout(gpointer data)
 	int ret = TRUE;
 	WPA * wpa = data;
 	char const path[] = WPA_SUPPLICANT_PATH;
+	char const * p;
 	DIR * dir;
 	struct dirent * de;
 	struct stat st;
@@ -188,8 +189,10 @@ static gboolean _init_timeout(gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
-	snprintf(wpa->path, sizeof(wpa->path), "%s",
-			TMPDIR "/panel_wpa_supplicant.XXXXXX");
+	if((p = getenv("TMPDIR")) == NULL)
+		p = TMPDIR;
+	snprintf(wpa->path, sizeof(wpa->path), "%s%s", p,
+			"/panel_wpa_supplicant.XXXXXX");
 	if(mktemp(wpa->path) == NULL)
 	{
 		wpa->helper->error(NULL, "mktemp", 1);
