@@ -49,7 +49,12 @@
 /* wpa_supplicant */
 /* private */
 /* types */
-typedef enum _WPACommand { WC_LIST_NETWORKS, WC_STATUS } WPACommand;
+typedef enum _WPACommand
+{
+	WC_LIST_NETWORKS = 0,
+	WC_REASSOCIATE,
+	WC_STATUS
+} WPACommand;
 
 typedef struct _WPAEntry
 {
@@ -209,6 +214,9 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 		case WC_LIST_NETWORKS:
 			cmd = strdup("LIST_NETWORKS");
 			break;
+		case WC_REASSOCIATE:
+			cmd = strdup("REASSOCIATE");
+			break;
 		case WC_STATUS:
 			cmd = strdup("STATUS-VERBOSE");
 			break;
@@ -340,6 +348,8 @@ static gboolean _start_timeout(gpointer data)
 		g_io_channel_set_buffered(wpa->channel, FALSE);
 		_on_timeout(wpa);
 		wpa->source = g_timeout_add(5000, _on_timeout, wpa);
+		wpa->rd_source = g_io_add_watch(wpa->channel, G_IO_IN,
+				_on_watch_can_read, wpa);
 		ret = FALSE;
 		break;
 	}
@@ -403,31 +413,46 @@ static void _wpa_stop(WPA * wpa)
 /* on_clicked */
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
+/* callbacks */
+static void _clicked_on_reassociate(gpointer data);
 
 static void _on_clicked(gpointer data)
 {
 	WPA * wpa = data;
 	GtkWidget * menu;
 	GtkWidget * menuitem;
+	GtkWidget * submenu;
 	size_t i;
 
 	menu = gtk_menu_new();
 	/* FIXME summarize the status instead */
 	menuitem = gtk_image_menu_item_new_with_label("Network list");
-	gtk_widget_set_sensitive(menuitem, FALSE);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	menuitem = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	/* FIXME add a list of actions */
+	submenu = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
 	for(i = 0; i < wpa->networks_cnt; i++)
 	{
 		menuitem = gtk_image_menu_item_new_with_label(wpa->networks[i]);
 		gtk_widget_set_sensitive(menuitem, FALSE);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
 	}
+	/* actions */
+	menuitem = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	menuitem = gtk_menu_item_new_with_label("Reassociate");
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_reassociate), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
 			wpa, 0, gtk_get_current_event_time());
+}
+
+static void _clicked_on_reassociate(gpointer data)
+{
+	WPA * wpa = data;
+
+	_wpa_queue(wpa, WC_REASSOCIATE);
 }
 
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
@@ -461,7 +486,6 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data)
 {
-	int ret = FALSE;
 	WPA * wpa = data;
 	WPAEntry * entry = &wpa->queue[0];
 	char buf[1024]; /* XXX in wpa */
@@ -483,9 +507,9 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	{
 		case G_IO_STATUS_NORMAL:
 			if(entry->command == WC_LIST_NETWORKS)
-				ret = _read_list_networks(wpa, buf, cnt);
+				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_STATUS)
-				ret = _read_status(wpa, buf, cnt);
+				_read_status(wpa, buf, cnt);
 			break;
 		case G_IO_STATUS_ERROR:
 			_wpa_error(wpa, error->message, 1);
@@ -494,23 +518,16 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			_wpa_reset(wpa);
 			return FALSE;
 	}
-	if(ret == TRUE)
-		return TRUE;
-	wpa->rd_source = 0;
 	memmove(entry, &wpa->queue[1], sizeof(*entry) * (--wpa->queue_cnt));
-	if(wpa->queue_cnt == 0)
-		return FALSE;
-	/* FIXME maybe wrong */
-	wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
-			_on_watch_can_write, wpa);
-	return ret;
+	if(wpa->queue_cnt != 0 && wpa->wr_source == 0)
+		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
+				_on_watch_can_write, wpa);
+	return TRUE;
 }
 
 static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 {
-#ifndef DEBUG
 	char ** n;
-#endif
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -545,7 +562,7 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			ssid[sizeof(ssid) - 1] = '\0';
 #ifdef DEBUG
 			fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
-#else
+#endif
 			/* FIXME store the scan results instead */
 			if((n = realloc(wpa->networks, sizeof(*n)
 							* (wpa->networks_cnt
@@ -557,7 +574,6 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 				if(wpa->networks[wpa->networks_cnt] != NULL)
 					wpa->networks_cnt++;
 			}
-#endif
 			if(strcmp(flags, "[CURRENT]") == 0)
 			{
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
@@ -657,8 +673,6 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 		_wpa_reset(wpa);
 		return FALSE;
 	}
-	wpa->rd_source = g_io_add_watch(wpa->channel, G_IO_IN,
-			_on_watch_can_read, wpa);
 	wpa->wr_source = 0;
 	return FALSE;
 }
