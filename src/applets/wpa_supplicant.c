@@ -574,7 +574,7 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 				if(wpa->networks[wpa->networks_cnt] != NULL)
 					wpa->networks_cnt++;
 			}
-			if(strcmp(flags, "[CURRENT]") == 0)
+			if(res > 3 && strcmp(flags, "[CURRENT]") == 0)
 			{
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
