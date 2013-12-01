@@ -26,6 +26,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +54,7 @@ typedef enum _WPACommand
 {
 	WC_LIST_NETWORKS = 0,
 	WC_REASSOCIATE,
+	WC_SELECT_NETWORK,		/* unsigned int id */
 	WC_STATUS
 } WPACommand;
 
@@ -60,6 +62,7 @@ typedef struct _WPANetwork
 {
 	unsigned int id;
 	char * name;
+	int current;
 } WPANetwork;
 
 typedef struct _WPAEntry
@@ -207,6 +210,8 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 /* wpa_queue */
 static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 {
+	va_list ap;
+	unsigned int u;
 	char * cmd = NULL;
 	WPAEntry * p;
 
@@ -215,6 +220,7 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 #endif
 	if(wpa->channel == NULL)
 		return -1;
+	va_start(ap, command);
 	switch(command)
 	{
 		case WC_LIST_NETWORKS:
@@ -223,10 +229,15 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 		case WC_REASSOCIATE:
 			cmd = strdup("REASSOCIATE");
 			break;
+		case WC_SELECT_NETWORK:
+			u = va_arg(ap, unsigned int);
+			cmd = g_strdup_printf("SELECT_NETWORK %u", u);
+			break;
 		case WC_STATUS:
 			cmd = strdup("STATUS-VERBOSE");
 			break;
 	}
+	va_end(ap);
 	if(cmd == NULL)
 		return -1;
 	if((p = realloc(wpa->queue, sizeof(*p) * (wpa->queue_cnt + 1))) == NULL)
@@ -420,6 +431,7 @@ static void _wpa_stop(WPA * wpa)
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 /* callbacks */
+static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data);
 static void _clicked_on_reassociate(gpointer data);
 
 static void _on_clicked(gpointer data)
@@ -428,6 +440,7 @@ static void _on_clicked(gpointer data)
 	GtkWidget * menu;
 	GtkWidget * menuitem;
 	GtkWidget * submenu;
+	GSList * group = NULL;
 	size_t i;
 
 	menu = gtk_menu_new();
@@ -438,9 +451,17 @@ static void _on_clicked(gpointer data)
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
 	for(i = 0; i < wpa->networks_cnt; i++)
 	{
-		menuitem = gtk_image_menu_item_new_with_label(
+		menuitem = gtk_radio_menu_item_new_with_label(group,
 				wpa->networks[i].name);
-		gtk_widget_set_sensitive(menuitem, FALSE);
+		group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(
+					menuitem));
+		g_object_set_data(G_OBJECT(menuitem), "network",
+				&wpa->networks[i]);
+		if(wpa->networks[i].current != 0)
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+						menuitem), TRUE);
+		g_signal_connect(menuitem, "toggled", G_CALLBACK(
+					_clicked_on_network_toggled), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
 	}
 	/* actions */
@@ -453,6 +474,20 @@ static void _on_clicked(gpointer data)
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
 			wpa, 0, gtk_get_current_event_time());
+}
+
+static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
+{
+	WPA * wpa = data;
+	WPANetwork * network = g_object_get_data(G_OBJECT(widget), "network");
+	size_t i;
+
+	if(network == NULL)
+		return;
+	for(i = 0; i < wpa->networks_cnt; i++)
+		wpa->networks[i].current = 0;
+	network->current = 1;
+	_wpa_queue(wpa, WC_SELECT_NETWORK, network->id);
 }
 
 static void _clicked_on_reassociate(gpointer data)
@@ -513,6 +548,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	switch(status)
 	{
 		case G_IO_STATUS_NORMAL:
+			if(strcmp(buf, "OK\n") == 0)
+				break;
 			if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_STATUS)
@@ -576,16 +613,17 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 								+ 1))) != NULL)
 			{
 				wpa->networks = n;
+				n = &wpa->networks[wpa->networks_cnt];
 				/* XXX ignore errors */
-				wpa->networks[wpa->networks_cnt].id = u;
-				wpa->networks[wpa->networks_cnt].name
-					= strdup(ssid);
-				if(wpa->networks[wpa->networks_cnt].name
-						!= NULL)
+				n->id = u;
+				n->name = strdup(ssid);
+				n->current = 0;
+				if(n->name != NULL)
 					wpa->networks_cnt++;
 			}
 			if(res > 3 && strcmp(flags, "[CURRENT]") == 0)
 			{
+				n->current = 0;
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
