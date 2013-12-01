@@ -307,7 +307,6 @@ static gboolean _start_timeout(gpointer data)
 		unlink(wpa->path);
 		return _wpa_error(wpa, wpa->path, TRUE);
 	}
-	unlink(wpa->path);
 	/* connect to the wpa_supplicant daemon */
 	memset(&ru, 0, sizeof(ru));
 	ru.sun_family = AF_UNIX;
@@ -346,6 +345,7 @@ static gboolean _start_timeout(gpointer data)
 	}
 	if(ret == TRUE)
 	{
+		unlink(wpa->path);
 		close(wpa->fd);
 		wpa->fd = -1;
 	}
@@ -392,6 +392,7 @@ static void _wpa_stop(WPA * wpa)
 		wpa->channel = NULL;
 		wpa->fd = -1;
 	}
+	unlink(wpa->path);
 	if(wpa->fd != -1 && close(wpa->fd) != 0)
 		wpa->helper->error(NULL, wpa->path, 1);
 	wpa->fd = -1;
