@@ -56,6 +56,12 @@ typedef enum _WPACommand
 	WC_STATUS
 } WPACommand;
 
+typedef struct _WPANetwork
+{
+	unsigned int id;
+	char * name;
+} WPANetwork;
+
 typedef struct _WPAEntry
 {
 	WPACommand command;
@@ -78,7 +84,7 @@ typedef struct _PanelApplet
 	WPAEntry * queue;
 	size_t queue_cnt;
 
-	char ** networks;
+	WPANetwork * networks;
 	size_t networks_cnt;
 
 	/* widgets */
@@ -390,7 +396,7 @@ static void _wpa_stop(WPA * wpa)
 	wpa->queue_cnt = 0;
 	/* free the network list */
 	for(i = 0; i < wpa->networks_cnt; i++)
-		free(wpa->networks[i]);
+		free(wpa->networks[i].name);
 	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
@@ -432,7 +438,8 @@ static void _on_clicked(gpointer data)
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
 	for(i = 0; i < wpa->networks_cnt; i++)
 	{
-		menuitem = gtk_image_menu_item_new_with_label(wpa->networks[i]);
+		menuitem = gtk_image_menu_item_new_with_label(
+				wpa->networks[i].name);
 		gtk_widget_set_sensitive(menuitem, FALSE);
 		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
 	}
@@ -527,7 +534,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 
 static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 {
-	char ** n;
+	WPANetwork * n;
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -539,7 +546,7 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 	int res;
 
 	for(i = 0; i < wpa->networks_cnt; i++)
-		free(wpa->networks[i]);
+		free(wpa->networks[i].name);
 	free(wpa->networks);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
@@ -570,8 +577,11 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			{
 				wpa->networks = n;
 				/* XXX ignore errors */
-				wpa->networks[wpa->networks_cnt] = strdup(ssid);
-				if(wpa->networks[wpa->networks_cnt] != NULL)
+				wpa->networks[wpa->networks_cnt].id = u;
+				wpa->networks[wpa->networks_cnt].name
+					= strdup(ssid);
+				if(wpa->networks[wpa->networks_cnt].name
+						!= NULL)
 					wpa->networks_cnt++;
 			}
 			if(res > 3 && strcmp(flags, "[CURRENT]") == 0)
