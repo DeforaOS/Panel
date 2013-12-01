@@ -54,6 +54,8 @@ typedef enum _WPACommand
 {
 	WC_LIST_NETWORKS = 0,
 	WC_REASSOCIATE,
+	WC_SCAN,
+	WC_SCAN_RESULTS,
 	WC_SELECT_NETWORK,		/* unsigned int id */
 	WC_STATUS
 } WPACommand;
@@ -228,6 +230,12 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 			break;
 		case WC_REASSOCIATE:
 			cmd = strdup("REASSOCIATE");
+			break;
+		case WC_SCAN:
+			cmd = strdup("SCAN");
+			break;
+		case WC_SCAN_RESULTS:
+			cmd = strdup("SCAN_RESULTS");
 			break;
 		case WC_SELECT_NETWORK:
 			u = va_arg(ap, unsigned int);
@@ -515,22 +523,31 @@ static gboolean _on_timeout(gpointer data)
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
 	if(wpa->networks == NULL)
+	{
 		_wpa_queue(wpa, WC_LIST_NETWORKS);
+#ifdef DEBUG
+		_wpa_queue(wpa, WC_SCAN);
+#endif
+	}
 	_wpa_queue(wpa, WC_STATUS);
+#ifdef DEBUG
+	_wpa_queue(wpa, WC_SCAN_RESULTS);
+#endif
 	return TRUE;
 }
 
 
 /* on_watch_can_read */
-static gboolean _read_status(WPA * wpa, char const * buf, size_t cnt);
-static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
+static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
+static void _read_status(WPA * wpa, char const * buf, size_t cnt);
+static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 
 static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data)
 {
 	WPA * wpa = data;
 	WPAEntry * entry = &wpa->queue[0];
-	char buf[1024]; /* XXX in wpa */
+	char buf[4096]; /* XXX in wpa */
 	gsize cnt;
 	GError * error = NULL;
 	GIOStatus status;
@@ -552,6 +569,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 				break;
 			if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
+			else if(entry->command == WC_SCAN_RESULTS)
+				_read_scan_results(wpa, buf, cnt);
 			else if(entry->command == WC_STATUS)
 				_read_status(wpa, buf, cnt);
 			break;
@@ -569,7 +588,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	return TRUE;
 }
 
-static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
+static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 {
 	WPANetwork * n;
 	size_t i;
@@ -635,10 +654,55 @@ static gboolean _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 		i = j;
 	}
 	free(p);
-	return FALSE;
 }
 
-static gboolean _read_status(WPA * wpa, char const * buf, size_t cnt)
+static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
+{
+	size_t i;
+	size_t j;
+	char * p = NULL;
+	char * q;
+	int res;
+	char bssid[18];
+	unsigned int frequency;
+	unsigned int level;
+	char flags1[32];
+	char flags2[32];
+	char ssid[80];
+
+	for(i = 0; i < cnt;)
+	{
+		for(j = i; j < cnt; j++)
+			if(buf[j] == '\n')
+				break;
+		if((q = realloc(p, ++j - i)) == NULL)
+			continue;
+		p = q;
+		snprintf(p, j - i, "%s", &buf[i]);
+		p[j - i - 1] = '\0';
+#ifdef DEBUG
+		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
+#endif
+		if((res = sscanf(p, "%17s %u %u [%31[^]]][%31[^]] %79s", bssid,
+						&frequency, &level, flags1,
+						flags2, ssid)) == 6)
+		{
+			bssid[sizeof(bssid) - 1] = '\0';
+			flags1[sizeof(flags1) - 1] = '\0';
+			flags2[sizeof(flags2) - 1] = '\0';
+			ssid[sizeof(ssid) - 1] = '\0';
+#ifdef DEBUG
+			fprintf(stderr, "DEBUG: %s() \"%s\" %u %u %s %s %s\n",
+					__func__, bssid, frequency, level,
+					flags1, flags2, ssid);
+#endif
+		}
+		i = j;
+	}
+	free(p);
+}
+
+static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 {
 	size_t i;
 	size_t j;
@@ -677,7 +741,6 @@ static gboolean _read_status(WPA * wpa, char const * buf, size_t cnt)
 		i = j;
 	}
 	free(p);
-	return FALSE;
 }
 
 
