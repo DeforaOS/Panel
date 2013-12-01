@@ -512,12 +512,18 @@ static void _on_clicked(gpointer data)
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* actions: reassociate */
-	menuitem = gtk_menu_item_new_with_label("Reassociate");
+	menuitem = gtk_image_menu_item_new_with_label("Reassociate");
+#if GTK_CHECK_VERSION(2, 12, 0)
+	image = gtk_image_new_from_stock(GTK_STOCK_DISCARD, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
+#endif
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_reassociate), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* actions: rescan */
-	menuitem = gtk_menu_item_new_with_label("Rescan");
+	menuitem = gtk_image_menu_item_new_with_label("Rescan");
+	image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_rescan), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
