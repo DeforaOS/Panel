@@ -610,7 +610,9 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 					_clicked_on_network_activated), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 		g_free(bssid);
+#if 0 /* XXX memory leak (for g_object_set_data() above) */
 		g_free(ssid);
+#endif
 	}
 }
 
@@ -622,6 +624,9 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 	if((ssid = g_object_get_data(G_OBJECT(widget), "ssid")) == NULL)
 		/* FIXME implement */
 		return;
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
+#endif
 	_wpa_queue(wpa, WC_ADD_NETWORK, ssid);
 }
 
@@ -786,7 +791,7 @@ static void _read_add_network(WPA * wpa, char const * buf, size_t cnt,
 	if(buf[0] == '\0' || errno != 0)
 		return;
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() %u\n", __func__, id);
+	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
 	_wpa_queue(wpa, WC_SET_NETWORK, id, "ssid", ssid);
 	_wpa_queue(wpa, WC_ENABLE_NETWORK, id);
