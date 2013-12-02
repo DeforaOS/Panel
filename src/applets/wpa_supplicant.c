@@ -61,7 +61,8 @@ typedef enum _WPACommand
 	WC_SCAN_RESULTS,
 	WC_SELECT_NETWORK,	/* unsigned int id */
 	WC_SET_NETWORK,		/* unsigned int id, key, value */
-	WC_STATUS
+	WC_STATUS,
+	WC_TERMINATE
 } WPACommand;
 
 typedef struct _WPANetwork
@@ -278,6 +279,9 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 			break;
 		case WC_STATUS:
 			cmd = strdup("STATUS-VERBOSE");
+			break;
+		case WC_TERMINATE:
+			cmd = strdup("TERMINATE");
 			break;
 	}
 	va_end(ap);
