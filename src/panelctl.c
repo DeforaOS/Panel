@@ -60,11 +60,15 @@ static int _panelctl(PanelMessageShow what, gboolean show)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s [-B|-S|-T|-b|-t]\n"
+	fprintf(stderr, _("Usage: %s [-B|-L|-R|-S|-T|-b|-l|-r|-t]\n"
 "  -B	Show the bottom panel\n"
+"  -L	Show the left panel\n"
+"  -R	Show the right panel\n"
 "  -S	Display or change settings\n"
 "  -T	Show the top panel\n"
 "  -b	Hide the bottom panel\n"
+"  -l	Hide the left panel\n"
+"  -r	Hide the right panel\n"
 "  -t	Hide the top panel\n"), PROGNAME);
 	return 1;
 }
@@ -83,11 +87,19 @@ int main(int argc, char * argv[])
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
-	while((o = getopt(argc, argv, "BSTbt")) != -1)
+	while((o = getopt(argc, argv, "BLRSTblrt")) != -1)
 		switch(o)
 		{
 			case 'B':
 				what = PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
+				show = TRUE;
+				break;
+			case 'L':
+				what = PANEL_MESSAGE_SHOW_PANEL_LEFT;
+				show = TRUE;
+				break;
+			case 'R':
+				what = PANEL_MESSAGE_SHOW_PANEL_RIGHT;
 				show = TRUE;
 				break;
 			case 'S':
@@ -100,6 +112,14 @@ int main(int argc, char * argv[])
 				break;
 			case 'b':
 				what = PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
+				show = FALSE;
+				break;
+			case 'l':
+				what = PANEL_MESSAGE_SHOW_PANEL_LEFT;
+				show = FALSE;
+				break;
+			case 'r':
+				what = PANEL_MESSAGE_SHOW_PANEL_RIGHT;
 				show = FALSE;
 				break;
 			case 't':

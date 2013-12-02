@@ -410,6 +410,12 @@ static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 			if(what & PANEL_MESSAGE_SHOW_PANEL_BOTTOM
 					&& panel->bottom != NULL)
 				panel_window_show(panel->bottom, show);
+			if(what & PANEL_MESSAGE_SHOW_PANEL_LEFT
+					&& panel->left != NULL)
+				panel_window_show(panel->left, show);
+			if(what & PANEL_MESSAGE_SHOW_PANEL_RIGHT
+					&& panel->right != NULL)
+				panel_window_show(panel->right, show);
 			if(what & PANEL_MESSAGE_SHOW_PANEL_TOP
 					&& panel->top != NULL)
 				panel_window_show(panel->top, show);
