@@ -52,6 +52,7 @@ typedef struct _PanelApplet
 	guint idle;
 	gboolean refresh;
 	time_t refresh_mti;
+	GtkWidget * widget;
 } Main;
 
 typedef struct _MainMenu
@@ -171,7 +172,8 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			main);
 	gtk_container_add(GTK_CONTAINER(ret), hbox);
 	gtk_widget_show_all(ret);
-	*widget = ret;
+	main->widget = ret;
+	*widget = main->widget;
 	return main;
 }
 
@@ -579,7 +581,15 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data)
 {
 	Main * main = data;
+	GtkAllocation a;
 
+#if GTK_CHECK_VERSION(2, 18, 0)
+	gtk_widget_get_allocation(main->widget, &a);
+#else
+	a = main->widget->allocation;
+#endif
+	*x = a.x;
+	*y = a.y;
 	main->helper->position_menu(main->helper->panel, menu, x, y, push_in);
 }
 

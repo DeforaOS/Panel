@@ -248,15 +248,16 @@ static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 #endif
 	if(req.height <= 0)
 		return;
-	*x = (req.width < panel->root_width - PANEL_BORDER_WIDTH)
-		? PANEL_BORDER_WIDTH : 0;
 	if(position == PANEL_POSITION_TOP)
 		*y = panel_window_get_height(panel->top);
 	else if(position == PANEL_POSITION_BOTTOM)
 		*y = panel->root_height
 			- panel_window_get_height(panel->bottom) - req.height;
-	else /* XXX generic */
-		*y = panel->root_height - req.height;
+	else if(position == PANEL_POSITION_LEFT)
+		*x = panel_window_get_width(panel->left);
+	else if(position == PANEL_POSITION_RIGHT)
+		*x = panel->root_width
+			- panel_window_get_width(panel->right) - req.width;
 	*push_in = TRUE;
 }
 

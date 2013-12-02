@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,9 @@
 typedef enum _PanelPosition
 {
 	PANEL_POSITION_BOTTOM	= 0x1,
-	PANEL_POSITION_TOP	= 0x2
+	PANEL_POSITION_TOP	= 0x2,
+	PANEL_POSITION_LEFT	= 0x4,
+	PANEL_POSITION_RIGHT	= 0x8
 } PanelPosition;
 # define PANEL_POSITION_DEFAULT PANEL_POSITION_BOTTOM
 

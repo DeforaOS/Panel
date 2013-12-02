@@ -199,6 +199,16 @@ void panel_window_get_size(PanelWindow * panel, gint * width, gint * height)
 }
 
 
+/* panel_window_get_width */
+int panel_window_get_width(PanelWindow * panel)
+{
+	gint width;
+
+	gtk_window_get_size(panel, &width, NULL);
+	return width;
+}
+
+
 /* panel_window_set_accept_focus */
 void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept)
 {

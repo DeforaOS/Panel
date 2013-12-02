@@ -69,6 +69,8 @@ struct _Panel
 	PanelWindow * top;
 	PanelAppletHelper bottom_helper;
 	PanelWindow * bottom;
+	PanelWindow * left;
+	PanelWindow * right;
 
 	GdkScreen * screen;
 	GdkWindow * root;
@@ -192,6 +194,8 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->bottom_helper = panel->top_helper;
 	panel->bottom_helper.position_menu = _panel_helper_position_menu_bottom;
 	panel->bottom = NULL;
+	panel->left = NULL;
+	panel->right = NULL;
 	iconsize = GTK_ICON_SIZE_INVALID;
 	if(panel->prefs.iconsize != NULL)
 		iconsize = gtk_icon_size_from_name(panel->prefs.iconsize);
@@ -321,6 +325,12 @@ static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 		case PANEL_POSITION_TOP:
 			variable = "top_size";
 			break;
+		case PANEL_POSITION_LEFT:
+			variable = "left_size";
+			break;
+		case PANEL_POSITION_RIGHT:
+			variable = "right_size";
+			break;
 	}
 	if(variable != NULL)
 		p = config_get(panel->config, NULL, variable);
@@ -446,6 +456,10 @@ void panel_delete(Panel * panel)
 		panel_window_delete(panel->top);
 	if(panel->bottom != NULL)
 		panel_window_delete(panel->bottom);
+	if(panel->left != NULL)
+		panel_window_delete(panel->left);
+	if(panel->right != NULL)
+		panel_window_delete(panel->right);
 	if(panel->config != NULL)
 		config_delete(panel->config);
 	object_delete(panel);

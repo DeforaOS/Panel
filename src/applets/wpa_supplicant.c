@@ -103,6 +103,7 @@ typedef struct _PanelApplet
 	ssize_t networks_cur;
 
 	/* widgets */
+	GtkWidget * widget;
 	GtkWidget * image;
 #ifndef EMBEDDED
 	GtkWidget * label;
@@ -199,6 +200,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		gtk_container_add(GTK_CONTAINER(ret), hbox);
 		*widget = ret;
 	}
+	wpa->widget = *widget;
 	return wpa;
 }
 
@@ -699,7 +701,15 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data)
 {
 	WPA * wpa = data;
+	GtkAllocation a;
 
+#if GTK_CHECK_VERSION(2, 18, 0)
+	gtk_widget_get_allocation(wpa->widget, &a);
+#else
+	a = wpa->widget->allocation;
+#endif
+	*x = a.x;
+	*y = a.y;
 	wpa->helper->position_menu(wpa->helper->panel, menu, x, y, push_in);
 }
 
