@@ -52,6 +52,8 @@
 typedef enum _WPACommand
 {
 	WC_ADD_NETWORK = 0,	/* char const * ssid */
+	WC_ATTACH,
+	WC_DETACH,
 	WC_ENABLE_NETWORK,	/* unsigned int id */
 	WC_LIST_NETWORKS,
 	WC_REASSOCIATE,
@@ -243,6 +245,12 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 		case WC_ADD_NETWORK:
 			cmd = g_strdup_printf("ADD_NETWORK");
 			ssid = va_arg(ap, char const *);
+			break;
+		case WC_ATTACH:
+			cmd = strdup("ATTACH");
+			break;
+		case WC_DETACH:
+			cmd = strdup("DETACH");
 			break;
 		case WC_ENABLE_NETWORK:
 			u = va_arg(ap, unsigned int);
