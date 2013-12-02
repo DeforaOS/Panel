@@ -599,7 +599,8 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 				3, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
-		g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
+		if(ssid != NULL)
+			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
 		/* FIXME use the relevant icon (and our own) */
 		image = gtk_image_new_from_icon_name("phone-signal-00",
 				GTK_ICON_SIZE_MENU);
@@ -711,7 +712,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data)
 {
 	WPA * wpa = data;
-	WPAEntry * entry = &wpa->queue[0];
+	WPAEntry * entry = (wpa->queue_cnt > 0) ? &wpa->queue[0] : NULL;
 	char buf[4096]; /* XXX in wpa */
 	gsize cnt;
 	GError * error = NULL;
@@ -730,6 +731,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	switch(status)
 	{
 		case G_IO_STATUS_NORMAL:
+			if(entry == NULL)
+				break;
 			if(cnt == 3 && strncmp(buf, "OK\n", cnt) == 0)
 				break;
 			if(cnt == 5 && strncmp(buf, "FAIL\n", cnt) == 0)
@@ -755,9 +758,14 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			_wpa_reset(wpa);
 			return FALSE;
 	}
-	free(entry->ssid);
-	memmove(entry, &wpa->queue[1], sizeof(*entry) * (--wpa->queue_cnt));
-	if(wpa->queue_cnt != 0 && wpa->wr_source == 0)
+	if(entry != NULL)
+	{
+		free(wpa->queue[0].ssid);
+		memmove(&wpa->queue[0], &wpa->queue[1],
+				sizeof(wpa->queue[0]) * (--wpa->queue_cnt));
+	}
+	/* schedule commands again */
+	if(wpa->queue_cnt > 0 && wpa->wr_source == 0)
 		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
 	return TRUE;
@@ -817,7 +825,7 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%u %79[^\t] %79[^\t] [%79[^]]", &u, ssid,
+		if((res = sscanf(p, "%u %79[^\t] %79[^\t] [%79[^]]]", &u, ssid,
 						bssid, flags)) >= 3)
 		{
 			ssid[sizeof(ssid) - 1] = '\0';
@@ -1014,10 +1022,9 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 			return FALSE;
 	}
 	if(entry->buf_cnt != 0)
-	{
+		/* partial packet */
 		_wpa_reset(wpa);
-		return FALSE;
-	}
-	wpa->wr_source = 0;
+	else
+		wpa->wr_source = 0;
 	return FALSE;
 }
