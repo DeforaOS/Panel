@@ -503,6 +503,7 @@ static void _wpa_stop(WPA * wpa)
 /* on_clicked */
 static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
+static GtkWidget * _clicked_network_view_image(guint level);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 /* callbacks */
@@ -619,9 +620,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 				? ssid : bssid);
 		if(ssid != NULL)
 			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
-		/* FIXME use the relevant icon (and our own) */
-		image = gtk_image_new_from_icon_name("phone-signal-00",
-				GTK_ICON_SIZE_MENU);
+		image = _clicked_network_view_image(level);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
 				image);
 		g_signal_connect(menuitem, "activate", G_CALLBACK(
@@ -632,6 +631,24 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		g_free(ssid);
 #endif
 	}
+}
+
+static GtkWidget * _clicked_network_view_image(guint level)
+{
+	char const * name;
+
+	/* FIXME check if the mapping is right (and use our own icons) */
+	if(level >= 100)
+		name = "phone-signal-100";
+	else if(level >= 75)
+		name = "phone-signal-75";
+	else if(level >= 50)
+		name = "phone-signal-50";
+	else if(level >= 25)
+		name = "phone-signal-25";
+	else
+		name = "phone-signal-00";
+	return gtk_image_new_from_icon_name(name, GTK_ICON_SIZE_MENU);
 }
 
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
