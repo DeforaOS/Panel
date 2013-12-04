@@ -13,7 +13,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - open two separate connections (commands, unsolicited messages)
  * - configuration value for the interface to track */
 
 
@@ -67,13 +66,6 @@ typedef enum _WPACommand
 	WC_TERMINATE
 } WPACommand;
 
-typedef struct _WPANetwork
-{
-	unsigned int id;
-	char * name;
-	int enabled;
-} WPANetwork;
-
 typedef struct _WPAEntry
 {
 	WPACommand command;
@@ -83,13 +75,10 @@ typedef struct _WPAEntry
 	char * ssid;
 } WPAEntry;
 
-typedef struct _PanelApplet
+typedef struct _WPAChannel
 {
-	PanelAppletHelper * helper;
-
 	/* FIXME dynamically allocate instead */
 	char path[256];
-	guint source;
 	int fd;
 	GIOChannel * channel;
 	guint rd_source;
@@ -97,6 +86,21 @@ typedef struct _PanelApplet
 
 	WPAEntry * queue;
 	size_t queue_cnt;
+} WPAChannel;
+
+typedef struct _WPANetwork
+{
+	unsigned int id;
+	char * name;
+	int enabled;
+} WPANetwork;
+
+typedef struct _PanelApplet
+{
+	PanelAppletHelper * helper;
+
+	guint source;
+	WPAChannel channel[2];
 
 	WPANetwork * networks;
 	size_t networks_cnt;
@@ -117,7 +121,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _wpa_destroy(WPA * wpa);
 
 static int _wpa_error(WPA * wpa, char const * message, int ret);
-static int _wpa_queue(WPA * wpa, WPACommand command, ...);
+static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
 static int _wpa_reset(WPA * wpa);
 static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
@@ -149,6 +153,8 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* wpa_init */
+static void _init_channel(WPAChannel * channel);
+
 static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	WPA * wpa;
@@ -160,12 +166,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	wpa->helper = helper;
 	wpa->source = 0;
-	wpa->fd = -1;
-	wpa->channel = NULL;
-	wpa->rd_source = 0;
-	wpa->wr_source = 0;
-	wpa->queue = NULL;
-	wpa->queue_cnt = 0;
+	_init_channel(&wpa->channel[0]);
+	_init_channel(&wpa->channel[1]);
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
@@ -204,6 +206,16 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	return wpa;
 }
 
+static void _init_channel(WPAChannel * channel)
+{
+	channel->fd = -1;
+	channel->channel = NULL;
+	channel->rd_source = 0;
+	channel->wr_source = 0;
+	channel->queue = NULL;
+	channel->queue_cnt = 0;
+}
+
 
 /* wpa_destroy */
 static void _wpa_destroy(WPA * wpa)
@@ -226,7 +238,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 
 
 /* wpa_queue */
-static int _wpa_queue(WPA * wpa, WPACommand command, ...)
+static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 {
 	va_list ap;
 	unsigned int u;
@@ -239,7 +251,7 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
 #endif
-	if(wpa->channel == NULL)
+	if(channel->channel == NULL)
 		return -1;
 	va_start(ap, command);
 	switch(command)
@@ -300,20 +312,21 @@ static int _wpa_queue(WPA * wpa, WPACommand command, ...)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, cmd);
 #endif
-	if((p = realloc(wpa->queue, sizeof(*p) * (wpa->queue_cnt + 1))) == NULL)
+	if((p = realloc(channel->queue, sizeof(*p) * (channel->queue_cnt + 1)))
+			== NULL)
 	{
 		free(cmd);
 		return -1;
 	}
-	wpa->queue = p;
-	p = &wpa->queue[wpa->queue_cnt];
+	channel->queue = p;
+	p = &channel->queue[channel->queue_cnt];
 	p->command = command;
 	p->buf = cmd;
 	p->buf_cnt = strlen(cmd);
 	/* XXX may fail */
 	p->ssid = (ssid != NULL) ? strdup(ssid) : NULL;
-	if(wpa->queue_cnt++ == 0)
-		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
+	if(channel->queue_cnt++ == 0)
+		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
 	return 0;
 }
@@ -332,6 +345,7 @@ static int _wpa_reset(WPA * wpa)
 
 /* wpa_start */
 static gboolean _start_timeout(gpointer data);
+static int _timeout_channel(WPA * wpa, WPAChannel * channel);
 
 static int _wpa_start(WPA * wpa)
 {
@@ -348,8 +362,23 @@ static int _wpa_start(WPA * wpa)
 
 static gboolean _start_timeout(gpointer data)
 {
-	gboolean ret = TRUE;
 	WPA * wpa = data;
+
+	if(_timeout_channel(wpa, &wpa->channel[0]) != 0
+			|| _timeout_channel(wpa, &wpa->channel[1]) != 0)
+	{
+		_wpa_stop(wpa);
+		return TRUE;
+	}
+	_on_timeout(wpa);
+	wpa->source = g_timeout_add(5000, _on_timeout, wpa);
+	_wpa_queue(wpa, &wpa->channel[1], WC_ATTACH);
+	return FALSE;
+}
+
+static int _timeout_channel(WPA * wpa, WPAChannel * channel)
+{
+	int ret = -1;
 	char const path[] = WPA_SUPPLICANT_PATH;
 	char const * p;
 	DIR * dir;
@@ -363,15 +392,12 @@ static gboolean _start_timeout(gpointer data)
 #endif
 	if((p = getenv("TMPDIR")) == NULL)
 		p = TMPDIR;
-	snprintf(wpa->path, sizeof(wpa->path), "%s%s", p,
+	snprintf(channel->path, sizeof(channel->path), "%s%s", p,
 			"/panel_wpa_supplicant.XXXXXX");
-	if(mktemp(wpa->path) == NULL)
-	{
-		wpa->helper->error(NULL, "mktemp", 1);
-		return TRUE;
-	}
+	if(mktemp(channel->path) == NULL)
+		return -wpa->helper->error(NULL, "mktemp", 1);
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, wpa->path);
+	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, channel->path);
 #endif
 	if((dir = opendir(path)) == NULL)
 	{
@@ -380,25 +406,25 @@ static gboolean _start_timeout(gpointer data)
 #ifndef EMBEDDED
 		gtk_label_set_text(GTK_LABEL(wpa->label), "Not running");
 #endif
-		return wpa->helper->error(NULL, path, TRUE);
+		return -wpa->helper->error(NULL, path, 1);
 	}
 	/* create the local socket */
 	memset(&lu, 0, sizeof(lu));
-	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", wpa->path)
+	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", channel->path)
 			>= (int)sizeof(lu.sun_path))
 	{
-		unlink(wpa->path);
+		unlink(channel->path);
 		/* XXX make sure this error is explicit enough */
-		return _wpa_error(wpa, wpa->path, TRUE);
+		return -_wpa_error(wpa, channel->path, 1);
 	}
 	lu.sun_family = AF_LOCAL;
-	if((wpa->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
-		return _wpa_error(wpa, "socket", TRUE);
-	if(bind(wpa->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
+	if((channel->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
+		return -_wpa_error(wpa, "socket", 1);
+	if(bind(channel->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
-		close(wpa->fd);
-		unlink(wpa->path);
-		return _wpa_error(wpa, wpa->path, TRUE);
+		close(channel->fd);
+		unlink(channel->path);
+		return -_wpa_error(wpa, channel->path, 1);
 	}
 	/* connect to the wpa_supplicant daemon */
 	memset(&ru, 0, sizeof(ru));
@@ -413,7 +439,8 @@ static gboolean _start_timeout(gpointer data)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, de->d_name);
 #endif
-		if(connect(wpa->fd, (struct sockaddr *)&ru, SUN_LEN(&ru)) != 0)
+		if(connect(channel->fd, (struct sockaddr *)&ru, SUN_LEN(&ru))
+				!= 0)
 		{
 			wpa->helper->error(NULL, "connect", 1);
 			continue;
@@ -422,27 +449,26 @@ static gboolean _start_timeout(gpointer data)
 		fprintf(stderr, "DEBUG: %s() connected\n", __func__);
 #endif
 #ifndef EMBEDDED
+		/* XXX will be done for every channel */
 		gtk_label_set_text(GTK_LABEL(wpa->label), de->d_name);
 #endif
-		wpa->channel = g_io_channel_unix_new(wpa->fd);
+		channel->channel = g_io_channel_unix_new(channel->fd);
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() %p\n", __func__,
-				(void *)wpa->channel);
+				(void *)channel->channel);
 #endif
-		g_io_channel_set_encoding(wpa->channel, NULL, NULL);
-		g_io_channel_set_buffered(wpa->channel, FALSE);
-		_on_timeout(wpa);
-		wpa->source = g_timeout_add(5000, _on_timeout, wpa);
-		wpa->rd_source = g_io_add_watch(wpa->channel, G_IO_IN,
+		g_io_channel_set_encoding(channel->channel, NULL, NULL);
+		g_io_channel_set_buffered(channel->channel, FALSE);
+		channel->rd_source = g_io_add_watch(channel->channel, G_IO_IN,
 				_on_watch_can_read, wpa);
-		ret = FALSE;
+		ret = 0;
 		break;
 	}
-	if(ret == TRUE)
+	if(ret != 0)
 	{
-		unlink(wpa->path);
-		close(wpa->fd);
-		wpa->fd = -1;
+		unlink(channel->path);
+		close(channel->fd);
+		channel->fd = -1;
 	}
 	closedir(dir);
 	return ret;
@@ -450,6 +476,8 @@ static gboolean _start_timeout(gpointer data)
 
 
 /* wpa_stop */
+static void _stop_channel(WPA * wpa, WPAChannel * channel);
+
 static void _wpa_stop(WPA * wpa)
 {
 	size_t i;
@@ -457,25 +485,12 @@ static void _wpa_stop(WPA * wpa)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
-	/* de-register the event sources */
+	/* de-register the event source */
 	if(wpa->source != 0)
 		g_source_remove(wpa->source);
 	wpa->source = 0;
-	if(wpa->rd_source != 0)
-		g_source_remove(wpa->rd_source);
-	wpa->rd_source = 0;
-	if(wpa->wr_source != 0)
-		g_source_remove(wpa->wr_source);
-	wpa->wr_source = 0;
-	/* free the command queue */
-	for(i = 0; i < wpa->queue_cnt; i++)
-	{
-		free(wpa->queue[i].buf);
-		free(wpa->queue[i].ssid);
-	}
-	free(wpa->queue);
-	wpa->queue = NULL;
-	wpa->queue_cnt = 0;
+	_stop_channel(wpa, &wpa->channel[0]);
+	_stop_channel(wpa, &wpa->channel[1]);
 	/* free the network list */
 	gtk_list_store_clear(wpa->store);
 	for(i = 0; i < wpa->networks_cnt; i++)
@@ -484,18 +499,39 @@ static void _wpa_stop(WPA * wpa)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
-	/* close and remove the socket */
-	if(wpa->channel != NULL)
+}
+
+static void _stop_channel(WPA * wpa, WPAChannel * channel)
+{
+	size_t i;
+
+	if(channel->rd_source != 0)
+		g_source_remove(channel->rd_source);
+	channel->rd_source = 0;
+	if(channel->wr_source != 0)
+		g_source_remove(channel->wr_source);
+	channel->wr_source = 0;
+	/* free the command queue */
+	for(i = 0; i < channel->queue_cnt; i++)
 	{
-		g_io_channel_shutdown(wpa->channel, TRUE, NULL);
-		g_io_channel_unref(wpa->channel);
-		wpa->channel = NULL;
-		wpa->fd = -1;
+		free(channel->queue[i].buf);
+		free(channel->queue[i].ssid);
 	}
-	unlink(wpa->path);
-	if(wpa->fd != -1 && close(wpa->fd) != 0)
-		wpa->helper->error(NULL, wpa->path, 1);
-	wpa->fd = -1;
+	free(channel->queue);
+	channel->queue = NULL;
+	channel->queue_cnt = 0;
+	/* close and remove the socket */
+	if(channel->channel != NULL)
+	{
+		g_io_channel_shutdown(channel->channel, TRUE, NULL);
+		g_io_channel_unref(channel->channel);
+		channel->channel = NULL;
+		channel->fd = -1;
+	}
+	unlink(channel->path);
+	if(channel->fd != -1 && close(channel->fd) != 0)
+		wpa->helper->error(NULL, channel->path, 1);
+	channel->fd = -1;
 }
 
 
@@ -654,6 +690,7 @@ static GtkWidget * _clicked_network_view_image(guint level)
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 	char const * ssid;
 
 	if((ssid = g_object_get_data(G_OBJECT(widget), "ssid")) == NULL)
@@ -662,12 +699,13 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
 #endif
-	_wpa_queue(wpa, WC_ADD_NETWORK, ssid);
+	_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
 }
 
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 	WPANetwork * network;
 	size_t i;
 
@@ -677,8 +715,8 @@ static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 	{
 		/* enable every network again */
 		for(i = 0; i < wpa->networks_cnt; i++)
-			_wpa_queue(wpa, WC_ENABLE_NETWORK, i);
-		_wpa_queue(wpa, WC_LIST_NETWORKS);
+			_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
+		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 		return;
 	}
 	/* select this network */
@@ -690,28 +728,31 @@ static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 		}
 		else
 			wpa->networks[i].enabled = 0;
-	_wpa_queue(wpa, WC_SELECT_NETWORK, network->id);
+	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
 }
 
 static void _clicked_on_reassociate(gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 
-	_wpa_queue(wpa, WC_REASSOCIATE);
+	_wpa_queue(wpa, channel, WC_REASSOCIATE);
 }
 
 static void _clicked_on_rescan(gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 
-	_wpa_queue(wpa, WC_SCAN);
+	_wpa_queue(wpa, channel, WC_SCAN);
 }
 
 static void _clicked_on_save_configuration(gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 
-	_wpa_queue(wpa, WC_SAVE_CONFIGURATION);
+	_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 }
 
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
@@ -735,23 +776,24 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 static gboolean _on_timeout(gpointer data)
 {
 	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
 	if(wpa->networks == NULL)
 	{
-		_wpa_queue(wpa, WC_LIST_NETWORKS);
-		_wpa_queue(wpa, WC_SCAN_RESULTS);
+		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+		_wpa_queue(wpa, channel, WC_SCAN_RESULTS);
 	}
-	_wpa_queue(wpa, WC_STATUS);
+	_wpa_queue(wpa, channel, WC_STATUS);
 	return TRUE;
 }
 
 
 /* on_watch_can_read */
-static void _read_add_network(WPA * wpa, char const * buf, size_t cnt,
-		char const * ssid);
+static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
+		size_t cnt, char const * ssid);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
@@ -760,15 +802,24 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data)
 {
 	WPA * wpa = data;
-	WPAEntry * entry = (wpa->queue_cnt > 0) ? &wpa->queue[0] : NULL;
+	WPAChannel * channel;
+	WPAEntry * entry;
 	char buf[4096]; /* XXX in wpa */
 	gsize cnt;
 	GError * error = NULL;
 	GIOStatus status;
 
-	if(condition != G_IO_IN || source != wpa->channel
-			|| wpa->queue_cnt == 0 || entry->buf_cnt != 0)
+	if(condition != G_IO_IN)
 		return FALSE; /* should not happen */
+	if(source == wpa->channel[0].channel
+			&& wpa->channel[0].queue_cnt > 0
+			&& wpa->channel[0].queue[0].buf_cnt == 0)
+		channel = &wpa->channel[0];
+	else if(source == wpa->channel[1].channel)
+		channel = &wpa->channel[1];
+	else
+		return FALSE; /* should not happen */
+	entry = (channel->queue_cnt > 0) ? &channel->queue[0] : NULL;
 	status = g_io_channel_read_chars(source, buf, sizeof(buf), &cnt,
 			&error);
 #ifdef DEBUG
@@ -790,7 +841,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 				break;
 			}
 			if(entry->command == WC_ADD_NETWORK)
-				_read_add_network(wpa, buf, cnt, entry->ssid);
+				_read_add_network(wpa, channel, buf, cnt,
+						entry->ssid);
 			else if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
@@ -808,19 +860,20 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	}
 	if(entry != NULL)
 	{
-		free(wpa->queue[0].ssid);
-		memmove(&wpa->queue[0], &wpa->queue[1],
-				sizeof(wpa->queue[0]) * (--wpa->queue_cnt));
+		free(channel->queue[0].ssid);
+		memmove(&channel->queue[0], &channel->queue[1],
+				sizeof(channel->queue[0])
+				* (--channel->queue_cnt));
 	}
 	/* schedule commands again */
-	if(wpa->queue_cnt > 0 && wpa->wr_source == 0)
-		wpa->wr_source = g_io_add_watch(wpa->channel, G_IO_OUT,
+	if(channel->queue_cnt > 0 && channel->wr_source == 0)
+		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
 	return TRUE;
 }
 
-static void _read_add_network(WPA * wpa, char const * buf, size_t cnt,
-		char const * ssid)
+static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
+		size_t cnt, char const * ssid)
 {
 	unsigned int id;
 
@@ -836,9 +889,9 @@ static void _read_add_network(WPA * wpa, char const * buf, size_t cnt,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
-	_wpa_queue(wpa, WC_SET_NETWORK, id, "ssid", ssid);
-	_wpa_queue(wpa, WC_ENABLE_NETWORK, id);
-	_wpa_queue(wpa, WC_LIST_NETWORKS);
+	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
+	_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, id);
+	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 }
 
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
@@ -1015,7 +1068,8 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 					: GTK_STOCK_DISCONNECT,
 					wpa->helper->icon_size);
 			if(strcmp(value, "SCANNING") == 0)
-				_wpa_queue(wpa, WC_SCAN_RESULTS);
+				_wpa_queue(wpa, &wpa->channel[0],
+						WC_SCAN_RESULTS);
 		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
@@ -1032,7 +1086,8 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 		gpointer data)
 {
 	WPA * wpa = data;
-	WPAEntry * entry = &wpa->queue[0];
+	WPAChannel * channel;
+	WPAEntry * entry;
 	gsize cnt = 0;
 	GError * error = NULL;
 	GIOStatus status;
@@ -1040,12 +1095,19 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
-	if(condition != G_IO_OUT || source != wpa->channel
-			|| wpa->queue_cnt == 0 || entry->buf_cnt == 0)
-	{
-		wpa->wr_source = 0;
+	if(condition != G_IO_OUT)
 		return FALSE; /* should not happen */
-	}
+	if(source == wpa->channel[0].channel
+			&& wpa->channel[0].queue_cnt > 0
+			&& wpa->channel[0].queue[0].buf_cnt != 0)
+		channel = &wpa->channel[0];
+	else if(source == wpa->channel[1].channel
+			&& wpa->channel[1].queue_cnt > 0
+			&& wpa->channel[1].queue[0].buf_cnt != 0)
+		channel = &wpa->channel[1];
+	else
+		return FALSE; /* should not happen */
+	entry = &channel->queue[0];
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"", __func__);
 	fwrite(entry->buf, sizeof(*entry->buf), entry->buf_cnt, stderr);
@@ -1073,6 +1135,6 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 		/* partial packet */
 		_wpa_reset(wpa);
 	else
-		wpa->wr_source = 0;
+		channel->wr_source = 0;
 	return FALSE;
 }
