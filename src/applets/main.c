@@ -93,7 +93,7 @@ static void _main_destroy(Main * main);
 
 /* helpers */
 static GtkWidget * _main_applications(Main * main);
-static GtkWidget * _main_image(char const * name);
+static GtkWidget * _main_icon(char const * name);
 static GtkWidget * _main_menuitem(char const * label, char const * stock);
 
 static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
@@ -374,42 +374,37 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 }
 
 
-/* main_image */
-static GtkWidget * _main_image(char const * name)
+/* main_icon */
+static GtkWidget * _main_icon(char const * icon)
 {
-	int width;
-	int height;
-	size_t len;
+	int width = 16;
+	int height = 16;
 	String * buf;
 	GdkPixbuf * pixbuf = NULL;
 
-	if(gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height) == TRUE
-			&& (name != NULL && (len = strlen(name)) > 4)
-			&& (strcmp(&name[len - 4], ".png") == 0
-				|| strcmp(&name[len - 4], ".xpm") == 0)
-			&& (buf = string_new_append(DATADIR, "/pixmaps/",
-					name, NULL)) != NULL)
+	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
+	if((buf = string_new_append(DATADIR, "/pixmaps/", icon, NULL)) != NULL)
 	{
 		pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width, height,
 				NULL);
 		string_delete(buf);
 	}
-	if(pixbuf != NULL)
-		return gtk_image_new_from_pixbuf(pixbuf);
-	return gtk_image_new_from_icon_name(name, GTK_ICON_SIZE_MENU);
+	if(pixbuf == NULL)
+		return gtk_image_new_from_icon_name(icon, GTK_ICON_SIZE_MENU);
+	return gtk_image_new_from_pixbuf(pixbuf);
 }
 
 
 /* main_menuitem */
-static GtkWidget * _main_menuitem(char const * label, char const * stock)
+static GtkWidget * _main_menuitem(char const * label, char const * icon)
 {
 	GtkWidget * ret;
 	GtkWidget * image;
 
 	ret = gtk_image_menu_item_new_with_label(label);
-	if(stock != NULL)
+	if(icon != NULL)
 	{
-		image = _main_image(stock);
+		image = _main_icon(icon);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
 	}
 	return ret;
