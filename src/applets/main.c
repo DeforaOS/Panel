@@ -90,11 +90,12 @@ static void _main_destroy(Main * main);
 /* helpers */
 static GtkWidget * _main_applications(Main * main);
 static GtkWidget * _main_icon(char const * path, char const * icon);
-static GtkWidget * _main_menuitem(char const * label, char const * icon);
+static GtkWidget * _main_menuitem(char const * path, char const * label,
+		char const * icon);
 static GtkWidget * _main_menuitem_stock(char const * label, char const * stock);
 
 static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
-			char const * path));
+			char const * path, char const * apppath));
 
 /* callbacks */
 static void _on_about(gpointer data);
@@ -203,6 +204,7 @@ static GtkWidget * _main_applications(Main * main)
 	Config * config;
 	const char section[] = "Desktop Entry";
 	char const * q;
+	char const * path;
 	size_t i;
 
 	if(main->apps == NULL)
@@ -213,7 +215,8 @@ static GtkWidget * _main_applications(Main * main)
 	{
 		config = p->data;
 		q = config_get(config, section, "Name"); /* should not fail */
-		menuitem = _main_menuitem(q, config_get(config, section,
+		path = config_get(config, NULL, "path");
+		menuitem = _main_menuitem(path, q, config_get(config, section,
 					"Icon"));
 		if((q = config_get(config, section, "Comment")) != NULL)
 			gtk_widget_set_tooltip_text(menuitem, q);
@@ -396,7 +399,8 @@ static GtkWidget * _main_icon(char const * path, char const * icon)
 
 
 /* main_menuitem */
-static GtkWidget * _main_menuitem(char const * label, char const * icon)
+static GtkWidget * _main_menuitem(char const * path, char const * label,
+		char const * icon)
 {
 	GtkWidget * ret;
 	GtkWidget * image;
@@ -404,7 +408,7 @@ static GtkWidget * _main_menuitem(char const * label, char const * icon)
 	ret = gtk_image_menu_item_new_with_label(label);
 	if(icon != NULL)
 	{
-		image = _main_icon(NULL, icon);
+		image = _main_icon(path, icon);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
 	}
 	return ret;
@@ -429,12 +433,13 @@ static GtkWidget * _main_menuitem_stock(char const * label, char const * stock)
 
 /* main_xdg_dirs */
 static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
-			char const * path));
+			char const * path, char const * apppath));
 static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
-			char const * path), char const * path);
+			char const * path, char const * apppath),
+		char const * path);
 
 static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
-			char const * path))
+			char const * path, char const * apppath))
 {
 	char const * path;
 	char * p;
@@ -465,7 +470,7 @@ static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
 }
 
 static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
-			char const * path))
+			char const * path, char const * apppath))
 {
 	char const fallback[] = ".local/share";
 	char const * path;
@@ -493,21 +498,16 @@ static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
 }
 
 static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
-			char const * path), char const * path)
+			char const * path, char const * apppath),
+		char const * path)
 {
 	const char applications[] = "/applications";
-	char * p;
-	size_t len;
+	char * apppath;
 
-	len = strlen(path) + sizeof(applications);
-	if((p = malloc(len)) == NULL)
-	{
+	if((apppath = string_new_append(path, applications, NULL)) == NULL)
 		main->helper->error(NULL, path, 1);
-		return;
-	}
-	snprintf(p, len, "%s%s", path, applications);
-	callback(main, p);
-	free(p);
+	callback(main, path, apppath);
+	string_delete(apppath);
 }
 
 
@@ -613,7 +613,7 @@ static int _idle_access(Main * main, char const * path, int mode);
 static int _idle_access_path(Main * main, char const * path,
 		char const * filename, int mode);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
-static void _idle_path(Main * main, char const * path);
+static void _idle_path(Main * main, char const * path, char const * apppath);
 
 static gboolean _on_idle(gpointer data)
 {
@@ -693,7 +693,7 @@ static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
 	return string_compare(cap, cbp);
 }
 
-static void _idle_path(Main * main, char const * path)
+static void _idle_path(Main * main, char const * path, char const * apppath)
 {
 	DIR * dir;
 	int fd;
@@ -708,17 +708,17 @@ static void _idle_path(Main * main, char const * path)
 	String const * q;
 
 #if defined(__sun__)
-	if((fd = open(path, O_RDONLY)) < 0
+	if((fd = open(apppath, O_RDONLY)) < 0
 			|| fstat(fd, &st) != 0
 			|| (dir = fdopendir(fd)) == NULL)
 #else
-	if((dir = opendir(path)) == NULL
+	if((dir = opendir(apppath)) == NULL
 			|| (fd = dirfd(dir)) < 0
 			|| fstat(fd, &st) != 0)
 #endif
 	{
 		if(errno != ENOENT)
-			main->helper->error(NULL, path, 1);
+			main->helper->error(NULL, apppath, 1);
 		return;
 	}
 	if(st.st_mtime > main->refresh_mti)
@@ -733,13 +733,13 @@ static void _idle_path(Main * main, char const * path)
 		if(len < sizeof(ext) || strncmp(&de->d_name[len - sizeof(ext)
 					+ 1], ext, sizeof(ext)) != 0)
 			continue;
-		if((p = realloc(name, strlen(path) + len + 2)) == NULL)
+		if((p = realloc(name, strlen(apppath) + len + 2)) == NULL)
 		{
-			main->helper->error(NULL, path, 1);
+			main->helper->error(NULL, apppath, 1);
 			continue;
 		}
 		name = p;
-		snprintf(name, strlen(path) + len + 2, "%s/%s", path,
+		snprintf(name, strlen(apppath) + len + 2, "%s/%s", apppath,
 				de->d_name);
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, name);
@@ -772,6 +772,8 @@ static void _idle_path(Main * main, char const * path)
 				&& _idle_access(main, q, X_OK) != 0
 				&& errno == ENOENT)
 			continue;
+		/* remember the path */
+		config_set(config, NULL, "path", path);
 		main->apps = g_slist_insert_sorted(main->apps, config,
 				_idle_apps_compare);
 		config = NULL;
@@ -849,7 +851,7 @@ static void _on_suspend(gpointer data)
 
 
 /* on_timeout */
-static void _timeout_path(Main * main, char const * path);
+static void _timeout_path(Main * main, char const * path, char const * apppath);
 
 static gboolean _on_timeout(gpointer data)
 {
@@ -869,11 +871,11 @@ static gboolean _on_timeout(gpointer data)
 	return FALSE;
 }
 
-static void _timeout_path(Main * main, char const * path)
+static void _timeout_path(Main * main, char const * path, char const * apppath)
 {
 	struct stat st;
 
-	if(stat(path, &st) != 0)
+	if(stat(apppath, &st) != 0)
 		return;
 	main->refresh = (st.st_mtime > main->refresh_mti) ? TRUE : FALSE;
 }
