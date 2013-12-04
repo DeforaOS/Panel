@@ -64,10 +64,6 @@ typedef struct _MainMenu
 
 
 /* constants */
-#ifndef PREFIX
-# define PREFIX "/usr/local"
-#endif
-
 static const MainMenu _main_menus[] =
 {
 	{ "Audio;",	"Audio",	"gnome-mime-audio",		},
