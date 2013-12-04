@@ -208,7 +208,8 @@ static GtkWidget * _main_applications(Main * main)
 	char const * q;
 	size_t i;
 
-	_on_idle(main); /* just in case */
+	if(main->apps == NULL)
+		_on_idle(main);
 	memset(menus, 0, sizeof(menus));
 	menu = gtk_menu_new();
 	for(p = main->apps; p != NULL; p = p->next)
