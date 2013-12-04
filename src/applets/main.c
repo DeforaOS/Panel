@@ -89,9 +89,10 @@ static void _main_destroy(Main * main);
 
 /* helpers */
 static GtkWidget * _main_applications(Main * main);
-static GtkWidget * _main_icon(char const * path, char const * icon);
-static GtkWidget * _main_menuitem(char const * path, char const * label,
+static GtkWidget * _main_icon(Main * main, char const * path,
 		char const * icon);
+static GtkWidget * _main_menuitem(Main * main, char const * path,
+		char const * label, char const * icon);
 static GtkWidget * _main_menuitem_stock(char const * label, char const * stock);
 
 static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
@@ -216,8 +217,8 @@ static GtkWidget * _main_applications(Main * main)
 		config = p->data;
 		q = config_get(config, section, "Name"); /* should not fail */
 		path = config_get(config, NULL, "path");
-		menuitem = _main_menuitem(path, q, config_get(config, section,
-					"Icon"));
+		menuitem = _main_menuitem(main, path, q,
+				config_get(config, section, "Icon"));
 		if((q = config_get(config, section, "Comment")) != NULL)
 			gtk_widget_set_tooltip_text(menuitem, q);
 		if((q = config_get(config, section, "Type")) != NULL
@@ -375,28 +376,34 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 
 
 /* main_icon */
-static GtkWidget * _main_icon(char const * path, char const * icon)
+static GtkWidget * _main_icon(Main * main, char const * path, char const * icon)
 {
 	const char pixmaps[] = "/pixmaps/";
 	int width = 16;
 	int height = 16;
 	String * buf;
 	GdkPixbuf * pixbuf = NULL;
+	GError * error = NULL;
 
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
 	if(icon[0] == '/')
 		pixbuf = gdk_pixbuf_new_from_file_at_size(icon, width, height,
-				NULL);
-	else
+				&error);
+	else if(strchr(icon, '.') != NULL)
 	{
 		if(path == NULL)
 			path = DATADIR;
 		if((buf = string_new_append(path, pixmaps, icon, NULL)) != NULL)
 		{
 			pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width,
-					height, NULL);
+					height, &error);
 			string_delete(buf);
 		}
+	}
+	if(error != NULL)
+	{
+		main->helper->error(NULL, error->message, 1);
+		g_error_free(error);
 	}
 	if(pixbuf == NULL)
 		return gtk_image_new_from_icon_name(icon, GTK_ICON_SIZE_MENU);
@@ -405,8 +412,8 @@ static GtkWidget * _main_icon(char const * path, char const * icon)
 
 
 /* main_menuitem */
-static GtkWidget * _main_menuitem(char const * path, char const * label,
-		char const * icon)
+static GtkWidget * _main_menuitem(Main * main, char const * path,
+		char const * label, char const * icon)
 {
 	GtkWidget * ret;
 	GtkWidget * image;
@@ -414,7 +421,7 @@ static GtkWidget * _main_menuitem(char const * path, char const * label,
 	ret = gtk_image_menu_item_new_with_label(label);
 	if(icon != NULL)
 	{
-		image = _main_icon(path, icon);
+		image = _main_icon(main, path, icon);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
 	}
 	return ret;
