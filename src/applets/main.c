@@ -381,7 +381,6 @@ static GtkWidget * _main_image(char const * name)
 	int height;
 	size_t len;
 	String * buf;
-	GError * error = NULL;
 	GdkPixbuf * pixbuf = NULL;
 
 	if(gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height) == TRUE
@@ -392,7 +391,7 @@ static GtkWidget * _main_image(char const * name)
 					name, NULL)) != NULL)
 	{
 		pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width, height,
-				&error);
+				NULL);
 		string_delete(buf);
 	}
 	if(pixbuf != NULL)
