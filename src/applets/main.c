@@ -377,20 +377,26 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 /* main_icon */
 static GtkWidget * _main_icon(char const * path, char const * icon)
 {
+	const char pixmaps[] = "/pixmaps/";
 	int width = 16;
 	int height = 16;
 	String * buf;
 	GdkPixbuf * pixbuf = NULL;
 
-	/* check the arguments */
-	if(path == NULL)
-		path = DATADIR;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
-	if((buf = string_new_append(path, "/pixmaps/", icon, NULL)) != NULL)
-	{
-		pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width, height,
+	if(icon[0] == '/')
+		pixbuf = gdk_pixbuf_new_from_file_at_size(icon, width, height,
 				NULL);
-		string_delete(buf);
+	else
+	{
+		if(path == NULL)
+			path = DATADIR;
+		if((buf = string_new_append(path, pixmaps, icon, NULL)) != NULL)
+		{
+			pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width,
+					height, NULL);
+			string_delete(buf);
+		}
 	}
 	if(pixbuf == NULL)
 		return gtk_image_new_from_icon_name(icon, GTK_ICON_SIZE_MENU);
