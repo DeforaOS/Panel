@@ -89,8 +89,9 @@ static void _main_destroy(Main * main);
 
 /* helpers */
 static GtkWidget * _main_applications(Main * main);
-static GtkWidget * _main_icon(char const * name);
-static GtkWidget * _main_menuitem(char const * label, char const * stock);
+static GtkWidget * _main_icon(char const * path, char const * icon);
+static GtkWidget * _main_menuitem(char const * label, char const * icon);
+static GtkWidget * _main_menuitem_stock(char const * label, char const * stock);
 
 static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
 			char const * path));
@@ -363,7 +364,7 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 		if(menus[i] == NULL)
 			continue;
 		m = &_main_menus[i];
-		menuitem = _main_menuitem(m->label, m->stock);
+		menuitem = _main_menuitem_stock(m->label, m->stock);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), menus[i]);
 		gtk_menu_shell_insert(GTK_MENU_SHELL(menu), menuitem, pos++);
 	}
@@ -371,15 +372,18 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 
 
 /* main_icon */
-static GtkWidget * _main_icon(char const * icon)
+static GtkWidget * _main_icon(char const * path, char const * icon)
 {
 	int width = 16;
 	int height = 16;
 	String * buf;
 	GdkPixbuf * pixbuf = NULL;
 
+	/* check the arguments */
+	if(path == NULL)
+		path = DATADIR;
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &width, &height);
-	if((buf = string_new_append(DATADIR, "/pixmaps/", icon, NULL)) != NULL)
+	if((buf = string_new_append(path, "/pixmaps/", icon, NULL)) != NULL)
 	{
 		pixbuf = gdk_pixbuf_new_from_file_at_size(buf, width, height,
 				NULL);
@@ -400,7 +404,23 @@ static GtkWidget * _main_menuitem(char const * label, char const * icon)
 	ret = gtk_image_menu_item_new_with_label(label);
 	if(icon != NULL)
 	{
-		image = _main_icon(icon);
+		image = _main_icon(NULL, icon);
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
+	}
+	return ret;
+}
+
+
+/* main_menuitem_stock */
+static GtkWidget * _main_menuitem_stock(char const * label, char const * stock)
+{
+	GtkWidget * ret;
+	GtkWidget * image;
+
+	ret = gtk_image_menu_item_new_with_label(label);
+	if(stock != NULL)
+	{
+		image = gtk_image_new_from_icon_name(stock, GTK_ICON_SIZE_MENU);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
 	}
 	return ret;
@@ -512,13 +532,14 @@ static void _on_clicked(gpointer data)
 	GtkWidget * menuitem;
 
 	menu = gtk_menu_new();
-	menuitem = _main_menuitem(_("Applications"), "gnome-applications");
+	menuitem = _main_menuitem_stock(_("Applications"),
+			"gnome-applications");
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), _main_applications(
 				main));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	menuitem = _main_menuitem(_("Run..."), GTK_STOCK_EXECUTE);
+	menuitem = _main_menuitem_stock(_("Run..."), GTK_STOCK_EXECUTE);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_run),
 			main);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -531,13 +552,14 @@ static void _on_clicked(gpointer data)
 	/* lock screen */
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	menuitem = _main_menuitem(_("Lock screen"), "gnome-lockscreen");
+	menuitem = _main_menuitem_stock(_("Lock screen"), "gnome-lockscreen");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_lock),
 			main);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 #ifdef EMBEDDED
 	/* rotate screen */
-	menuitem = _main_menuitem(_("Rotate"), GTK_STOCK_REFRESH); /* XXX */
+	menuitem = _main_menuitem_stock(_("Rotate"),
+			GTK_STOCK_REFRESH); /* XXX */
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_rotate),
 			data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -545,7 +567,7 @@ static void _on_clicked(gpointer data)
 	/* logout */
 	if(main->helper->logout_dialog != NULL)
 	{
-		menuitem = _main_menuitem(_("Logout..."), "gnome-logout");
+		menuitem = _main_menuitem_stock(_("Logout..."), "gnome-logout");
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_on_logout), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -553,13 +575,14 @@ static void _on_clicked(gpointer data)
 	/* suspend */
 	if(main->helper->suspend != NULL)
 	{
-		menuitem = _main_menuitem(_("Suspend"), "gtk-media-pause");
+		menuitem = _main_menuitem_stock(_("Suspend"),
+				"gtk-media-pause");
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_on_suspend), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	/* shutdown */
-	menuitem = _main_menuitem(_("Shutdown..."), "gnome-shutdown");
+	menuitem = _main_menuitem_stock(_("Shutdown..."), "gnome-shutdown");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_on_shutdown), data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
