@@ -13,7 +13,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - configuration value for the interface to track */
+ * - track password requests
+ * - configuration value for the interface to track
+ * - tooltip with details on the button (interface tracked...)
+ * - more tooltip details on the menu entries (channel, security settings...)
+ * - icons mentioning the security level (emblem-nowrite?)
+ * - full featured wireless configuration application */
 
 
 
@@ -641,8 +646,12 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	GtkTreeIter iter;
 	gboolean valid;
 	gchar * bssid;
+	guint frequency;
 	guint level;
 	gchar * ssid;
+#if GTK_CHECK_VERSION(2, 12, 0)
+	char buf[80];
+#endif
 
 	if((valid = gtk_tree_model_get_iter_first(model, &iter)) == FALSE)
 		return;
@@ -650,10 +659,15 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
 	{
-		gtk_tree_model_get(model, &iter, 0, &bssid, 2, &level,
-				3, &ssid, -1);
+		gtk_tree_model_get(model, &iter, 0, &bssid, 1, &frequency,
+				2, &level, 3, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
+#if GTK_CHECK_VERSION(2, 12, 0)
+		snprintf(buf, sizeof(buf), "Frequency: %u\nLevel: %u",
+				frequency, level);
+		gtk_widget_set_tooltip_text(menuitem, buf);
+#endif
 		if(ssid != NULL)
 			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
 		image = _clicked_network_view_image(level);
