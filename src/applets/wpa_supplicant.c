@@ -358,10 +358,7 @@ static int _wpa_start(WPA * wpa)
 		g_source_remove(wpa->source);
 	wpa->source = 0;
 	/* reconnect to the daemon */
-	if(_start_timeout(wpa) == FALSE)
-		return 0;
-	/* try again every five seconds */
-	wpa->source = g_timeout_add(5000, _start_timeout, wpa);
+	_start_timeout(wpa);
 	return 0;
 }
 
@@ -369,11 +366,15 @@ static gboolean _start_timeout(gpointer data)
 {
 	WPA * wpa = data;
 
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s()\n", __func__);
+#endif
 	if(_timeout_channel(wpa, &wpa->channel[0]) != 0
 			|| _timeout_channel(wpa, &wpa->channel[1]) != 0)
 	{
 		_wpa_stop(wpa);
-		return TRUE;
+		wpa->source = g_timeout_add(5000, _start_timeout, wpa);
+		return FALSE;
 	}
 	_on_timeout(wpa);
 	wpa->source = g_timeout_add(5000, _on_timeout, wpa);
