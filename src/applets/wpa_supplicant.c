@@ -794,9 +794,10 @@ static gboolean _on_timeout(gpointer data)
 /* on_watch_can_read */
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
+static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
-static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
+static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
 static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 		gpointer data)
@@ -831,7 +832,10 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	{
 		case G_IO_STATUS_NORMAL:
 			if(entry == NULL)
+			{
+				_read_unsolicited(wpa, buf, cnt);
 				break;
+			}
 			if(cnt == 3 && strncmp(buf, "OK\n", cnt) == 0)
 				break;
 			if(cnt == 5 && strncmp(buf, "FAIL\n", cnt) == 0)
@@ -847,8 +851,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
 				_read_scan_results(wpa, buf, cnt);
-			else
-				/* XXX may not always be relevant */
+			else if(entry->command == WC_STATUS)
 				_read_status(wpa, buf, cnt);
 			break;
 		case G_IO_STATUS_ERROR:
@@ -913,7 +916,7 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
-	for(i = 0; i < cnt;)
+	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
 			if(buf[j] == '\n')
@@ -960,7 +963,6 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 #endif
 			}
 		}
-		i = j;
 	}
 	free(p);
 	if(wpa->networks_cur < 0)
@@ -996,7 +998,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	GtkTreeIter iter;
 
 	gtk_list_store_clear(wpa->store);
-	for(i = 0; i < cnt;)
+	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
 			if(buf[j] == '\n')
@@ -1029,7 +1031,6 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 				gtk_list_store_set(wpa->store, &iter, 3, ssid,
 						-1);
 		}
-		i = j;
 	}
 	free(p);
 }
@@ -1043,7 +1044,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	char variable[80];
 	char value[80];
 
-	for(i = 0; i < cnt;)
+	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
 			if(buf[j] == '\n')
@@ -1068,14 +1069,49 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 					: GTK_STOCK_DISCONNECT,
 					wpa->helper->icon_size);
 			if(strcmp(value, "SCANNING") == 0)
-				_wpa_queue(wpa, &wpa->channel[0],
-						WC_SCAN_RESULTS);
+				gtk_label_set_text(GTK_LABEL(wpa->label),
+						"Scanning...");
 		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
 			gtk_label_set_text(GTK_LABEL(wpa->label), value);
 #endif
-		i = j;
+	}
+	free(p);
+}
+
+static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
+{
+	char const scan_results[] = "CTRL-EVENT-SCAN-RESULTS";
+	size_t i;
+	size_t j;
+	char * p = NULL;
+	char * q;
+	unsigned int u;
+	char event[80];
+	unsigned int v;
+	char bssid[80];
+
+	for(i = 0; i < cnt; i = j)
+	{
+		for(j = i; j < cnt; j++)
+			if(buf[j] == '\n')
+				break;
+		if((q = realloc(p, ++j - i)) == NULL)
+			continue;
+		p = q;
+		snprintf(p, j - i, "%s", &buf[i]);
+		p[j - i - 1] = '\0';
+#ifdef DEBUG
+		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
+#endif
+		if(sscanf(p, "<%u>%79s %u %79s\n", &u, event, &v, bssid) < 2)
+			continue;
+		event[sizeof(event) - 1] = '\0';
+		bssid[sizeof(bssid) - 1] = '\0';
+		if(strcmp(event, scan_results) == 0)
+			_wpa_queue(wpa, &wpa->channel[0], WC_SCAN_RESULTS);
+		/* FIXME implement the other events */
 	}
 	free(p);
 }
