@@ -219,8 +219,10 @@ static GtkWidget * _main_applications(Main * main)
 		path = config_get(config, NULL, "path");
 		menuitem = _main_menuitem(main, path, q,
 				config_get(config, section, "Icon"));
+#if GTK_CHECK_VERSION(2, 12, 0)
 		if((q = config_get(config, section, "Comment")) != NULL)
 			gtk_widget_set_tooltip_text(menuitem, q);
+#endif
 		if((q = config_get(config, section, "Type")) != NULL
 				&& strcmp(q, "Application") == 0
 				&& config_get(config, section, "Exec") == NULL)
