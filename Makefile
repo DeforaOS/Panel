@@ -123,6 +123,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tools/message.c \
 		$(PACKAGE)-$(VERSION)/tools/notify.c \
 		$(PACKAGE)-$(VERSION)/tools/test.c \
+		$(PACKAGE)-$(VERSION)/tools/wifibrowser.c \
 		$(PACKAGE)-$(VERSION)/tools/Makefile \
 		$(PACKAGE)-$(VERSION)/tools/helper.c \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \

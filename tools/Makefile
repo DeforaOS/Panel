@@ -1,4 +1,4 @@
-TARGETS	= panel-embed panel-message panel-notify panel-test
+TARGETS	= panel-embed panel-message panel-notify panel-test wifibrowser
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
@@ -45,6 +45,13 @@ panel-test_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) -L../src -Wl,-rpath,$(LIBDIR) -lPane
 panel-test: $(panel-test_OBJS)
 	$(CC) -o panel-test $(panel-test_OBJS) $(panel-test_LDFLAGS)
 
+wifibrowser_OBJS = wifibrowser.o
+wifibrowser_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -I ../include $(CFLAGSF) $(CFLAGS)
+wifibrowser_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+wifibrowser: $(wifibrowser_OBJS)
+	$(CC) -o wifibrowser $(wifibrowser_OBJS) $(wifibrowser_LDFLAGS)
+
 embed.o: embed.c ../include/Panel.h ../config.h
 	$(CC) $(panel-embed_CFLAGS) -c embed.c
 
@@ -57,8 +64,11 @@ notify.o: notify.c helper.c ../src/helper.c ../src/panel.h ../config.h
 test.o: test.c helper.c ../src/helper.c ../src/panel.h ../config.h
 	$(CC) $(panel-test_CFLAGS) -c test.c
 
+wifibrowser.o: wifibrowser.c ../src/applets/wpa_supplicant.c
+	$(CC) $(wifibrowser_CFLAGS) -c wifibrowser.c
+
 clean:
-	$(RM) -- $(panel-embed_OBJS) $(panel-message_OBJS) $(panel-notify_OBJS) $(panel-test_OBJS)
+	$(RM) -- $(panel-embed_OBJS) $(panel-message_OBJS) $(panel-notify_OBJS) $(panel-test_OBJS) $(wifibrowser_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
