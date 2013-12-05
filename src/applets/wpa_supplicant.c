@@ -1006,8 +1006,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char bssid[18];
 	unsigned int frequency;
 	unsigned int level;
-	char flags1[32];
-	char flags2[32];
+	char flags[32];
 	char ssid[80];
 	GtkTreeIter iter;
 
@@ -1025,23 +1024,22 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%17s %u %u [%31[^]]][%31[^]]] %79s", bssid,
-						&frequency, &level, flags1,
-						flags2, ssid)) >= 3)
+		if((res = sscanf(p, "%17s %u %u %31s %79[^\n]", bssid,
+						&frequency, &level, flags,
+						ssid)) >= 3)
 		{
 			bssid[sizeof(bssid) - 1] = '\0';
-			flags1[sizeof(flags1) - 1] = '\0';
-			flags2[sizeof(flags2) - 1] = '\0';
+			flags[sizeof(flags) - 1] = '\0';
 			ssid[sizeof(ssid) - 1] = '\0';
 #ifdef DEBUG
-			fprintf(stderr, "DEBUG: %s() \"%s\" %u %u %s %s %s\n",
+			fprintf(stderr, "DEBUG: %s() \"%s\" %u %u %s %s\n",
 					__func__, bssid, frequency, level,
-					flags1, flags2, ssid);
+					flags, ssid);
 #endif
 			gtk_list_store_append(wpa->store, &iter);
 			gtk_list_store_set(wpa->store, &iter, 0, bssid,
 					1, frequency, 2, level, -1);
-			if(res == 6)
+			if(res == 5)
 				gtk_list_store_set(wpa->store, &iter, 3, ssid,
 						-1);
 		}
