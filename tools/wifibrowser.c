@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)
 		return 2;
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size(GTK_WINDOW(window), 200, 300);
+	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 #if GTK_CHECK_VERSION(2, 6, 0)
 	gtk_window_set_icon_name(GTK_WINDOW(window), "network-wireless");
 #endif
