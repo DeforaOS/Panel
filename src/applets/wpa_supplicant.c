@@ -100,6 +100,17 @@ typedef struct _WPANetwork
 	int enabled;
 } WPANetwork;
 
+typedef enum _WPAScanResult
+{
+	WSR_UPDATED = 0,
+	WSR_BSSID,
+	WSR_FREQUENCY,
+	WSR_LEVEL,
+	WSR_SSID
+} WPAScanResult;
+#define WSR_LAST WSR_SSID
+#define WSR_COUNT (WSR_LAST + 1)
+
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
@@ -188,8 +199,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
-	wpa->store = gtk_list_store_new(4, G_TYPE_STRING, G_TYPE_UINT,
-			G_TYPE_UINT, G_TYPE_STRING);
+	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
+			G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -660,8 +671,9 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
 	{
-		gtk_tree_model_get(model, &iter, 0, &bssid, 1, &frequency,
-				2, &level, 3, &ssid, -1);
+		gtk_tree_model_get(model, &iter, WSR_BSSID, &bssid,
+				WSR_FREQUENCY, &frequency, WSR_LEVEL, &level,
+				WSR_SSID, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
@@ -1007,7 +1019,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char bssid[18];
 	unsigned int frequency;
 	unsigned int level;
-	char flags[32];
+	char flags[80];
 	char ssid[80];
 	GtkTreeIter iter;
 
@@ -1025,7 +1037,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if((res = sscanf(p, "%17s %u %u %31s %79[^\n]", bssid,
+		if((res = sscanf(p, "%17s %u %u %79s %79[^\n]", bssid,
 						&frequency, &level, flags,
 						ssid)) >= 3)
 		{
@@ -1038,11 +1050,13 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					flags, ssid);
 #endif
 			gtk_list_store_append(wpa->store, &iter);
-			gtk_list_store_set(wpa->store, &iter, 0, bssid,
-					1, frequency, 2, level, -1);
+			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
+					WSR_BSSID, bssid,
+					WSR_FREQUENCY, frequency,
+					WSR_LEVEL, level, -1);
 			if(res == 5)
-				gtk_list_store_set(wpa->store, &iter, 3, ssid,
-						-1);
+				gtk_list_store_set(wpa->store, &iter,
+						WSR_SSID, ssid, -1);
 		}
 	}
 	free(p);

@@ -102,13 +102,15 @@ int main(int argc, char * argv[])
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("SSID", renderer,
-			"text", 3, NULL);
-	gtk_tree_view_column_set_sort_column_id(column, 3);
+			"text", WSR_SSID, NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_SSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("BSSID", renderer,
-			"text", 0, NULL);
-	gtk_tree_view_column_set_sort_column_id(column, 1);
+			"text", WSR_BSSID, NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_container_add(GTK_CONTAINER(widget), view);
 	gtk_container_add(GTK_CONTAINER(window), widget);
