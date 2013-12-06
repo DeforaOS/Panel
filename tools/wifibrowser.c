@@ -34,6 +34,8 @@ static int _usage(void);
 
 /* callbacks */
 static gboolean _wifibrowser_on_closex(gpointer data);
+static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
+		gpointer data);
 
 
 /* functions */
@@ -55,6 +57,7 @@ static int _usage(void)
 
 
 /* callbacks */
+/* wifibrowser_on_closex */
 static gboolean _wifibrowser_on_closex(gpointer data)
 {
 	WPA * wpa = data;
@@ -62,6 +65,16 @@ static gboolean _wifibrowser_on_closex(gpointer data)
 	gtk_widget_hide(wpa->widget);
 	gtk_main_quit();
 	return FALSE;
+}
+
+
+/* wifibrowser_on_response */
+static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
+		gpointer data)
+{
+	gtk_widget_hide(widget);
+	if(arg1 == GTK_RESPONSE_CLOSE)
+		gtk_main_quit();
 }
 
 
@@ -73,6 +86,7 @@ int main(int argc, char * argv[])
 	PanelAppletHelper helper;
 	WPA * wpa;
 	GtkWidget * window;
+	GtkWidget * vbox;
 	GtkWidget * view;
 	GtkWidget * widget;
 	GtkCellRenderer * renderer;
@@ -87,14 +101,21 @@ int main(int argc, char * argv[])
 		return _usage();
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)
 		return 2;
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	window = gtk_dialog_new_with_buttons("Wireless browser", NULL, 0,
+			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 #if GTK_CHECK_VERSION(2, 6, 0)
 	gtk_window_set_icon_name(GTK_WINDOW(window), "network-wireless");
 #endif
-	gtk_window_set_title(GTK_WINDOW(window), "Wireless browser");
 	g_signal_connect_swapped(window, "delete-event", G_CALLBACK(
 				_wifibrowser_on_closex), wpa);
+	g_signal_connect(window, "response", G_CALLBACK(
+				_wifibrowser_on_response), wpa);
+#if GTK_CHECK_VERSION(2, 14, 0)
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(window));
+#else
+	vbox = GTK_DIALOG(window)->vbox;
+#endif
 	widget = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -118,7 +139,7 @@ int main(int argc, char * argv[])
 	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	gtk_container_add(GTK_CONTAINER(widget), view);
-	gtk_container_add(GTK_CONTAINER(window), widget);
+	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
 	gtk_widget_show_all(window);
 	gtk_main();
 	_wpa_destroy(wpa);
