@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Wireless networks
+Comment=Connect to wireless networks
+TryExec=wifibrowser
+Exec=wifibrowser
+Icon=network-wireless
+Type=Application
+Categories=Settings;GTK;

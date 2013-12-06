@@ -35,10 +35,13 @@ install: $(TARGETS)
 	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "Panel.pc"
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 0644 deforaos-panel-settings.desktop $(DESTDIR)$(PREFIX)/share/applications/deforaos-panel-settings.desktop
+	$(MKDIR) $(DESTDIR)$(PREFIX)/share/applications
+	$(INSTALL) -m 0644 deforaos-wifibrowser.desktop $(DESTDIR)$(PREFIX)/share/applications/deforaos-wifibrowser.desktop
 
 uninstall:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) uninstall) || exit; done
 	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -u -- "Panel.pc"
 	$(RM) -- $(DESTDIR)$(PREFIX)/share/applications/deforaos-panel-settings.desktop
+	$(RM) -- $(DESTDIR)$(PREFIX)/share/applications/deforaos-wifibrowser.desktop
 
 .PHONY: all subdirs clean distclean install uninstall

@@ -80,10 +80,13 @@ install: $(TARGETS)
 	$(INSTALL) -m 0755 panel-message $(DESTDIR)$(BINDIR)/panel-message
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 0755 panel-notify $(DESTDIR)$(BINDIR)/panel-notify
+	$(MKDIR) $(DESTDIR)$(BINDIR)
+	$(INSTALL) -m 0755 wifibrowser $(DESTDIR)$(BINDIR)/wifibrowser
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(BINDIR)/panel-embed
 	$(RM) -- $(DESTDIR)$(BINDIR)/panel-message
 	$(RM) -- $(DESTDIR)$(BINDIR)/panel-notify
+	$(RM) -- $(DESTDIR)$(BINDIR)/wifibrowser
 
 .PHONY: all clean distclean install uninstall
