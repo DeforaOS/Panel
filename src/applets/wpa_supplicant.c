@@ -103,6 +103,7 @@ typedef struct _WPANetwork
 typedef enum _WPAScanResult
 {
 	WSR_UPDATED = 0,
+	WSR_ICON,
 	WSR_BSSID,
 	WSR_FREQUENCY,
 	WSR_LEVEL,
@@ -200,7 +201,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
 	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
-			G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING);
+			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
+			G_TYPE_UINT, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -556,7 +558,6 @@ static void _stop_channel(WPA * wpa, WPAChannel * channel)
 /* on_clicked */
 static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
-static GtkWidget * _clicked_network_view_image(guint level);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 /* callbacks */
@@ -657,6 +658,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	GtkWidget * image;
 	GtkTreeIter iter;
 	gboolean valid;
+	GdkPixbuf * pixbuf;
 	gchar * bssid;
 	guint frequency;
 	guint level;
@@ -671,9 +673,9 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
 	{
-		gtk_tree_model_get(model, &iter, WSR_BSSID, &bssid,
-				WSR_FREQUENCY, &frequency, WSR_LEVEL, &level,
-				WSR_SSID, &ssid, -1);
+		gtk_tree_model_get(model, &iter, WSR_ICON, &pixbuf,
+				WSR_BSSID, &bssid, WSR_FREQUENCY, &frequency,
+				WSR_LEVEL, &level, WSR_SSID, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
@@ -683,7 +685,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 #endif
 		if(ssid != NULL)
 			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
-		image = _clicked_network_view_image(level);
+		image = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
 				image);
 		g_signal_connect(menuitem, "activate", G_CALLBACK(
@@ -694,24 +696,6 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		g_free(ssid);
 #endif
 	}
-}
-
-static GtkWidget * _clicked_network_view_image(guint level)
-{
-	char const * name;
-
-	/* FIXME check if the mapping is right (and use our own icons) */
-	if(level >= 100)
-		name = "phone-signal-100";
-	else if(level >= 75)
-		name = "phone-signal-75";
-	else if(level >= 50)
-		name = "phone-signal-50";
-	else if(level >= 25)
-		name = "phone-signal-25";
-	else
-		name = "phone-signal-00";
-	return gtk_image_new_from_icon_name(name, GTK_ICON_SIZE_MENU);
 }
 
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
@@ -823,6 +807,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
+static GdkPixbuf * _read_scan_results_pixbuf(guint level);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1016,6 +1001,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char * p = NULL;
 	char * q;
 	int res;
+	GdkPixbuf * pixbuf;
 	char bssid[18];
 	unsigned int frequency;
 	unsigned int level;
@@ -1041,6 +1027,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 						&frequency, &level, flags,
 						ssid)) >= 3)
 		{
+			pixbuf = _read_scan_results_pixbuf(level);
 			bssid[sizeof(bssid) - 1] = '\0';
 			flags[sizeof(flags) - 1] = '\0';
 			ssid[sizeof(ssid) - 1] = '\0';
@@ -1051,7 +1038,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 #endif
 			gtk_list_store_append(wpa->store, &iter);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
-					WSR_BSSID, bssid,
+					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
 					WSR_LEVEL, level, -1);
 			if(res == 5)
@@ -1060,6 +1047,28 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 		}
 	}
 	free(p);
+}
+
+static GdkPixbuf * _read_scan_results_pixbuf(guint level)
+{
+	GtkIconTheme * icontheme;
+	char const * name;
+	gint size;
+
+	icontheme = gtk_icon_theme_get_default();
+	/* FIXME check if the mapping is right (and use our own icons) */
+	if(level >= 100)
+		name = "phone-signal-100";
+	else if(level >= 75)
+		name = "phone-signal-75";
+	else if(level >= 50)
+		name = "phone-signal-50";
+	else if(level >= 25)
+		name = "phone-signal-25";
+	else
+		name = "phone-signal-00";
+	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size); /* XXX */
+	return gtk_icon_theme_load_icon(icontheme, name, size, 0, NULL);
 }
 
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)

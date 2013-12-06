@@ -100,6 +100,11 @@ int main(int argc, char * argv[])
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(wpa->store));
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
+	renderer = gtk_cell_renderer_pixbuf_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer,
+			"pixbuf", WSR_ICON, NULL);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_LEVEL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes("SSID", renderer,
 			"text", WSR_SSID, NULL);
