@@ -810,6 +810,8 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
+static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
+		char const * bssid);
 static GdkPixbuf * _read_scan_results_pixbuf(guint level);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
@@ -1044,8 +1046,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags, ssid);
 #endif
-			/* FIXME lookup corresponding existing entries */
-			gtk_list_store_append(wpa->store, &iter);
+			_read_scan_results_iter(wpa, &iter, bssid);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
@@ -1065,6 +1066,26 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 		else
 			valid = gtk_tree_model_iter_next(model, &iter);
 	}
+}
+
+static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
+		char const * bssid)
+{
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	gboolean valid;
+	gchar * b;
+	int res;
+
+	for(valid = gtk_tree_model_get_iter_first(model, iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, iter))
+	{
+		gtk_tree_model_get(model, iter, WSR_BSSID, &b, -1);
+		res = (b != NULL && strcmp(b, bssid) == 0) ? 0 : -1;
+		g_free(b);
+		if(res == 0)
+			return;
+	}
+	gtk_list_store_append(wpa->store, iter);
 }
 
 static GdkPixbuf * _read_scan_results_pixbuf(guint level)
