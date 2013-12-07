@@ -999,6 +999,8 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 {
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	gboolean valid;
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -1012,7 +1014,10 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char ssid[80];
 	GtkTreeIter iter;
 
-	gtk_list_store_clear(wpa->store);
+	/* mark every entry as obsolete */
+	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, &iter))
+		gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, FALSE, -1);
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1039,6 +1044,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags, ssid);
 #endif
+			/* FIXME lookup corresponding existing entries */
 			gtk_list_store_append(wpa->store, &iter);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
@@ -1050,6 +1056,15 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 		}
 	}
 	free(p);
+	/* remove the outdated entries */
+	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;)
+	{
+		gtk_tree_model_get(model, &iter, WSR_UPDATED, &valid, -1);
+		if(valid == FALSE)
+			valid = gtk_list_store_remove(wpa->store, &iter);
+		else
+			valid = gtk_tree_model_iter_next(model, &iter);
+	}
 }
 
 static GdkPixbuf * _read_scan_results_pixbuf(guint level)
