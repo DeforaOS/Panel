@@ -17,8 +17,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <libintl.h>
 #include <gtk/gtk.h>
 #include "../src/applets/wpa_supplicant.c"
+#define _(string) gettext(string)
 
 /* constants */
 #ifndef PROGNAME
@@ -51,7 +53,7 @@ static int _error(Panel * panel, char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, "Usage: %s\n", PROGNAME);
+	fprintf(stderr, _("Usage: %s\n"), PROGNAME);
 	return 1;
 }
 
@@ -101,7 +103,7 @@ int main(int argc, char * argv[])
 		return _usage();
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)
 		return 2;
-	window = gtk_dialog_new_with_buttons("Wireless browser", NULL, 0,
+	window = gtk_dialog_new_with_buttons(_("Wireless browser"), NULL, 0,
 			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 #if GTK_CHECK_VERSION(2, 6, 0)
@@ -127,13 +129,13 @@ int main(int argc, char * argv[])
 	gtk_tree_view_column_set_sort_column_id(column, WSR_LEVEL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("SSID", renderer,
+	column = gtk_tree_view_column_new_with_attributes(_("SSID"), renderer,
 			"text", WSR_SSID, NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, WSR_SSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes("BSSID", renderer,
+	column = gtk_tree_view_column_new_with_attributes(_("BSSID"), renderer,
 			"text", WSR_BSSID, NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);

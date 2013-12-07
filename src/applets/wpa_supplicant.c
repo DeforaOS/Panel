@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
+ * - refresh only the networks required (no longer clear the list store)
  * - track password requests
  * - configuration value for the interface to track
  * - tooltip with details on the button (interface tracked...)
@@ -34,7 +35,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <libintl.h>
 #include "Panel.h"
+#define _(string) gettext(string)
 
 /* constants */
 #ifndef TMPDIR
@@ -213,7 +216,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		ret = gtk_button_new();
 		gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		gtk_widget_set_tooltip_text(ret, "Wireless networking");
+		gtk_widget_set_tooltip_text(ret, _("Wireless networking"));
 #endif
 		g_signal_connect_swapped(ret, "clicked", G_CALLBACK(
 					_on_clicked), wpa);
@@ -249,7 +252,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "error",
 			wpa->helper->icon_size);
 #ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(wpa->label), "Error");
+	gtk_label_set_text(GTK_LABEL(wpa->label), _("Error"));
 #endif
 	return wpa->helper->error(NULL, message, ret);
 }
@@ -423,7 +426,7 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 		gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 				GTK_STOCK_DISCONNECT, wpa->helper->icon_size);
 #ifndef EMBEDDED
-		gtk_label_set_text(GTK_LABEL(wpa->label), "Not running");
+		gtk_label_set_text(GTK_LABEL(wpa->label), _("Not running"));
 #endif
 		return -wpa->helper->error(NULL, path, 1);
 	}
@@ -578,7 +581,7 @@ static void _on_clicked(gpointer data)
 	/* FIXME summarize the status instead */
 	_clicked_network_list(wpa, menu);
 	/* reassociate */
-	menuitem = gtk_image_menu_item_new_with_label("Reassociate");
+	menuitem = gtk_image_menu_item_new_with_label(_("Reassociate"));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	image = gtk_image_new_from_stock(GTK_STOCK_DISCARD, GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
@@ -587,14 +590,14 @@ static void _on_clicked(gpointer data)
 				_clicked_on_reassociate), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* rescan */
-	menuitem = gtk_image_menu_item_new_with_label("Rescan");
+	menuitem = gtk_image_menu_item_new_with_label(_("Rescan"));
 	image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_rescan), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* save configuration */
-	menuitem = gtk_image_menu_item_new_with_label("Save configuration");
+	menuitem = gtk_image_menu_item_new_with_label(_("Save configuration"));
 	image = gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
@@ -617,12 +620,12 @@ static void _clicked_network_list(WPA * wpa, GtkWidget * menu)
 	if(wpa->networks_cnt == 0)
 		return;
 	/* network list */
-	menuitem = gtk_image_menu_item_new_with_label("Network list");
+	menuitem = gtk_image_menu_item_new_with_label(_("Network list"));
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	submenu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
 	/* network list: any network */
-	menuitem = gtk_radio_menu_item_new_with_label(NULL, "Any network");
+	menuitem = gtk_radio_menu_item_new_with_label(NULL, _("Any network"));
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem), TRUE);
 	group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(menuitem));
 	g_signal_connect(menuitem, "toggled", G_CALLBACK(
@@ -679,7 +682,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		snprintf(buf, sizeof(buf), "Frequency: %u\nLevel: %u",
+		snprintf(buf, sizeof(buf), _("Frequency: %u\nLevel: %u"),
 				frequency, level);
 		gtk_widget_set_tooltip_text(menuitem, buf);
 #endif
@@ -853,7 +856,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			if(cnt == 5 && strncmp(buf, "FAIL\n", cnt) == 0)
 			{
 				/* FIXME improve the error message */
-				wpa->helper->error(NULL, "An error occured", 0);
+				wpa->helper->error(NULL, _("Unknown error"), 0);
 				break;
 			}
 			if(entry->command == WC_ADD_NETWORK)
@@ -1106,7 +1109,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 					wpa->helper->icon_size);
 			if(strcmp(value, "SCANNING") == 0)
 				gtk_label_set_text(GTK_LABEL(wpa->label),
-						"Scanning...");
+						_("Scanning..."));
 		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
