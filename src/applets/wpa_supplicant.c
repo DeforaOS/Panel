@@ -13,13 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - refresh only the networks required (no longer clear the list store)
  * - track password requests
  * - configuration value for the interface to track
  * - tooltip with details on the button (interface tracked...)
  * - more tooltip details on the menu entries (channel, security settings...)
- * - icons mentioning the security level (emblem-nowrite?)
- * - full featured wireless configuration application */
+ * - icons mentioning the security level (emblem-nowrite?) */
 
 
 
