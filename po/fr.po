@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-07 12:27+0100\n"
+"POT-Creation-Date: 2013-12-07 12:53+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -259,11 +259,11 @@ msgstr ""
 "Fréquence: %u\n"
 "Niveau: %u"
 
-#: ../src/applets/wpa_supplicant.c:859
+#: ../src/applets/wpa_supplicant.c:861
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1112
+#: ../src/applets/wpa_supplicant.c:1148
 msgid "Scanning..."
 msgstr "Recherche..."
 
