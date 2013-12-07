@@ -30,6 +30,13 @@
 
 /* WifiBrowser */
 /* private */
+/* types */
+typedef enum _WifiBrowserResponse
+{
+	WBR_RESCAN = 0
+} WifiBrowserResponse;
+
+
 /* prototypes */
 static int _error(Panel * panel, char const * message, int ret);
 static int _usage(void);
@@ -74,9 +81,19 @@ static gboolean _wifibrowser_on_closex(gpointer data)
 static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 		gpointer data)
 {
-	gtk_widget_hide(widget);
-	if(arg1 == GTK_RESPONSE_CLOSE)
-		gtk_main_quit();
+	WPA * wpa = data;
+	WPAChannel * channel = &wpa->channel[0];
+
+	switch(arg1)
+	{
+		case GTK_RESPONSE_CLOSE:
+			gtk_widget_hide(widget);
+			gtk_main_quit();
+			break;
+		case WBR_RESCAN:
+			_wpa_queue(wpa, channel, WC_SCAN);
+			break;
+	}
 }
 
 
@@ -104,6 +121,7 @@ int main(int argc, char * argv[])
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)
 		return 2;
 	window = gtk_dialog_new_with_buttons(_("Wireless browser"), NULL, 0,
+			_("Rescan"), WBR_RESCAN,
 			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
 #if GTK_CHECK_VERSION(2, 6, 0)
