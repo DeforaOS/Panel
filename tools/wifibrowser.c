@@ -33,7 +33,8 @@
 /* types */
 typedef enum _WifiBrowserResponse
 {
-	WBR_RESCAN = 0
+	WBR_REASSOCIATE = 0,
+	WBR_RESCAN
 } WifiBrowserResponse;
 
 
@@ -90,6 +91,9 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 			gtk_widget_hide(widget);
 			gtk_main_quit();
 			break;
+		case WBR_REASSOCIATE:
+			_wpa_queue(wpa, channel, WC_REASSOCIATE);
+			break;
 		case WBR_RESCAN:
 			_wpa_queue(wpa, channel, WC_SCAN);
 			break;
@@ -121,6 +125,7 @@ int main(int argc, char * argv[])
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)
 		return 2;
 	window = gtk_dialog_new_with_buttons(_("Wireless browser"), NULL, 0,
+			_("Reassociate"), WBR_REASSOCIATE,
 			_("Rescan"), WBR_RESCAN,
 			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
