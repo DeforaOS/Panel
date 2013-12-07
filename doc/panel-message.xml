@@ -69,8 +69,8 @@
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para>&name; expects a text message to be specified as an argument on the
-			command line.</para>
+		<para><command>&name;</command> expects a text message to be specified as an
+					argument on the command line.</para>
 		<para>The following options are available:</para>
 		<variablelist>
 			<varlistentry>

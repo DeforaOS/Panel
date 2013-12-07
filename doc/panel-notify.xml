@@ -73,8 +73,8 @@
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para>&name; expects an arbitrary number of panel applets to be specified as
-			arguments on the command line.</para>
+		<para><command>&name;</command> expects an arbitrary number of panel applets
+			to be specified as arguments on the command line.</para>
 		<para>The following options are available:</para>
 		<variablelist>
 			<varlistentry>

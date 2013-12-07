@@ -62,8 +62,8 @@
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para>&name; expects the name of a command, along with its optional parameters
-			to be specified as arguments on the command line.</para>
+		<para><command>&name;</command> expects the name of a command, along with its
+			optional parameters to be specified as arguments on the command line.</para>
 	</refsect1>
 	<refsect1 id="bugs">
 		<title>Bugs</title>
