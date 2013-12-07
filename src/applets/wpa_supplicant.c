@@ -45,6 +45,9 @@
 # define WPA_SUPPLICANT_PATH	"/var/run/wpa_supplicant"
 #endif
 
+/* macros */
+#define min(a, b)		((a) < (b) ? (a) : (b))
+
 /* portability */
 #ifndef SUN_LEN
 # define SUN_LEN(su)		sizeof(struct sockaddr_un)
@@ -810,7 +813,7 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
-static GdkPixbuf * _read_scan_results_pixbuf(guint level);
+static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1035,7 +1038,6 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 						&frequency, &level, flags,
 						ssid)) >= 3)
 		{
-			pixbuf = _read_scan_results_pixbuf(level);
 			bssid[sizeof(bssid) - 1] = '\0';
 			flags[sizeof(flags) - 1] = '\0';
 			ssid[sizeof(ssid) - 1] = '\0';
@@ -1044,6 +1046,8 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags, ssid);
 #endif
+			/* FIXME actually parse the flags */
+			pixbuf = _read_scan_results_pixbuf(level, FALSE);
 			_read_scan_results_iter(wpa, &iter, bssid);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
@@ -1086,11 +1090,21 @@ static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 	gtk_list_store_append(wpa->store, iter);
 }
 
-static GdkPixbuf * _read_scan_results_pixbuf(guint level)
+static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted)
 {
+	GdkPixbuf * ret;
 	GtkIconTheme * icontheme;
 	char const * name;
 	gint size;
+#if GTK_CHECK_VERSION(2, 14, 0)
+	const int flags = GTK_ICON_LOOKUP_USE_BUILTIN
+		| GTK_ICON_LOOKUP_FORCE_SIZE;
+#else
+	const int flags = GTK_ICON_LOOKUP_USE_BUILTIN;
+#endif
+	GdkPixbuf * pixbuf;
+	/* FIXME implement more levels of security */
+	char const * emblem = encrypted ? "stock_lock" : "stock_lock-open";
 
 	icontheme = gtk_icon_theme_get_default();
 	/* FIXME check if the mapping is right (and use our own icons) */
@@ -1105,7 +1119,25 @@ static GdkPixbuf * _read_scan_results_pixbuf(guint level)
 	else
 		name = "phone-signal-00";
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size); /* XXX */
-	return gtk_icon_theme_load_icon(icontheme, name, size, 0, NULL);
+	if((pixbuf = gtk_icon_theme_load_icon(icontheme, name, size, 0, NULL))
+			== NULL)
+		return NULL;
+	if((ret = gdk_pixbuf_copy(pixbuf)) != NULL)
+	{
+		g_object_unref(pixbuf);
+		size = min(24, size / 2);
+		pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size,
+				flags, NULL);
+		if(pixbuf != NULL)
+		{
+			gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0,
+					0, 1.0, 1.0, GDK_INTERP_NEAREST, 255);
+			g_object_unref(pixbuf);
+		}
+	}
+	else
+		ret = pixbuf;
+	return ret;
 }
 
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)
