@@ -43,7 +43,21 @@
 
 
 /* private */
+/* prototypes */
+static int _error(char const * message, int ret);
+static int _usage(void);
+
+
 /* functions */
+/* error */
+static int _error(char const * message, int ret)
+{
+	fprintf(stderr, "%s: ", PROGNAME);
+	perror(message);
+	return ret;
+}
+
+
 /* usage */
 static int _usage(void)
 {
@@ -64,7 +78,8 @@ int main(int argc, char * argv[])
 	PanelPrefs prefs;
 	char * p;
 
-	setlocale(LC_ALL, "");
+	if(setlocale(LC_ALL, "") == NULL)
+		_error("setlocale", 1);
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
