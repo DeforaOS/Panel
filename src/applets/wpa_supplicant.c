@@ -813,7 +813,8 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
-static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted);
+static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
+		gint size, guint level, gboolean encrypted);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1003,6 +1004,8 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 {
 	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	GtkIconTheme * icontheme;
+	gint size = 16;
 	gboolean valid;
 	size_t i;
 	size_t j;
@@ -1017,6 +1020,8 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char ssid[80];
 	GtkTreeIter iter;
 
+	icontheme = gtk_icon_theme_get_default();
+	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size);
 	/* mark every entry as obsolete */
 	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
 			valid = gtk_tree_model_iter_next(model, &iter))
@@ -1047,7 +1052,8 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					flags, ssid);
 #endif
 			/* FIXME actually parse the flags */
-			pixbuf = _read_scan_results_pixbuf(level, FALSE);
+			pixbuf = _read_scan_results_pixbuf(icontheme, size,
+					level, FALSE);
 			_read_scan_results_iter(wpa, &iter, bssid);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
@@ -1090,12 +1096,11 @@ static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 	gtk_list_store_append(wpa->store, iter);
 }
 
-static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted)
+static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
+		gint size, guint level, gboolean encrypted)
 {
 	GdkPixbuf * ret;
-	GtkIconTheme * icontheme;
 	char const * name;
-	gint size;
 #if GTK_CHECK_VERSION(2, 14, 0)
 	const int flags = GTK_ICON_LOOKUP_USE_BUILTIN
 		| GTK_ICON_LOOKUP_FORCE_SIZE;
@@ -1106,7 +1111,6 @@ static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted)
 	/* FIXME implement more levels of security */
 	char const * emblem = encrypted ? "stock_lock" : "stock_lock-open";
 
-	icontheme = gtk_icon_theme_get_default();
 	/* FIXME check if the mapping is right (and use our own icons) */
 	if(level >= 100)
 		name = "phone-signal-100";
@@ -1118,25 +1122,20 @@ static GdkPixbuf * _read_scan_results_pixbuf(guint level, gboolean encrypted)
 		name = "phone-signal-25";
 	else
 		name = "phone-signal-00";
-	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size); /* XXX */
 	if((pixbuf = gtk_icon_theme_load_icon(icontheme, name, size, 0, NULL))
 			== NULL)
 		return NULL;
-	if((ret = gdk_pixbuf_copy(pixbuf)) != NULL)
+	if((ret = gdk_pixbuf_copy(pixbuf)) == NULL)
+		return pixbuf;
+	g_object_unref(pixbuf);
+	size = min(24, size / 2);
+	pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size, flags, NULL);
+	if(pixbuf != NULL)
 	{
+		gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0, 0, 1.0,
+				1.0, GDK_INTERP_NEAREST, 255);
 		g_object_unref(pixbuf);
-		size = min(24, size / 2);
-		pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size,
-				flags, NULL);
-		if(pixbuf != NULL)
-		{
-			gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0,
-					0, 1.0, 1.0, GDK_INTERP_NEAREST, 255);
-			g_object_unref(pixbuf);
-		}
 	}
-	else
-		ret = pixbuf;
 	return ret;
 }
 
