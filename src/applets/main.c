@@ -637,7 +637,7 @@ static gboolean _on_idle(gpointer data)
 	if(main->apps != NULL)
 		return FALSE;
 	_main_xdg_dirs(main, _idle_path);
-	g_timeout_add(1000, _on_timeout, main);
+	g_timeout_add(10000, _on_timeout, main);
 	return FALSE;
 }
 
