@@ -61,6 +61,7 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 	if((separator = malloc(sizeof(*separator))) == NULL)
 		return NULL;
 	separator->helper = helper;
+	/* FIXME choose the correct orientation */
 	separator->widget = gtk_vseparator_new();
 	gtk_widget_show(separator->widget);
 	*widget = separator->widget;

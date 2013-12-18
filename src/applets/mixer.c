@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 
 	guint source;
 	GPid pid;
@@ -106,7 +107,6 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
 	Mixer * mixer;
-	GtkWidget * ret;
 	GtkWidget * image;
 
 	if((mixer = malloc(sizeof(*mixer))) == NULL)
@@ -119,18 +119,18 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 	mixer->window = NULL;
 	mixer->pr_box = NULL;
 	_init_size(mixer, helper);
-	ret = gtk_toggle_button_new();
+	mixer->widget = gtk_toggle_button_new();
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(ret, _("Show mixer"));
+	gtk_widget_set_tooltip_text(mixer->widget, _("Show mixer"));
 #endif
-	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
-	g_signal_connect(G_OBJECT(ret), "toggled", G_CALLBACK(
+	gtk_button_set_relief(GTK_BUTTON(mixer->widget), GTK_RELIEF_NONE);
+	g_signal_connect(mixer->widget, "toggled", G_CALLBACK(
 				_mixer_on_toggled), mixer);
 	image = gtk_image_new_from_icon_name(applet.icon, helper->icon_size);
-	gtk_container_add(GTK_CONTAINER(ret), image);
-	gtk_widget_show_all(ret);
+	gtk_container_add(GTK_CONTAINER(mixer->widget), image);
+	gtk_widget_show_all(mixer->widget);
 	mixer->source = g_idle_add(_init_idle, mixer);
-	*widget = ret;
+	*widget = mixer->widget;
 	return mixer;
 }
 
@@ -197,6 +197,7 @@ static void _mixer_destroy(Mixer * mixer)
 		g_source_remove(mixer->source);
 	if(mixer->pid > 0)
 		g_spawn_close_pid(mixer->pid);
+	gtk_widget_destroy(mixer->widget);
 	free(mixer);
 }
 

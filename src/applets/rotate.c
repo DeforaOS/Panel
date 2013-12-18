@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Rotate Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Rotate;
 
 
@@ -64,16 +65,17 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	if((rotate = object_new(sizeof(*rotate))) == NULL)
 		return NULL;
 	rotate->helper = helper;
-	*widget = gtk_button_new();
+	rotate->widget = gtk_button_new();
 	image = gtk_image_new_from_stock(applet.icon, helper->icon_size);
-	gtk_button_set_image(GTK_BUTTON(*widget), image);
-	gtk_button_set_relief(GTK_BUTTON(*widget), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(rotate->widget), image);
+	gtk_button_set_relief(GTK_BUTTON(rotate->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(*widget, _("Rotate the screen"));
+	gtk_widget_set_tooltip_text(rotate->widget, _("Rotate the screen"));
 #endif
-	g_signal_connect_swapped(G_OBJECT(*widget), "clicked", G_CALLBACK(
+	g_signal_connect_swapped(rotate->widget, "clicked", G_CALLBACK(
 				_on_clicked), rotate);
-	gtk_widget_show_all(*widget);
+	gtk_widget_show_all(rotate->widget);
+	*widget = rotate->widget;
 	return rotate;
 }
 
@@ -81,6 +83,7 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* rotate_destroy */
 static void _rotate_destroy(Rotate * rotate)
 {
+	gtk_widget_destroy(rotate->widget);
 	object_delete(rotate);
 }
 

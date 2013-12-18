@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 	GtkWidget * scale;
 	guint timeout;
 } Memory;
@@ -76,7 +77,6 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
 	Memory * memory;
-	GtkWidget * ret;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -86,22 +86,23 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	memory->helper = helper;
-	ret = gtk_hbox_new(FALSE, 0);
+	memory->widget = gtk_hbox_new(FALSE, 0);
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("RAM:"));
 	gtk_widget_modify_font(label, desc);
-	gtk_box_pack_start(GTK_BOX(ret), label, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(memory->widget), label, FALSE, FALSE, 0);
 	memory->scale = gtk_vscale_new_with_range(0, 100, 1);
 	gtk_widget_set_sensitive(memory->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(memory->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(memory->scale), GTK_POS_RIGHT);
-	gtk_box_pack_start(GTK_BOX(ret), memory->scale, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(memory->widget), memory->scale, FALSE, FALSE,
+			0);
 	memory->timeout = g_timeout_add(5000, _on_timeout, memory);
 	_on_timeout(memory);
 	pango_font_description_free(desc);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(memory->widget);
+	*widget = memory->widget;
 	return memory;
 #else
 	helper->error(NULL, _("memory: Unsupported platform"), 1);
@@ -114,6 +115,7 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 static void _memory_destroy(Memory * memory)
 {
 	g_source_remove(memory->timeout);
+	gtk_widget_destroy(memory->widget);
 	free(memory);
 }
 

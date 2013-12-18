@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 	GtkWidget * scale;
 	guint timeout;
 } Swap;
@@ -72,7 +73,6 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if defined(__linux__) || defined(__NetBSD__)
 	Swap * swap;
-	GtkWidget * ret;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -82,22 +82,22 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	swap->helper = helper;
-	ret = gtk_hbox_new(FALSE, 0);
+	swap->widget = gtk_hbox_new(FALSE, 0);
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("Swap:"));
 	gtk_widget_modify_font(label, desc);
-	gtk_box_pack_start(GTK_BOX(ret), label, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(swap->widget), label, FALSE, FALSE, 0);
 	swap->scale = gtk_vscale_new_with_range(0, 100, 1);
 	gtk_widget_set_sensitive(swap->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(swap->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(swap->scale), GTK_POS_RIGHT);
-	gtk_box_pack_start(GTK_BOX(ret), swap->scale, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(swap->widget), swap->scale, FALSE, FALSE, 0);
 	swap->timeout = g_timeout_add(5000, _on_timeout, swap);
 	_on_timeout(swap);
 	pango_font_description_free(desc);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(swap->widget);
+	*widget = swap->widget;
 	return swap;
 #else
 	helper->error(NULL, _("swap: Unsupported platform"), 1);
@@ -110,6 +110,7 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 static void _swap_destroy(Swap * swap)
 {
 	g_source_remove(swap->timeout);
+	gtk_widget_destroy(swap->widget);
 	free(swap);
 }
 
