@@ -890,7 +890,8 @@ static void _timeout_path(Main * main, char const * path, char const * apppath)
 {
 	struct stat st;
 
-	if(stat(apppath, &st) != 0)
-		return;
-	main->refresh = (st.st_mtime > main->refresh_mti) ? TRUE : FALSE;
+	if(main->refresh != TRUE
+			&& stat(apppath, &st) == 0
+			&& st.st_mtime > main->refresh_mti)
+		main->refresh = TRUE;
 }
