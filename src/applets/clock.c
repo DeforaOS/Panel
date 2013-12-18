@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 	char const * format;
 	GtkWidget * label;
 	guint timeout;
@@ -68,7 +69,6 @@ PanelAppletDefinition applet =
 static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Clock * clock;
-	GtkWidget * ret;
 #ifdef EMBEDDED
 	PangoFontDescription * desc;
 #endif
@@ -81,7 +81,7 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 					"format")) == NULL)
 #ifdef EMBEDDED
 		clock->format = _("%H:%M");
-	ret = clock->label;
+	clock->widget = clock->label;
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	gtk_widget_modify_font(clock->label, desc);
@@ -93,15 +93,15 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		else
 			clock->format = _("%H:%M");
 	}
-	ret = gtk_frame_new(NULL);
-	gtk_frame_set_shadow_type(GTK_FRAME(ret), GTK_SHADOW_IN);
-	gtk_container_add(GTK_CONTAINER(ret), clock->label);
+	clock->widget = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(clock->widget), GTK_SHADOW_IN);
+	gtk_container_add(GTK_CONTAINER(clock->widget), clock->label);
 #endif
 	gtk_label_set_justify(GTK_LABEL(clock->label), GTK_JUSTIFY_CENTER);
 	clock->timeout = g_timeout_add(1000, _on_timeout, clock);
 	_on_timeout(clock);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(clock->widget);
+	*widget = clock->widget;
 	return clock;
 }
 
@@ -110,6 +110,7 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 static void _clock_destroy(Clock * clock)
 {
 	g_source_remove(clock->timeout);
+	gtk_widget_destroy(clock->widget);
 	free(clock);
 }
 

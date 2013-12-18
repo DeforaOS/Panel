@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 
 	/* preferences */
 	GtkWidget * pr_box;
@@ -64,7 +65,6 @@ PanelAppletDefinition applet =
 static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Lock * lock;
-	GtkWidget * ret;
 	GtkWidget * image;
 
 	if((lock = malloc(sizeof(*lock))) == NULL)
@@ -72,18 +72,18 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	lock->helper = helper;
 	lock->pr_box = NULL;
 	lock->pr_command = NULL;
-	ret = gtk_button_new();
+	lock->widget = gtk_button_new();
 	image = gtk_image_new_from_icon_name("gnome-lockscreen",
 			helper->icon_size);
-	gtk_button_set_image(GTK_BUTTON(ret), image);
-	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(lock->widget), image);
+	gtk_button_set_relief(GTK_BUTTON(lock->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(ret, _("Lock screen"));
+	gtk_widget_set_tooltip_text(lock->widget, _("Lock screen"));
 #endif
-	g_signal_connect_swapped(G_OBJECT(ret), "clicked", G_CALLBACK(
+	g_signal_connect_swapped(lock->widget, "clicked", G_CALLBACK(
 				_on_clicked), helper);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(lock->widget);
+	*widget = lock->widget;
 	return lock;
 }
 
@@ -91,6 +91,7 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* lock_destroy */
 static void _lock_destroy(Lock * lock)
 {
+	gtk_widget_destroy(lock->widget);
 	free(lock);
 }
 

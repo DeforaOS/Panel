@@ -152,10 +152,10 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	}
 	else
 		battery->box = hbox;
-	*widget = battery->box;
 	battery->timeout = g_timeout_add(5000, _on_timeout, battery);
 	_on_timeout(battery);
 	gtk_widget_show(battery->image);
+	*widget = battery->box;
 	return battery;
 }
 

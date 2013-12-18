@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Logout;
 
 
@@ -60,7 +61,6 @@ PanelAppletDefinition applet =
 static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Logout * logout;
-	GtkWidget * ret;
 	GtkWidget * image;
 
 	if((logout = malloc(sizeof(*logout))) == NULL)
@@ -71,17 +71,17 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		helper->error(NULL, _("logout: Logging out is disabled"), 1);
 		return NULL;
 	}
-	ret = gtk_button_new();
+	logout->widget = gtk_button_new();
 	image = gtk_image_new_from_icon_name("gnome-logout", helper->icon_size);
-	gtk_button_set_image(GTK_BUTTON(ret), image);
-	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+	gtk_button_set_image(GTK_BUTTON(logout->widget), image);
+	gtk_button_set_relief(GTK_BUTTON(logout->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(ret, _("Logout"));
+	gtk_widget_set_tooltip_text(logout->widget, _("Logout"));
 #endif
-	g_signal_connect_swapped(G_OBJECT(ret), "clicked", G_CALLBACK(
+	g_signal_connect_swapped(logout->widget, "clicked", G_CALLBACK(
 				_on_clicked), logout);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(logout->widget);
+	*widget = logout->widget;
 	return logout;
 }
 
@@ -89,6 +89,7 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* logout_destroy */
 static void _logout_destroy(Logout * logout)
 {
+	gtk_widget_destroy(logout->widget);
 	free(logout);
 }
 

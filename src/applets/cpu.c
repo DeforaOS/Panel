@@ -38,6 +38,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 	GtkWidget * scale;
 	guint timeout;
 #if defined(__FreeBSD__) || defined(__NetBSD__)
@@ -79,7 +80,6 @@ static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	Cpu * cpu;
-	GtkWidget * ret;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -89,24 +89,24 @@ static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	cpu->helper = helper;
-	ret = gtk_hbox_new(FALSE, 0);
+	cpu->widget = gtk_hbox_new(FALSE, 0);
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("CPU:"));
 	gtk_widget_modify_font(label, desc);
-	gtk_box_pack_start(GTK_BOX(ret), label, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
 	cpu->scale = gtk_vscale_new_with_range(0, 100, 1);
 	gtk_widget_set_sensitive(cpu->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
-	gtk_box_pack_start(GTK_BOX(ret), cpu->scale, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(cpu->widget), cpu->scale, FALSE, FALSE, 0);
 	cpu->timeout = g_timeout_add(500, _on_timeout, cpu);
 	cpu->used = 0;
 	cpu->total = 0;
 	_on_timeout(cpu);
 	pango_font_description_free(desc);
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(cpu->widget);
+	*widget = cpu->widget;
 	return cpu;
 #else
 	error_set("%s: %s", "cpu", _("Unsupported platform"));
@@ -119,6 +119,7 @@ static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 static void _cpu_destroy(Cpu * cpu)
 {
 	g_source_remove(cpu->timeout);
+	gtk_widget_destroy(cpu->widget);
 	free(cpu);
 }
 
