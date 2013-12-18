@@ -272,7 +272,6 @@ void panel_window_remove_all(PanelWindow * panel)
 	for(i = 0; i < panel->applets_cnt; i++)
 	{
 		pa = &panel->applets[i];
-		gtk_widget_destroy(pa->widget);
 		pa->pad->destroy(pa->pa);
 		plugin_delete(pa->plugin);
 	}
