@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Pager Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_icon_size_lookup(helper->icon_size, NULL, &height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
 	systray->owner = gtk_invisible_new();
-	g_signal_connect(G_OBJECT(systray->hbox), "screen-changed", G_CALLBACK(
+	g_signal_connect(systray->hbox, "screen-changed", G_CALLBACK(
 				_on_screen_changed), systray);
 	gtk_widget_show(systray->hbox);
 	*widget = systray->hbox;
