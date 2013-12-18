@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,6 +104,7 @@ static void _gps_destroy(GPS * gps)
 	if(gps->fd != -1)
 		close(gps->fd);
 #endif
+	gtk_widget_destroy(gps->image);
 	free(gps);
 }
 

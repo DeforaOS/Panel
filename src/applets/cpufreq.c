@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,6 +144,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 static void _cpufreq_destroy(Cpufreq * cpufreq)
 {
 	g_source_remove(cpufreq->timeout);
+	gtk_widget_destroy(cpufreq->hbox);
 	free(cpufreq);
 }
 

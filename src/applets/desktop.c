@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,13 +72,16 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			NULL);
 	gtk_widget_show_all(ret);
 	*widget = ret;
-	return (Desktop *)ret; /* XXX ugly workaround */
+	/* XXX ugly workaround */
+	return (Desktop *)ret;
 }
 
 
 /* desktop_destroy */
 static void _desktop_destroy(Desktop * desktop)
 {
+	/* XXX just as ugly */
+	gtk_widget_destroy((GtkWidget *)desktop);
 }
 
 

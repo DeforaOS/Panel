@@ -184,6 +184,7 @@ static void _main_destroy(Main * main)
 		g_source_remove(main->idle);
 	g_slist_foreach(main->apps, (GFunc)config_delete, NULL);
 	g_slist_free(main->apps);
+	gtk_widget_destroy(main->widget);
 	free(main);
 }
 
@@ -210,7 +211,7 @@ static GtkWidget * _main_applications(Main * main)
 
 	if(main->apps == NULL)
 		_on_idle(main);
-	memset(menus, 0, sizeof(menus));
+	memset(&menus, 0, sizeof(menus));
 	menu = gtk_menu_new();
 	for(p = main->apps; p != NULL; p = p->next)
 	{
@@ -635,9 +636,12 @@ static gboolean _on_idle(gpointer data)
 	Main * main = data;
 
 	if(main->apps != NULL)
+	{
+		main->idle = 0;
 		return FALSE;
+	}
 	_main_xdg_dirs(main, _idle_path);
-	g_timeout_add(10000, _on_timeout, main);
+	main->idle = g_timeout_add(10000, _on_timeout, main);
 	return FALSE;
 }
 
@@ -882,7 +886,7 @@ static gboolean _on_timeout(gpointer data)
 	g_slist_foreach(main->apps, (GFunc)config_delete, NULL);
 	g_slist_free(main->apps);
 	main->apps = NULL;
-	g_idle_add(_on_idle, main);
+	main->idle = g_idle_add(_on_idle, main);
 	return FALSE;
 }
 

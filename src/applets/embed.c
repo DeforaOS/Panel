@@ -128,6 +128,7 @@ static void _embed_destroy(Embed * embed)
 		g_source_remove(embed->source);
 	g_object_unref(embed->vbox);
 	free(embed->widgets);
+	gtk_widget_destroy(embed->button);
 	object_delete(embed);
 }
 

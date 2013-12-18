@@ -231,6 +231,7 @@ static void _keyboard_destroy(Keyboard * keyboard)
 		g_source_remove(keyboard->source);
 	if(keyboard->pid > 0)
 		g_spawn_close_pid(keyboard->pid);
+	gtk_widget_destroy(keyboard->button);
 	free(keyboard);
 }
 

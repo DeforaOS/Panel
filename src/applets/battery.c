@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ typedef struct _PanelApplet
 	int charging;
 
 	/* widgets */
-	GtkWidget * hbox;
+	GtkWidget * box;
 	GtkWidget * image;
 	GtkWidget * label;
 	GtkWidget * progress;
@@ -125,7 +125,7 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	battery->fd = -1;
 #endif
 	hbox = gtk_hbox_new(FALSE, 4);
-	battery->hbox = hbox;
+	battery->box = hbox;
 	battery->image = gtk_image_new_from_icon_name("battery",
 			helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), battery->image, FALSE, TRUE, 0);
@@ -147,11 +147,12 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		battery->progress = gtk_progress_bar_new();
 		gtk_box_pack_start(GTK_BOX(vbox), battery->progress, TRUE, TRUE,
 				0);
-		*widget = vbox;
+		battery->box = vbox;
 		pango_font_description_free(bold);
 	}
 	else
-		*widget = hbox;
+		battery->box = hbox;
+	*widget = battery->box;
 	battery->timeout = g_timeout_add(5000, _on_timeout, battery);
 	_on_timeout(battery);
 	gtk_widget_show(battery->image);
@@ -168,6 +169,7 @@ static void _battery_destroy(Battery * battery)
 	if(battery->fd != -1)
 		close(battery->fd);
 #endif
+	gtk_widget_destroy(battery->box);
 	free(battery);
 }
 
@@ -237,7 +239,7 @@ static void _battery_set(Battery * battery, gdouble value, gboolean charging)
 	/* XXX only show when necessary? */
 	if(value >= 0.0 && value <= 100.0)
 	{
-		gtk_widget_show(battery->hbox);
+		gtk_widget_show(battery->box);
 		if(battery->progress != NULL)
 		{
 			gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(
@@ -276,7 +278,7 @@ static void _battery_set(Battery * battery, gdouble value, gboolean charging)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	snprintf(buf, sizeof(buf), _("Battery level: %.0lf%%%s"), value,
 			charging ? _(" (charging)") : "");
-	gtk_widget_set_tooltip_text(battery->hbox, buf);
+	gtk_widget_set_tooltip_text(battery->box, buf);
 #endif
 }
 

@@ -25,6 +25,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Template;
 
 
@@ -63,8 +64,9 @@ static Template * _template_init(PanelAppletHelper * helper,
 		return NULL;
 	}
 	template->helper = helper;
-	*widget = gtk_label_new("Template");
-	gtk_widget_show(*widget);
+	template->widget = gtk_label_new("Template");
+	gtk_widget_show(template->widget);
+	*widget = template->widget;
 	return template;
 }
 
@@ -72,5 +74,6 @@ static Template * _template_init(PanelAppletHelper * helper,
 /* template_destroy */
 static void _template_destroy(Template * template)
 {
+	gtk_widget_destroy(template->widget);
 	object_delete(template);
 }

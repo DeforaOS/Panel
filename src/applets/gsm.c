@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,6 +107,7 @@ static void _gsm_destroy(GSM * gsm)
 	if(gsm->fd != -1)
 		close(gsm->fd);
 #endif
+	gtk_widget_destroy(gsm->hbox);
 	free(gsm);
 }
 

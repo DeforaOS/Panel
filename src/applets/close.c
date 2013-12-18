@@ -114,6 +114,7 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* close_destroy */
 static void _close_destroy(Close * close)
 {
+	gtk_widget_destroy(close->widget);
 	free(close);
 }
 

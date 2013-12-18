@@ -33,6 +33,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Phone;
 
 
@@ -76,19 +77,18 @@ PanelAppletDefinition applet =
 static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Phone * phone;
-	GtkWidget * socket;
 
 	if((phone = malloc(sizeof(*phone))) == NULL)
 		return NULL;
 	phone->helper = helper;
-	socket = gtk_socket_new();
-	g_signal_connect(socket, "plug-added", G_CALLBACK(_on_plug_added),
-			NULL);
-	g_signal_connect(socket, "plug-removed", G_CALLBACK(_on_plug_removed),
-			NULL);
-	g_signal_connect(socket, "screen-changed", G_CALLBACK(
+	phone->widget = gtk_socket_new();
+	g_signal_connect(phone->widget, "plug-added", G_CALLBACK(
+				_on_plug_added), NULL);
+	g_signal_connect(phone->widget, "plug-removed", G_CALLBACK(
+				_on_plug_removed), NULL);
+	g_signal_connect(phone->widget, "screen-changed", G_CALLBACK(
 				_on_screen_changed), NULL);
-	*widget = socket;
+	*widget = phone->widget;
 	return phone;
 }
 
@@ -96,6 +96,7 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* phone_destroy */
 static void _phone_destroy(Phone * phone)
 {
+	gtk_widget_destroy(phone->widget);
 	free(phone);
 }
 

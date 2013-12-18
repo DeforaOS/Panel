@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Pager Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,8 +111,9 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	pager->helper = helper;
+	/* FIXME choose the right orientation */
 	pager->hbox = gtk_hbox_new(TRUE, 0);
-	g_signal_connect(G_OBJECT(pager->hbox), "screen-changed", G_CALLBACK(
+	g_signal_connect(pager->hbox, "screen-changed", G_CALLBACK(
 				_on_screen_changed), pager);
 	pager->widgets = NULL;
 	pager->widgets_cnt = 0;
@@ -127,6 +128,7 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* pager_destroy */
 static void _pager_destroy(Pager * pager)
 {
+	gtk_widget_destroy(pager->hbox);
 	free(pager);
 }
 

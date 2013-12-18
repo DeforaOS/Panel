@@ -100,9 +100,10 @@ static void _systray_destroy(Systray * systray)
 {
 	GdkWindow * window;
 
+	gtk_widget_destroy(systray->hbox);
 	if((window = gtk_widget_get_window(systray->owner)) != NULL)
 		gdk_window_remove_filter(window, _on_filter, systray);
-	gtk_widget_destroy(systray->hbox);
+	gtk_widget_destroy(systray->owner);
 	free(systray);
 }
 

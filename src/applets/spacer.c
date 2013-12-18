@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Spacer;
 
 
@@ -54,14 +55,13 @@ PanelAppletDefinition applet =
 static Spacer * _spacer_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Spacer * spacer;
-	GtkWidget * ret;
 
 	if((spacer = malloc(sizeof(*spacer))) == NULL)
 		return NULL;
 	spacer->helper = helper;
-	ret = gtk_label_new(NULL);
-	gtk_widget_show(ret);
-	*widget = ret;
+	spacer->widget = gtk_label_new(NULL);
+	gtk_widget_show(spacer->widget);
+	*widget = spacer->widget;
 	return spacer;
 }
 
@@ -69,5 +69,6 @@ static Spacer * _spacer_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* spacer_destroy */
 static void _spacer_destroy(Spacer * spacer)
 {
+	gtk_widget_destroy(spacer->widget);
 	free(spacer);
 }

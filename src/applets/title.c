@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* title_destroy */
 static void _title_destroy(Title * title)
 {
+	gtk_widget_destroy(title->widget);
 	free(title);
 }
 

@@ -27,6 +27,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Player;
 
 
@@ -76,22 +77,24 @@ static Player * _player_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	player->helper = helper;
-	*widget = gtk_hbox_new(FALSE, 0);
-	_init_add(*widget, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
+	/* FIXME choose the adequate orientation */
+	player->widget = gtk_hbox_new(FALSE, 0);
+	_init_add(player->widget, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
 			_player_on_previous);
-	_init_add(*widget, GTK_STOCK_MEDIA_REWIND, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_REWIND, helper->icon_size,
 			_player_on_rewind);
-	_init_add(*widget, GTK_STOCK_MEDIA_PLAY, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_PLAY, helper->icon_size,
 			_player_on_play);
-	_init_add(*widget, GTK_STOCK_MEDIA_PAUSE, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_PAUSE, helper->icon_size,
 			_player_on_pause);
-	_init_add(*widget, GTK_STOCK_MEDIA_STOP, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_STOP, helper->icon_size,
 			_player_on_stop);
-	_init_add(*widget, GTK_STOCK_MEDIA_FORWARD, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_FORWARD, helper->icon_size,
 			_player_on_forward);
-	_init_add(*widget, GTK_STOCK_MEDIA_NEXT, helper->icon_size,
+	_init_add(player->widget, GTK_STOCK_MEDIA_NEXT, helper->icon_size,
 			_player_on_next);
-	gtk_widget_show_all(*widget);
+	gtk_widget_show_all(player->widget);
+	*widget = player->widget;
 	return player;
 }
 
@@ -113,6 +116,7 @@ static void _init_add(GtkWidget * box, char const * stock, GtkIconSize iconsize,
 /* player_destroy */
 static void _player_destroy(Player * player)
 {
+	gtk_widget_destroy(player->widget);
 	object_delete(player);
 }
 

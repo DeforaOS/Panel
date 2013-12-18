@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+	GtkWidget * widget;
 } Separator;
 
 
@@ -56,14 +57,13 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
 	Separator * separator;
-	GtkWidget * ret;
 
 	if((separator = malloc(sizeof(*separator))) == NULL)
 		return NULL;
 	separator->helper = helper;
-	ret = gtk_vseparator_new();
-	gtk_widget_show(ret);
-	*widget = ret;
+	separator->widget = gtk_vseparator_new();
+	gtk_widget_show(separator->widget);
+	*widget = separator->widget;
 	return separator;
 }
 
@@ -71,5 +71,6 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 /* separator_destroy */
 static void _separator_destroy(Separator * separator)
 {
+	gtk_widget_destroy(separator->widget);
 	free(separator);
 }
