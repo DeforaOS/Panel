@@ -169,12 +169,12 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 	task->tasks = tasks;
 	task->window = window;
 	task->widget = gtk_button_new();
-	g_signal_connect(G_OBJECT(task->widget), "button-press-event",
-			G_CALLBACK(_on_button_press), task);
-	g_signal_connect_swapped(G_OBJECT(task->widget), "popup-menu",
-			G_CALLBACK(_on_popup), task);
-	g_signal_connect_swapped(task->widget, "clicked",
-			G_CALLBACK(_on_clicked), task);
+	g_signal_connect(task->widget, "button-press-event", G_CALLBACK(
+				_on_button_press), task);
+	g_signal_connect_swapped(task->widget, "popup-menu", G_CALLBACK(
+				_on_popup), task);
+	g_signal_connect_swapped(task->widget, "clicked", G_CALLBACK(
+				_on_clicked), task);
 	task->image = gtk_image_new();
 	task->delete = FALSE;
 	hbox = gtk_hbox_new(FALSE, 0);
