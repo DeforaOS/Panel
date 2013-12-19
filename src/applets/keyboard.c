@@ -227,6 +227,8 @@ static int _keyboard_on_message(void * data, uint32_t value1, uint32_t value2,
 /* keyboard_destroy */
 static void _keyboard_destroy(Keyboard * keyboard)
 {
+	desktop_message_unregister(keyboard->window, _keyboard_on_message,
+			keyboard);
 	if(keyboard->source > 0)
 		g_source_remove(keyboard->source);
 	if(keyboard->pid > 0)

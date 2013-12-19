@@ -96,6 +96,7 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* phone_destroy */
 static void _phone_destroy(Phone * phone)
 {
+	desktop_message_unregister(NULL, _on_message, phone->widget);
 	gtk_widget_destroy(phone->widget);
 	free(phone);
 }
@@ -140,6 +141,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous)
 {
 	if(previous != NULL)
 		return;
+	desktop_message_unregister(NULL, _on_message, widget);
 	desktop_message_register(NULL, PHONE_EMBED_MESSAGE, _on_message,
 			widget);
 }

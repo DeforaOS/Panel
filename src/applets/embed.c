@@ -126,6 +126,8 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 /* embed_destroy */
 static void _embed_destroy(Embed * embed)
 {
+	desktop_message_unregister(embed->window, _embed_on_desktop_message,
+			embed);
 	if(embed->source != 0)
 		g_source_remove(embed->source);
 	g_object_unref(embed->vbox);
