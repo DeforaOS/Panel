@@ -356,8 +356,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	pager->display = gdk_screen_get_display(pager->screen);
 	pager->root = gdk_screen_get_root_window(pager->screen);
 	events = gdk_window_get_events(pager->root);
-	gdk_window_set_events(pager->root, events
-			| GDK_PROPERTY_CHANGE_MASK);
+	gdk_window_set_events(pager->root, events | GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(pager->root, _on_filter, pager);
 	/* atoms */
 	for(i = 0; i < PAGER_ATOM_COUNT; i++)
