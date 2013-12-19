@@ -15,10 +15,12 @@
 
 
 
+#include <libintl.h>
 #include <System.h>
 #include <Desktop.h>
 #include <Desktop/Player.h>
 #include "Panel.h"
+#define _(string) gettext(string)
 
 
 /* Player */
@@ -80,19 +82,19 @@ static Player * _player_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	/* FIXME choose the adequate orientation */
 	player->widget = gtk_hbox_new(FALSE, 0);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
-			"Previous", _player_on_previous);
+			_("Previous"), _player_on_previous);
 	_init_add(player->widget, GTK_STOCK_MEDIA_REWIND, helper->icon_size,
-			"Rewind", _player_on_rewind);
+			_("Rewind"), _player_on_rewind);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PLAY, helper->icon_size,
-			"Play", _player_on_play);
+			_("Play"), _player_on_play);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PAUSE, helper->icon_size,
-			"Pause", _player_on_pause);
+			_("Pause"), _player_on_pause);
 	_init_add(player->widget, GTK_STOCK_MEDIA_STOP, helper->icon_size,
-			"Stop", _player_on_stop);
+			_("Stop"), _player_on_stop);
 	_init_add(player->widget, GTK_STOCK_MEDIA_FORWARD, helper->icon_size,
-			"Forward", _player_on_forward);
+			_("Forward"), _player_on_forward);
 	_init_add(player->widget, GTK_STOCK_MEDIA_NEXT, helper->icon_size,
-			"Next", _player_on_next);
+			_("Next"), _player_on_next);
 	gtk_widget_show_all(player->widget);
 	*widget = player->widget;
 	return player;

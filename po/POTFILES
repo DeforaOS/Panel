@@ -14,6 +14,7 @@
 ../src/applets/main.c
 ../src/applets/memory.c
 ../src/applets/mixer.c
+../src/applets/player.c
 ../src/applets/rotate.c
 ../src/applets/swap.c
 ../src/applets/tasks.c
