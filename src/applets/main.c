@@ -134,7 +134,6 @@ PanelAppletDefinition applet =
 static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Main * main;
-	GtkWidget * ret;
 	GtkWidget * hbox;
 	GtkWidget * image;
 	char const * p;
@@ -147,7 +146,7 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	main->apps = NULL;
 	main->idle = g_idle_add(_on_idle, main);
 	main->refresh_mti = 0;
-	ret = gtk_button_new();
+	main->widget = gtk_button_new();
 	hbox = gtk_hbox_new(FALSE, 4);
 	image = gtk_image_new_from_icon_name("gnome-main-menu",
 			helper->icon_size);
@@ -163,15 +162,14 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		pango_font_description_free(bold);
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	}
-	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+	gtk_button_set_relief(GTK_BUTTON(main->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(ret, _("Main menu"));
+	gtk_widget_set_tooltip_text(main->widget, _("Main menu"));
 #endif
-	g_signal_connect_swapped(ret, "clicked", G_CALLBACK(_on_clicked),
-			main);
-	gtk_container_add(GTK_CONTAINER(ret), hbox);
-	gtk_widget_show_all(ret);
-	main->widget = ret;
+	g_signal_connect_swapped(main->widget, "clicked", G_CALLBACK(
+				_on_clicked), main);
+	gtk_container_add(GTK_CONTAINER(main->widget), hbox);
+	gtk_widget_show_all(main->widget);
 	*widget = main->widget;
 	return main;
 }
