@@ -156,6 +156,7 @@ static int _title_get_text_property(Title * title, Window window, Atom property,
 {
 	int res;
 	XTextProperty text;
+	GdkAtom atom;
 	int cnt;
 	char ** list;
 	int i;
@@ -168,13 +169,12 @@ static int _title_get_text_property(Title * title, Window window, Atom property,
 			&text, property);
 	if(gdk_error_trap_pop() != 0 || res == 0)
 		return 1;
+	atom = gdk_x11_xatom_to_atom(text.encoding);
 #if GTK_CHECK_VERSION(2, 24, 0)
 	cnt = gdk_x11_display_text_property_to_text_list(title->display,
-			text.encoding, text.format, text.value, text.nitems,
-			&list);
+			atom, text.format, text.value, text.nitems, &list);
 #else
-	cnt = gdk_text_property_to_utf8_list(gdk_x11_xatom_to_atom(
-				text.encoding), text.format, text.value,
+	cnt = gdk_text_property_to_utf8_list(atom, text.format, text.value,
 			text.nitems, &list);
 #endif
 	if(cnt > 0)
