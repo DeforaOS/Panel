@@ -65,7 +65,7 @@ PanelAppletDefinition applet =
 /* functions */
 /* player_init */
 static void _init_add(GtkWidget * box, char const * stock, GtkIconSize iconsize,
-		GCallback callback);
+		char const * tooltip, GCallback callback);
 
 static Player * _player_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
@@ -80,26 +80,26 @@ static Player * _player_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	/* FIXME choose the adequate orientation */
 	player->widget = gtk_hbox_new(FALSE, 0);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
-			_player_on_previous);
+			"Previous", _player_on_previous);
 	_init_add(player->widget, GTK_STOCK_MEDIA_REWIND, helper->icon_size,
-			_player_on_rewind);
+			"Rewind", _player_on_rewind);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PLAY, helper->icon_size,
-			_player_on_play);
+			"Play", _player_on_play);
 	_init_add(player->widget, GTK_STOCK_MEDIA_PAUSE, helper->icon_size,
-			_player_on_pause);
+			"Pause", _player_on_pause);
 	_init_add(player->widget, GTK_STOCK_MEDIA_STOP, helper->icon_size,
-			_player_on_stop);
+			"Stop", _player_on_stop);
 	_init_add(player->widget, GTK_STOCK_MEDIA_FORWARD, helper->icon_size,
-			_player_on_forward);
+			"Forward", _player_on_forward);
 	_init_add(player->widget, GTK_STOCK_MEDIA_NEXT, helper->icon_size,
-			_player_on_next);
+			"Next", _player_on_next);
 	gtk_widget_show_all(player->widget);
 	*widget = player->widget;
 	return player;
 }
 
 static void _init_add(GtkWidget * box, char const * stock, GtkIconSize iconsize,
-		GCallback callback)
+		char const * tooltip, GCallback callback)
 {
 	GtkWidget * button;
 	GtkWidget * image;
@@ -108,6 +108,9 @@ static void _init_add(GtkWidget * box, char const * stock, GtkIconSize iconsize,
 	image = gtk_image_new_from_stock(stock, iconsize);
 	gtk_button_set_image(GTK_BUTTON(button), image);
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+	gtk_widget_set_tooltip_text(button, tooltip);
+#endif
 	g_signal_connect(button, "clicked", callback, NULL);
 	gtk_box_pack_start(GTK_BOX(box), button, FALSE, TRUE, 0);
 }
