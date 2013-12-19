@@ -5,6 +5,7 @@
 ../src/applets/cpu.c
 ../src/applets/cpufreq.c
 ../src/applets/desktop.c
+../src/applets/embed.c
 ../src/applets/gps.c
 ../src/applets/gsm.c
 ../src/applets/keyboard.c

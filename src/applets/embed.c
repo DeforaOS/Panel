@@ -22,9 +22,11 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
+#include <libintl.h>
 #include <System.h>
 #include <Desktop.h>
 #include "Panel.h"
+#define _(string) gettext(string)
 
 
 /* Embed */
@@ -103,11 +105,11 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 	embed->widgets = NULL;
 	embed->widgets_cnt = 0;
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(embed->button, "Desktop notifications");
+	gtk_widget_set_tooltip_text(embed->button, _("Desktop notifications"));
 #endif
 	gtk_button_set_relief(GTK_BUTTON(embed->button), GTK_RELIEF_NONE);
 	gtk_widget_set_sensitive(embed->button, FALSE);
-	g_signal_connect_swapped(G_OBJECT(embed->button), "toggled", G_CALLBACK(
+	g_signal_connect_swapped(embed->button, "toggled", G_CALLBACK(
 				_embed_on_toggled), embed);
 	image = gtk_image_new_from_icon_name(applet.icon, helper->icon_size);
 	gtk_container_add(GTK_CONTAINER(embed->button), image);
