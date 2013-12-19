@@ -1042,14 +1042,16 @@ static void _preferences_on_response_apply(gpointer data)
 			continue;
 		pad->settings(pa, TRUE, FALSE);
 	}
-#if 0 /* FIXME crashes the panel */
 	if(panel->top != NULL)
 		panel_window_remove_all(panel->top);
+	if(panel->left != NULL)
+		panel_window_remove_all(panel->left);
+	if(panel->right != NULL)
+		panel_window_remove_all(panel->right);
 	if(panel->bottom != NULL)
 		panel_window_remove_all(panel->bottom);
 	if(panel->source == 0)
 		panel->source = g_idle_add(_on_idle, panel);
-#endif
 }
 
 static void _preferences_on_response_cancel(gpointer data)
