@@ -61,7 +61,7 @@ static void _embed_destroy(Embed * embed);
 static void _embed_on_added(gpointer data);
 static int _embed_on_desktop_message(void * data, uint32_t value1,
 		uint32_t value2, uint32_t value3);
-static int _embed_on_idle(gpointer data);
+static gboolean _embed_on_idle(gpointer data);
 static gboolean _embed_on_removed(GtkWidget * widget, gpointer data);
 static void _embed_on_toggled(gpointer data);
 
@@ -116,7 +116,7 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 	gtk_widget_show(embed->button);
 #endif
 	*widget = embed->button;
-	g_idle_add(_embed_on_idle, embed);
+	embed->source = g_idle_add(_embed_on_idle, embed);
 	return embed;
 }
 
@@ -190,7 +190,7 @@ static int _embed_on_desktop_message(void * data, uint32_t value1,
 
 
 /* embed_on_idle */
-static int _embed_on_idle(gpointer data)
+static gboolean _embed_on_idle(gpointer data)
 {
 	Embed * embed = data;
 
