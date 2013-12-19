@@ -163,7 +163,7 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 
 	if((task = malloc(sizeof(*task))) == NULL)
 	{
-		tasks->helper->error(tasks->helper->panel, "malloc", 0);
+		tasks->helper->error(tasks->helper->panel, "malloc", 1);
 		return NULL;
 	}
 	task->tasks = tasks;
@@ -972,12 +972,13 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	if(tasks->root != NULL)
+		gdk_window_remove_filter(tasks->root, _on_filter, tasks);
 	tasks->screen = gtk_widget_get_screen(widget);
 	tasks->display = gdk_screen_get_display(tasks->screen);
 	tasks->root = gdk_screen_get_root_window(tasks->screen);
 	events = gdk_window_get_events(tasks->root);
-	gdk_window_set_events(tasks->root, events
-			| GDK_PROPERTY_CHANGE_MASK);
+	gdk_window_set_events(tasks->root, events | GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(tasks->root, _on_filter, tasks);
 	/* atoms */
 	for(i = 0; i < TASKS_ATOM_COUNT; i++)
