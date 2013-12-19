@@ -96,7 +96,7 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	title->widget = gtk_label_new("");
 	gtk_widget_modify_font(title->widget, bold);
 	pango_font_description_free(bold);
-	g_signal_connect(G_OBJECT(title->widget), "screen-changed", G_CALLBACK(
+	g_signal_connect(title->widget, "screen-changed", G_CALLBACK(
 				_on_screen_changed), title);
 	title->display = NULL;
 	title->screen = NULL;
