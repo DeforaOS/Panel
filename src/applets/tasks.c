@@ -272,7 +272,7 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tasks->tasks = NULL;
 	tasks->tasks_cnt = 0;
 	tasks->hbox = gtk_hbox_new(TRUE, 0);
-	g_signal_connect(G_OBJECT(tasks->hbox), "screen-changed", G_CALLBACK(
+	g_signal_connect(tasks->hbox, "screen-changed", G_CALLBACK(
 				_on_screen_changed), tasks);
 	tasks->icon_size = helper->icon_size;
 	tasks->icon_width = 48;
@@ -780,8 +780,8 @@ static gboolean _on_popup(gpointer data)
 			menu = gtk_menu_new();
 		menuitem = gtk_image_menu_item_new_from_stock(_(items[j].stock),
 				NULL); /* XXX they're not always stock */
-		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-				G_CALLBACK(items[j].callback), task);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					items[j].callback), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 		/* maximizing horizontally and vertically */
 		if(items[j].atom != TASKS_ATOM__NET_WM_ACTION_MAXIMIZE_VERT
@@ -792,8 +792,8 @@ static gboolean _on_popup(gpointer data)
 			continue;
 		menuitem = gtk_image_menu_item_new_from_stock(_("Maximize"),
 				NULL);
-		g_signal_connect_swapped(G_OBJECT(menuitem), "activate",
-				G_CALLBACK(_on_popup_maximize), task);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_on_popup_maximize), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	XFree(buf);
