@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-07 12:53+0100\n"
+"POT-Creation-Date: 2013-12-19 03:16+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -17,26 +17,26 @@ msgstr ""
 "Language: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ../src/applets/battery.c:187
+#: ../src/applets/battery.c:189
 msgid "Show the battery level"
 msgstr "Afficher le niveau de batterie"
 
-#: ../src/applets/battery.c:255
+#: ../src/applets/battery.c:257
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:271 ../src/applets/wpa_supplicant.c:255
+#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:257
 #: ../src/panel.c:490 ../src/panel.c:495 ../src/run.c:224 ../src/run.c:230
 #: ../tools/message.c:76
 msgid "Error"
 msgstr "Erreur"
 
-#: ../src/applets/battery.c:277
+#: ../src/applets/battery.c:279
 #, c-format
 msgid "Battery level: %.0lf%%%s"
 msgstr "Batterie : %.0lf%%%s"
 
-#: ../src/applets/battery.c:278
+#: ../src/applets/battery.c:280
 msgid " (charging)"
 msgstr " (en charge)"
 
@@ -48,7 +48,7 @@ msgstr "Bluetooth actif"
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: ../src/applets/clock.c:92 ../src/applets/clock.c:137
+#: ../src/applets/clock.c:92 ../src/applets/clock.c:138
 msgid ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
@@ -72,17 +72,21 @@ msgstr "Plate-forme non supportée"
 msgid "No support detected"
 msgstr "Aucun support détecté"
 
-#: ../src/applets/cpufreq.c:128 ../src/applets/cpufreq.c:168
+#: ../src/applets/cpufreq.c:128 ../src/applets/cpufreq.c:169
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:167
+#: ../src/applets/cpufreq.c:168
 msgid "CPU frequency: "
 msgstr "Fréquence CPU : "
 
 #: ../src/applets/desktop.c:69
 msgid "Show desktop"
 msgstr "Afficher le bureau"
+
+#: ../src/applets/embed.c:106
+msgid "Desktop notifications"
+msgstr "Notifications"
 
 #: ../src/applets/gps.c:89
 msgid "GPS is enabled"
@@ -96,24 +100,24 @@ msgstr "GSM actif"
 msgid "Show keyboard"
 msgstr "Afficher le clavier"
 
-#: ../src/applets/keyboard.c:313 ../src/applets/lock.c:113
-#: ../src/applets/mixer.c:279 ../src/run.c:110
+#: ../src/applets/keyboard.c:314 ../src/applets/lock.c:114
+#: ../src/applets/mixer.c:280 ../src/run.c:110
 msgid "Command:"
 msgstr "Commande :"
 
-#: ../src/applets/keyboard.c:324 ../src/applets/mixer.c:290
+#: ../src/applets/keyboard.c:325 ../src/applets/mixer.c:291
 msgid "Width:"
 msgstr "Largeur :"
 
-#: ../src/applets/keyboard.c:335 ../src/applets/mixer.c:301
+#: ../src/applets/keyboard.c:336 ../src/applets/mixer.c:302
 msgid "Height:"
 msgstr "Hauteur :"
 
-#: ../src/applets/keyboard.c:346 ../src/applets/mixer.c:312
+#: ../src/applets/keyboard.c:347 ../src/applets/mixer.c:313
 msgid "Keep ratio"
 msgstr "Respecter les proportions"
 
-#: ../src/applets/lock.c:81 ../src/applets/main.c:570
+#: ../src/applets/lock.c:81 ../src/applets/main.c:569
 msgid "Lock screen"
 msgstr "Verrouiller l'écran"
 
@@ -126,31 +130,31 @@ msgstr "logout: Se déconnecter est désactivé"
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: ../src/applets/main.c:168
+#: ../src/applets/main.c:167
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: ../src/applets/main.c:550
+#: ../src/applets/main.c:549
 msgid "Applications"
 msgstr "Programmes"
 
-#: ../src/applets/main.c:557
+#: ../src/applets/main.c:556
 msgid "Run..."
 msgstr "Exécuter..."
 
-#: ../src/applets/main.c:576
+#: ../src/applets/main.c:575
 msgid "Rotate"
 msgstr "Réorienter"
 
-#: ../src/applets/main.c:585
+#: ../src/applets/main.c:584
 msgid "Logout..."
 msgstr "Déconnecter..."
 
-#: ../src/applets/main.c:593
+#: ../src/applets/main.c:592
 msgid "Suspend"
 msgstr "Suspendre"
 
-#: ../src/applets/main.c:600
+#: ../src/applets/main.c:599
 msgid "Shutdown..."
 msgstr "Arrêter..."
 
@@ -158,7 +162,7 @@ msgstr "Arrêter..."
 msgid "RAM:"
 msgstr "Mémoire :"
 
-#: ../src/applets/memory.c:107
+#: ../src/applets/memory.c:108
 msgid "memory: Unsupported platform"
 msgstr "memory: Plate-forme non supportée"
 
@@ -166,7 +170,7 @@ msgstr "memory: Plate-forme non supportée"
 msgid "Show mixer"
 msgstr "Afficher le mixer"
 
-#: ../src/applets/rotate.c:72
+#: ../src/applets/rotate.c:73
 msgid "Rotate the screen"
 msgstr "Réorienter l'écran"
 
@@ -178,43 +182,43 @@ msgstr "Échange :"
 msgid "swap: Unsupported platform"
 msgstr "swap: Plate-forme non supportée"
 
-#: ../src/applets/tasks.c:464 ../src/applets/title.c:233
+#: ../src/applets/tasks.c:469 ../src/applets/title.c:236
 msgid "(Untitled)"
 msgstr "(Sans titre)"
 
-#: ../src/applets/tasks.c:737
+#: ../src/applets/tasks.c:742
 msgid "Move"
 msgstr "Déplacer"
 
-#: ../src/applets/tasks.c:739
+#: ../src/applets/tasks.c:744
 msgid "Resize"
 msgstr "Redimensionner"
 
-#: ../src/applets/tasks.c:741
+#: ../src/applets/tasks.c:746
 msgid "Minimize"
 msgstr "Réduire"
 
-#: ../src/applets/tasks.c:743
+#: ../src/applets/tasks.c:748
 msgid "Shade"
 msgstr "Masquer"
 
-#: ../src/applets/tasks.c:745
+#: ../src/applets/tasks.c:750
 msgid "Stick"
 msgstr "Attacher"
 
-#: ../src/applets/tasks.c:747
+#: ../src/applets/tasks.c:752
 msgid "Maximize horizontally"
 msgstr "Maximiser horizontalement"
 
-#: ../src/applets/tasks.c:749
+#: ../src/applets/tasks.c:754
 msgid "Maximize vertically"
 msgstr "Maximiser verticalement"
 
-#: ../src/applets/tasks.c:753
+#: ../src/applets/tasks.c:758
 msgid "Change desktop"
 msgstr "Déplacer vers le bureau"
 
-#: ../src/applets/tasks.c:790
+#: ../src/applets/tasks.c:795
 msgid "Maximize"
 msgstr "Maximiser"
 
@@ -222,35 +226,35 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
-#: ../src/applets/wpa_supplicant.c:219
+#: ../src/applets/wpa_supplicant.c:220
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:429
+#: ../src/applets/wpa_supplicant.c:431
 msgid "Not running"
 msgstr "Pas de service"
 
-#: ../src/applets/wpa_supplicant.c:584
+#: ../src/applets/wpa_supplicant.c:586 ../tools/wifibrowser.c:132
 msgid "Reassociate"
 msgstr "Réassocier"
 
-#: ../src/applets/wpa_supplicant.c:593
+#: ../src/applets/wpa_supplicant.c:595 ../tools/wifibrowser.c:133
 msgid "Rescan"
 msgstr "Rechercher"
 
-#: ../src/applets/wpa_supplicant.c:600
+#: ../src/applets/wpa_supplicant.c:602
 msgid "Save configuration"
 msgstr "Sauvegarder la configuration"
 
-#: ../src/applets/wpa_supplicant.c:623
+#: ../src/applets/wpa_supplicant.c:625
 msgid "Network list"
 msgstr "Liste des réseaux"
 
-#: ../src/applets/wpa_supplicant.c:628
+#: ../src/applets/wpa_supplicant.c:630
 msgid "Any network"
 msgstr "Tous les réseaux"
 
-#: ../src/applets/wpa_supplicant.c:685
+#: ../src/applets/wpa_supplicant.c:687
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -259,11 +263,11 @@ msgstr ""
 "Fréquence: %u\n"
 "Niveau: %u"
 
-#: ../src/applets/wpa_supplicant.c:861
+#: ../src/applets/wpa_supplicant.c:864
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1148
+#: ../src/applets/wpa_supplicant.c:1178
 msgid "Scanning..."
 msgstr "Recherche..."
 
@@ -316,7 +320,7 @@ msgstr "Arrêter"
 msgid "Restart"
 msgstr "Redémarrer"
 
-#: ../src/main.c:50
+#: ../src/main.c:64
 #, c-format
 msgid ""
 "Usage: %s [-L|-S|-x][-m monitor]\n"
@@ -519,19 +523,19 @@ msgstr ""
 " -l\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/wifibrowser.c:56
+#: ../tools/wifibrowser.c:65
 #, c-format
 msgid "Usage: %s\n"
 msgstr "Usage: %s\n"
 
-#: ../tools/wifibrowser.c:106
+#: ../tools/wifibrowser.c:131
 msgid "Wireless browser"
 msgstr "Réseaux sans fil"
 
-#: ../tools/wifibrowser.c:132
+#: ../tools/wifibrowser.c:162
 msgid "SSID"
 msgstr "SSID"
 
-#: ../tools/wifibrowser.c:138
+#: ../tools/wifibrowser.c:169
 msgid "BSSID"
 msgstr "BSSID"
