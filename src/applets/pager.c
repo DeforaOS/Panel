@@ -128,6 +128,8 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* pager_destroy */
 static void _pager_destroy(Pager * pager)
 {
+	if(pager->root != NULL)
+		gdk_window_remove_filter(pager->root, _on_filter, pager);
 	gtk_widget_destroy(pager->hbox);
 	free(pager);
 }
