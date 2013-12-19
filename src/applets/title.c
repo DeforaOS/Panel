@@ -113,6 +113,8 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* title_destroy */
 static void _title_destroy(Title * title)
 {
+	if(title->root != NULL)
+		gdk_window_remove_filter(title->root, _on_filter, title);
 	gtk_widget_destroy(title->widget);
 	free(title);
 }
