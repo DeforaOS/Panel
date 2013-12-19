@@ -50,6 +50,7 @@ static void _systray_destroy(Systray * systray);
 /* callbacks */
 static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
+static void _on_owner_destroy(gpointer data);
 static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
@@ -86,7 +87,7 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	systray->hbox = gtk_hbox_new(FALSE, 0);
 	gtk_icon_size_lookup(helper->icon_size, NULL, &height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
-	systray->owner = gtk_invisible_new();
+	systray->owner = NULL;
 	g_signal_connect(systray->hbox, "screen-changed", G_CALLBACK(
 				_on_screen_changed), systray);
 	gtk_widget_show(systray->hbox);
@@ -98,12 +99,11 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* systray_destroy */
 static void _systray_destroy(Systray * systray)
 {
-	GdkWindow * window;
-
+#if 0 /* FIXME crashes */
+	if(systray->owner != NULL)
+		gtk_widget_destroy(systray->owner);
 	gtk_widget_destroy(systray->hbox);
-	if((window = gtk_widget_get_window(systray->owner)) != NULL)
-		gdk_window_remove_filter(window, _on_filter, systray);
-	gtk_widget_destroy(systray->owner);
+#endif
 	free(systray);
 }
 
@@ -152,6 +152,18 @@ static GdkFilterReturn _filter_clientmessage(Systray * systray,
 }
 
 
+/* on_owner_destroy */
+static void _on_owner_destroy(gpointer data)
+{
+	Systray * systray = data;
+	GdkWindow * window;
+
+	window = gtk_widget_get_window(systray->owner);
+	gdk_window_remove_filter(window, _on_filter, systray);
+	systray->owner = NULL;
+}
+
+
 /* on_screen_changed */
 static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
@@ -166,9 +178,14 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	GdkWindow * window;
 	XEvent xev;
 
+	if(systray->owner != NULL)
+		return;
 	screen = gtk_widget_get_screen(widget);
 	snprintf(buf, sizeof(buf), "%s%d", name, gdk_screen_get_number(screen));
 	atom = gdk_atom_intern(buf, FALSE);
+	systray->owner = gtk_invisible_new();
+	g_signal_connect_swapped(systray->owner, "destroy", G_CALLBACK(
+				_on_owner_destroy), systray);
 	gtk_widget_realize(systray->owner);
 	window = gtk_widget_get_window(systray->owner);
 	if(gdk_selection_owner_set(window, atom, gtk_get_current_event_time(),
