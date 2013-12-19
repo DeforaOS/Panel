@@ -309,8 +309,10 @@ static void _tasks_destroy(Tasks * tasks)
 	if(tasks->root != NULL)
 		gdk_window_remove_filter(tasks->root, _on_filter, tasks);
 	for(i = 0; i < tasks->tasks_cnt; i++)
-		free(tasks->tasks[i]);
+		_task_delete(tasks->tasks[i]);
 	free(tasks->tasks);
+	tasks->tasks = NULL;
+	tasks->tasks_cnt = 0;
 	gtk_widget_destroy(tasks->widget);
 	free(tasks);
 }
