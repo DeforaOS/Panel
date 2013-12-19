@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ typedef struct _PanelApplet
 	guint source;
 
 	/* widgets */
+	GtkWidget * widget;
 	GtkWidget * button;
 	GtkWidget * progress;
 } Volume;
@@ -65,7 +66,9 @@ typedef struct _PanelApplet
 /* private */
 /* prototypes */
 static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget);
+#if GTK_CHECK_VERSION(2, 12, 0)
 static void _volume_destroy(Volume * volume);
+#endif
 
 
 /* public */
@@ -76,7 +79,11 @@ PanelAppletDefinition applet =
 	"stock_volume",
 	NULL,
 	_volume_init,
+#if GTK_CHECK_VERSION(2, 12, 0)
 	_volume_destroy,
+#else
+	NULL,
+#endif
 	NULL,
 	FALSE,
 	TRUE
@@ -116,13 +123,14 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
 	{
 		vbox = gtk_vbox_new(FALSE, 4);
-		*widget = gtk_image_new_from_icon_name("stock_volume-med",
-				helper->icon_size);
-		gtk_box_pack_start(GTK_BOX(vbox), *widget, TRUE, TRUE, 0);
+		volume->widget = gtk_image_new_from_icon_name(
+				"stock_volume-med", helper->icon_size);
+		gtk_box_pack_start(GTK_BOX(vbox), volume->widget, TRUE, TRUE,
+				0);
 		volume->progress = gtk_progress_bar_new();
 		gtk_box_pack_start(GTK_BOX(vbox), volume->progress, TRUE, TRUE,
 				0);
-		*widget = vbox;
+		volume->widget = vbox;
 	}
 	else
 	{
@@ -132,10 +140,11 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 				helper->icon_size, NULL);
 		g_signal_connect_swapped(volume->button, "value-changed",
 				G_CALLBACK(_on_value_changed), volume);
-		*widget = volume->button;
+		volume->widget = volume->button;
 	}
 	_on_volume_timeout(volume);
-	gtk_widget_show_all(*widget);
+	gtk_widget_show_all(volume->widget);
+	*widget = volume->widget;
 	return volume;
 #else
 	return NULL;
@@ -147,6 +156,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* volume_destroy */
 static void _volume_destroy(Volume * volume)
 {
+	gtk_widget_destroy(volume->widget);
 	_volume_delete(volume);
 }
 

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ struct _PanelApplet
 	Task ** tasks;
 	size_t tasks_cnt;
 
+	GtkWidget * widget;
 	GtkWidget * hbox;
 	GtkIconSize icon_size;
 	int icon_width;
@@ -264,7 +265,6 @@ static void _task_toggle_state2(Task * task, TasksAtom state1,
 static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Tasks * tasks;
-	GtkWidget * ret;
 
 	if((tasks = malloc(sizeof(*tasks))) == NULL)
 		return NULL;
@@ -285,18 +285,18 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tasks->screen = NULL;
 	tasks->root = NULL;
 #ifndef EMBEDDED
-	ret = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(ret),
+	tasks->widget = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(tasks->widget),
 			GTK_POLICY_NEVER, GTK_POLICY_NEVER);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(ret),
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(tasks->widget),
 			GTK_SHADOW_NONE);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(ret),
-			tasks->hbox);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(
+				tasks->widget), tasks->hbox);
 #else
-	ret = tasks->hbox;
+	tasks->widget = tasks->hbox;
 #endif
-	gtk_widget_show_all(ret);
-	*widget = ret;
+	gtk_widget_show_all(tasks->widget);
+	*widget = tasks->widget;
 	return tasks;
 }
 
@@ -309,6 +309,7 @@ static void _tasks_destroy(Tasks * tasks)
 	for(i = 0; i < tasks->tasks_cnt; i++)
 		free(tasks->tasks[i]);
 	free(tasks->tasks);
+	gtk_widget_destroy(tasks->widget);
 	free(tasks);
 }
 

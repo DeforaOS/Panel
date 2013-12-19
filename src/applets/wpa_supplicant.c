@@ -211,7 +211,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
 	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
-		*widget = hbox;
+		wpa->widget = hbox;
 	else
 	{
 		ret = gtk_button_new();
@@ -222,9 +222,9 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		g_signal_connect_swapped(ret, "clicked", G_CALLBACK(
 					_on_clicked), wpa);
 		gtk_container_add(GTK_CONTAINER(ret), hbox);
-		*widget = ret;
+		wpa->widget = ret;
 	}
-	wpa->widget = *widget;
+	*widget = wpa->widget;
 	return wpa;
 }
 
@@ -243,6 +243,7 @@ static void _init_channel(WPAChannel * channel)
 static void _wpa_destroy(WPA * wpa)
 {
 	_wpa_stop(wpa);
+	gtk_widget_destroy(wpa->widget);
 	object_delete(wpa);
 }
 
