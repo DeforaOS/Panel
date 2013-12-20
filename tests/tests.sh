@@ -98,7 +98,7 @@ target="$1"
 $DATE > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
-#_test "applets"
+_test "applets2"
 echo "Expected failures:" 1>&2
 _fail "applets"
 if [ -n "$FAILED" ]; then

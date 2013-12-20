@@ -117,6 +117,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/tasks.atoms \
 		$(PACKAGE)-$(VERSION)/src/applets/project.conf \
 		$(PACKAGE)-$(VERSION)/tests/applets.c \
+		$(PACKAGE)-$(VERSION)/tests/applets2.c \
 		$(PACKAGE)-$(VERSION)/tests/Makefile \
 		$(PACKAGE)-$(VERSION)/tests/tests.sh \
 		$(PACKAGE)-$(VERSION)/tests/project.conf \
