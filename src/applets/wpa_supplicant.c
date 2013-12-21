@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
  * - track password requests
- * - configuration value for the interface to track
  * - tooltip with details on the button (interface tracked...)
  * - more tooltip details on the menu entries (channel, security settings...)
  * - icons mentioning the security level (emblem-nowrite?) */
@@ -372,7 +371,7 @@ static int _wpa_reset(WPA * wpa)
 static gboolean _start_timeout(gpointer data);
 static int _timeout_channel(WPA * wpa, WPAChannel * channel);
 static int _timeout_channel_interface(WPA * wpa, WPAChannel * channel,
-		char const * interface);
+		char const * path, char const * interface);
 
 static int _wpa_start(WPA * wpa)
 {
@@ -408,6 +407,7 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 {
 	int ret;
 	char const path[] = WPA_SUPPLICANT_PATH;
+	char const * interface;
 	char const * p;
 	DIR * dir;
 	struct dirent * de;
@@ -427,48 +427,53 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, channel->path);
 #endif
-	if((dir = opendir(path)) == NULL)
-		return -wpa->helper->error(NULL, path, 1);
 	/* create the local socket */
 	memset(&lu, 0, sizeof(lu));
 	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", channel->path)
 			>= (int)sizeof(lu.sun_path))
 	{
-		closedir(dir);
 		unlink(channel->path);
 		/* XXX make sure this error is explicit enough */
 		return -_wpa_error(wpa, channel->path, 1);
 	}
 	lu.sun_family = AF_LOCAL;
 	if((channel->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
-	{
-		closedir(dir);
 		return -_wpa_error(wpa, "socket", 1);
-	}
 	if(bind(channel->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
 		close(channel->fd);
-		closedir(dir);
 		unlink(channel->path);
 		return -_wpa_error(wpa, channel->path, 1);
 	}
+	if((interface = wpa->helper->config_get(wpa->helper->panel,
+					"wpa_supplicant", "interface")) != NULL)
+	{
+		ret = _timeout_channel_interface(wpa, channel, path, interface);
+		if(ret != 0)
+			wpa->helper->error(NULL, interface, 1);
+	}
 	/* look for the first available interface */
-	for(ret = -1; ret != 0 && (de = readdir(dir)) != NULL;)
-		ret = _timeout_channel_interface(wpa, channel, de->d_name);
+	else if((dir = opendir(path)) != NULL)
+	{
+		for(ret = -1; ret != 0 && (de = readdir(dir)) != NULL;)
+			ret = _timeout_channel_interface(wpa, channel, path,
+					de->d_name);
+		closedir(dir);
+	}
+	else
+		ret = -wpa->helper->error(NULL, path, 1);
 	if(ret != 0)
 	{
-		unlink(channel->path);
 		close(channel->fd);
+		unlink(channel->path);
 		channel->fd = -1;
 	}
-	closedir(dir);
 	return ret;
 }
 
 static int _timeout_channel_interface(WPA * wpa, WPAChannel * channel,
-		char const * interface)
+		char const * path, char const * interface)
 {
-	char const path[] = WPA_SUPPLICANT_PATH;
 	struct stat st;
 	struct sockaddr_un ru;
 
