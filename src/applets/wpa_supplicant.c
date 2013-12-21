@@ -371,6 +371,8 @@ static int _wpa_reset(WPA * wpa)
 /* wpa_start */
 static gboolean _start_timeout(gpointer data);
 static int _timeout_channel(WPA * wpa, WPAChannel * channel);
+static int _timeout_channel_interface(WPA * wpa, WPAChannel * channel,
+		char const * interface);
 
 static int _wpa_start(WPA * wpa)
 {
@@ -404,14 +406,12 @@ static gboolean _start_timeout(gpointer data)
 
 static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 {
-	int ret = -1;
+	int ret;
 	char const path[] = WPA_SUPPLICANT_PATH;
 	char const * p;
 	DIR * dir;
 	struct dirent * de;
-	struct stat st;
 	struct sockaddr_un lu;
-	struct sockaddr_un ru;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
@@ -452,44 +452,9 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 		unlink(channel->path);
 		return -_wpa_error(wpa, channel->path, 1);
 	}
-	/* connect to the wpa_supplicant daemon */
-	memset(&ru, 0, sizeof(ru));
-	ru.sun_family = AF_UNIX;
-	while((de = readdir(dir)) != NULL)
-	{
-		if(snprintf(ru.sun_path, sizeof(ru.sun_path), "%s/%s", path,
-					de->d_name) >= (int)sizeof(ru.sun_path)
-				|| lstat(ru.sun_path, &st) != 0
-				|| (st.st_mode & S_IFSOCK) != S_IFSOCK)
-			continue;
-#ifdef DEBUG
-		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, de->d_name);
-#endif
-		if(connect(channel->fd, (struct sockaddr *)&ru, SUN_LEN(&ru))
-				!= 0)
-		{
-			wpa->helper->error(NULL, "connect", 1);
-			continue;
-		}
-#ifdef DEBUG
-		fprintf(stderr, "DEBUG: %s() connected\n", __func__);
-#endif
-#ifndef EMBEDDED
-		/* XXX will be done for every channel */
-		gtk_label_set_text(GTK_LABEL(wpa->label), de->d_name);
-#endif
-		channel->channel = g_io_channel_unix_new(channel->fd);
-#ifdef DEBUG
-		fprintf(stderr, "DEBUG: %s() %p\n", __func__,
-				(void *)channel->channel);
-#endif
-		g_io_channel_set_encoding(channel->channel, NULL, NULL);
-		g_io_channel_set_buffered(channel->channel, FALSE);
-		channel->rd_source = g_io_add_watch(channel->channel, G_IO_IN,
-				_on_watch_can_read, wpa);
-		ret = 0;
-		break;
-	}
+	/* look for the first available interface */
+	for(ret = -1; ret != 0 && (de = readdir(dir)) != NULL;)
+		ret = _timeout_channel_interface(wpa, channel, de->d_name);
 	if(ret != 0)
 	{
 		unlink(channel->path);
@@ -498,6 +463,44 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	}
 	closedir(dir);
 	return ret;
+}
+
+static int _timeout_channel_interface(WPA * wpa, WPAChannel * channel,
+		char const * interface)
+{
+	char const path[] = WPA_SUPPLICANT_PATH;
+	struct stat st;
+	struct sockaddr_un ru;
+
+	memset(&ru, 0, sizeof(ru));
+	ru.sun_family = AF_UNIX;
+	if(snprintf(ru.sun_path, sizeof(ru.sun_path), "%s/%s", path, interface)
+			>= (int)sizeof(ru.sun_path)
+			|| lstat(ru.sun_path, &st) != 0
+			|| (st.st_mode & S_IFSOCK) != S_IFSOCK)
+		return -1;
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, interface);
+#endif
+	/* connect to the wpa_supplicant daemon */
+	if(connect(channel->fd, (struct sockaddr *)&ru, SUN_LEN(&ru)) != 0)
+		return -wpa->helper->error(NULL, "connect", 1);
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() connected to %s\n", __func__, interface);
+#endif
+#ifndef EMBEDDED
+	/* XXX will be done for every channel */
+	gtk_label_set_text(GTK_LABEL(wpa->label), interface);
+#endif
+	channel->channel = g_io_channel_unix_new(channel->fd);
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() %p\n", __func__, (void *)channel->channel);
+#endif
+	g_io_channel_set_encoding(channel->channel, NULL, NULL);
+	g_io_channel_set_buffered(channel->channel, FALSE);
+	channel->rd_source = g_io_add_watch(channel->channel, G_IO_IN,
+			_on_watch_can_read, wpa);
+	return 0;
 }
 
 
