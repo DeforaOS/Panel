@@ -17,14 +17,25 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
 #include "../src/applets/wpa_supplicant.c"
+#include "../config.h"
 #define _(string) gettext(string)
 
 /* constants */
 #ifndef PROGNAME
 # define PROGNAME	"wifibrowser"
+#endif
+#ifndef PREFIX
+# define PREFIX		"/usr/local"
+#endif
+#ifndef DATADIR
+# define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
 #endif
 
 
@@ -209,7 +220,18 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 /* main */
 int main(int argc, char * argv[])
 {
+	int o;
+
+	setlocale(LC_ALL, "");
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
+	while((o = getopt(argc, argv, "")) != -1)
+		switch(o)
+		{
+			default:
+				return _usage();
+		}
 	if(optind != argc)
 		return _usage();
 	return (_wifibrowser() == 0) ? 0 : 2;
