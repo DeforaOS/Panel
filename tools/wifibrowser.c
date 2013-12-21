@@ -56,7 +56,7 @@ struct _Panel
 
 
 /* prototypes */
-static int _wifibrowser(void);
+static int _wifibrowser(char const * interface);
 
 static int _error(Panel * panel, char const * message, int ret);
 static int _usage(void);
@@ -73,7 +73,7 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 
 /* functions */
 /* wifibrowser */
-static int _wifibrowser(void)
+static int _wifibrowser(char const * interface)
 {
 	Panel panel;
 	PanelAppletHelper helper;
@@ -85,7 +85,11 @@ static int _wifibrowser(void)
 	GtkCellRenderer * renderer;
 	GtkTreeViewColumn * column;
 
-	panel.config = config_new();
+	/* FIXME report errors */
+	if((panel.config = config_new()) != NULL
+			&& interface != NULL)
+		config_set(panel.config, "wpa_supplicant", "interface",
+				interface);
 	/* FIXME load the configuration */
 	memset(&helper, 0, sizeof(helper));
 	helper.panel = &panel;
@@ -161,7 +165,7 @@ static int _error(Panel * panel, char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s\n"), PROGNAME);
+	fprintf(stderr, _("Usage: %s [-i interface]\n"), PROGNAME);
 	return 1;
 }
 
@@ -220,19 +224,23 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 /* main */
 int main(int argc, char * argv[])
 {
+	char const * interface = NULL;
 	int o;
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
-	while((o = getopt(argc, argv, "")) != -1)
+	while((o = getopt(argc, argv, "i:")) != -1)
 		switch(o)
 		{
+			case 'i':
+				interface = optarg;
+				break;
 			default:
 				return _usage();
 		}
 	if(optind != argc)
 		return _usage();
-	return (_wifibrowser() == 0) ? 0 : 2;
+	return (_wifibrowser(interface) == 0) ? 0 : 2;
 }
