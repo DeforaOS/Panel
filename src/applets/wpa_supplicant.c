@@ -418,8 +418,10 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 #endif
 	if((p = getenv("TMPDIR")) == NULL)
 		p = TMPDIR;
-	snprintf(channel->path, sizeof(channel->path), "%s%s", p,
-			"/panel_wpa_supplicant.XXXXXX");
+	if(snprintf(channel->path, sizeof(channel->path), "%s%s", p,
+				"/panel_wpa_supplicant.XXXXXX")
+			>= (int)sizeof(channel->path))
+		return -wpa->helper->error(NULL, "snprintf", 1);
 	if(mktemp(channel->path) == NULL)
 		return -wpa->helper->error(NULL, "mktemp", 1);
 #ifdef DEBUG
@@ -432,16 +434,21 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", channel->path)
 			>= (int)sizeof(lu.sun_path))
 	{
+		closedir(dir);
 		unlink(channel->path);
 		/* XXX make sure this error is explicit enough */
 		return -_wpa_error(wpa, channel->path, 1);
 	}
 	lu.sun_family = AF_LOCAL;
 	if((channel->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
+	{
+		closedir(dir);
 		return -_wpa_error(wpa, "socket", 1);
+	}
 	if(bind(channel->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
 		close(channel->fd);
+		closedir(dir);
 		unlink(channel->path);
 		return -_wpa_error(wpa, channel->path, 1);
 	}
