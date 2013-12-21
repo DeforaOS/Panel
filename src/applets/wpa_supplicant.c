@@ -426,14 +426,7 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, channel->path);
 #endif
 	if((dir = opendir(path)) == NULL)
-	{
-		gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-				GTK_STOCK_DISCONNECT, wpa->helper->icon_size);
-#ifndef EMBEDDED
-		gtk_label_set_text(GTK_LABEL(wpa->label), _("Not running"));
-#endif
 		return -wpa->helper->error(NULL, path, 1);
-	}
 	/* create the local socket */
 	memset(&lu, 0, sizeof(lu));
 	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", channel->path)
@@ -525,6 +518,12 @@ static void _wpa_stop(WPA * wpa)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
+	/* report the status */
+	gtk_image_set_from_stock(GTK_IMAGE(wpa->image), GTK_STOCK_DISCONNECT,
+			wpa->helper->icon_size);
+#ifndef EMBEDDED
+	gtk_label_set_text(GTK_LABEL(wpa->label), _("Not running"));
+#endif
 }
 
 static void _stop_channel(WPA * wpa, WPAChannel * channel)
