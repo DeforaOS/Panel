@@ -70,6 +70,7 @@ typedef enum _WPACommand
 	WC_SCAN_RESULTS,
 	WC_SELECT_NETWORK,	/* unsigned int id */
 	WC_SET_NETWORK,		/* unsigned int id, key, value */
+	WC_SET_PASSWORD,	/* unsigned int id, char const * password */
 	WC_STATUS,
 	WC_TERMINATE
 } WPACommand;
@@ -322,6 +323,11 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			t = va_arg(ap, char const *);
 			cmd = g_strdup_printf("SET_NETWORK %u %s \"%s\"", u, s,
 					t);
+			break;
+		case WC_SET_PASSWORD:
+			u = va_arg(ap, unsigned int);
+			s = va_arg(ap, char const *);
+			cmd = g_strdup_printf("PASSWORD %u \"%s\"", u, s);
 			break;
 		case WC_STATUS:
 			cmd = strdup("STATUS-VERBOSE");
