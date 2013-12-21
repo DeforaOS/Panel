@@ -150,6 +150,9 @@ static int _wpa_reset(WPA * wpa);
 static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
 
+static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
+		unsigned int level);
+
 /* callbacks */
 static void _on_clicked(gpointer data);
 static gboolean _on_timeout(gpointer data);
@@ -582,6 +585,16 @@ static void _stop_channel(WPA * wpa, WPAChannel * channel)
 }
 
 
+/* wpa_tooltip */
+static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
+		unsigned int level)
+{
+	/* FIXME mention the channel instead of the frequency */
+	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u"), frequency,
+			level);
+}
+
+
 /* callbacks */
 /* on_clicked */
 static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
@@ -707,8 +720,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		snprintf(buf, sizeof(buf), _("Frequency: %u\nLevel: %u"),
-				frequency, level);
+		_wpa_tooltip(buf, sizeof(buf), frequency, level);
 		gtk_widget_set_tooltip_text(menuitem, buf);
 #endif
 		if(ssid != NULL)
@@ -1043,6 +1055,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	unsigned int level;
 	char flags[80];
 	char ssid[80];
+	char tooltip[80];
 	gboolean protected;
 	GtkTreeIter iter;
 
@@ -1081,10 +1094,13 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 			pixbuf = _read_scan_results_pixbuf(icontheme, size,
 					level, protected);
 			_read_scan_results_iter(wpa, &iter, bssid);
+			_wpa_tooltip(tooltip, sizeof(tooltip), frequency,
+					level);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
-					WSR_LEVEL, level, -1);
+					WSR_LEVEL, level, WSR_TOOLTIP, tooltip,
+					-1);
 			if(res == 5)
 				gtk_list_store_set(wpa->store, &iter,
 						WSR_SSID, ssid, -1);
