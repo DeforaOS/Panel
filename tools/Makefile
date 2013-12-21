@@ -64,7 +64,7 @@ notify.o: notify.c helper.c ../src/helper.c ../src/panel.h ../config.h
 test.o: test.c helper.c ../src/helper.c ../src/panel.h ../config.h
 	$(CC) $(panel-test_CFLAGS) -c test.c
 
-wifibrowser.o: wifibrowser.c ../src/applets/wpa_supplicant.c
+wifibrowser.o: wifibrowser.c ../src/applets/wpa_supplicant.c ../config.h
 	$(CC) $(wifibrowser_CFLAGS) -c wifibrowser.c
 
 clean:
