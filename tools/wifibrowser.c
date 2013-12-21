@@ -38,10 +38,18 @@ typedef enum _WifiBrowserResponse
 	WBR_SAVE_CONFIGURATION
 } WifiBrowserResponse;
 
+struct _Panel
+{
+	Config * config;
+};
+
 
 /* prototypes */
 static int _error(Panel * panel, char const * message, int ret);
 static int _usage(void);
+
+static char const * _helper_config_get(Panel * panel, char const * section,
+		char const * variable);
 
 /* callbacks */
 static gboolean _wifibrowser_on_closex(gpointer data);
@@ -64,6 +72,17 @@ static int _usage(void)
 {
 	fprintf(stderr, _("Usage: %s\n"), PROGNAME);
 	return 1;
+}
+
+
+/* helpers */
+/* helper_config_get */
+static char const * _helper_config_get(Panel * panel, char const * section,
+		char const * variable)
+{
+	if(panel->config == NULL)
+		return NULL;
+	return config_get(panel->config, section, variable);
 }
 
 
@@ -110,6 +129,7 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 /* main */
 int main(int argc, char * argv[])
 {
+	Panel panel;
 	PanelAppletHelper helper;
 	WPA * wpa;
 	GtkWidget * window;
@@ -119,10 +139,14 @@ int main(int argc, char * argv[])
 	GtkCellRenderer * renderer;
 	GtkTreeViewColumn * column;
 
+	panel.config = config_new();
+	/* FIXME load the configuration */
 	memset(&helper, 0, sizeof(helper));
+	helper.panel = &panel;
 	helper.type = PANEL_APPLET_TYPE_NORMAL;
 	helper.icon_size = GTK_ICON_SIZE_MENU;
 	helper.error = _error;
+	helper.config_get = _helper_config_get;
 	gtk_init(&argc, &argv);
 	if(optind != argc)
 		return _usage();
@@ -176,5 +200,7 @@ int main(int argc, char * argv[])
 	gtk_widget_show_all(window);
 	gtk_main();
 	_wpa_destroy(wpa);
+	if(panel.config != NULL)
+		config_delete(panel.config);
 	return 0;
 }
