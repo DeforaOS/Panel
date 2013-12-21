@@ -1,4 +1,4 @@
-TARGETS	= panel.1 panel.html panelctl.1 panelctl.html panel-embed.1 panel-embed.html panel-message.1 panel-message.html panel-notify.1 panel-notify.html
+TARGETS	= panel.1 panel.html panelctl.1 panelctl.html panel-embed.1 panel-embed.html panel-message.1 panel-message.html panel-notify.1 panel-notify.html wifibrowser.1 wifibrowser.html
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -39,9 +39,15 @@ panel-notify.1: panel-notify.xml
 panel-notify.html: panel-notify.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-notify.html"
 
+wifibrowser.1: wifibrowser.xml
+	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.1"
+
+wifibrowser.html: wifibrowser.xml
+	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.html"
+
 clean:
-	$(RM) -- $(panel.1_OBJS) $(panel.html_OBJS) $(panelctl.1_OBJS) $(panelctl.html_OBJS) $(panel-embed.1_OBJS) $(panel-embed.html_OBJS) $(panel-message.1_OBJS) $(panel-message.html_OBJS) $(panel-notify.1_OBJS) $(panel-notify.html_OBJS)
-	./docbook.sh -c -P "$(PREFIX)" -- "panel-notify.html"
+	$(RM) -- $(panel.1_OBJS) $(panel.html_OBJS) $(panelctl.1_OBJS) $(panelctl.html_OBJS) $(panel-embed.1_OBJS) $(panel-embed.html_OBJS) $(panel-message.1_OBJS) $(panel-message.html_OBJS) $(panel-notify.1_OBJS) $(panel-notify.html_OBJS) $(wifibrowser.1_OBJS) $(wifibrowser.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "wifibrowser.html"
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -57,6 +63,8 @@ install: $(TARGETS)
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-message.html"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-notify.1"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-notify.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "wifibrowser.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "wifibrowser.html"
 
 uninstall:
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "panel.1"
@@ -69,5 +77,7 @@ uninstall:
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "panel-message.html"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "panel-notify.1"
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "panel-notify.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "wifibrowser.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "wifibrowser.html"
 
 .PHONY: all clean distclean install uninstall
