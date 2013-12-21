@@ -56,7 +56,7 @@ struct _Panel
 
 
 /* prototypes */
-static int _wifibrowser(char const * interface);
+static int _wifibrowser(char const * configfile, char const * interface);
 
 static int _error(Panel * panel, char const * message, int ret);
 static int _usage(void);
@@ -73,7 +73,7 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 
 /* functions */
 /* wifibrowser */
-static int _wifibrowser(char const * interface)
+static int _wifibrowser(char const * configfile, char const * interface)
 {
 	Panel panel;
 	PanelAppletHelper helper;
@@ -85,11 +85,19 @@ static int _wifibrowser(char const * interface)
 	GtkCellRenderer * renderer;
 	GtkTreeViewColumn * column;
 
-	/* FIXME report errors */
-	if((panel.config = config_new()) != NULL
-			&& interface != NULL)
-		config_set(panel.config, "wpa_supplicant", "interface",
-				interface);
+	/* XXX report errors to the user instead */
+	if((panel.config = config_new()) != NULL)
+	{
+		if(configfile != NULL
+				&& config_load(panel.config, configfile) != 0)
+			error_print(PROGNAME);
+		if(interface != NULL
+				&& config_set(panel.config, "wpa_supplicant",
+					"interface", interface) != 0)
+			error_print(PROGNAME);
+	}
+	else
+		error_print(PROGNAME);
 	/* FIXME load the configuration */
 	memset(&helper, 0, sizeof(helper));
 	helper.panel = &panel;
@@ -165,7 +173,9 @@ static int _error(Panel * panel, char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s [-i interface]\n"), PROGNAME);
+	fprintf(stderr, _("Usage: %s [-c filename][-i interface]\n"
+"  -c	Path to a configuration file\n"
+"  -i	Network interface to connect to\n"), PROGNAME);
 	return 1;
 }
 
@@ -224,6 +234,7 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 /* main */
 int main(int argc, char * argv[])
 {
+	char const * configfile = NULL;
 	char const * interface = NULL;
 	int o;
 
@@ -231,9 +242,12 @@ int main(int argc, char * argv[])
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
-	while((o = getopt(argc, argv, "i:")) != -1)
+	while((o = getopt(argc, argv, "c:i:")) != -1)
 		switch(o)
 		{
+			case 'c':
+				configfile = optarg;
+				break;
 			case 'i':
 				interface = optarg;
 				break;
@@ -242,5 +256,5 @@ int main(int argc, char * argv[])
 		}
 	if(optind != argc)
 		return _usage();
-	return (_wifibrowser(interface) == 0) ? 0 : 2;
+	return (_wifibrowser(configfile, interface) == 0) ? 0 : 2;
 }
