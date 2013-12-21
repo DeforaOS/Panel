@@ -51,12 +51,13 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<group choice="opt">
-				<arg choice="plain">-L</arg>
-				<arg choice="plain">-S</arg>
-				<arg choice="plain">-X</arg>
-				<arg choice="plain">-x</arg>
+				<arg choice="plain"><option>-L</option></arg>
+				<arg choice="plain"><option>-S</option></arg>
+				<arg choice="plain"><option>-X</option></arg>
+				<arg choice="plain"><option>-x</option></arg>
 			</group>
-			<arg choice="opt">-t <replaceable>timeout</replaceable></arg>
+			<arg choice="opt"><option>-t</option>
+				<replaceable>timeout</replaceable></arg>
 			<arg choice="plain" rep="repeat"><replaceable>applet</replaceable></arg>
 		</cmdsynopsis>
 		<cmdsynopsis>

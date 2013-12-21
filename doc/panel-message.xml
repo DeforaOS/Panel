@@ -51,13 +51,15 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<group choice="opt">
-				<arg choice="plain">-E</arg>
-				<arg choice="plain">-I</arg>
-				<arg choice="plain">-Q</arg>
-				<arg choice="plain">-W</arg>
+				<arg choice="plain"><option>-E</option></arg>
+				<arg choice="plain"><option>-I</option></arg>
+				<arg choice="plain"><option>-Q</option></arg>
+				<arg choice="plain"><option>-W</option></arg>
 			</group>
-			<arg choice="opt">-T <replaceable>title</replaceable></arg>
-			<arg choice="opt">-t <replaceable>timeout</replaceable></arg>
+			<arg choice="opt"><option>-T</option>
+				<replaceable>title</replaceable></arg>
+			<arg choice="opt"><option>-t</option>
+				<replaceable>timeout</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	<refsect1 id="description">

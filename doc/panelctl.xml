@@ -51,15 +51,15 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<group choice="plain">
-				<arg choice="plain">-B</arg>
-				<arg choice="plain">-L</arg>
-				<arg choice="plain">-R</arg>
-				<arg choice="plain">-S</arg>
-				<arg choice="plain">-T</arg>
-				<arg choice="plain">-b</arg>
-				<arg choice="plain">-l</arg>
-				<arg choice="plain">-r</arg>
-				<arg choice="plain">-t</arg>
+				<arg choice="plain"><option>-B</option></arg>
+				<arg choice="plain"><option>-L</option></arg>
+				<arg choice="plain"><option>-R</option></arg>
+				<arg choice="plain"><option>-S</option></arg>
+				<arg choice="plain"><option>-T</option></arg>
+				<arg choice="plain"><option>-b</option></arg>
+				<arg choice="plain"><option>-l</option></arg>
+				<arg choice="plain"><option>-r</option></arg>
+				<arg choice="plain"><option>-t</option></arg>
 			</group>
 		</cmdsynopsis>
 	</refsynopsisdiv>
