@@ -45,9 +45,12 @@ struct _Panel
 
 
 /* prototypes */
+static int _wifibrowser(void);
+
 static int _error(Panel * panel, char const * message, int ret);
 static int _usage(void);
 
+/* helpers */
 static char const * _helper_config_get(Panel * panel, char const * section,
 		char const * variable);
 
@@ -58,6 +61,83 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 
 
 /* functions */
+/* wifibrowser */
+static int _wifibrowser(void)
+{
+	Panel panel;
+	PanelAppletHelper helper;
+	WPA * wpa;
+	GtkWidget * window;
+	GtkWidget * vbox;
+	GtkWidget * view;
+	GtkWidget * widget;
+	GtkCellRenderer * renderer;
+	GtkTreeViewColumn * column;
+
+	panel.config = config_new();
+	/* FIXME load the configuration */
+	memset(&helper, 0, sizeof(helper));
+	helper.panel = &panel;
+	helper.type = PANEL_APPLET_TYPE_NORMAL;
+	helper.icon_size = GTK_ICON_SIZE_MENU;
+	helper.error = _error;
+	helper.config_get = _helper_config_get;
+	if((wpa = _wpa_init(&helper, &widget)) == NULL)
+		return 2;
+	window = gtk_dialog_new_with_buttons(_("Wireless browser"), NULL, 0,
+			_("Reassociate"), WBR_REASSOCIATE,
+			_("Rescan"), WBR_RESCAN,
+			GTK_STOCK_SAVE, WBR_SAVE_CONFIGURATION,
+			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
+	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+#if GTK_CHECK_VERSION(2, 6, 0)
+	gtk_window_set_icon_name(GTK_WINDOW(window), "network-wireless");
+#endif
+	g_signal_connect_swapped(window, "delete-event", G_CALLBACK(
+				_wifibrowser_on_closex), wpa);
+	g_signal_connect(window, "response", G_CALLBACK(
+				_wifibrowser_on_response), wpa);
+#if GTK_CHECK_VERSION(2, 14, 0)
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(window));
+#else
+	vbox = GTK_DIALOG(window)->vbox;
+#endif
+	widget = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
+			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(wpa->store));
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
+	/* signal level */
+	renderer = gtk_cell_renderer_pixbuf_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer,
+			"pixbuf", WSR_ICON, NULL);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_LEVEL);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	/* SSID */
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(_("SSID"), renderer,
+			"text", WSR_SSID, NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_SSID);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	/* BSSID */
+	renderer = gtk_cell_renderer_text_new();
+	column = gtk_tree_view_column_new_with_attributes(_("BSSID"), renderer,
+			"text", WSR_BSSID, NULL);
+	gtk_tree_view_column_set_resizable(column, TRUE);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	gtk_container_add(GTK_CONTAINER(widget), view);
+	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
+	gtk_widget_show_all(window);
+	gtk_main();
+	_wpa_destroy(wpa);
+	if(panel.config != NULL)
+		config_delete(panel.config);
+	return 0;
+}
+
+
 /* error */
 static int _error(Panel * panel, char const * message, int ret)
 {
@@ -129,78 +209,8 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 /* main */
 int main(int argc, char * argv[])
 {
-	Panel panel;
-	PanelAppletHelper helper;
-	WPA * wpa;
-	GtkWidget * window;
-	GtkWidget * vbox;
-	GtkWidget * view;
-	GtkWidget * widget;
-	GtkCellRenderer * renderer;
-	GtkTreeViewColumn * column;
-
-	panel.config = config_new();
-	/* FIXME load the configuration */
-	memset(&helper, 0, sizeof(helper));
-	helper.panel = &panel;
-	helper.type = PANEL_APPLET_TYPE_NORMAL;
-	helper.icon_size = GTK_ICON_SIZE_MENU;
-	helper.error = _error;
-	helper.config_get = _helper_config_get;
 	gtk_init(&argc, &argv);
 	if(optind != argc)
 		return _usage();
-	if((wpa = _wpa_init(&helper, &widget)) == NULL)
-		return 2;
-	window = gtk_dialog_new_with_buttons(_("Wireless browser"), NULL, 0,
-			_("Reassociate"), WBR_REASSOCIATE,
-			_("Rescan"), WBR_RESCAN,
-			GTK_STOCK_SAVE, WBR_SAVE_CONFIGURATION,
-			GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE, NULL);
-	gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
-#if GTK_CHECK_VERSION(2, 6, 0)
-	gtk_window_set_icon_name(GTK_WINDOW(window), "network-wireless");
-#endif
-	g_signal_connect_swapped(window, "delete-event", G_CALLBACK(
-				_wifibrowser_on_closex), wpa);
-	g_signal_connect(window, "response", G_CALLBACK(
-				_wifibrowser_on_response), wpa);
-#if GTK_CHECK_VERSION(2, 14, 0)
-	vbox = gtk_dialog_get_content_area(GTK_DIALOG(window));
-#else
-	vbox = GTK_DIALOG(window)->vbox;
-#endif
-	widget = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
-			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(wpa->store));
-	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), TRUE);
-	/* signal level */
-	renderer = gtk_cell_renderer_pixbuf_new();
-	column = gtk_tree_view_column_new_with_attributes("", renderer,
-			"pixbuf", WSR_ICON, NULL);
-	gtk_tree_view_column_set_sort_column_id(column, WSR_LEVEL);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	/* SSID */
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("SSID"), renderer,
-			"text", WSR_SSID, NULL);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, WSR_SSID);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	/* BSSID */
-	renderer = gtk_cell_renderer_text_new();
-	column = gtk_tree_view_column_new_with_attributes(_("BSSID"), renderer,
-			"text", WSR_BSSID, NULL);
-	gtk_tree_view_column_set_resizable(column, TRUE);
-	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);
-	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
-	gtk_container_add(GTK_CONTAINER(widget), view);
-	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
-	gtk_widget_show_all(window);
-	gtk_main();
-	_wpa_destroy(wpa);
-	if(panel.config != NULL)
-		config_delete(panel.config);
-	return 0;
+	return (_wifibrowser() == 0) ? 0 : 2;
 }
