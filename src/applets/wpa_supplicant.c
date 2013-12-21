@@ -111,9 +111,10 @@ typedef enum _WPAScanResult
 	WSR_BSSID,
 	WSR_FREQUENCY,
 	WSR_LEVEL,
-	WSR_SSID
+	WSR_SSID,
+	WSR_TOOLTIP
 } WPAScanResult;
-#define WSR_LAST WSR_SSID
+#define WSR_LAST WSR_TOOLTIP
 #define WSR_COUNT (WSR_LAST + 1)
 
 typedef struct _PanelApplet
@@ -208,7 +209,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
 			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
-			G_TYPE_UINT, G_TYPE_STRING);
+			G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
