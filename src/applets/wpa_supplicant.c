@@ -142,7 +142,9 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _wpa_destroy(WPA * wpa);
 
 static int _wpa_error(WPA * wpa, char const * message, int ret);
+
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
+
 static int _wpa_reset(WPA * wpa);
 static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
@@ -812,6 +814,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
+static gboolean _read_scan_results_flags(WPA * wpa, char const * flags);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
@@ -1019,6 +1022,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	unsigned int level;
 	char flags[80];
 	char ssid[80];
+	gboolean protected;
 	GtkTreeIter iter;
 
 	icontheme = gtk_icon_theme_get_default();
@@ -1052,9 +1056,9 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags, ssid);
 #endif
-			/* FIXME actually parse the flags */
+			protected = _read_scan_results_flags(wpa, flags);
 			pixbuf = _read_scan_results_pixbuf(icontheme, size,
-					level, FALSE);
+					level, protected);
 			_read_scan_results_iter(wpa, &iter, bssid);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
@@ -1075,6 +1079,24 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 		else
 			valid = gtk_tree_model_iter_next(model, &iter);
 	}
+}
+
+static gboolean _read_scan_results_flags(WPA * wpa, char const * flags)
+{
+	char const * p;
+	char const wpa1[] = "WPA-PSK-";
+	char const wpa2[] = "WPA2-PSK-";
+
+	for(p = flags; *p != '\0'; p++)
+		if(*p == '[')
+		{
+			/* FIXME really implement */
+			if(strncmp(wpa1, &p[1], sizeof(wpa1) - 1) == 0)
+				return TRUE;
+			if(strncmp(wpa2, &p[1], sizeof(wpa2) - 1) == 0)
+				return TRUE;
+		}
+	return FALSE;
 }
 
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
