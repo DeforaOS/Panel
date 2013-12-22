@@ -111,11 +111,21 @@ typedef enum _WPAScanResult
 	WSR_BSSID,
 	WSR_FREQUENCY,
 	WSR_LEVEL,
+	WSR_FLAGS,
 	WSR_SSID,
 	WSR_TOOLTIP
 } WPAScanResult;
 #define WSR_LAST WSR_TOOLTIP
 #define WSR_COUNT (WSR_LAST + 1)
+
+typedef enum _WPAScanResultFlag
+{
+	WSRF_WPA	= 0x01,
+	WSRF_WPA2	= 0x02,
+	WSRF_CCMP	= 0x04,
+	WSRF_TKIP	= 0x08,
+	WSRF_ESS	= 0x10
+} WPAScanResultFlag;
 
 typedef struct _PanelApplet
 {
@@ -151,7 +161,7 @@ static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
 
 static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
-		unsigned int level);
+		unsigned int level, uint32_t flags);
 
 /* callbacks */
 static void _on_clicked(gpointer data);
@@ -212,7 +222,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
 			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
-			G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
+			G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -587,11 +597,15 @@ static void _stop_channel(WPA * wpa, WPAChannel * channel)
 
 /* wpa_tooltip */
 static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
-		unsigned int level)
+		unsigned int level, uint32_t flags)
 {
+	char const * security = (flags & WSRF_WPA2) ? "WPA2"
+		: ((flags & WSRF_WPA) ? "WPA" : NULL);
+
 	/* FIXME mention the channel instead of the frequency */
-	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u"), frequency,
-			level);
+	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u%s%s"), frequency,
+			level, (security != NULL) ? _("\nSecurity: ") : "",
+			(security != NULL) ? security : "");
 }
 
 
@@ -720,7 +734,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		_wpa_tooltip(buf, sizeof(buf), frequency, level);
+		_wpa_tooltip(buf, sizeof(buf), frequency, level, 0);
 		gtk_widget_set_tooltip_text(menuitem, buf);
 #endif
 		if(ssid != NULL)
@@ -847,11 +861,11 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
-static gboolean _read_scan_results_flags(WPA * wpa, char const * flags);
+static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
-		gint size, guint level, gboolean encrypted);
+		gint size, guint level, uint32_t flags);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1054,9 +1068,9 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	unsigned int frequency;
 	unsigned int level;
 	char flags[80];
+	uint32_t f;
 	char ssid[80];
 	char tooltip[80];
-	gboolean protected;
 	GtkTreeIter iter;
 
 	icontheme = gtk_icon_theme_get_default();
@@ -1090,17 +1104,17 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					__func__, bssid, frequency, level,
 					flags, ssid);
 #endif
-			protected = _read_scan_results_flags(wpa, flags);
+			f = _read_scan_results_flags(wpa, flags);
 			pixbuf = _read_scan_results_pixbuf(icontheme, size,
-					level, protected);
+					level, f);
 			_read_scan_results_iter(wpa, &iter, bssid);
 			_wpa_tooltip(tooltip, sizeof(tooltip), frequency,
-					level);
+					level, f);
 			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
-					WSR_LEVEL, level, WSR_TOOLTIP, tooltip,
-					-1);
+					WSR_LEVEL, level, WSR_FLAGS, f,
+					WSR_TOOLTIP, tooltip, -1);
 			if(res == 5)
 				gtk_list_store_set(wpa->store, &iter,
 						WSR_SSID, ssid, -1);
@@ -1118,22 +1132,48 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	}
 }
 
-static gboolean _read_scan_results_flags(WPA * wpa, char const * flags)
+static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 {
+	uint32_t ret = 0;
 	char const * p;
 	char const wpa1[] = "WPA-PSK-";
 	char const wpa2[] = "WPA2-PSK-";
+	char const ccmp[] = "CCMP";
+	char const tkipccmp[] = "TKIP+CCMP";
+	char const tkip[] = "TKIP";
+	char const ess[] = "ESS";
 
-	for(p = flags; *p != '\0'; p++)
-		if(*p == '[')
+	for(p = flags; *p != '\0';)
+	{
+		if(*(p++) != '[')
+			continue;
+		if(strncmp(wpa1, p, sizeof(wpa1) - 1) == 0)
 		{
-			/* FIXME really implement */
-			if(strncmp(wpa1, &p[1], sizeof(wpa1) - 1) == 0)
-				return TRUE;
-			if(strncmp(wpa2, &p[1], sizeof(wpa2) - 1) == 0)
-				return TRUE;
+			ret |= WSRF_WPA;
+			p += sizeof(wpa1) - 1;
 		}
-	return FALSE;
+		else if(strncmp(wpa2, p, sizeof(wpa2) - 1) == 0)
+		{
+			ret |= WSRF_WPA2;
+			p += sizeof(wpa2) - 1;
+		}
+		else if(strncmp(ess, p, sizeof(ess) - 1) == 0)
+		{
+			ret |= WSRF_ESS;
+			p += sizeof(ess);
+		}
+		else
+			continue;
+		if(strncmp(ccmp, p, sizeof(ccmp) - 1) == 0)
+			ret |= WSRF_CCMP;
+		else if(strncmp(tkipccmp, p, sizeof(tkipccmp) - 1) == 0)
+			ret |= WSRF_TKIP | WSRF_CCMP;
+		else if(strncmp(tkip, p, sizeof(tkip) - 1) == 0)
+			ret |= WSRF_TKIP;
+		/* FIXME implement more */
+		for(p++; *p != '\0' && *p != ']'; p++);
+	}
+	return ret;
 }
 
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
@@ -1157,19 +1197,19 @@ static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 }
 
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
-		gint size, guint level, gboolean encrypted)
+		gint size, guint level, uint32_t flags)
 {
 	GdkPixbuf * ret;
 	char const * name;
 #if GTK_CHECK_VERSION(2, 14, 0)
-	const int flags = GTK_ICON_LOOKUP_USE_BUILTIN
+	const int f = GTK_ICON_LOOKUP_USE_BUILTIN
 		| GTK_ICON_LOOKUP_FORCE_SIZE;
 #else
-	const int flags = GTK_ICON_LOOKUP_USE_BUILTIN;
+	const int f = GTK_ICON_LOOKUP_USE_BUILTIN;
 #endif
 	GdkPixbuf * pixbuf;
-	/* FIXME implement more levels of security */
-	char const * emblem = encrypted ? "stock_lock" : "stock_lock-open";
+	char const * emblem = (flags & WSRF_WPA2) ? "stock_lock-ok"
+		: ((flags & WSRF_WPA) ? "stock_lock" : "stock_lock-open");
 
 	/* FIXME check if the mapping is right (and use our own icons) */
 	if(level >= 100)
@@ -1189,7 +1229,7 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 		return pixbuf;
 	g_object_unref(pixbuf);
 	size = min(24, size / 2);
-	pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size, flags, NULL);
+	pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size, f, NULL);
 	if(pixbuf != NULL)
 	{
 		gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0, 0, 1.0,
