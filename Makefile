@@ -1,5 +1,5 @@
 PACKAGE	= Panel
-VERSION	= 0.2.18
+VERSION	= 0.3.0
 SUBDIRS	= data doc include po src tests tools
 RM	= rm -f
 LN	= ln -f

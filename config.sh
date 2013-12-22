@@ -1,5 +1,5 @@
 PACKAGE="Panel"
-VERSION="0.2.18"
+VERSION="0.3.0"
 
 PREFIX="/usr/local"
 LIBDIR="${PREFIX}/lib"
