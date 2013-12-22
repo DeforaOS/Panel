@@ -1255,7 +1255,9 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 				: ((flags & WSRF_WEP) ? "security-low" : NULL));
 
 	/* FIXME check if the mapping is right (and use our own icons) */
-	if(level >= 100)
+	if(flags & WSRF_IBSS)
+		name = "nm-adhoc";
+	else if(level >= 100)
 		name = "phone-signal-100";
 	else if(level >= 75)
 		name = "phone-signal-75";
