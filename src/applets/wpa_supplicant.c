@@ -1039,9 +1039,16 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			if(res > 3 && strcmp(flags, "CURRENT") == 0)
 			{
 				wpa->networks_cur = wpa->networks_cnt - 1;
+#if GTK_CHECK_VERSION(2, 6, 0)
+				gtk_image_set_from_icon_name(
+						GTK_IMAGE(wpa->image),
+						"network-idle",
+						wpa->helper->icon_size);
+#else
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
+#endif
 #ifndef EMBEDDED
 				gtk_label_set_text(GTK_LABEL(wpa->label), ssid);
 #endif
@@ -1324,14 +1331,44 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 		value[sizeof(value) - 1] = '\0';
 		if(strcmp(variable, "wpa_state") == 0)
 		{
-			gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-					(strcmp(value, "COMPLETED") == 0)
-					? GTK_STOCK_CONNECT
-					: GTK_STOCK_DISCONNECT,
-					wpa->helper->icon_size);
-			if(strcmp(value, "SCANNING") == 0)
+			if(strcmp(value, "COMPLETED") == 0)
+#if GTK_CHECK_VERSION(2, 6, 0)
+				gtk_image_set_from_icon_name(
+						GTK_IMAGE(wpa->image),
+						"network-idle",
+						wpa->helper->icon_size);
+#else
+				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
+						GTK_STOCK_CONNECT,
+						wpa->helper->icon_size);
+#endif
+			else if(strcmp(value, "SCANNING") == 0)
+			{
+#if GTK_CHECK_VERSION(2, 6, 0)
+				/* TODO make it blink */
+				gtk_image_set_from_icon_name(
+						GTK_IMAGE(wpa->image),
+						"network-transmit-receive",
+						wpa->helper->icon_size);
+#else
+				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
+						GTK_STOCK_CONNECT,
+						wpa->helper->icon_size);
+#endif
 				gtk_label_set_text(GTK_LABEL(wpa->label),
 						_("Scanning..."));
+			}
+			else
+#if GTK_CHECK_VERSION(2, 6, 0)
+				gtk_image_set_from_icon_name(
+						GTK_IMAGE(wpa->image),
+						"network-offline",
+						wpa->helper->icon_size);
+#else
+				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
+						GTK_STOCK_DISCONNECT,
+						wpa->helper->icon_size);
+#endif
 		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
