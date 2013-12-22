@@ -148,6 +148,7 @@ typedef struct _PanelApplet
 	GtkWidget * label;
 #endif
 	GtkListStore * store;
+	GtkWidget * password;
 } WPA;
 
 
@@ -250,6 +251,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 					_on_clicked), wpa);
 		gtk_container_add(GTK_CONTAINER(wpa->widget), hbox);
 	}
+	wpa->password = NULL;
 	*widget = wpa->widget;
 	return wpa;
 }
@@ -301,6 +303,8 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	GtkWidget * entry;
 	char const * password;
 
+	if(wpa->password != NULL)
+		return;
 	dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
 			GTK_BUTTONS_OK_CANCEL,
 #if GTK_CHECK_VERSION(2, 6, 0)
@@ -309,6 +313,8 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 #endif
 			_("The network \"%s\" is protected by a key."),
 			network->name);
+	wpa->password = dialog;
+	gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_OK);
 #if GTK_CHECK_VERSION(2, 10, 0)
 	entry = gtk_image_new_from_icon_name("dialog-password",
 			GTK_ICON_SIZE_DIALOG);
@@ -330,6 +336,7 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	label = gtk_label_new(_("Key: "));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
 	entry = gtk_entry_new();
+	gtk_entry_set_activates_default(GTK_ENTRY(entry), TRUE);
 	gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
 	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
@@ -340,7 +347,9 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 		/* FIXME the network may have changed in the meantime */
 		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD, network->id,
 				password);
-	gtk_widget_destroy(dialog);
+	if(wpa->password != NULL)
+		gtk_widget_destroy(wpa->password);
+	wpa->password = NULL;
 }
 
 
@@ -634,6 +643,9 @@ static void _wpa_stop(WPA * wpa)
 #ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), _("Unavailable"));
 #endif
+	if(wpa->password != NULL)
+		gtk_widget_destroy(wpa->password);
+	wpa->password = NULL;
 }
 
 static void _stop_channel(WPA * wpa, WPAChannel * channel)
@@ -1406,6 +1418,9 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
 #endif
+				if(wpa->password != NULL)
+					gtk_widget_destroy(wpa->password);
+				wpa->password = NULL;
 			}
 			else if(strcmp(value, "4WAY_HANDSHAKE") == 0)
 			{
@@ -1497,6 +1512,7 @@ static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
 		/* XXX hackish, blame wpa_supplicant(8) */
 		else if(strncmp(&p[3], wpa_handshake, sizeof(wpa_handshake) - 1)
 				== 0 && wpa->networks_cur >= 0)
+			/* FIXME does not work if networks_cur is not set */
 			_wpa_ask_password(wpa,
 					&wpa->networks[wpa->networks_cur]);
 		/* FIXME implement the other events */
