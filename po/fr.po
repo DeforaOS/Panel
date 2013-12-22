@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.2.18\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-19 05:56+0100\n"
+"POT-Creation-Date: 2013-12-22 18:13+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -25,7 +25,7 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:257
+#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:290
 #: ../src/panel.c:490 ../src/panel.c:495 ../src/run.c:224 ../src/run.c:230
 #: ../tools/message.c:76
 msgid "Error"
@@ -254,48 +254,73 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
-#: ../src/applets/wpa_supplicant.c:220
+#: ../src/applets/wpa_supplicant.c:248
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:431
-msgid "Not running"
-msgstr "Pas de service"
+#: ../src/applets/wpa_supplicant.c:311
+msgid "Password required"
+msgstr "Mot de passe requis"
 
-#: ../src/applets/wpa_supplicant.c:586 ../tools/wifibrowser.c:132
-msgid "Reassociate"
-msgstr "Réassocier"
+#: ../src/applets/wpa_supplicant.c:314
+#, c-format
+msgid "The network \"%s\" is protected by a key."
+msgstr "Le réseau \"%s\" est protégé par une clé."
 
-#: ../src/applets/wpa_supplicant.c:595 ../tools/wifibrowser.c:133
-msgid "Rescan"
-msgstr "Rechercher"
+#: ../src/applets/wpa_supplicant.c:329
+msgid "Wireless key"
+msgstr "Clé du réseau"
 
-#: ../src/applets/wpa_supplicant.c:602
-msgid "Save configuration"
-msgstr "Sauvegarder la configuration"
+#: ../src/applets/wpa_supplicant.c:336
+msgid "Key: "
+msgstr "Clé : "
 
-#: ../src/applets/wpa_supplicant.c:625
-msgid "Network list"
-msgstr "Liste des réseaux"
+#: ../src/applets/wpa_supplicant.c:644
+msgid "Unavailable"
+msgstr "Indisponible"
 
-#: ../src/applets/wpa_supplicant.c:630
-msgid "Any network"
-msgstr "Tous les réseaux"
-
-#: ../src/applets/wpa_supplicant.c:687
+#: ../src/applets/wpa_supplicant.c:694
 #, c-format
 msgid ""
 "Frequency: %u\n"
-"Level: %u"
+"Level: %u%s%s"
 msgstr ""
-"Fréquence: %u\n"
-"Niveau: %u"
+"Fréquence : %u\n"
+"Niveau : %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:864
+#: ../src/applets/wpa_supplicant.c:695
+msgid ""
+"\n"
+"Security: "
+msgstr ""
+"\n"
+"Sécurité : "
+
+#: ../src/applets/wpa_supplicant.c:724 ../tools/wifibrowser.c:111
+msgid "Reassociate"
+msgstr "Réassocier"
+
+#: ../src/applets/wpa_supplicant.c:733 ../tools/wifibrowser.c:112
+msgid "Rescan"
+msgstr "Rechercher"
+
+#: ../src/applets/wpa_supplicant.c:740
+msgid "Save configuration"
+msgstr "Sauvegarder la configuration"
+
+#: ../src/applets/wpa_supplicant.c:763
+msgid "Network list"
+msgstr "Liste des réseaux"
+
+#: ../src/applets/wpa_supplicant.c:768
+msgid "Any network"
+msgstr "Tous les réseaux"
+
+#: ../src/applets/wpa_supplicant.c:1013
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1178
+#: ../src/applets/wpa_supplicant.c:1467
 msgid "Scanning..."
 msgstr "Recherche..."
 
@@ -551,19 +576,25 @@ msgstr ""
 " -l\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/wifibrowser.c:65
-#, c-format
-msgid "Usage: %s\n"
-msgstr "Usage: %s\n"
-
-#: ../tools/wifibrowser.c:131
+#: ../tools/wifibrowser.c:110
 msgid "Wireless browser"
 msgstr "Réseaux sans fil"
 
-#: ../tools/wifibrowser.c:162
+#: ../tools/wifibrowser.c:144
 msgid "SSID"
 msgstr "SSID"
 
-#: ../tools/wifibrowser.c:169
+#: ../tools/wifibrowser.c:151
 msgid "BSSID"
 msgstr "BSSID"
+
+#: ../tools/wifibrowser.c:179
+#, c-format
+msgid ""
+"Usage: %s [-c filename][-i interface]\n"
+"  -c\tPath to a configuration file\n"
+"  -i\tNetwork interface to connect to\n"
+msgstr ""
+"Usage: %s [-c fichier][-i interface]\n"
+"  -c\tFichier de configuration\n"
+"  -i\tInterface réseau à connecter\n"
