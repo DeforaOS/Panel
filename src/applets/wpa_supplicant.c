@@ -144,6 +144,7 @@ typedef struct _PanelApplet
 	/* widgets */
 	GtkWidget * widget;
 	GtkWidget * image;
+	gboolean blink;
 #ifndef EMBEDDED
 	GtkWidget * label;
 #endif
@@ -217,6 +218,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	hbox = gtk_hbox_new(FALSE, 4);
 	wpa->image = gtk_image_new_from_stock(GTK_STOCK_DISCONNECT,
 			helper->icon_size);
+	wpa->blink = FALSE;
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->image, FALSE, TRUE, 0);
 #ifndef EMBEDDED
 	wpa->label = gtk_label_new(" ");
@@ -1345,11 +1347,12 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 			else if(strcmp(value, "SCANNING") == 0)
 			{
 #if GTK_CHECK_VERSION(2, 6, 0)
-				/* TODO make it blink */
 				gtk_image_set_from_icon_name(
 						GTK_IMAGE(wpa->image),
-						"network-transmit-receive",
+						wpa->blink ? "network-idle"
+						: "network-transmit-receive",
 						wpa->helper->icon_size);
+				wpa->blink = wpa->blink ? FALSE : TRUE;
 #else
 				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 						GTK_STOCK_CONNECT,
