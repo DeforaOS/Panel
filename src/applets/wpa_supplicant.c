@@ -805,6 +805,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gchar * bssid;
 	guint frequency;
 	guint level;
+	guint flags;
 	gchar * ssid;
 #if GTK_CHECK_VERSION(2, 12, 0)
 	char buf[80];
@@ -818,11 +819,12 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	{
 		gtk_tree_model_get(model, &iter, WSR_ICON, &pixbuf,
 				WSR_BSSID, &bssid, WSR_FREQUENCY, &frequency,
-				WSR_LEVEL, &level, WSR_SSID, &ssid, -1);
+				WSR_LEVEL, &level, WSR_FLAGS, &flags,
+				WSR_SSID, &ssid, -1);
 		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
 				? ssid : bssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		_wpa_tooltip(buf, sizeof(buf), frequency, level, 0);
+		_wpa_tooltip(buf, sizeof(buf), frequency, level, flags);
 		gtk_widget_set_tooltip_text(menuitem, buf);
 #endif
 		if(ssid != NULL)
