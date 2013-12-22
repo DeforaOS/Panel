@@ -1250,10 +1250,9 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 	const int f = GTK_ICON_LOOKUP_USE_BUILTIN;
 #endif
 	GdkPixbuf * pixbuf;
-	char const * emblem = (flags & WSRF_WPA2) ? "stock_lock-ok"
-		: ((flags & WSRF_WPA) ? "stock_lock"
-				: ((flags & WSRF_WEP) ? "stock_lock-open"
-					: NULL));
+	char const * emblem = (flags & WSRF_WPA2) ? "security-high"
+		: ((flags & WSRF_WPA) ? "security-medium"
+				: ((flags & WSRF_WEP) ? "security-low" : NULL));
 
 	/* FIXME check if the mapping is right (and use our own icons) */
 	if(level >= 100)
