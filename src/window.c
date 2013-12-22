@@ -204,7 +204,7 @@ int panel_window_get_width(PanelWindow * panel)
 {
 	gint width;
 
-	gtk_window_get_size(panel, &width, NULL);
+	gtk_window_get_size(GTK_WINDOW(panel->window), &width, NULL);
 	return width;
 }
 
