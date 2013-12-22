@@ -15,8 +15,7 @@
 /* TODO:
  * - track password requests
  * - tooltip with details on the button (interface tracked...)
- * - more tooltip details on the menu entries (channel, security settings...)
- * - icons mentioning the security level (emblem-nowrite?) */
+ * - more tooltip details on the menu entries (channel, security settings...) */
 
 
 
