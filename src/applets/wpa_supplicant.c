@@ -1358,8 +1358,10 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
 #endif
+#ifndef EMBEDDED
 				gtk_label_set_text(GTK_LABEL(wpa->label),
 						_("Scanning..."));
+#endif
 			}
 			else
 #if GTK_CHECK_VERSION(2, 6, 0)
