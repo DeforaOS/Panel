@@ -315,6 +315,11 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(dialog), entry);
 	gtk_widget_show(entry);
 #endif
+#if GTK_CHECK_VERSION(2, 6, 0)
+	gtk_window_set_icon_name(GTK_WINDOW(dialog), "dialog-password");
+#endif
+	gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Wireless key"));
 #if GTK_CHECK_VERSION(2, 14, 0)
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
