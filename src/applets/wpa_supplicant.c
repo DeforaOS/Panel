@@ -844,7 +844,7 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
 	WPAChannel * channel = &wpa->channel[0];
-	char const * ssid;
+	gchar * ssid;
 	size_t i;
 
 	if((ssid = g_object_get_data(G_OBJECT(widget), "ssid")) == NULL)
@@ -856,8 +856,12 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 	/* check if the network is already in the list */
 	for(i = 0; i < wpa->networks_cnt; i++)
 		if(strcmp(wpa->networks[i].name, ssid) == 0)
-			return;
-	_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+			break;
+	if(i == wpa->networks_cnt)
+		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+#if 1 /* XXX partly remediate memory leak (see above) */
+	g_free(ssid);
+#endif
 }
 
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
