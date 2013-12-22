@@ -157,6 +157,8 @@ static void _wpa_destroy(WPA * wpa);
 
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
+static void _wpa_ask_password(WPA * wpa);
+
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
 
 static int _wpa_reset(WPA * wpa);
@@ -286,6 +288,58 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 	gtk_label_set_text(GTK_LABEL(wpa->label), _("Error"));
 #endif
 	return wpa->helper->error(NULL, message, ret);
+}
+
+
+/* wpa_ask_password */
+static void _wpa_ask_password(WPA * wpa)
+{
+	GtkWidget * dialog;
+	GtkWidget * vbox;
+	GtkWidget * hbox;
+	GtkWidget * label;
+	GtkWidget * entry;
+	char const * password;
+
+	if(wpa->networks_cur < 0)
+		return;
+	dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_OK_CANCEL,
+#if GTK_CHECK_VERSION(2, 6, 0)
+			"%s", _("Password required"));
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
+#endif
+			"%s", _("This network is protected by a password."));
+#if GTK_CHECK_VERSION(2, 10, 0)
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(dialog),
+			gtk_image_new_from_icon_name("dialog-password",
+				GTK_ICON_SIZE_DIALOG));
+#endif
+	gtk_window_set_title(GTK_WINDOW(dialog), _("Wireless key"));
+#if GTK_CHECK_VERSION(2, 14, 0)
+	vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+#else
+	vbox = GTK_DIALOG(dialog)->vbox;
+#endif
+	hbox = gtk_hbox_new(FALSE, 4);
+	label = gtk_label_new(_("Key: "));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	entry = gtk_entry_new();
+	gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
+	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK
+			&& (password = gtk_entry_get_text(GTK_ENTRY(entry)))
+			!= NULL)
+	{
+		/* FIXME the current network may have changed completely! */
+		if(wpa->networks_cur < 0)
+			/* XXX report the error */
+			return;
+		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD,
+				wpa->networks[wpa->networks_cur].id);
+	}
+	gtk_widget_destroy(dialog);
 }
 
 
