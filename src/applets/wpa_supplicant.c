@@ -157,7 +157,7 @@ static void _wpa_destroy(WPA * wpa);
 
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
-static void _wpa_ask_password(WPA * wpa);
+static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
 
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
 
@@ -292,7 +292,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 
 
 /* wpa_ask_password */
-static void _wpa_ask_password(WPA * wpa)
+static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 {
 	GtkWidget * dialog;
 	GtkWidget * vbox;
@@ -301,19 +301,19 @@ static void _wpa_ask_password(WPA * wpa)
 	GtkWidget * entry;
 	char const * password;
 
-	if(wpa->networks_cur < 0)
-		return;
 	dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
 			GTK_BUTTONS_OK_CANCEL,
 #if GTK_CHECK_VERSION(2, 6, 0)
 			"%s", _("Password required"));
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
 #endif
-			"%s", _("This network is protected by a password."));
+			_("The network \"%s\" is protected by a key."),
+			network->name);
 #if GTK_CHECK_VERSION(2, 10, 0)
-	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(dialog),
-			gtk_image_new_from_icon_name("dialog-password",
-				GTK_ICON_SIZE_DIALOG));
+	entry = gtk_image_new_from_icon_name("dialog-password",
+			GTK_ICON_SIZE_DIALOG);
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(dialog), entry);
+	gtk_widget_show(entry);
 #endif
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Wireless key"));
 #if GTK_CHECK_VERSION(2, 14, 0)
@@ -328,17 +328,13 @@ static void _wpa_ask_password(WPA * wpa)
 	gtk_entry_set_visibility(GTK_ENTRY(entry), FALSE);
 	gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+	gtk_widget_show_all(hbox);
 	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK
 			&& (password = gtk_entry_get_text(GTK_ENTRY(entry)))
 			!= NULL)
-	{
-		/* FIXME the current network may have changed completely! */
-		if(wpa->networks_cur < 0)
-			/* XXX report the error */
-			return;
-		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD,
-				wpa->networks[wpa->networks_cur].id);
-	}
+		/* FIXME the network may have changed in the meantime */
+		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD, network->id,
+				password);
 	gtk_widget_destroy(dialog);
 }
 
@@ -406,9 +402,11 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 					t);
 			break;
 		case WC_SET_PASSWORD:
+			/* FIXME really uses SET_NETWORK (and may not be psk) */
 			u = va_arg(ap, unsigned int);
 			s = va_arg(ap, char const *);
-			cmd = g_strdup_printf("PASSWORD %u \"%s\"", u, s);
+			cmd = g_strdup_printf("SET_NETWORK %u psk \"%s\"", u,
+					s);
 			break;
 		case WC_STATUS:
 			cmd = strdup("STATUS-VERBOSE");
@@ -1371,6 +1369,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	char variable[80];
 	char value[80];
 
+	/* FIXME really collect the information and react at the end */
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1391,6 +1390,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 		if(strcmp(variable, "wpa_state") == 0)
 		{
 			if(strcmp(value, "COMPLETED") == 0)
+			{
 #if GTK_CHECK_VERSION(2, 6, 0)
 				gtk_image_set_from_icon_name(
 						GTK_IMAGE(wpa->image),
@@ -1401,6 +1401,22 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 						GTK_STOCK_CONNECT,
 						wpa->helper->icon_size);
 #endif
+			}
+			else if(strcmp(value, "4WAY_HANDSHAKE") == 0)
+			{
+#if GTK_CHECK_VERSION(2, 6, 0)
+				gtk_image_set_from_icon_name(
+						GTK_IMAGE(wpa->image),
+						wpa->blink ? "network-idle"
+						: "network-transmit-receive",
+						wpa->helper->icon_size);
+				wpa->blink = wpa->blink ? FALSE : TRUE;
+#else
+				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
+						GTK_STOCK_CONNECT,
+						wpa->helper->icon_size);
+#endif
+			}
 			else if(strcmp(value, "SCANNING") == 0)
 			{
 #if GTK_CHECK_VERSION(2, 6, 0)
@@ -1443,6 +1459,8 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
 {
 	char const scan_results[] = "CTRL-EVENT-SCAN-RESULTS";
+	char const wpa_handshake[] = "WPA: 4-Way Handshake failed"
+		" - pre-shared key may be incorrect";
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -1471,6 +1489,11 @@ static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
 		bssid[sizeof(bssid) - 1] = '\0';
 		if(strcmp(event, scan_results) == 0)
 			_wpa_queue(wpa, &wpa->channel[0], WC_SCAN_RESULTS);
+		/* XXX hackish, blame wpa_supplicant(8) */
+		else if(strncmp(&p[3], wpa_handshake, sizeof(wpa_handshake) - 1)
+				== 0 && wpa->networks_cur >= 0)
+			_wpa_ask_password(wpa,
+					&wpa->networks[wpa->networks_cur]);
 		/* FIXME implement the other events */
 	}
 	free(p);
