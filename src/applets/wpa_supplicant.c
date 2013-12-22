@@ -270,8 +270,13 @@ static void _wpa_destroy(WPA * wpa)
 /* wpa_error */
 static int _wpa_error(WPA * wpa, char const * message, int ret)
 {
-	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "error",
+#if GTK_CHECK_VERSION(2, 6, 0)
+	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "network-error",
 			wpa->helper->icon_size);
+#else
+	gtk_image_set_from_stock(GTK_IMAGE(wpa->image), GTK_STOCK_DIALOG_ERROR,
+			wpa->helper->icon_size);
+#endif
 #ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), _("Error"));
 #endif
@@ -557,8 +562,13 @@ static void _wpa_stop(WPA * wpa)
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
 	/* report the status */
+#if GTK_CHECK_VERSION(2, 6, 0)
+	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "network-offline",
+			wpa->helper->icon_size);
+#else
 	gtk_image_set_from_stock(GTK_IMAGE(wpa->image), GTK_STOCK_DISCONNECT,
 			wpa->helper->icon_size);
+#endif
 #ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), _("Not running"));
 #endif
