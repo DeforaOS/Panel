@@ -120,11 +120,13 @@ typedef enum _WPAScanResult
 
 typedef enum _WPAScanResultFlag
 {
-	WSRF_WPA	= 0x01,
-	WSRF_WPA2	= 0x02,
-	WSRF_CCMP	= 0x04,
-	WSRF_TKIP	= 0x08,
-	WSRF_ESS	= 0x10
+	WSRF_WEP	= 0x01,
+	WSRF_WPA	= 0x02,
+	WSRF_WPA2	= 0x04,
+	WSRF_CCMP	= 0x08,
+	WSRF_TKIP	= 0x10,
+	WSRF_PREAUTH	= 0x20,
+	WSRF_ESS	= 0x40
 } WPAScanResultFlag;
 
 typedef struct _PanelApplet
@@ -600,7 +602,8 @@ static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
 		unsigned int level, uint32_t flags)
 {
 	char const * security = (flags & WSRF_WPA2) ? "WPA2"
-		: ((flags & WSRF_WPA) ? "WPA" : NULL);
+		: ((flags & WSRF_WPA) ? "WPA"
+				: ((flags & WSRF_WEP) ? "WEP" : NULL));
 
 	/* FIXME mention the channel instead of the frequency */
 	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u%s%s"), frequency,
@@ -1136,18 +1139,25 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 {
 	uint32_t ret = 0;
 	char const * p;
-	char const wpa1[] = "WPA-PSK-";
-	char const wpa2[] = "WPA2-PSK-";
+	char const wep[] = "WEP";
+	char const wpa1[] = "WPA-PSK";
+	char const wpa2[] = "WPA2-PSK";
 	char const ccmp[] = "CCMP";
 	char const tkipccmp[] = "TKIP+CCMP";
 	char const tkip[] = "TKIP";
 	char const ess[] = "ESS";
+	char const preauth[] = "preauth";
 
 	for(p = flags; *p != '\0';)
 	{
 		if(*(p++) != '[')
 			continue;
-		if(strncmp(wpa1, p, sizeof(wpa1) - 1) == 0)
+		if(strncmp(wep, p, sizeof(wep) - 1) == 0)
+		{
+			ret |= WSRF_WEP;
+			p += sizeof(wep) - 1;
+		}
+		else if(strncmp(wpa1, p, sizeof(wpa1) - 1) == 0)
 		{
 			ret |= WSRF_WPA;
 			p += sizeof(wpa1) - 1;
@@ -1160,19 +1170,44 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 		else if(strncmp(ess, p, sizeof(ess) - 1) == 0)
 		{
 			ret |= WSRF_ESS;
-			p += sizeof(ess);
+			p += sizeof(ess) - 1;
 		}
 		else
 			continue;
+		if(*p == '-')
+			p++;
 		if(strncmp(ccmp, p, sizeof(ccmp) - 1) == 0)
+		{
 			ret |= WSRF_CCMP;
+			p += sizeof(ccmp) - 1;
+		}
 		else if(strncmp(tkipccmp, p, sizeof(tkipccmp) - 1) == 0)
+		{
 			ret |= WSRF_TKIP | WSRF_CCMP;
+			p += sizeof(tkipccmp) - 1;
+		}
 		else if(strncmp(tkip, p, sizeof(tkip) - 1) == 0)
+		{
 			ret |= WSRF_TKIP;
+			p += sizeof(tkip) - 1;
+		}
+		else
+			continue;
+		if(*p == '-')
+			p++;
+		if(strncmp(preauth, p, sizeof(preauth) - 1) == 0)
+		{
+			ret |= WSRF_PREAUTH;
+			p += sizeof(preauth) - 1;
+		}
+		else
+			continue;
 		/* FIXME implement more */
 		for(p++; *p != '\0' && *p != ']'; p++);
 	}
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() => 0x%x\n", __func__, ret);
+#endif
 	return ret;
 }
 
@@ -1209,7 +1244,9 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 #endif
 	GdkPixbuf * pixbuf;
 	char const * emblem = (flags & WSRF_WPA2) ? "stock_lock-ok"
-		: ((flags & WSRF_WPA) ? "stock_lock" : "stock_lock-open");
+		: ((flags & WSRF_WPA) ? "stock_lock"
+				: ((flags & WSRF_WEP) ? "stock_lock-open"
+					: NULL));
 
 	/* FIXME check if the mapping is right (and use our own icons) */
 	if(level >= 100)
@@ -1229,6 +1266,8 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 		return pixbuf;
 	g_object_unref(pixbuf);
 	size = min(24, size / 2);
+	if(emblem == NULL)
+		return ret;
 	pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size, f, NULL);
 	if(pixbuf != NULL)
 	{
