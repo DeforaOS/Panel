@@ -199,7 +199,6 @@ static void _init_channel(WPAChannel * channel);
 static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	WPA * wpa;
-	GtkWidget * ret;
 	GtkWidget * hbox;
 	PangoFontDescription * bold;
 
@@ -235,15 +234,15 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		wpa->widget = hbox;
 	else
 	{
-		ret = gtk_button_new();
-		gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
+		wpa->widget = gtk_button_new();
+		gtk_button_set_relief(GTK_BUTTON(wpa->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		gtk_widget_set_tooltip_text(ret, _("Wireless networking"));
+		gtk_widget_set_tooltip_text(wpa->widget,
+				_("Wireless networking"));
 #endif
-		g_signal_connect_swapped(ret, "clicked", G_CALLBACK(
+		g_signal_connect_swapped(wpa->widget, "clicked", G_CALLBACK(
 					_on_clicked), wpa);
-		gtk_container_add(GTK_CONTAINER(ret), hbox);
-		wpa->widget = ret;
+		gtk_container_add(GTK_CONTAINER(wpa->widget), hbox);
 	}
 	*widget = wpa->widget;
 	return wpa;
