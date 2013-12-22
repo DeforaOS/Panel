@@ -120,13 +120,14 @@ typedef enum _WPAScanResult
 
 typedef enum _WPAScanResultFlag
 {
-	WSRF_WEP	= 0x01,
-	WSRF_WPA	= 0x02,
-	WSRF_WPA2	= 0x04,
-	WSRF_CCMP	= 0x08,
-	WSRF_TKIP	= 0x10,
-	WSRF_PREAUTH	= 0x20,
-	WSRF_ESS	= 0x40
+	WSRF_IBSS	= 0x01,
+	WSRF_WEP	= 0x02,
+	WSRF_WPA	= 0x04,
+	WSRF_WPA2	= 0x08,
+	WSRF_CCMP	= 0x10,
+	WSRF_TKIP	= 0x20,
+	WSRF_PREAUTH	= 0x40,
+	WSRF_ESS	= 0x80
 } WPAScanResultFlag;
 
 typedef struct _PanelApplet
@@ -1145,8 +1146,9 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 	char const ccmp[] = "CCMP";
 	char const tkipccmp[] = "TKIP+CCMP";
 	char const tkip[] = "TKIP";
-	char const ess[] = "ESS";
 	char const preauth[] = "preauth";
+	char const ess[] = "ESS";
+	char const ibss[] = "IBSS";
 
 	for(p = flags; *p != '\0';)
 	{
@@ -1171,6 +1173,11 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 		{
 			ret |= WSRF_ESS;
 			p += sizeof(ess) - 1;
+		}
+		else if(strncmp(ibss, p, sizeof(ibss) - 1) == 0)
+		{
+			ret |= WSRF_IBSS;
+			p += sizeof(ibss) - 1;
 		}
 		else
 			continue;
