@@ -571,7 +571,7 @@ static void _wpa_stop(WPA * wpa)
 			wpa->helper->icon_size);
 #endif
 #ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(wpa->label), _("Not running"));
+	gtk_label_set_text(GTK_LABEL(wpa->label), _("Unavailable"));
 #endif
 }
 
