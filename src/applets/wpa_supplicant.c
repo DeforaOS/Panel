@@ -476,9 +476,8 @@ static int _wpa_start(WPA * wpa)
 {
 	if(wpa->source != 0)
 		g_source_remove(wpa->source);
-	wpa->source = 0;
 	/* reconnect to the daemon */
-	_start_timeout(wpa);
+	wpa->source = g_idle_add(_start_timeout, wpa);
 	return 0;
 }
 
