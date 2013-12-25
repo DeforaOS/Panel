@@ -25,6 +25,9 @@
 #include <libintl.h>
 #include <System.h>
 #include <Desktop.h>
+#if GTK_CHECK_VERSION(3, 0, 0)
+# include <gtk/gtkx.h>
+#endif
 #include "Panel.h"
 #define _(string) gettext(string)
 
@@ -35,7 +38,11 @@
 typedef struct _EmbedWidget
 {
 	GtkWidget * socket;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	unsigned long id;
+#else
 	GdkNativeWindow id;
+#endif
 } EmbedWidget;
 
 typedef struct _PanelApplet
@@ -210,7 +217,11 @@ static gboolean _embed_on_idle(gpointer data)
 #endif
 	gtk_window_set_type_hint(GTK_WINDOW(embed->window),
 			GDK_WINDOW_TYPE_HINT_DOCK);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	embed->vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+#else
 	embed->vbox = gtk_vbox_new(FALSE, 0);
+#endif
 	g_object_ref(embed->vbox);
 	gtk_container_add(GTK_CONTAINER(embed->window), embed->vbox);
 	gtk_widget_show(embed->vbox);

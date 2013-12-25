@@ -69,9 +69,6 @@ static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
 
 	_panel_init(&panel, PANEL_WINDOW_POSITION_CENTER,
 			PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
-#if GTK_CHECK_VERSION(3, 0, 0)
-	gtk_window_set_has_resize_grip(GTK_WINDOW(panel.top.window), FALSE);
-#endif
 	_panel_set_title(&panel, _("Notification"));
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)

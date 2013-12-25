@@ -241,7 +241,11 @@ static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 {
 	GtkRequisition req;
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_get_preferred_size(GTK_WIDGET(menu), NULL, &req);
+#else
 	gtk_widget_size_request(GTK_WIDGET(menu), &req);
+#endif
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() width=%d, height=%d\n", __func__,
 			req.width, req.height);
@@ -287,7 +291,11 @@ static void _panel_helper_position_menu_widget(Panel * panel, GtkMenu * menu,
 	gint sx = 0;
 	gint sy = 0;
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_get_preferred_size(GTK_WIDGET(menu), NULL, &req);
+#else
 	gtk_widget_size_request(GTK_WIDGET(menu), &req);
+#endif
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() width=%d, height=%d\n", __func__,
 			req.width, req.height);
