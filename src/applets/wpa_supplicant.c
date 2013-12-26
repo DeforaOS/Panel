@@ -859,7 +859,15 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 		if(strcmp(wpa->networks[i].name, ssid) == 0)
 			break;
 	if(i == wpa->networks_cnt)
+		/* add (and then select) this network */
 		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+	else
+	{
+		/* select this network directly */
+		_wpa_queue(wpa, channel, WC_SELECT_NETWORK,
+				wpa->networks[i].id);
+		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+	}
 #if 1 /* XXX partly remediate memory leak (see above) */
 	g_free(ssid);
 #endif
@@ -879,19 +887,11 @@ static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 		/* enable every network again */
 		for(i = 0; i < wpa->networks_cnt; i++)
 			_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
-		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
-		return;
 	}
-	/* select this network */
-	for(i = 0; i < wpa->networks_cnt; i++)
-		if(network == &wpa->networks[i])
-		{
-			network->enabled = 1;
-			wpa->networks_cur = i;
-		}
-		else
-			wpa->networks[i].enabled = 0;
-	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
+	else
+		/* select this network */
+		_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
+	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 }
 
 static void _clicked_on_reassociate(gpointer data)
@@ -1061,7 +1061,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
 	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
-	_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, id);
+	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 }
 
