@@ -69,6 +69,8 @@ static char const * _helper_config_get(Panel * panel, char const * section,
 static gboolean _wifibrowser_on_closex(gpointer data);
 static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 		gpointer data);
+static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
+		GdkEventButton * event, gpointer data);
 
 
 /* functions */
@@ -153,6 +155,8 @@ static int _wifibrowser(char const * configfile, char const * interface)
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, WSR_BSSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	g_signal_connect(view, "button-press-event", G_CALLBACK(
+				_wifibrowser_on_view_button_press), wpa);
 	gtk_container_add(GTK_CONTAINER(widget), view);
 	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
 	gtk_widget_show_all(window);
@@ -229,6 +233,44 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 			_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 			break;
 	}
+}
+
+
+/* wifibrowser_on_view_button_press */
+static void _wifibrowser_on_view_button_press_connect(GtkWidget * widget,
+		gpointer data);
+
+static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
+		GdkEventButton * event, gpointer data)
+{
+	WPA * wpa = data;
+	GtkTreeSelection * treesel;
+	GtkTreeModel * model;
+	GtkTreeIter iter;
+	GtkWidget * menu;
+
+	if(event->type != GDK_BUTTON_PRESS
+			|| (event->button != 3 && event->button != 0))
+		return FALSE;
+	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
+	if(gtk_tree_selection_get_selected(treesel, &model, &iter) != TRUE)
+		return FALSE;
+	menu = gtk_menu_new();
+	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_CONNECT, NULL);
+	g_signal_connect(widget, "activate", G_CALLBACK(
+				_wifibrowser_on_view_button_press_connect),
+			wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);
+	gtk_widget_show_all(menu);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button,
+			event->time);
+	return TRUE;
+}
+
+static void _wifibrowser_on_view_button_press_connect(GtkWidget * widget,
+		gpointer data)
+{
+	/* FIXME implement */
 }
 
 
