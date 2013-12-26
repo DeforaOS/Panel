@@ -245,15 +245,13 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 {
 	WPA * wpa = data;
 	GtkTreeSelection * treesel;
-	GtkTreeModel * model;
-	GtkTreeIter iter;
 	GtkWidget * menu;
 
 	if(event->type != GDK_BUTTON_PRESS
 			|| (event->button != 3 && event->button != 0))
 		return FALSE;
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-	if(gtk_tree_selection_get_selected(treesel, &model, &iter) != TRUE)
+	if(gtk_tree_selection_get_selected(treesel, NULL, NULL) != TRUE)
 		return FALSE;
 	menu = gtk_menu_new();
 	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_CONNECT, NULL);
@@ -270,6 +268,8 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 static void _wifibrowser_on_view_button_press_connect(GtkWidget * widget,
 		gpointer data)
 {
+	WPA * wpa = data;
+
 	/* FIXME implement */
 }
 
