@@ -237,40 +237,37 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 
 
 /* wifibrowser_on_view_button_press */
-static void _wifibrowser_on_view_button_press_connect(GtkWidget * widget,
-		gpointer data);
-
 static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 		GdkEventButton * event, gpointer data)
 {
 	WPA * wpa = data;
 	GtkTreeSelection * treesel;
+	GtkTreeModel * model;
+	GtkTreeIter iter;
+	gchar * ssid;
 	GtkWidget * menu;
 
 	if(event->type != GDK_BUTTON_PRESS
 			|| (event->button != 3 && event->button != 0))
 		return FALSE;
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(widget));
-	if(gtk_tree_selection_get_selected(treesel, NULL, NULL) != TRUE)
+	if(gtk_tree_selection_get_selected(treesel, &model, &iter) != TRUE)
 		return FALSE;
+	gtk_tree_model_get(model, &iter, WSR_SSID, &ssid, -1);
 	menu = gtk_menu_new();
 	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_CONNECT, NULL);
+	if(ssid != NULL)
+		g_object_set_data(G_OBJECT(widget), "ssid", ssid);
 	g_signal_connect(widget, "activate", G_CALLBACK(
-				_wifibrowser_on_view_button_press_connect),
-			wpa);
+				_clicked_on_network_activated), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button,
 			event->time);
+#if 0 /* XXX memory leak (for g_object_set_data() above) */
+	g_free(ssid);
+#endif
 	return TRUE;
-}
-
-static void _wifibrowser_on_view_button_press_connect(GtkWidget * widget,
-		gpointer data)
-{
-	WPA * wpa = data;
-
-	/* FIXME implement */
 }
 
 
