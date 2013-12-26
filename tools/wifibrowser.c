@@ -71,6 +71,8 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 		gpointer data);
 static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 		GdkEventButton * event, gpointer data);
+static gboolean _wifibrowser_on_view_popup_menu(GtkWidget * widget,
+		gpointer data);
 
 
 /* functions */
@@ -157,6 +159,8 @@ static int _wifibrowser(char const * configfile, char const * interface)
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	g_signal_connect(view, "button-press-event", G_CALLBACK(
 				_wifibrowser_on_view_button_press), wpa);
+	g_signal_connect(view, "popup-menu", G_CALLBACK(
+				_wifibrowser_on_view_popup_menu), wpa);
 	gtk_container_add(GTK_CONTAINER(widget), view);
 	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
 	gtk_widget_show_all(window);
@@ -268,6 +272,20 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 	g_free(ssid);
 #endif
 	return TRUE;
+}
+
+
+/* wifibrowser_on_view_popup_menu */
+static gboolean _wifibrowser_on_view_popup_menu(GtkWidget * widget,
+		gpointer data)
+{
+	GdkEventButton event;
+
+	memset(&event, 0, sizeof(event));
+	event.type = GDK_BUTTON_PRESS;
+	event.button = 0;
+	event.time = gtk_get_current_event_time();
+	return _wifibrowser_on_view_button_press(widget, &event, data);
 }
 
 
