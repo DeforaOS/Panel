@@ -153,9 +153,15 @@ typedef struct _PanelApplet
 
 
 /* prototypes */
+/* plug-in */
 static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _wpa_destroy(WPA * wpa);
 
+/* accessors */
+static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
+		char const * network);
+
+/* useful */
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
@@ -276,19 +282,75 @@ static void _wpa_destroy(WPA * wpa)
 }
 
 
+/* wpa_set_status */
+static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
+		char const * network)
+{
+	char const * stock = connected
+		? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT;
+	char const * icon;
+#if !GTK_CHECK_VERSION(2, 6, 0)
+	gint size = 16;
+	GtkIconTheme * icontheme;
+	GdkPixbuf * pixbuf;
+#endif
+
+	if(connected == FALSE && network == NULL)
+	{
+		/* an error occurred */
+		stock = GTK_STOCK_DIALOG_ERROR;
+		icon = "network-error";
+		network = _("Error");
+	}
+	else if(connected == FALSE && associated == FALSE)
+		/* not connected to wpa_supplicant */
+		icon = "network-offline";
+	else if(connected == FALSE && associated == TRUE)
+	{
+		/* connected to an interface */
+		icon = "network-offline";
+		network = (network != NULL) ? network : _("Connecting...");
+	}
+	else if(associated == FALSE)
+	{
+		/* connected but not associated */
+		icon = wpa->blink ? "network-idle"
+			: "network-transmit-receive";
+		wpa->blink = wpa->blink ? FALSE : TRUE;
+		network = (network != NULL) ? network :  _("Scanning...");
+	}
+	else
+		/* connected and associated */
+		icon = "network-idle";
+#if GTK_CHECK_VERSION(2, 6, 0)
+	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), icon,
+			wpa->helper->icon_size);
+#else
+	gtk_icon_size_lookup(wpa->helper->icon_size, &size, &size);
+	icontheme = gtk_icon_theme_get_default();
+	if((pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size, 0, NULL))
+			!= NULL)
+	{
+		gtk_image_set_from_pixbuf(GTK_IMAGE(wpa->image), pixbuf);
+		g_object_unref(pixbuf);
+	}
+	else
+		gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
+				(connected && associated)
+				? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT,
+				wpa->helper->icon_size);
+#endif
+#ifndef EMBEDDED
+	gtk_label_set_text(GTK_LABEL(wpa->label), network);
+#endif
+}
+
+
+/* useful */
 /* wpa_error */
 static int _wpa_error(WPA * wpa, char const * message, int ret)
 {
-#if GTK_CHECK_VERSION(2, 6, 0)
-	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "network-error",
-			wpa->helper->icon_size);
-#else
-	gtk_image_set_from_stock(GTK_IMAGE(wpa->image), GTK_STOCK_DIALOG_ERROR,
-			wpa->helper->icon_size);
-#endif
-#ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(wpa->label), _("Error"));
-#endif
+	_wpa_set_status(wpa, FALSE, FALSE, NULL);
 	return wpa->helper->error(NULL, message, ret);
 }
 
@@ -591,10 +653,8 @@ static int _timeout_channel_interface(WPA * wpa, WPAChannel * channel,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() connected to %s\n", __func__, interface);
 #endif
-#ifndef EMBEDDED
 	/* XXX will be done for every channel */
-	gtk_label_set_text(GTK_LABEL(wpa->label), interface);
-#endif
+	_wpa_set_status(wpa, FALSE, TRUE, interface);
 	channel->channel = g_io_channel_unix_new(channel->fd);
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %p\n", __func__, (void *)channel->channel);
@@ -632,16 +692,7 @@ static void _wpa_stop(WPA * wpa)
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
 	/* report the status */
-#if GTK_CHECK_VERSION(2, 6, 0)
-	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), "network-offline",
-			wpa->helper->icon_size);
-#else
-	gtk_image_set_from_stock(GTK_IMAGE(wpa->image), GTK_STOCK_DISCONNECT,
-			wpa->helper->icon_size);
-#endif
-#ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(wpa->label), _("Unavailable"));
-#endif
+	_wpa_set_status(wpa, FALSE, FALSE, _("Unavailable"));
 	if(wpa->password != NULL)
 		gtk_widget_destroy(wpa->password);
 	wpa->password = NULL;
@@ -1123,19 +1174,8 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			if(res > 3 && strcmp(flags, "CURRENT") == 0)
 			{
 				wpa->networks_cur = wpa->networks_cnt - 1;
-#if GTK_CHECK_VERSION(2, 6, 0)
-				gtk_image_set_from_icon_name(
-						GTK_IMAGE(wpa->image),
-						"network-idle",
-						wpa->helper->icon_size);
-#else
-				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-						GTK_STOCK_CONNECT,
-						wpa->helper->icon_size);
-#endif
-#ifndef EMBEDDED
-				gtk_label_set_text(GTK_LABEL(wpa->label), ssid);
-#endif
+				/* XXX may be associated already */
+				_wpa_set_status(wpa, TRUE, FALSE, ssid);
 			}
 		}
 	}
@@ -1389,6 +1429,8 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 {
+	gboolean associated = FALSE;
+	char * network = NULL;
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -1396,7 +1438,6 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	char variable[80];
 	char value[80];
 
-	/* FIXME really collect the information and react at the end */
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1417,73 +1458,28 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 		if(strcmp(variable, "wpa_state") == 0)
 		{
 			if(strcmp(value, "COMPLETED") == 0)
-			{
-#if GTK_CHECK_VERSION(2, 6, 0)
-				gtk_image_set_from_icon_name(
-						GTK_IMAGE(wpa->image),
-						"network-idle",
-						wpa->helper->icon_size);
-#else
-				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-						GTK_STOCK_CONNECT,
-						wpa->helper->icon_size);
-#endif
-				if(wpa->password != NULL)
-					gtk_widget_destroy(wpa->password);
-				wpa->password = NULL;
-			}
+				associated = TRUE;
 			else if(strcmp(value, "4WAY_HANDSHAKE") == 0)
-			{
-#if GTK_CHECK_VERSION(2, 6, 0)
-				gtk_image_set_from_icon_name(
-						GTK_IMAGE(wpa->image),
-						wpa->blink ? "network-idle"
-						: "network-transmit-receive",
-						wpa->helper->icon_size);
-				wpa->blink = wpa->blink ? FALSE : TRUE;
-#else
-				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-						GTK_STOCK_CONNECT,
-						wpa->helper->icon_size);
-#endif
-			}
+				associated = FALSE;
 			else if(strcmp(value, "SCANNING") == 0)
-			{
-#if GTK_CHECK_VERSION(2, 6, 0)
-				gtk_image_set_from_icon_name(
-						GTK_IMAGE(wpa->image),
-						wpa->blink ? "network-idle"
-						: "network-transmit-receive",
-						wpa->helper->icon_size);
-				wpa->blink = wpa->blink ? FALSE : TRUE;
-#else
-				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-						GTK_STOCK_CONNECT,
-						wpa->helper->icon_size);
-#endif
-#ifndef EMBEDDED
-				gtk_label_set_text(GTK_LABEL(wpa->label),
-						_("Scanning..."));
-#endif
-			}
-			else
-#if GTK_CHECK_VERSION(2, 6, 0)
-				gtk_image_set_from_icon_name(
-						GTK_IMAGE(wpa->image),
-						"network-offline",
-						wpa->helper->icon_size);
-#else
-				gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
-						GTK_STOCK_DISCONNECT,
-						wpa->helper->icon_size);
-#endif
+				associated = FALSE;
 		}
 #ifndef EMBEDDED
 		if(strcmp(variable, "ssid") == 0)
-			gtk_label_set_text(GTK_LABEL(wpa->label), value);
+			/* XXX may fail */
+			network = strdup(value);
 #endif
 	}
 	free(p);
+	/* reflect the status */
+	if(associated == TRUE)
+	{
+		if(wpa->password != NULL)
+			gtk_widget_destroy(wpa->password);
+		wpa->password = NULL;
+	}
+	_wpa_set_status(wpa, TRUE, associated, network);
+	free(network);
 }
 
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
