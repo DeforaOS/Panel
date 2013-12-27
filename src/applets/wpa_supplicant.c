@@ -366,6 +366,7 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	GtkWidget * label;
 	GtkWidget * entry;
 	char const * password;
+	size_t i;
 
 	if(wpa->password != NULL)
 		return;
@@ -411,6 +412,10 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 		/* FIXME the network may have changed in the meantime */
 		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD, network->id,
 				password);
+	else
+		/* enable every network again */
+		for(i = 0; i < wpa->networks_cnt; i++)
+			_wpa_queue(wpa, &wpa->channel[0], WC_ENABLE_NETWORK, i);
 	if(wpa->password != NULL)
 		gtk_widget_destroy(wpa->password);
 	wpa->password = NULL;
