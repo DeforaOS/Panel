@@ -119,14 +119,16 @@ typedef enum _WPAScanResult
 
 typedef enum _WPAScanResultFlag
 {
-	WSRF_IBSS	= 0x01,
-	WSRF_WEP	= 0x02,
-	WSRF_WPA	= 0x04,
-	WSRF_WPA2	= 0x08,
-	WSRF_CCMP	= 0x10,
-	WSRF_TKIP	= 0x20,
-	WSRF_PREAUTH	= 0x40,
-	WSRF_ESS	= 0x80
+	WSRF_IBSS	= 0x001,
+	WSRF_WEP	= 0x002,
+	WSRF_WPA	= 0x004,
+	WSRF_WPA2	= 0x008,
+	WSRF_PSK	= 0x010,
+	WSRF_EAP	= 0x020,
+	WSRF_CCMP	= 0x040,
+	WSRF_TKIP	= 0x080,
+	WSRF_PREAUTH	= 0x100,
+	WSRF_ESS	= 0x200
 } WPAScanResultFlag;
 
 typedef struct _PanelApplet
@@ -1282,8 +1284,10 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 	uint32_t ret = 0;
 	char const * p;
 	char const wep[] = "WEP";
-	char const wpa1[] = "WPA-PSK";
-	char const wpa2[] = "WPA2-PSK";
+	char const wpa1[] = "WPA-";
+	char const wpa2[] = "WPA2-";
+	char const psk[] = "PSK";
+	char const eap[] = "EAP";
 	char const ccmp[] = "CCMP";
 	char const tkipccmp[] = "TKIP+CCMP";
 	char const tkip[] = "TKIP";
@@ -1295,6 +1299,7 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 	{
 		if(*(p++) != '[')
 			continue;
+		/* FIXME parse more consistently */
 		if(strncmp(wep, p, sizeof(wep) - 1) == 0)
 		{
 			ret |= WSRF_WEP;
@@ -1322,6 +1327,16 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 		}
 		else
 			continue;
+		if(strncmp(psk, p, sizeof(psk) - 1) == 0)
+		{
+			ret |= WSRF_PSK;
+			p += sizeof(psk) - 1;
+		}
+		else if(strncmp(eap, p, sizeof(eap) - 1) == 0)
+		{
+			ret |= WSRF_EAP;
+			p += sizeof(eap) - 1;
+		}
 		if(*p == '-')
 			p++;
 		if(strncmp(ccmp, p, sizeof(ccmp) - 1) == 0)
