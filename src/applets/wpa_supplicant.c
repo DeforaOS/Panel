@@ -756,10 +756,12 @@ static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
 
 /* callbacks */
 /* on_clicked */
+static void _clicked_available(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
+static void _clicked_unavailable(GtkWidget * menu);
 /* callbacks */
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data);
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data);
@@ -771,10 +773,22 @@ static void _on_clicked(gpointer data)
 {
 	WPA * wpa = data;
 	GtkWidget * menu;
+
+	menu = gtk_menu_new();
+	if(wpa->channel[0].fd < 0)
+		_clicked_unavailable(menu);
+	else
+		_clicked_available(wpa, menu);
+	gtk_widget_show_all(menu);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
+			wpa, 0, gtk_get_current_event_time());
+}
+
+static void _clicked_available(WPA * wpa, GtkWidget * menu)
+{
 	GtkWidget * menuitem;
 	GtkWidget * image;
 
-	menu = gtk_menu_new();
 	/* FIXME summarize the status instead */
 	_clicked_network_list(wpa, menu);
 	/* reassociate */
@@ -802,9 +816,6 @@ static void _on_clicked(gpointer data)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* view */
 	_clicked_network_view(wpa, menu);
-	gtk_widget_show_all(menu);
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
-			wpa, 0, gtk_get_current_event_time());
 }
 
 static void _clicked_network_list(WPA * wpa, GtkWidget * menu)
@@ -899,6 +910,16 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	}
 }
 
+static void _clicked_unavailable(GtkWidget * menu)
+{
+	GtkWidget * menuitem;
+
+	menuitem = gtk_image_menu_item_new_with_label(
+			_("wpa_supplicant is not running"));
+	gtk_widget_set_sensitive(menuitem, FALSE);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+}
+
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
@@ -941,11 +962,9 @@ static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)) == FALSE)
 		return;
 	if((network = g_object_get_data(G_OBJECT(widget), "network")) == NULL)
-	{
 		/* enable every network again */
 		for(i = 0; i < wpa->networks_cnt; i++)
 			_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
-	}
 	else
 		/* select this network */
 		_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
