@@ -146,7 +146,7 @@ static int _wifibrowser(char const * configfile, char const * interface)
 	/* SSID */
 	renderer = gtk_cell_renderer_text_new();
 	column = gtk_tree_view_column_new_with_attributes(_("SSID"), renderer,
-			"text", WSR_SSID, NULL);
+			"text", WSR_SSID_DISPLAY, NULL);
 	gtk_tree_view_column_set_resizable(column, TRUE);
 	gtk_tree_view_column_set_sort_column_id(column, WSR_SSID);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
