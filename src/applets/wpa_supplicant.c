@@ -110,6 +110,7 @@ typedef enum _WPAScanResult
 	WSR_LEVEL,
 	WSR_FLAGS,
 	WSR_SSID,
+	WSR_SSID_DISPLAY,
 	WSR_TOOLTIP
 } WPAScanResult;
 #define WSR_LAST WSR_TOOLTIP
@@ -233,7 +234,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
 			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
-			G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING);
+			G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING,
+			G_TYPE_STRING);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -863,11 +865,11 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	GtkTreeIter iter;
 	gboolean valid;
 	GdkPixbuf * pixbuf;
-	gchar * bssid;
 	guint frequency;
 	guint level;
 	guint flags;
 	gchar * ssid;
+	gchar * dssid;
 #if GTK_CHECK_VERSION(2, 12, 0)
 	char buf[80];
 #endif
@@ -879,11 +881,10 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	for(; valid == TRUE; valid = gtk_tree_model_iter_next(model, &iter))
 	{
 		gtk_tree_model_get(model, &iter, WSR_ICON, &pixbuf,
-				WSR_BSSID, &bssid, WSR_FREQUENCY, &frequency,
-				WSR_LEVEL, &level, WSR_FLAGS, &flags,
-				WSR_SSID, &ssid, -1);
-		menuitem = gtk_image_menu_item_new_with_label((ssid != NULL)
-				? ssid : bssid);
+				WSR_FREQUENCY, &frequency, WSR_LEVEL, &level,
+				WSR_FLAGS, &flags, WSR_SSID, &ssid,
+				WSR_SSID_DISPLAY, &dssid, -1);
+		menuitem = gtk_image_menu_item_new_with_label(dssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
 		_wpa_tooltip(buf, sizeof(buf), frequency, level, flags);
 		gtk_widget_set_tooltip_text(menuitem, buf);
@@ -896,7 +897,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		g_signal_connect(menuitem, "activate", G_CALLBACK(
 					_clicked_on_network_activated), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-		g_free(bssid);
+		g_free(dssid);
 #if 0 /* XXX memory leak (for g_object_set_data() above) */
 		g_free(ssid);
 #endif
@@ -1281,7 +1282,11 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					WSR_TOOLTIP, tooltip, -1);
 			if(res == 5)
 				gtk_list_store_set(wpa->store, &iter,
-						WSR_SSID, ssid, -1);
+						WSR_SSID, ssid,
+						WSR_SSID_DISPLAY, ssid, -1);
+			else
+				gtk_list_store_set(wpa->store, &iter,
+						WSR_SSID_DISPLAY, bssid, -1);
 		}
 	}
 	free(p);
