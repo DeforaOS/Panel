@@ -13,9 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - track password requests
- * - tooltip with details on the button (interface tracked...)
- * - more tooltip details on the menu entries (channel, security settings...) */
+ * - tooltip with details on the button (interface tracked...) */
 
 
 
