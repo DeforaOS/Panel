@@ -223,13 +223,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
 	hbox = gtk_hbox_new(FALSE, 4);
-#if GTK_CHECK_VERSION(2, 6, 0)
-	wpa->image = gtk_image_new_from_icon_name("network-offline",
-			helper->icon_size);
-#else
-	wpa->image = gtk_image_new_from_stock(GTK_STOCK_DISCONNECT,
-			helper->icon_size);
-#endif
+	wpa->image = gtk_image_new();
 	wpa->blink = FALSE;
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->image, FALSE, TRUE, 0);
 #ifndef EMBEDDED
@@ -258,6 +252,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		gtk_container_add(GTK_CONTAINER(wpa->widget), hbox);
 	}
 	wpa->password = NULL;
+	_wpa_set_status(wpa, FALSE, FALSE, _("Unavailable"));
 	*widget = wpa->widget;
 	return wpa;
 }
