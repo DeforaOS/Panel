@@ -1285,8 +1285,12 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 						WSR_SSID, ssid,
 						WSR_SSID_DISPLAY, ssid, -1);
 			else
+			{
+				snprintf(tooltip, sizeof(tooltip),
+						_("Unknown (%s)"), bssid);
 				gtk_list_store_set(wpa->store, &iter,
-						WSR_SSID_DISPLAY, bssid, -1);
+						WSR_SSID_DISPLAY, tooltip, -1);
+			}
 		}
 	}
 	free(p);
