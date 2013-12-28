@@ -871,7 +871,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	gchar * ssid;
 	gchar * dssid;
 #if GTK_CHECK_VERSION(2, 12, 0)
-	char buf[80];
+	gchar * tooltip;
 #endif
 
 	if((valid = gtk_tree_model_get_iter_first(model, &iter)) == FALSE)
@@ -883,11 +883,15 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		gtk_tree_model_get(model, &iter, WSR_ICON, &pixbuf,
 				WSR_FREQUENCY, &frequency, WSR_LEVEL, &level,
 				WSR_FLAGS, &flags, WSR_SSID, &ssid,
-				WSR_SSID_DISPLAY, &dssid, -1);
+				WSR_SSID_DISPLAY, &dssid,
+#if GTK_CHECK_VERSION(2, 12, 0)
+				WSR_TOOLTIP, &tooltip,
+#endif
+				-1);
 		menuitem = gtk_image_menu_item_new_with_label(dssid);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		_wpa_tooltip(buf, sizeof(buf), frequency, level, flags);
-		gtk_widget_set_tooltip_text(menuitem, buf);
+		gtk_widget_set_tooltip_text(menuitem, tooltip);
+		g_free(tooltip);
 #endif
 		if(ssid != NULL)
 			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
@@ -1030,11 +1034,17 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
+static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
 static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
+static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
+		char const * bssid, char const * ssid, unsigned int level,
+		unsigned int frequency, unsigned int flags, GdkPixbuf * pixbuf,
+		char const * tooltip);
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 		gint size, guint level, uint32_t flags);
+static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1222,7 +1232,6 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
 	GtkIconTheme * icontheme;
 	gint size = 16;
-	gboolean valid;
 	size_t i;
 	size_t j;
 	char * p = NULL;
@@ -1240,10 +1249,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 
 	icontheme = gtk_icon_theme_get_default();
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size);
-	/* mark every entry as obsolete */
-	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
-			valid = gtk_tree_model_iter_next(model, &iter))
-		gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, FALSE, -1);
+	_read_scan_results_reset(wpa, model);
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1272,9 +1278,14 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 			f = _read_scan_results_flags(wpa, flags);
 			pixbuf = _read_scan_results_pixbuf(icontheme, size,
 					level, f);
-			_read_scan_results_iter(wpa, &iter, bssid);
-			_wpa_tooltip(tooltip, sizeof(tooltip), frequency,
-					level, f);
+			_wpa_tooltip(tooltip, sizeof(tooltip), frequency, level,
+					f);
+			if(res == 5)
+				_read_scan_results_iter_ssid(wpa, &iter, bssid,
+						ssid, level, frequency, f,
+						pixbuf, tooltip);
+			else
+				_read_scan_results_iter(wpa, &iter, bssid);
 			gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
@@ -1294,14 +1305,36 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 		}
 	}
 	free(p);
+	_read_scan_results_cleanup(wpa, model);
+}
+
+static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model)
+{
+	GtkTreeIter iter;
+	GtkTreeIter child;
+	gboolean valid;
+
 	/* remove the outdated entries */
 	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;)
 	{
 		gtk_tree_model_get(model, &iter, WSR_UPDATED, &valid, -1);
 		if(valid == FALSE)
+		{
 			valid = gtk_tree_store_remove(wpa->store, &iter);
-		else
-			valid = gtk_tree_model_iter_next(model, &iter);
+			continue;
+		}
+		for(valid = gtk_tree_model_iter_children(model, &child, &iter);
+				valid == TRUE;)
+		{
+			gtk_tree_model_get(model, &child, WSR_UPDATED, &valid,
+					-1);
+			if(valid == FALSE)
+				valid = gtk_tree_store_remove(wpa->store,
+						&child);
+			else
+				valid = gtk_tree_model_iter_next(model, &child);
+		}
+		valid = gtk_tree_model_iter_next(model, &iter);
 	}
 }
 
@@ -1420,6 +1453,62 @@ static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 	gtk_tree_store_append(wpa->store, iter, NULL);
 }
 
+static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
+		char const * bssid, char const * ssid, unsigned int level,
+		unsigned int frequency, unsigned int flags, GdkPixbuf * pixbuf,
+		char const * tooltip)
+{
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	gboolean valid;
+	gchar * s;
+	unsigned int f;
+	unsigned int l = 0;
+	int res;
+	GtkTreeIter parent;
+
+	/* look for the network in the list */
+	for(valid = gtk_tree_model_get_iter_first(model, iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, iter))
+	{
+		gtk_tree_model_get(model, iter, WSR_SSID, &s, WSR_LEVEL, &l,
+				WSR_FLAGS, &f, -1);
+		res = (s != NULL && strcmp(s, ssid) == 0 && f == flags)
+			? 0 : -1;
+		g_free(s);
+		if(res == 0)
+			break;
+	}
+	if(valid != TRUE)
+	{
+		gtk_tree_store_append(wpa->store, iter, NULL);
+		gtk_tree_store_set(wpa->store, iter, WSR_UPDATED, TRUE,
+				WSR_LEVEL, level, WSR_FREQUENCY, frequency,
+				WSR_FLAGS, flags, WSR_SSID, ssid,
+				WSR_SSID_DISPLAY, ssid, WSR_ICON, pixbuf,
+				WSR_TOOLTIP, tooltip, -1);
+	}
+	else
+		gtk_tree_store_set(wpa->store, iter, WSR_UPDATED, TRUE,
+				/* refresh the level and icon if relevant */
+				(level > l) ? WSR_LEVEL : -1, level,
+				WSR_FREQUENCY, frequency, WSR_ICON, pixbuf,
+				WSR_TOOLTIP, tooltip, -1);
+	/* look for the BSSID in the network */
+	parent = *iter;
+	for(valid = gtk_tree_model_iter_children(model, iter, &parent);
+			valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, iter))
+	{
+		gtk_tree_model_get(model, iter, WSR_BSSID, &s, -1);
+		res = (s != NULL && strcmp(s, bssid) == 0) ? 0 : -1;
+		g_free(s);
+		if(res == 0)
+			break;
+	}
+	if(valid != TRUE)
+		gtk_tree_store_append(wpa->store, iter, &parent);
+}
+
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 		gint size, guint level, uint32_t flags)
 {
@@ -1466,6 +1555,25 @@ static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
 		g_object_unref(pixbuf);
 	}
 	return ret;
+}
+
+static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model)
+{
+	GtkTreeIter iter;
+	GtkTreeIter child;
+	gboolean valid;
+
+	/* mark every entry as obsolete */
+	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
+			valid = gtk_tree_model_iter_next(model, &iter))
+	{
+		gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, FALSE, -1);
+		for(valid = gtk_tree_model_iter_children(model, &child, &iter);
+				valid == TRUE;
+				valid = gtk_tree_model_iter_next(model, &child))
+			gtk_tree_store_set(wpa->store, &child,
+					WSR_UPDATED, FALSE, -1);
+	}
 }
 
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)
