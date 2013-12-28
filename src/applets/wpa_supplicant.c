@@ -168,6 +168,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret);
 static void _wpa_connect(WPA * wpa, char const * ssid);
 static void _wpa_connect_network(WPA * wpa, WPANetwork * network);
 static void _wpa_disconnect(WPA * wpa);
+static void _wpa_rescan(WPA * wpa);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
 
@@ -461,6 +462,7 @@ static void _wpa_disconnect(WPA * wpa)
 	for(i = 0; i < wpa->networks_cnt; i++)
 		_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+	_wpa_rescan(wpa);
 }
 
 
@@ -563,6 +565,15 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
 	return 0;
+}
+
+
+/* wpa_rescan */
+static void _wpa_rescan(WPA * wpa)
+{
+	WPAChannel * channel = &wpa->channel[0];
+
+	_wpa_queue(wpa, channel, WC_SCAN);
 }
 
 
@@ -1006,9 +1017,8 @@ static void _clicked_on_reassociate(gpointer data)
 static void _clicked_on_rescan(gpointer data)
 {
 	WPA * wpa = data;
-	WPAChannel * channel = &wpa->channel[0];
 
-	_wpa_queue(wpa, channel, WC_SCAN);
+	_wpa_rescan(wpa);
 }
 
 static void _clicked_on_save_configuration(gpointer data)
