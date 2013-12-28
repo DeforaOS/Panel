@@ -165,7 +165,8 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 /* useful */
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
-static void _wpa_connect(WPA * wpa, WPANetwork * network);
+static void _wpa_connect(WPA * wpa, char const * ssid);
+static void _wpa_connect_network(WPA * wpa, WPANetwork * network);
 static void _wpa_disconnect(WPA * wpa);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
@@ -421,7 +422,26 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 
 
 /* wpa_connect */
-static void _wpa_connect(WPA * wpa, WPANetwork * network)
+static void _wpa_connect(WPA * wpa, char const * ssid)
+{
+	WPAChannel * channel = &wpa->channel[0];
+	size_t i;
+
+	/* check if the network is already in the list */
+	for(i = 0; i < wpa->networks_cnt; i++)
+		if(strcmp(wpa->networks[i].name, ssid) == 0)
+			break;
+	if(i < wpa->networks_cnt)
+		/* select this network directly */
+		_wpa_connect_network(wpa, &wpa->networks[i]);
+	else
+		/* add (and then select) this network */
+		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+}
+
+
+/* wpa_connect_network */
+static void _wpa_connect_network(WPA * wpa, WPANetwork * network)
 {
 	WPAChannel * channel = &wpa->channel[0];
 
@@ -948,9 +968,7 @@ static void _clicked_unavailable(GtkWidget * menu)
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
-	WPAChannel * channel = &wpa->channel[0];
 	gchar * ssid;
-	size_t i;
 
 	if((ssid = g_object_get_data(G_OBJECT(widget), "ssid")) == NULL)
 		/* FIXME implement */
@@ -958,16 +976,7 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
 #endif
-	/* check if the network is already in the list */
-	for(i = 0; i < wpa->networks_cnt; i++)
-		if(strcmp(wpa->networks[i].name, ssid) == 0)
-			break;
-	if(i < wpa->networks_cnt)
-		/* select this network directly */
-		_wpa_connect(wpa, &wpa->networks[i]);
-	else
-		/* add (and then select) this network */
-		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+	_wpa_connect(wpa, ssid);
 #if 1 /* XXX partly remediate memory leak (see above) */
 	g_free(ssid);
 #endif
@@ -981,7 +990,7 @@ static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)) == FALSE)
 		return;
 	if((network = g_object_get_data(G_OBJECT(widget), "network")) != NULL)
-		_wpa_connect(wpa, network);
+		_wpa_connect_network(wpa, network);
 	else
 		_wpa_disconnect(wpa);
 }
@@ -1159,6 +1168,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
 	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
+	/* XXX make this optional */
 	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 }
