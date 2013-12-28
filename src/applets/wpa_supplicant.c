@@ -165,6 +165,9 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 /* useful */
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
+static void _wpa_connect(WPA * wpa, WPANetwork * network);
+static void _wpa_disconnect(WPA * wpa);
+
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
 
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
@@ -414,6 +417,30 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	if(wpa->password != NULL)
 		gtk_widget_destroy(wpa->password);
 	wpa->password = NULL;
+}
+
+
+/* wpa_connect */
+static void _wpa_connect(WPA * wpa, WPANetwork * network)
+{
+	WPAChannel * channel = &wpa->channel[0];
+
+	/* select this network */
+	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
+	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+}
+
+
+/* wpa_disconnect */
+static void _wpa_disconnect(WPA * wpa)
+{
+	WPAChannel * channel = &wpa->channel[0];
+	size_t i;
+
+	/* enable every network again */
+	for(i = 0; i < wpa->networks_cnt; i++)
+		_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
+	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 }
 
 
@@ -953,20 +980,14 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
-	WPAChannel * channel = &wpa->channel[0];
 	WPANetwork * network;
-	size_t i;
 
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)) == FALSE)
 		return;
-	if((network = g_object_get_data(G_OBJECT(widget), "network")) == NULL)
-		/* enable every network again */
-		for(i = 0; i < wpa->networks_cnt; i++)
-			_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
+	if((network = g_object_get_data(G_OBJECT(widget), "network")) != NULL)
+		_wpa_connect(wpa, network);
 	else
-		/* select this network */
-		_wpa_queue(wpa, channel, WC_SELECT_NETWORK, network->id);
-	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+		_wpa_disconnect(wpa);
 }
 
 static void _clicked_on_reassociate(gpointer data)
