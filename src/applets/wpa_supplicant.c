@@ -1355,7 +1355,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 			else
 			{
 				snprintf(tooltip, sizeof(tooltip),
-						_("Unknown (%s)"), bssid);
+						_("Hidden (%s)"), bssid);
 				gtk_tree_store_set(wpa->store, &iter,
 						WSR_SSID_DISPLAY, tooltip, -1);
 			}
