@@ -65,7 +65,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 
 	_panel_init(&panel, PANEL_WINDOW_POSITION_MANAGED,
 			PANEL_APPLET_TYPE_NORMAL, iconsize);
-	_panel_set_title(&panel, _("Applet tester"));
+	_panel_set_title(&panel, "Applet tester");
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
 			error_print(PROGNAME);
@@ -79,9 +79,9 @@ static int _test(GtkIconSize iconsize, char * applets[])
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s [-L|-S|-X|-x] applet...\n"
-"       %s -l\n"
-"  -l	Lists the plug-ins available\n"), PROGNAME, PROGNAME);
+	fputs("Usage: " PROGNAME " [-L|-S|-X|-x] applet...\n"
+"       " PROGNAME " -l\n"
+"  -l	Lists the plug-ins available\n", stderr);
 	return 1;
 }
 
