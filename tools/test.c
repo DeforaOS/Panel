@@ -53,6 +53,7 @@
 /* private */
 /* prototypes */
 static int _test(GtkIconSize iconsize, char * applets[]);
+
 static int _usage(void);
 
 
