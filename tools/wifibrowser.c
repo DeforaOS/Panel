@@ -241,6 +241,9 @@ static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 
 
 /* wifibrowser_on_view_button_press */
+/* callbacks */
+static void _clicked_on_network_disconnect(gpointer data);
+
 static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 		GdkEventButton * event, gpointer data)
 {
@@ -265,6 +268,10 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 	g_signal_connect(widget, "activate", G_CALLBACK(
 				_clicked_on_network_activated), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);
+	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_DISCONNECT, NULL);
+	g_signal_connect_swapped(widget, "activate", G_CALLBACK(
+				_clicked_on_network_disconnect), wpa);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, event->button,
 			event->time);
@@ -272,6 +279,13 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 	g_free(ssid);
 #endif
 	return TRUE;
+}
+
+static void _clicked_on_network_disconnect(gpointer data)
+{
+	WPA * wpa = data;
+
+	_wpa_disconnect(wpa);
 }
 
 
