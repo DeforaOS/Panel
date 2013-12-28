@@ -148,7 +148,7 @@ typedef struct _PanelApplet
 #ifndef EMBEDDED
 	GtkWidget * label;
 #endif
-	GtkListStore * store;
+	GtkTreeStore * store;
 	GtkWidget * password;
 } WPA;
 
@@ -232,7 +232,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(wpa->label, bold);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
-	wpa->store = gtk_list_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
+	wpa->store = gtk_tree_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
 			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
 			G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING,
 			G_TYPE_STRING);
@@ -686,7 +686,7 @@ static void _wpa_stop(WPA * wpa)
 	_stop_channel(wpa, &wpa->channel[0]);
 	_stop_channel(wpa, &wpa->channel[1]);
 	/* free the network list */
-	gtk_list_store_clear(wpa->store);
+	gtk_tree_store_clear(wpa->store);
 	for(i = 0; i < wpa->networks_cnt; i++)
 		free(wpa->networks[i].name);
 	free(wpa->networks);
@@ -1243,7 +1243,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	/* mark every entry as obsolete */
 	for(valid = gtk_tree_model_get_iter_first(model, &iter); valid == TRUE;
 			valid = gtk_tree_model_iter_next(model, &iter))
-		gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, FALSE, -1);
+		gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, FALSE, -1);
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1275,20 +1275,20 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 			_read_scan_results_iter(wpa, &iter, bssid);
 			_wpa_tooltip(tooltip, sizeof(tooltip), frequency,
 					level, f);
-			gtk_list_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
+			gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
 					WSR_LEVEL, level, WSR_FLAGS, f,
 					WSR_TOOLTIP, tooltip, -1);
 			if(res == 5)
-				gtk_list_store_set(wpa->store, &iter,
+				gtk_tree_store_set(wpa->store, &iter,
 						WSR_SSID, ssid,
 						WSR_SSID_DISPLAY, ssid, -1);
 			else
 			{
 				snprintf(tooltip, sizeof(tooltip),
 						_("Unknown (%s)"), bssid);
-				gtk_list_store_set(wpa->store, &iter,
+				gtk_tree_store_set(wpa->store, &iter,
 						WSR_SSID_DISPLAY, tooltip, -1);
 			}
 		}
@@ -1299,7 +1299,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	{
 		gtk_tree_model_get(model, &iter, WSR_UPDATED, &valid, -1);
 		if(valid == FALSE)
-			valid = gtk_list_store_remove(wpa->store, &iter);
+			valid = gtk_tree_store_remove(wpa->store, &iter);
 		else
 			valid = gtk_tree_model_iter_next(model, &iter);
 	}
@@ -1417,7 +1417,7 @@ static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		if(res == 0)
 			return;
 	}
-	gtk_list_store_append(wpa->store, iter);
+	gtk_tree_store_append(wpa->store, iter, NULL);
 }
 
 static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
