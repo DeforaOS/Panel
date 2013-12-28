@@ -962,16 +962,12 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 	for(i = 0; i < wpa->networks_cnt; i++)
 		if(strcmp(wpa->networks[i].name, ssid) == 0)
 			break;
-	if(i == wpa->networks_cnt)
+	if(i < wpa->networks_cnt)
+		/* select this network directly */
+		_wpa_connect(wpa, &wpa->networks[i]);
+	else
 		/* add (and then select) this network */
 		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
-	else
-	{
-		/* select this network directly */
-		_wpa_queue(wpa, channel, WC_SELECT_NETWORK,
-				wpa->networks[i].id);
-		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
-	}
 #if 1 /* XXX partly remediate memory leak (see above) */
 	g_free(ssid);
 #endif
