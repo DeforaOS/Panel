@@ -908,7 +908,7 @@ static void _clicked_unavailable(GtkWidget * menu)
 	GtkWidget * menuitem;
 
 	menuitem = gtk_image_menu_item_new_with_label(
-			_("wpa_supplicant is not running"));
+			_("Wireless is disabled"));
 	gtk_widget_set_sensitive(menuitem, FALSE);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 }
