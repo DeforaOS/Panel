@@ -141,6 +141,10 @@ typedef struct _PanelApplet
 	size_t networks_cnt;
 	ssize_t networks_cur;
 
+	/* status */
+	gboolean connected;
+	gboolean associated;
+
 	/* widgets */
 	GtkWidget * widget;
 	GtkWidget * image;
@@ -171,6 +175,8 @@ static void _wpa_disconnect(WPA * wpa);
 static void _wpa_rescan(WPA * wpa);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network);
+
+static void _wpa_notify(WPA * wpa, char const * message);
 
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...);
 
@@ -225,6 +231,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
+	wpa->connected = FALSE;
+	wpa->associated = FALSE;
 	/* widgets */
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
@@ -296,6 +304,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	GtkIconTheme * icontheme;
 	GdkPixbuf * pixbuf;
 #endif
+	char buf[80];
 
 	if(connected == FALSE && network == NULL)
 	{
@@ -311,6 +320,14 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	{
 		/* connected to an interface */
 		icon = "network-offline";
+		if(wpa->connected != connected && wpa->associated != associated
+				&& network != NULL)
+		{
+			snprintf(buf, sizeof(buf),
+					_("Connected to interface %s"),
+					network);
+			_wpa_notify(wpa, buf);
+		}
 		network = (network != NULL) ? network : _("Connecting...");
 	}
 	else if(associated == FALSE)
@@ -322,8 +339,17 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		network = (network != NULL) ? network :  _("Scanning...");
 	}
 	else
+	{
 		/* connected and associated */
 		icon = "network-idle";
+		if(wpa->connected != connected && wpa->associated != associated
+				&& network != NULL)
+		{
+			snprintf(buf, sizeof(buf), _("Connected to network %s"),
+					network);
+			_wpa_notify(wpa, buf);
+		}
+	}
 #if GTK_CHECK_VERSION(2, 6, 0)
 	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), icon,
 			wpa->helper->icon_size);
@@ -345,6 +371,8 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 #ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), network);
 #endif
+	wpa->connected = connected;
+	wpa->associated = associated;
 }
 
 
@@ -463,6 +491,33 @@ static void _wpa_disconnect(WPA * wpa)
 		_wpa_queue(wpa, channel, WC_ENABLE_NETWORK, i);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 	_wpa_rescan(wpa);
+}
+
+
+/* wpa_notify */
+static void _wpa_notify(WPA * wpa, char const * message)
+{
+	char const * p;
+	char * argv[] = { "panel-message", "-I", "--", NULL, NULL };
+	GError * error = NULL;
+
+	/* check if notifications are enabled */
+	if((p = wpa->helper->config_get(wpa->helper->panel, "wpa_supplicant",
+					"notify")) == NULL
+			|| strtol(p, NULL, 10) != 1)
+		return;
+	if((argv[3] = strdup(message)) == NULL)
+	{
+		wpa->helper->error(NULL, strerror(errno), 1);
+		return;
+	}
+	if(g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL,
+				NULL, &error) == FALSE)
+	{
+		wpa->helper->error(NULL, error->message, 1);
+		g_error_free(error);
+	}
+	free(argv[3]);
 }
 
 
@@ -598,6 +653,8 @@ static int _wpa_start(WPA * wpa)
 {
 	if(wpa->source != 0)
 		g_source_remove(wpa->source);
+	wpa->connected = FALSE;
+	wpa->associated = FALSE;
 	/* reconnect to the daemon */
 	wpa->source = g_idle_add(_start_timeout, wpa);
 	return 0;
@@ -751,6 +808,8 @@ static void _wpa_stop(WPA * wpa)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
+	wpa->connected = FALSE;
+	wpa->associated = FALSE;
 	/* report the status */
 	_wpa_set_status(wpa, FALSE, FALSE, _("Unavailable"));
 	if(wpa->password != NULL)
