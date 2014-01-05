@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <locale.h>
 #include <libintl.h>
 #include <Desktop.h>
@@ -46,7 +47,7 @@
 
 /* private */
 /* prototypes */
-static int _message(unsigned int timeout, GtkMessageType type,
+static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message);
 
 /* callbacks */
@@ -58,11 +59,10 @@ static int _usage(void);
 
 /* functions */
 /* message */
-static int _message(unsigned int timeout, GtkMessageType type,
+static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message)
 {
 	PangoFontDescription * bold;
-	char const * stock;
 	GtkWidget * plug;
 	GtkWidget * hbox;
 	GtkWidget * vbox;
@@ -72,30 +72,6 @@ static int _message(unsigned int timeout, GtkMessageType type,
 
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
-	switch(type)
-	{
-		case GTK_MESSAGE_ERROR:
-			stock = GTK_STOCK_DIALOG_ERROR;
-			if(title == NULL)
-				title = _("Error");
-			break;
-		case GTK_MESSAGE_QUESTION:
-			stock = GTK_STOCK_DIALOG_QUESTION;
-			if(title == NULL)
-				title = _("Question");
-			break;
-		case GTK_MESSAGE_WARNING:
-			stock = GTK_STOCK_DIALOG_WARNING;
-			if(title == NULL)
-				title = _("Warning");
-			break;
-		case GTK_MESSAGE_INFO:
-		default:
-			stock = GTK_STOCK_DIALOG_INFO;
-			if(title == NULL)
-				title = _("Information");
-			break;
-	}
 	plug = gtk_plug_new(0);
 	gtk_container_set_border_width(GTK_CONTAINER(plug), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -104,7 +80,11 @@ static int _message(unsigned int timeout, GtkMessageType type,
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	/* icon */
-	widget = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_DIALOG);
+	if(strncmp(stock, "stock_", 6) == 0)
+		widget = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_DIALOG);
+	else
+		widget = gtk_image_new_from_icon_name(stock,
+				GTK_ICON_SIZE_DIALOG);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 	/* title */
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -162,8 +142,8 @@ static int _error(char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s [-EIQW][-T title][-t timeout] message\n"),
-			PROGNAME);
+	fprintf(stderr, _("Usage: %s [-EIQW][-T title][-t timeout] message\n"
+"       %s [-N name][-T title][-t timeout] message\n"), PROGNAME, PROGNAME);
 	return 1;
 }
 
@@ -173,9 +153,9 @@ static int _usage(void)
 /* main */
 int main(int argc, char * argv[])
 {
-	GtkMessageType type = GTK_MESSAGE_INFO;
 	unsigned int timeout = 3;
-	char const * title = NULL;
+	char const * stock = GTK_STOCK_DIALOG_INFO;
+	char const * title = _("Information");
 	int o;
 	char * p;
 
@@ -184,23 +164,30 @@ int main(int argc, char * argv[])
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
-	while((o = getopt(argc, argv, "EIQT:Wt:")) != -1)
+	while((o = getopt(argc, argv, "EIN:QT:Wt:")) != -1)
 		switch(o)
 		{
 			case 'E':
-				type = GTK_MESSAGE_ERROR;
+				stock = GTK_STOCK_DIALOG_ERROR;
+				title = _("Error");
 				break;
 			case 'I':
-				type = GTK_MESSAGE_INFO;
+				stock = GTK_STOCK_DIALOG_INFO;
+				title = _("Information");
+				break;
+			case 'N':
+				stock = optarg;
 				break;
 			case 'Q':
-				type = GTK_MESSAGE_QUESTION;
+				stock = GTK_STOCK_DIALOG_QUESTION;
+				title = _("Question");
 				break;
 			case 'T':
 				title = optarg;
 				break;
 			case 'W':
-				type = GTK_MESSAGE_WARNING;
+				stock = GTK_STOCK_DIALOG_WARNING;
+				title = _("Warning");
 				break;
 			case 't':
 				timeout = strtoul(optarg, &p, 10);
@@ -212,5 +199,5 @@ int main(int argc, char * argv[])
 		}
 	if(argc - optind != 1)
 		return _usage();
-	return (_message(timeout, type, title, argv[optind]) == 0) ? 0 : 2;
+	return (_message(timeout, stock, title, argv[optind]) == 0) ? 0 : 2;
 }
