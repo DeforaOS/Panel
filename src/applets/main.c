@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -492,12 +492,13 @@ static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
 	size_t len;
 	char * p;
 
-	/* FIXME fallback to "$HOME/.local/share" if not set */
+	/* use $XDG_DATA_HOME if set and not empty */
 	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
 	{
 		_xdg_dirs_path(main, callback, path);
 		return;
 	}
+	/* fallback to "$HOME/.local/share" */
 	if((homedir = getenv("HOME")) == NULL)
 		homedir = g_get_home_dir();
 	len = strlen(homedir) + 1 + sizeof(fallback);
