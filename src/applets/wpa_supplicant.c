@@ -138,9 +138,11 @@ typedef struct _PanelApplet
 	guint source;
 	WPAChannel channel[2];
 
+	/* configuration */
 	WPANetwork * networks;
 	size_t networks_cnt;
 	ssize_t networks_cur;
+	gboolean autosave;
 
 	/* status */
 	gboolean connected;
@@ -222,6 +224,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	WPA * wpa;
 	GtkWidget * hbox;
 	PangoFontDescription * bold;
+	char const * p;
 
 	if((wpa = object_new(sizeof(*wpa))) == NULL)
 		return NULL;
@@ -232,6 +235,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
+	p = helper->config_get(helper->panel, "wpa_supplicant", "autosave");
+	wpa->autosave = (p != NULL && strtol(p, NULL, 10) != 0) ? TRUE : FALSE;
 	wpa->connected = FALSE;
 	wpa->associated = FALSE;
 	/* widgets */
@@ -389,6 +394,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 /* wpa_ask_password */
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 {
+	WPAChannel * channel = &wpa->channel[0];
 	GtkWidget * dialog;
 	GtkWidget * vbox;
 	GtkWidget * hbox;
@@ -438,9 +444,13 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 	if(gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_OK
 			&& (password = gtk_entry_get_text(GTK_ENTRY(entry)))
 			!= NULL)
+	{
 		/* FIXME the network may have changed in the meantime */
-		_wpa_queue(wpa, &wpa->channel[0], WC_SET_PASSWORD, network->id,
+		_wpa_queue(wpa, channel, WC_SET_PASSWORD, network->id,
 				password);
+		if(wpa->autosave)
+			_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
+	}
 	else
 		/* enable every network again */
 		for(i = 0; i < wpa->networks_cnt; i++)
@@ -1280,6 +1290,8 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		/* required to be able to connect to open or WEP networks */
 		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt",
 				"NONE");
+	if(wpa->autosave)
+		_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 	/* XXX make this optional */
 	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
