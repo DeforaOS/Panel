@@ -67,6 +67,8 @@ static char const * _helper_config_get(Panel * panel, char const * section,
 
 /* callbacks */
 static gboolean _wifibrowser_on_closex(gpointer data);
+static void _wifibrowser_on_enabled_toggled(GtkCellRenderer * renderer,
+		gchar * path, gpointer data);
 static void _wifibrowser_on_response(GtkWidget * widget, gint arg1,
 		gpointer data);
 static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
@@ -137,6 +139,15 @@ static int _wifibrowser(char const * configfile, char const * interface)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_tree_view_set_tooltip_column(GTK_TREE_VIEW(view), WSR_TOOLTIP);
 #endif
+	/* auto-connect */
+	renderer = gtk_cell_renderer_toggle_new();
+	column = gtk_tree_view_column_new_with_attributes("", renderer,
+			"visible", WSR_CAN_ENABLE, "active", WSR_ENABLED,
+			"activatable", WSR_CAN_ENABLE, NULL);
+	gtk_tree_view_column_set_sort_column_id(column, WSR_ENABLED);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
+	g_signal_connect(renderer, "toggled", G_CALLBACK(
+				_wifibrowser_on_enabled_toggled), wpa);
 	/* signal level */
 	renderer = gtk_cell_renderer_pixbuf_new();
 	column = gtk_tree_view_column_new_with_attributes("", renderer,
@@ -211,6 +222,29 @@ static gboolean _wifibrowser_on_closex(gpointer data)
 	gtk_widget_hide(wpa->widget);
 	gtk_main_quit();
 	return FALSE;
+}
+
+
+/* wifibrowser_on_enabled_toggled */
+static void _wifibrowser_on_enabled_toggled(GtkCellRenderer * renderer,
+		gchar * path, gpointer data)
+{
+	WPA * wpa = data;
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	GtkTreePath * p;
+	GtkTreeIter iter;
+	gboolean enabled;
+
+	if((p = gtk_tree_path_new_from_string(path)) == NULL)
+		return;
+	if(gtk_tree_model_get_iter(model, &iter, p) == TRUE)
+	{
+		gtk_tree_model_get(model, &iter, WSR_ENABLED, &enabled, -1);
+		/* FIXME really implement (add/enable/disable the network) */
+		gtk_tree_store_set(wpa->store, &iter, WSR_ENABLED,
+				(enabled != FALSE) ? FALSE : TRUE, -1);
+	}
+	gtk_tree_path_free(p);
 }
 
 

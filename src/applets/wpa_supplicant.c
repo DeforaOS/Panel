@@ -112,9 +112,11 @@ typedef enum _WPAScanResult
 	WSR_FLAGS,
 	WSR_SSID,
 	WSR_SSID_DISPLAY,
-	WSR_TOOLTIP
+	WSR_TOOLTIP,
+	WSR_ENABLED,
+	WSR_CAN_ENABLE
 } WPAScanResult;
-#define WSR_LAST WSR_TOOLTIP
+#define WSR_LAST WSR_CAN_ENABLE
 #define WSR_COUNT (WSR_LAST + 1)
 
 typedef enum _WPAScanResultFlag
@@ -254,7 +256,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->store = gtk_tree_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
 			GDK_TYPE_PIXBUF, G_TYPE_STRING, G_TYPE_UINT,
 			G_TYPE_UINT, G_TYPE_UINT, G_TYPE_STRING, G_TYPE_STRING,
-			G_TYPE_STRING);
+			G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN);
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
@@ -1637,18 +1639,21 @@ static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
 	if(valid != TRUE)
 	{
 		gtk_tree_store_append(wpa->store, iter, NULL);
+		/* FIXME determine the true value for WSR_ENABLED */
 		gtk_tree_store_set(wpa->store, iter, WSR_UPDATED, TRUE,
 				WSR_LEVEL, level, WSR_FREQUENCY, frequency,
 				WSR_FLAGS, flags, WSR_SSID, ssid,
 				WSR_SSID_DISPLAY, ssid, WSR_ICON, pixbuf,
-				WSR_TOOLTIP, tooltip, -1);
+				WSR_TOOLTIP, tooltip, WSR_ENABLED, FALSE,
+				WSR_CAN_ENABLE, TRUE, -1);
 	}
 	else
 		gtk_tree_store_set(wpa->store, iter, WSR_UPDATED, TRUE,
 				/* refresh the level and icon if relevant */
 				(level > l) ? WSR_LEVEL : -1, level,
 				WSR_FREQUENCY, frequency, WSR_ICON, pixbuf,
-				WSR_TOOLTIP, tooltip, -1);
+				WSR_TOOLTIP, tooltip, WSR_ENABLED, FALSE,
+				WSR_CAN_ENABLE, FALSE, -1);
 	/* look for the BSSID in the network */
 	parent = *iter;
 	for(valid = gtk_tree_model_iter_children(model, iter, &parent);
