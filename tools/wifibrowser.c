@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2013-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -283,13 +283,14 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 static gboolean _wifibrowser_on_view_popup_menu(GtkWidget * widget,
 		gpointer data)
 {
+	WPA * wpa = data;
 	GdkEventButton event;
 
 	memset(&event, 0, sizeof(event));
 	event.type = GDK_BUTTON_PRESS;
 	event.button = 0;
 	event.time = gtk_get_current_event_time();
-	return _wifibrowser_on_view_button_press(widget, &event, data);
+	return _wifibrowser_on_view_button_press(widget, &event, wpa);
 }
 
 
