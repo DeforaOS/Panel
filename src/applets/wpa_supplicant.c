@@ -1202,6 +1202,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 	gsize cnt;
 	GError * error = NULL;
 	GIOStatus status;
+	char const * p;
 
 	if(condition != G_IO_IN)
 		return FALSE; /* should not happen */
@@ -1234,7 +1235,11 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			if(cnt == 5 && strncmp(buf, "FAIL\n", cnt) == 0)
 			{
 				/* FIXME improve the error message */
-				wpa->helper->error(NULL, _("Unknown error"), 0);
+				p = _("Unknown error");
+				if(entry->command == WC_SAVE_CONFIGURATION)
+					p = _("Could not save the"
+							" configuration");
+				wpa->helper->error(NULL, p, 0);
 				break;
 			}
 			if(entry->command == WC_ADD_NETWORK)
