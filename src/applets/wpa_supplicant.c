@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,6 +79,7 @@ typedef struct _WPAEntry
 	size_t buf_cnt;
 	/* for WC_ADD_NETWORK */
 	char * ssid;
+	uint32_t flags;
 } WPAEntry;
 
 typedef struct _WPAChannel
@@ -169,7 +170,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 /* useful */
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
-static void _wpa_connect(WPA * wpa, char const * ssid);
+static void _wpa_connect(WPA * wpa, char const * ssid, uint32_t flags);
 static void _wpa_connect_network(WPA * wpa, WPANetwork * network);
 static void _wpa_disconnect(WPA * wpa);
 static void _wpa_rescan(WPA * wpa);
@@ -451,7 +452,7 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 
 
 /* wpa_connect */
-static void _wpa_connect(WPA * wpa, char const * ssid)
+static void _wpa_connect(WPA * wpa, char const * ssid, uint32_t flags)
 {
 	WPAChannel * channel = &wpa->channel[0];
 	size_t i;
@@ -465,7 +466,7 @@ static void _wpa_connect(WPA * wpa, char const * ssid)
 		_wpa_connect_network(wpa, &wpa->networks[i]);
 	else
 		/* add (and then select) this network */
-		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid);
+		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid, flags);
 }
 
 
@@ -529,6 +530,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	char * cmd = NULL;
 	WPAEntry * p;
 	char const * ssid = NULL;
+	uint32_t flags = 0;
 	char const * s;
 	char const * t;
 
@@ -543,6 +545,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 		case WC_ADD_NETWORK:
 			cmd = g_strdup_printf("ADD_NETWORK");
 			ssid = va_arg(ap, char const *);
+			flags = va_arg(ap, uint32_t);
 			break;
 		case WC_ATTACH:
 			cmd = strdup("ATTACH");
@@ -616,6 +619,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	p->buf_cnt = strlen(cmd);
 	/* XXX may fail */
 	p->ssid = (ssid != NULL) ? strdup(ssid) : NULL;
+	p->flags = flags;
 	if(channel->queue_cnt++ == 0)
 		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
@@ -997,11 +1001,12 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	guint frequency;
 	guint level;
 	guint flags;
-	gchar * ssid;
 	gchar * dssid;
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gchar * tooltip;
 #endif
+	GtkTreePath * path;
+	GtkTreeRowReference * row;
 
 	if((valid = gtk_tree_model_get_iter_first(model, &iter)) == FALSE)
 		return;
@@ -1011,8 +1016,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	{
 		gtk_tree_model_get(model, &iter, WSR_ICON, &pixbuf,
 				WSR_FREQUENCY, &frequency, WSR_LEVEL, &level,
-				WSR_FLAGS, &flags, WSR_SSID, &ssid,
-				WSR_SSID_DISPLAY, &dssid,
+				WSR_FLAGS, &flags, WSR_SSID_DISPLAY, &dssid,
 #if GTK_CHECK_VERSION(2, 12, 0)
 				WSR_TOOLTIP, &tooltip,
 #endif
@@ -1022,8 +1026,10 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		gtk_widget_set_tooltip_text(menuitem, tooltip);
 		g_free(tooltip);
 #endif
-		if(ssid != NULL)
-			g_object_set_data(G_OBJECT(menuitem), "ssid", ssid);
+		path = gtk_tree_model_get_path(model, &iter);
+		row = gtk_tree_row_reference_new(model, path);
+		gtk_tree_path_free(path);
+		g_object_set_data(G_OBJECT(menuitem), "row", row);
 		image = gtk_image_new_from_pixbuf(pixbuf);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
 				image);
@@ -1032,7 +1038,7 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 		g_free(dssid);
 #if 0 /* XXX memory leak (for g_object_set_data() above) */
-		g_free(ssid);
+		gtk_tree_row_reference_free(treeref);
 #endif
 	}
 }
@@ -1058,17 +1064,30 @@ static void _clicked_on_disconnect(gpointer data)
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 {
 	WPA * wpa = data;
+	GtkTreeRowReference * row;
+	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
+	GtkTreePath * path;
+	GtkTreeIter iter;
 	gchar * ssid;
+	guint f;
 
-	if((ssid = g_object_get_data(G_OBJECT(widget), "ssid")) == NULL)
+	if((row = g_object_get_data(G_OBJECT(widget), "row")) == NULL)
 		/* FIXME implement */
 		return;
+	if((path = gtk_tree_row_reference_get_path(row)) == NULL
+			|| gtk_tree_model_get_iter(model, &iter, path) != TRUE)
+	{
+		gtk_tree_row_reference_free(row);
+		return;
+	}
+	gtk_tree_model_get(model, &iter, WSR_SSID, &ssid, WSR_FLAGS, &f, -1);
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
 #endif
-	_wpa_connect(wpa, ssid);
-#if 1 /* XXX partly remediate memory leak (see above) */
+	_wpa_connect(wpa, ssid, f);
 	g_free(ssid);
+#if 1 /* XXX partly remediate memory leak (see above) */
+	gtk_tree_row_reference_free(row);
 #endif
 }
 
@@ -1146,7 +1165,7 @@ static gboolean _on_timeout(gpointer data)
 
 /* on_watch_can_read */
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
-		size_t cnt, char const * ssid);
+		size_t cnt, char const * ssid, uint32_t flags);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
@@ -1210,7 +1229,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			}
 			if(entry->command == WC_ADD_NETWORK)
 				_read_add_network(wpa, channel, buf, cnt,
-						entry->ssid);
+						entry->ssid, entry->flags);
 			else if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
@@ -1240,7 +1259,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 }
 
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
-		size_t cnt, char const * ssid)
+		size_t cnt, char const * ssid, uint32_t flags)
 {
 	unsigned int id;
 
@@ -1257,6 +1276,10 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
 	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
+	if((flags & (WSRF_WPA | WSRF_WPA2)) == 0)
+		/* required to be able to connect to open or WEP networks */
+		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt",
+				"NONE");
 	/* XXX make this optional */
 	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
 	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
