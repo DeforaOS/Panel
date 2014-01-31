@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,6 +109,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	}
 	cpufreq->helper = helper;
 	desc = pango_font_description_new();
+	pango_font_description_set_family(desc, "Monospace");
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	cpufreq->hbox = gtk_hbox_new(FALSE, 4);
 	image = gtk_image_new_from_icon_name("gnome-monitor",
@@ -162,7 +163,7 @@ static gboolean _on_timeout(gpointer data)
 
 	if(sysctlbyname(cpufreq->name, &freq, &freqsize, NULL, 0) < 0)
 		return helper->error(NULL, cpufreq->name, TRUE);
-	snprintf(buf, sizeof(buf), "%u", (unsigned int)freq);
+	snprintf(buf, sizeof(buf), "%4u", (unsigned int)freq);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
 # if GTK_CHECK_VERSION(2, 12, 0)
 	snprintf(buf, sizeof(buf), "%s%u %s", _("CPU frequency: "),
