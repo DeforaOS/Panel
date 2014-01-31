@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2014 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -26,7 +26,7 @@
 
 #variables
 PREFIX="/usr/local"
-. "../config.sh"
+[ -f "../config.sh" ] && . "../config.sh"
 #executables
 DEBUG="_debug"
 INSTALL="install -m 0644"
@@ -41,6 +41,14 @@ _debug()
 {
 	echo "$@" 1>&2
 	"$@"
+}
+
+
+#error
+_error()
+{
+	echo "docbook.sh: $@" 1>&2
+	return 2
 }
 
 
@@ -84,6 +92,12 @@ if [ $# -eq 0 ]; then
 	exit $?
 fi
 
+#check the variables
+if [ -z "$PACKAGE" ]; then
+	_error "The PACKAGE variable needs to be set"
+	exit $?
+fi
+
 [ -z "$DATADIR" ] && DATADIR="$PREFIX/share"
 [ -z "$MANDIR" ] && MANDIR="$DATADIR/man"
 
@@ -123,7 +137,7 @@ while [ $# -gt 0 ]; do
 	#install
 	if [ "$install" -eq 1 ]; then
 		$DEBUG $MKDIR -- "$instdir"			|| exit 2
-		$DEBUG $INSTALL -- "$target" "$instdir/$target"	|| exit 2
+		$DEBUG $INSTALL "$target" "$instdir/$target"	|| exit 2
 		continue
 	fi
 
