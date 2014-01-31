@@ -149,8 +149,11 @@ typedef struct _PanelApplet
 	/* status */
 	gboolean connected;
 	gboolean associated;
+	guint level;
+	uint32_t flags;
 
 	/* widgets */
+	GtkIconTheme * icontheme;
 	GtkWidget * widget;
 	GtkWidget * image;
 	gboolean blink;
@@ -168,6 +171,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _wpa_destroy(WPA * wpa);
 
 /* accessors */
+static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
+		uint32_t flags);
 static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		char const * network);
 
@@ -241,7 +246,10 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->autosave = (p != NULL && strtol(p, NULL, 10) != 0) ? TRUE : FALSE;
 	wpa->connected = FALSE;
 	wpa->associated = FALSE;
+	wpa->level = 0;
+	wpa->flags = 0;
 	/* widgets */
+	wpa->icontheme = gtk_icon_theme_get_default();
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
 	hbox = gtk_hbox_new(FALSE, 4);
@@ -300,6 +308,58 @@ static void _wpa_destroy(WPA * wpa)
 }
 
 
+/* accessors */
+/* wpa_get_icon */
+static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
+		uint32_t flags)
+{
+	GdkPixbuf * ret;
+	char const * name;
+#if GTK_CHECK_VERSION(2, 14, 0)
+	const int f = GTK_ICON_LOOKUP_USE_BUILTIN
+		| GTK_ICON_LOOKUP_FORCE_SIZE;
+#else
+	const int f = GTK_ICON_LOOKUP_USE_BUILTIN;
+#endif
+	GdkPixbuf * pixbuf;
+	char const * emblem = (flags & WSRF_WPA2) ? "security-high"
+		: ((flags & WSRF_WPA) ? "security-medium"
+				: ((flags & WSRF_WEP) ? "security-low" : NULL));
+
+	/* FIXME check if the mapping is right (and use our own icons) */
+	if(flags & WSRF_IBSS)
+		name = "nm-adhoc";
+	else if(level >= 100)
+		name = "phone-signal-100";
+	else if(level >= 75)
+		name = "phone-signal-75";
+	else if(level >= 50)
+		name = "phone-signal-50";
+	else if(level >= 25)
+		name = "phone-signal-25";
+	else
+		name = "phone-signal-00";
+	if((pixbuf = gtk_icon_theme_load_icon(wpa->icontheme, name, size, 0,
+					NULL)) == NULL)
+		return NULL;
+	if((ret = gdk_pixbuf_copy(pixbuf)) == NULL)
+		return pixbuf;
+	g_object_unref(pixbuf);
+	size = min(24, size / 2);
+	if(emblem == NULL)
+		return ret;
+	pixbuf = gtk_icon_theme_load_icon(wpa->icontheme, emblem, size, f,
+			NULL);
+	if(pixbuf != NULL)
+	{
+		gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0, 0, 1.0,
+				1.0, GDK_INTERP_NEAREST, 255);
+		g_object_unref(pixbuf);
+	}
+	return ret;
+}
+
+
 /* wpa_set_status */
 static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		char const * network)
@@ -307,13 +367,11 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	char const * stock = connected
 		? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT;
 	char const * icon;
-#if !GTK_CHECK_VERSION(2, 6, 0)
 	gint size = 16;
-	GtkIconTheme * icontheme;
-	GdkPixbuf * pixbuf;
-#endif
+	GdkPixbuf * pixbuf = NULL;
 	char buf[80];
 
+	gtk_icon_size_lookup(wpa->helper->icon_size, &size, &size);
 	if(connected == FALSE && network == NULL)
 	{
 		/* an error occurred */
@@ -350,6 +408,8 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	{
 		/* connected and associated */
 		icon = "network-idle";
+		/* XXX use real values */
+		pixbuf = _wpa_get_icon(wpa, size, wpa->level, wpa->flags);
 		if(wpa->connected != connected && wpa->associated != associated
 				&& network != NULL)
 		{
@@ -359,13 +419,17 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		}
 	}
 #if GTK_CHECK_VERSION(2, 6, 0)
-	gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), icon,
-			wpa->helper->icon_size);
+	if(pixbuf != NULL)
+	{
+		gtk_image_set_from_pixbuf(GTK_IMAGE(wpa->image), pixbuf);
+		g_object_unref(pixbuf);
+	}
+	else
+		gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), icon,
+				wpa->helper->icon_size);
 #else
-	gtk_icon_size_lookup(wpa->helper->icon_size, &size, &size);
-	icontheme = gtk_icon_theme_get_default();
-	if((pixbuf = gtk_icon_theme_load_icon(icontheme, icon, size, 0, NULL))
-			!= NULL)
+	if(pixbuf != NULL || (pixbuf = gtk_icon_theme_load_icon(wpa->icontheme,
+					icon, size, 0, NULL)) != NULL)
 	{
 		gtk_image_set_from_pixbuf(GTK_IMAGE(wpa->image), pixbuf);
 		g_object_unref(pixbuf);
@@ -1188,8 +1252,6 @@ static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid, char const * ssid, unsigned int level,
 		unsigned int frequency, unsigned int flags, GdkPixbuf * pixbuf,
 		char const * tooltip);
-static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
-		gint size, guint level, uint32_t flags);
 static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
@@ -1388,7 +1450,6 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 {
 	GtkTreeModel * model = GTK_TREE_MODEL(wpa->store);
-	GtkIconTheme * icontheme;
 	gint size = 16;
 	size_t i;
 	size_t j;
@@ -1405,7 +1466,6 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 	char tooltip[80];
 	GtkTreeIter iter;
 
-	icontheme = gtk_icon_theme_get_default();
 	gtk_icon_size_lookup(GTK_ICON_SIZE_MENU, &size, &size);
 	_read_scan_results_reset(wpa, model);
 	for(i = 0; i < cnt; i = j)
@@ -1434,8 +1494,7 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 					flags, ssid);
 #endif
 			f = _read_scan_results_flags(wpa, flags);
-			pixbuf = _read_scan_results_pixbuf(icontheme, size,
-					level, f);
+			pixbuf = _wpa_get_icon(wpa, size, level, f);
 			_wpa_tooltip(tooltip, sizeof(tooltip), frequency, level,
 					f);
 			if(res == 5)
@@ -1668,54 +1727,6 @@ static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
 	}
 	if(valid != TRUE)
 		gtk_tree_store_append(wpa->store, iter, &parent);
-}
-
-static GdkPixbuf * _read_scan_results_pixbuf(GtkIconTheme * icontheme,
-		gint size, guint level, uint32_t flags)
-{
-	GdkPixbuf * ret;
-	char const * name;
-#if GTK_CHECK_VERSION(2, 14, 0)
-	const int f = GTK_ICON_LOOKUP_USE_BUILTIN
-		| GTK_ICON_LOOKUP_FORCE_SIZE;
-#else
-	const int f = GTK_ICON_LOOKUP_USE_BUILTIN;
-#endif
-	GdkPixbuf * pixbuf;
-	char const * emblem = (flags & WSRF_WPA2) ? "security-high"
-		: ((flags & WSRF_WPA) ? "security-medium"
-				: ((flags & WSRF_WEP) ? "security-low" : NULL));
-
-	/* FIXME check if the mapping is right (and use our own icons) */
-	if(flags & WSRF_IBSS)
-		name = "nm-adhoc";
-	else if(level >= 100)
-		name = "phone-signal-100";
-	else if(level >= 75)
-		name = "phone-signal-75";
-	else if(level >= 50)
-		name = "phone-signal-50";
-	else if(level >= 25)
-		name = "phone-signal-25";
-	else
-		name = "phone-signal-00";
-	if((pixbuf = gtk_icon_theme_load_icon(icontheme, name, size, 0, NULL))
-			== NULL)
-		return NULL;
-	if((ret = gdk_pixbuf_copy(pixbuf)) == NULL)
-		return pixbuf;
-	g_object_unref(pixbuf);
-	size = min(24, size / 2);
-	if(emblem == NULL)
-		return ret;
-	pixbuf = gtk_icon_theme_load_icon(icontheme, emblem, size, f, NULL);
-	if(pixbuf != NULL)
-	{
-		gdk_pixbuf_composite(pixbuf, ret, 0, 0, size, size, 0, 0, 1.0,
-				1.0, GDK_INTERP_NEAREST, 255);
-		g_object_unref(pixbuf);
-	}
-	return ret;
 }
 
 static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model)
