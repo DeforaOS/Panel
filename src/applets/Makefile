@@ -1,4 +1,4 @@
-TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so volume.so wpa_supplicant.so
+TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so volume.so wpa_supplicant.so
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -130,6 +130,13 @@ mixer_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 mixer.so: $(mixer_OBJS)
 	$(CCSHARED) -o mixer.so $(mixer_OBJS) $(mixer_LDFLAGS)
+
+mpd_OBJS = mpd.o
+mpd_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+mpd_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+mpd.so: $(mpd_OBJS)
+	$(CCSHARED) -o mpd.so $(mpd_OBJS) $(mpd_LDFLAGS)
 
 pager_OBJS = pager.o
 pager_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
@@ -277,6 +284,9 @@ memory.o: memory.c ../../include/Panel.h
 mixer.o: mixer.c ../../include/Panel.h
 	$(CC) $(mixer_CFLAGS) -c mixer.c
 
+mpd.o: mpd.c ../../include/Panel.h
+	$(CC) $(mpd_CFLAGS) -c mpd.c
+
 pager.o: pager.c ../../include/Panel.h
 	$(CC) $(pager_CFLAGS) -c pager.c
 
@@ -320,7 +330,7 @@ wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
