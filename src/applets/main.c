@@ -118,7 +118,7 @@ static gboolean _on_timeout(gpointer data);
 PanelAppletDefinition applet =
 {
 	"Main menu",
-	"gnome-main-menu",
+	"start-here",
 	NULL,
 	_main_init,
 	_main_destroy,
@@ -148,8 +148,7 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	main->refresh_mti = 0;
 	main->widget = gtk_button_new();
 	hbox = gtk_hbox_new(FALSE, 4);
-	image = gtk_image_new_from_icon_name("gnome-main-menu",
-			helper->icon_size);
+	image = gtk_image_new_from_icon_name("start-here", helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);
 	/* add some text if configured so */
 	if((p = helper->config_get(helper->panel, "main", "text")) != NULL
