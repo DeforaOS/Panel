@@ -1,5 +1,5 @@
 # $Id$
-# Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org>
+# Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org>
 # This file is distributed under the same license as the Panel package.
 # Pierre Pronchery <khorben@defora.org>, 2010.
 #
@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-12-22 18:13+0100\n"
+"POT-Creation-Date: 2014-03-04 02:12+0100\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -25,9 +25,9 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:290
+#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:380
 #: ../src/panel.c:490 ../src/panel.c:495 ../src/run.c:224 ../src/run.c:230
-#: ../tools/message.c:76
+#: ../tools/message.c:172
 msgid "Error"
 msgstr "Erreur"
 
@@ -64,7 +64,7 @@ msgstr "Fermer"
 msgid "CPU:"
 msgstr "CPU :"
 
-#: ../src/applets/cpu.c:112 ../src/applets/cpufreq.c:137
+#: ../src/applets/cpu.c:112 ../src/applets/cpufreq.c:138
 msgid "Unsupported platform"
 msgstr "Plate-forme non supportée"
 
@@ -72,11 +72,11 @@ msgstr "Plate-forme non supportée"
 msgid "No support detected"
 msgstr "Aucun support détecté"
 
-#: ../src/applets/cpufreq.c:128 ../src/applets/cpufreq.c:169
+#: ../src/applets/cpufreq.c:129 ../src/applets/cpufreq.c:170
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:168
+#: ../src/applets/cpufreq.c:169
 msgid "CPU frequency: "
 msgstr "Fréquence CPU : "
 
@@ -84,7 +84,7 @@ msgstr "Fréquence CPU : "
 msgid "Show desktop"
 msgstr "Afficher le bureau"
 
-#: ../src/applets/embed.c:108
+#: ../src/applets/embed.c:115
 msgid "Desktop notifications"
 msgstr "Notifications"
 
@@ -130,7 +130,7 @@ msgstr "logout: Se déconnecter est désactivé"
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: ../src/applets/main.c:167
+#: ../src/applets/main.c:166
 msgid "Main menu"
 msgstr "Menu principal"
 
@@ -254,32 +254,50 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
-#: ../src/applets/wpa_supplicant.c:248
+#: ../src/applets/wpa_supplicant.c:279
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:311
+#: ../src/applets/wpa_supplicant.c:286 ../src/applets/wpa_supplicant.c:894
+msgid "Unavailable"
+msgstr "Indisponible"
+
+#: ../src/applets/wpa_supplicant.c:393
+#, c-format
+msgid "Connected to interface %s"
+msgstr "Connecté à l'interface %s"
+
+#: ../src/applets/wpa_supplicant.c:397
+msgid "Connecting..."
+msgstr "Connexion..."
+
+#: ../src/applets/wpa_supplicant.c:405
+msgid "Scanning..."
+msgstr "Recherche..."
+
+#: ../src/applets/wpa_supplicant.c:416
+#, c-format
+msgid "Connected to network %s"
+msgstr "Connecté au réseau %s"
+
+#: ../src/applets/wpa_supplicant.c:477
 msgid "Password required"
 msgstr "Mot de passe requis"
 
-#: ../src/applets/wpa_supplicant.c:314
+#: ../src/applets/wpa_supplicant.c:480
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr "Le réseau \"%s\" est protégé par une clé."
 
-#: ../src/applets/wpa_supplicant.c:329
+#: ../src/applets/wpa_supplicant.c:495
 msgid "Wireless key"
 msgstr "Clé du réseau"
 
-#: ../src/applets/wpa_supplicant.c:336
+#: ../src/applets/wpa_supplicant.c:502
 msgid "Key: "
 msgstr "Clé : "
 
-#: ../src/applets/wpa_supplicant.c:644
-msgid "Unavailable"
-msgstr "Indisponible"
-
-#: ../src/applets/wpa_supplicant.c:694
+#: ../src/applets/wpa_supplicant.c:943
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -288,7 +306,7 @@ msgstr ""
 "Fréquence : %u\n"
 "Niveau : %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:695
+#: ../src/applets/wpa_supplicant.c:944
 msgid ""
 "\n"
 "Security: "
@@ -296,33 +314,42 @@ msgstr ""
 "\n"
 "Sécurité : "
 
-#: ../src/applets/wpa_supplicant.c:724 ../tools/wifibrowser.c:111
+#: ../src/applets/wpa_supplicant.c:990 ../tools/wifibrowser.c:117
 msgid "Reassociate"
 msgstr "Réassocier"
 
-#: ../src/applets/wpa_supplicant.c:733 ../tools/wifibrowser.c:112
+#: ../src/applets/wpa_supplicant.c:1008 ../tools/wifibrowser.c:118
 msgid "Rescan"
 msgstr "Rechercher"
 
-#: ../src/applets/wpa_supplicant.c:740
+#: ../src/applets/wpa_supplicant.c:1015
 msgid "Save configuration"
 msgstr "Sauvegarder la configuration"
 
-#: ../src/applets/wpa_supplicant.c:763
+#: ../src/applets/wpa_supplicant.c:1035
 msgid "Network list"
 msgstr "Liste des réseaux"
 
-#: ../src/applets/wpa_supplicant.c:768
+#: ../src/applets/wpa_supplicant.c:1040
 msgid "Any network"
 msgstr "Tous les réseaux"
 
-#: ../src/applets/wpa_supplicant.c:1013
+#: ../src/applets/wpa_supplicant.c:1127
+msgid "Wireless is disabled"
+msgstr "Réseau sans fil désactivé"
+
+#: ../src/applets/wpa_supplicant.c:1302
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1467
-msgid "Scanning..."
-msgstr "Recherche..."
+#: ../src/applets/wpa_supplicant.c:1304
+msgid "Could not save the configuration"
+msgstr "Impossible de sauvegarder la configuration"
+
+#: ../src/applets/wpa_supplicant.c:1518
+#, c-format
+msgid "Hidden (%s)"
+msgstr "Masqué (%s)"
 
 #: ../src/helper.c:109
 msgid "Panel for the DeforaOS desktop"
@@ -343,7 +370,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:329
+#: ../src/helper.c:337
 msgid ""
 "This will shutdown your device, therefore closing any application currently "
 "opened and losing any unsaved data.\n"
@@ -354,7 +381,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:334
+#: ../src/helper.c:342
 msgid ""
 "This will shutdown your computer, therefore closing any application "
 "currently opened and losing any unsaved data.\n"
@@ -365,11 +392,11 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:349 ../src/helper.c:361 ../src/helper.c:370
+#: ../src/helper.c:357 ../src/helper.c:369 ../src/helper.c:378
 msgid "Shutdown"
 msgstr "Arrêter"
 
-#: ../src/helper.c:360
+#: ../src/helper.c:368
 msgid "Restart"
 msgstr "Redémarrer"
 
@@ -518,28 +545,32 @@ msgstr "Usage: %s commande [arguments...]\n"
 msgid "Applets available:"
 msgstr "Applets disponibles :"
 
-#: ../tools/message.c:81
-msgid "Question"
-msgstr "Question"
+#: ../tools/message.c:145
+#, c-format
+msgid ""
+"Usage: %s [-EIQW][-T title][-t timeout] message\n"
+"       %s [-N name][-T title][-t timeout] message\n"
+msgstr ""
+"Usage: %s [-EIQW][-T titre][-t durée] message\n"
+"       %s [-N nom][-T titre][-t durée] message\n"
 
-#: ../tools/message.c:86
-msgid "Warning"
-msgstr "Attention"
-
-#: ../tools/message.c:92
+#: ../tools/message.c:158 ../tools/message.c:176
 msgid "Information"
 msgstr "Information"
 
-#: ../tools/message.c:144
-#, c-format
-msgid "Usage: %s [-EIQW][-T title][-t timeout] message\n"
-msgstr "Usage: %s [-EIQW][-T titre][-t durée] message\n"
+#: ../tools/message.c:183
+msgid "Question"
+msgstr "Question"
 
-#: ../tools/notify.c:75
+#: ../tools/message.c:190
+msgid "Warning"
+msgstr "Attention"
+
+#: ../tools/notify.c:72
 msgid "Notification"
 msgstr "Notification"
 
-#: ../tools/notify.c:104
+#: ../tools/notify.c:101
 #, c-format
 msgid ""
 "Usage: %s [-L|-S|-X|-x][-t timeout] applet...\n"
@@ -560,35 +591,19 @@ msgstr ""
 "  -t\tDurée d'affichage (0 : illimité)\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/test.c:68
-msgid "Applet tester"
-msgstr "Testeur d'applets"
-
-#: ../tools/test.c:82
-#, c-format
-msgid ""
-"Usage: %s [-L|-S|-X|-x] applet...\n"
-"       %s -l\n"
-"  -l\tLists the plug-ins available\n"
-msgstr ""
-"Usage: %s [-L|-S|-X|-x] applet...\n"
-"       %s -l\n"
-" -l\n"
-"  -l\tLister les applets disponibles\n"
-
-#: ../tools/wifibrowser.c:110
+#: ../tools/wifibrowser.c:116
 msgid "Wireless browser"
 msgstr "Réseaux sans fil"
 
-#: ../tools/wifibrowser.c:144
+#: ../tools/wifibrowser.c:159
 msgid "SSID"
 msgstr "SSID"
 
-#: ../tools/wifibrowser.c:151
+#: ../tools/wifibrowser.c:166
 msgid "BSSID"
 msgstr "BSSID"
 
-#: ../tools/wifibrowser.c:179
+#: ../tools/wifibrowser.c:198
 #, c-format
 msgid ""
 "Usage: %s [-c filename][-i interface]\n"
