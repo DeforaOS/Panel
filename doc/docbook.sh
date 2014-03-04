@@ -29,6 +29,7 @@ PREFIX="/usr/local"
 [ -f "../config.sh" ] && . "../config.sh"
 #executables
 DEBUG="_debug"
+FOP="fop"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
@@ -41,6 +42,45 @@ _debug()
 {
 	echo "$@" 1>&2
 	"$@"
+}
+
+
+#docbook
+_docbook()
+{
+	target="$1"
+
+	source="${target%.*}.xml"
+	ext="${target##*.}"
+	ext="${ext##.}"
+	case "$ext" in
+		html)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
+			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
+			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			;;
+		pdf)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/fo/docbook.xsl"
+			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
+			$DEBUG $XSLTPROC -o "${target%.*}.fo" "$XSL" "$source" &&
+			$DEBUG $FOP -fo "${target%.*}.fo" -pdf "$target"
+			$RM -- "${target%.*}.fo"
+			;;
+		1|2|3|4|5|6|7|8|9)
+			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
+			$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
+			;;
+		*)
+			echo "$0: $target: Unknown type" 1>&2
+			return 2
+			;;
+	esac
+
+	if [ $? -ne 0 ]; then
+		echo "$0: $target: Could not create page" 1>&2
+		$RM -- "$target"
+		return 2
+	fi
 }
 
 
@@ -78,7 +118,7 @@ while getopts "ciuP:" name; do
 			uninstall=1
 			;;
 		P)
-			PREFIX="$2"
+			PREFIX="$OPTARG"
 			;;
 		?)
 			_usage
@@ -103,20 +143,16 @@ fi
 
 while [ $# -gt 0 ]; do
 	target="$1"
-	source="${target%.*}.xml"
 	shift
 
 	#determine the type
 	ext="${target##*.}"
 	ext="${ext##.}"
 	case "$ext" in
-		html)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl"
-			[ -f "${target%.*}.xsl" ] && XSL="${target%.*}.xsl"
+		html|pdf)
 			instdir="$DATADIR/doc/$ext/$PACKAGE"
 			;;
 		1|2|3|4|5|6|7|8|9)
-			XSL="http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl"
 			instdir="$MANDIR/man$ext"
 			;;
 		*)
@@ -142,11 +178,6 @@ while [ $# -gt 0 ]; do
 	fi
 
 	#create
-	$DEBUG $XSLTPROC -o "$target" "$XSL" "$source"
 	#XXX ignore errors
-	if [ $? -ne 0 ]; then
-		echo "$0: $target: Could not create page" 1>&2
-		$RM -- "$target"
-		break
-	fi
+	_docbook "$target"					|| break
 done
