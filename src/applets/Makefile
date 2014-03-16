@@ -1,4 +1,4 @@
-TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so volume.so wpa_supplicant.so
+TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so volume.so wpa_supplicant.so
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -137,6 +137,13 @@ mpd_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 mpd.so: $(mpd_OBJS)
 	$(CCSHARED) -o mpd.so $(mpd_OBJS) $(mpd_LDFLAGS)
+
+network_OBJS = network.o
+network_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+network_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+network.so: $(network_OBJS)
+	$(CCSHARED) -o network.so $(network_OBJS) $(network_LDFLAGS)
 
 pager_OBJS = pager.o
 pager_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
@@ -287,6 +294,9 @@ mixer.o: mixer.c ../../include/Panel.h
 mpd.o: mpd.c ../../include/Panel.h
 	$(CC) $(mpd_CFLAGS) -c mpd.c
 
+network.o: network.c ../../include/Panel.h
+	$(CC) $(network_CFLAGS) -c network.c
+
 pager.o: pager.c ../../include/Panel.h
 	$(CC) $(pager_CFLAGS) -c pager.c
 
@@ -330,7 +340,7 @@ wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -368,6 +378,8 @@ install: $(TARGETS)
 	$(INSTALL) -m 0644 memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 mixer.so $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
+	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
+	$(INSTALL) -m 0644 network.so $(DESTDIR)$(LIBDIR)/Panel/applets/network.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 pager.so $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
@@ -412,6 +424,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
+	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/network.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/player.so

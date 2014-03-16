@@ -101,6 +101,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/memory.c \
 		$(PACKAGE)-$(VERSION)/src/applets/mixer.c \
 		$(PACKAGE)-$(VERSION)/src/applets/mpd.c \
+		$(PACKAGE)-$(VERSION)/src/applets/network.c \
 		$(PACKAGE)-$(VERSION)/src/applets/pager.c \
 		$(PACKAGE)-$(VERSION)/src/applets/phone.c \
 		$(PACKAGE)-$(VERSION)/src/applets/player.c \
