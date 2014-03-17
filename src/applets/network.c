@@ -25,8 +25,8 @@
 #include <string.h>
 #ifdef __NetBSD__
 # include <ifaddrs.h>
-# include <net/if.h>
 #endif
+#include <net/if.h>
 #include <System.h>
 #include "Panel.h"
 
@@ -135,8 +135,23 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 
 static void _network_refresh(Network * network)
 {
+	char const * p;
+#ifdef __NetBSD__
 	struct ifaddrs * ifa;
+#endif
 
+	if((p = network->helper->config_get(network->helper->panel, "network",
+					"interface")) != NULL)
+	{
+		/* FIXME obtain some flags if possible */
+#ifdef IFF_UP
+		_refresh_interface(network, p, IFF_UP);
+#else
+		_refresh_interface(network, p, 0);
+#endif
+		return;
+	}
+#ifdef __NetBSD__
 	if(getifaddrs(&ifa) != 0)
 		return;
 	for(; ifa != NULL; ifa = ifa->ifa_next)
@@ -149,6 +164,7 @@ static void _network_refresh(Network * network)
 	}
 	/* FIXME also remove/disable the interfaces not listed */
 	freeifaddrs(ifa);
+#endif
 }
 
 static void _refresh_interface(Network * network, char const * name,
