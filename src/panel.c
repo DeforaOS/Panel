@@ -169,6 +169,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->top_helper.panel = panel;
 	panel->top_helper.type = PANEL_APPLET_TYPE_NORMAL;
 	panel->top_helper.icon_size = GTK_ICON_SIZE_LARGE_TOOLBAR;
+	panel->top_helper.orientation = GTK_ORIENTATION_HORIZONTAL;
 	panel->top_helper.config_get = _panel_helper_config_get;
 	panel->top_helper.config_set = _panel_helper_config_set;
 	panel->top_helper.error = _panel_helper_error;

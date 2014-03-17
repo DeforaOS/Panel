@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,6 +254,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->panel = panel;
 	helper->type = type;
 	helper->icon_size = iconsize;
+	helper->orientation = GTK_ORIENTATION_HORIZONTAL;
 	helper->config_get = _panel_helper_config_get;
 	helper->config_set = _panel_helper_config_set;
 	helper->error = _panel_helper_error;

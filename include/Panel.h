@@ -38,6 +38,7 @@ typedef struct _PanelAppletHelper
 	Panel * panel;
 	PanelAppletType type;
 	GtkIconSize icon_size;
+	GtkOrientation orientation;
 	char const * (*config_get)(Panel * panel, char const * section,
 			char const * variable);
 	int (*config_set)(Panel * panel, char const * section,
