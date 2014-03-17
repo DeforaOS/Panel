@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 	if((separator = malloc(sizeof(*separator))) == NULL)
 		return NULL;
 	separator->helper = helper;
-	/* FIXME choose the correct orientation */
-	separator->widget = gtk_vseparator_new();
+	separator->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_vseparator_new() : gtk_hseparator_new();
 	gtk_widget_show(separator->widget);
 	*widget = separator->widget;
 	return separator;
