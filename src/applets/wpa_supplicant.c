@@ -168,6 +168,7 @@ typedef struct _PanelApplet
 	GtkTreeStore * store;
 	GtkWidget * pw_window;
 	GtkWidget * pw_entry;
+	unsigned int pw_id;
 } WPA;
 
 
@@ -289,6 +290,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		gtk_container_add(GTK_CONTAINER(wpa->widget), hbox);
 	}
 	wpa->pw_window = NULL;
+	wpa->pw_id = 0;
 	_wpa_set_status(wpa, FALSE, FALSE, _("Unavailable"));
 	*widget = wpa->widget;
 	return wpa;
@@ -467,14 +469,13 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 
 /* wpa_ask_password */
 static void _ask_password_window(WPA * wpa);
+/* callbacks */
+static gboolean _ask_password_on_closex(gpointer data);
+static void _ask_password_on_response(GtkWidget * widget, gint response,
+		gpointer data);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 {
-	WPAChannel * channel = &wpa->channel[0];
-	unsigned int id = network->id;
-	char const * password;
-	size_t i;
-
 	if(wpa->pw_window == NULL)
 		_ask_password_window(wpa);
 #if GTK_CHECK_VERSION(2, 6, 0)
@@ -486,22 +487,11 @@ static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 #endif
 			_("The network \"%s\" is protected by a key."),
 			network->name);
-	gtk_entry_set_text(GTK_ENTRY(wpa->pw_entry), "");
-	/* XXX no longer block on gtk_dialog_run() */
-	if(gtk_dialog_run(GTK_DIALOG(wpa->pw_window)) == GTK_RESPONSE_OK
-			&& (password = gtk_entry_get_text(GTK_ENTRY(
-						wpa->pw_entry))) != NULL)
-	{
-		/* FIXME the network may have changed in the meantime */
-		_wpa_queue(wpa, channel, WC_SET_PASSWORD, id, password);
-		if(wpa->autosave)
-			_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
-	}
-	else
-		/* enable every network again */
-		for(i = 0; i < wpa->networks_cnt; i++)
-			_wpa_queue(wpa, &wpa->channel[0], WC_ENABLE_NETWORK, i);
-	gtk_widget_hide(wpa->pw_window);
+	/* reset the text if the network has changed */
+	if(wpa->pw_id != network->id)
+		gtk_entry_set_text(GTK_ENTRY(wpa->pw_entry), "");
+	wpa->pw_id = network->id;
+	gtk_window_present(GTK_WINDOW(wpa->pw_window));
 }
 
 static void _ask_password_window(WPA * wpa)
@@ -541,6 +531,42 @@ static void _ask_password_window(WPA * wpa)
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->pw_entry, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 	gtk_widget_show_all(hbox);
+	g_signal_connect_swapped(wpa->pw_window, "delete-event", G_CALLBACK(
+				_ask_password_on_closex), wpa);
+	g_signal_connect(wpa->pw_window, "response", G_CALLBACK(
+				_ask_password_on_response), wpa);
+}
+
+static gboolean _ask_password_on_closex(gpointer data)
+{
+	WPA * wpa = data;
+
+	gtk_widget_hide(wpa->pw_window);
+	return TRUE;
+}
+
+static void _ask_password_on_response(GtkWidget * widget, gint response,
+		gpointer data)
+{
+	WPA * wpa = data;
+	char const * password;
+	size_t i;
+	WPAChannel * channel = &wpa->channel[0];
+
+	if(response != GTK_RESPONSE_OK
+			|| (password = gtk_entry_get_text(GTK_ENTRY(
+						wpa->pw_entry))) == NULL)
+		/* enable every network again */
+		for(i = 0; i < wpa->networks_cnt; i++)
+			_wpa_queue(wpa, &wpa->channel[0], WC_ENABLE_NETWORK, i);
+	else
+	{
+		/* FIXME the network may have changed in the meantime */
+		_wpa_queue(wpa, channel, WC_SET_PASSWORD, wpa->pw_id, password);
+		if(wpa->autosave)
+			_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
+	}
+	gtk_widget_hide(wpa->pw_window);
 }
 
 
