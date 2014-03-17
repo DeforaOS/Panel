@@ -249,6 +249,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
+	/* autosave only if explicitly configured */
 	p = helper->config_get(helper->panel, "wpa_supplicant", "autosave");
 	wpa->autosave = (p != NULL && strtol(p, NULL, 10) != 0) ? TRUE : FALSE;
 	wpa->connected = FALSE;
