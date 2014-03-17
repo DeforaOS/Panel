@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Pager Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 
-	GtkWidget * hbox;
+	GtkWidget * box;
 
 	GtkWidget ** widgets;
 	size_t widgets_cnt;
@@ -111,16 +111,21 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	pager->helper = helper;
-	/* FIXME choose the right orientation */
-	pager->hbox = gtk_hbox_new(TRUE, 0);
-	g_signal_connect(pager->hbox, "screen-changed", G_CALLBACK(
+#if GTK_CHECK_VERSION(3, 0, 0)
+	pager->box = gtk_box_new(helper->orientation, 0);
+	gtk_box_set_homogeneous(GTK_BOX(helper->box), TRUE);
+#else
+	pager->box = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
+#endif
+	g_signal_connect(pager->box, "screen-changed", G_CALLBACK(
 				_on_screen_changed), pager);
 	pager->widgets = NULL;
 	pager->widgets_cnt = 0;
 	pager->screen = NULL;
 	pager->display = NULL;
 	pager->root = NULL;
-	*widget = pager->hbox;
+	*widget = pager->box;
 	return pager;
 }
 
@@ -130,7 +135,7 @@ static void _pager_destroy(Pager * pager)
 {
 	if(pager->root != NULL)
 		gdk_window_remove_filter(pager->root, _on_filter, pager);
-	gtk_widget_destroy(pager->hbox);
+	gtk_widget_destroy(pager->box);
 	free(pager);
 }
 
@@ -270,14 +275,14 @@ static void _pager_do(Pager * pager)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
 		g_signal_connect(G_OBJECT(pager->widgets[i]), "clicked",
 				G_CALLBACK(_on_clicked), pager);
-		gtk_box_pack_start(GTK_BOX(pager->hbox), pager->widgets[i],
+		gtk_box_pack_start(GTK_BOX(pager->box), pager->widgets[i],
 				FALSE, TRUE, 0);
 	}
 	free(names);
 	if(pager->widgets_cnt <= 1)
-		gtk_widget_hide(pager->hbox);
+		gtk_widget_hide(pager->box);
 	else
-		gtk_widget_show_all(pager->hbox);
+		gtk_widget_show_all(pager->box);
 }
 
 
