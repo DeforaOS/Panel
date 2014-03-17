@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
- * - make sure it works with WEP and open networks
+ * - make sure it works with WEP networks
  * - remove the network list from the applet
  * - manage the network list from the browser (networks without reception...)
  * - automatically save the configuration by default (and remove the button)
@@ -613,6 +613,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	uint32_t flags = 0;
 	char const * s;
 	char const * t;
+	char const * format;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
@@ -663,8 +664,9 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			u = va_arg(ap, unsigned int);
 			s = va_arg(ap, char const *);
 			t = va_arg(ap, char const *);
-			cmd = g_strdup_printf("SET_NETWORK %u %s \"%s\"", u, s,
-					t);
+			format = (t != NULL) ? "SET_NETWORK %u %s \"%s\""
+				: "SET_NETWORK %u %s NONE";
+			cmd = g_strdup_printf(format, u, s, t);
 			break;
 		case WC_SET_PASSWORD:
 			/* FIXME really uses SET_NETWORK (and may not be psk) */
@@ -1347,7 +1349,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 	unsigned int id;
 
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, ssid);
+	fprintf(stderr, "DEBUG: %s(\"%s\", 0x%08x)\n", __func__, ssid, flags);
 #endif
 	if(cnt < 2 || buf[cnt - 1] != '\n')
 		return;
@@ -1361,8 +1363,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
 	if((flags & (WSRF_WPA | WSRF_WPA2)) == 0)
 		/* required to be able to connect to open or WEP networks */
-		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt",
-				"NONE");
+		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt", NULL);
 	if(wpa->autosave)
 		_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 	/* XXX make this optional */
