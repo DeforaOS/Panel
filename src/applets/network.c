@@ -93,8 +93,12 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	network->helper = helper;
-	/* FIXME the orientation may be wrong */
-	network->widget = gtk_hbox_new(TRUE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	network->widget = gtk_box_new(helper->orientation, 0);
+#else
+	network->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
+#endif
 	gtk_widget_show(network->widget);
 	network->source = g_timeout_add(500, _network_on_timeout, network);
 	if((network->fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2013-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,8 +79,12 @@ static Player * _player_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	player->helper = helper;
-	/* FIXME choose the adequate orientation */
-	player->widget = gtk_hbox_new(FALSE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	player->widget = gtk_box_new(helper->orientation, 0);
+#else
+	player->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
+#endif
 	_init_add(player->widget, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
 			_("Previous"), _player_on_previous);
 	_init_add(player->widget, GTK_STOCK_MEDIA_REWIND, helper->icon_size,
