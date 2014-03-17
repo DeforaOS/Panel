@@ -13,6 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
+ * - make sure it works with WEP and open networks
+ * - remove the network list from the applet
+ * - manage the network list from the browser (networks without reception...)
+ * - automatically save the configuration by default (and remove the button)
  * - tooltip with details on the button (interface tracked...) */
 
 
