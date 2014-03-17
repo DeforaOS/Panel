@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,6 +85,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 	PanelWindow * panel;
 	int icon_width;
 	int icon_height;
+	GtkOrientation orientation;
 
 	if(gtk_icon_size_lookup(helper->icon_size, &icon_width, &icon_height)
 			!= TRUE)
@@ -107,6 +108,14 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 	fprintf(stderr, "DEBUG: %s() %u height=%d\n", __func__, position,
 			panel->height);
 #endif
+	panel->box = NULL;
+	orientation = panel_window_get_orientation(panel);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	panel->box = gtk_box_new(orientation, 2);
+#else
+	panel->box = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 2) : gtk_vbox_new(FALSE, 2);
+#endif
 	switch(position)
 	{
 		case PANEL_WINDOW_POSITION_TOP:
@@ -118,11 +127,6 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 			gtk_window_set_type_hint(GTK_WINDOW(panel->window),
 					GDK_WINDOW_TYPE_HINT_DOCK);
 			gtk_window_stick(GTK_WINDOW(panel->window));
-#if GTK_CHECK_VERSION(3, 0, 0)
-			panel->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-#else
-			panel->box = gtk_hbox_new(FALSE, 2);
-#endif
 			g_signal_connect(panel->window, "configure-event",
 					G_CALLBACK(_panel_window_on_configure_event), panel);
 			break;
@@ -135,11 +139,6 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 			gtk_window_set_type_hint(GTK_WINDOW(panel->window),
 					GDK_WINDOW_TYPE_HINT_DOCK);
 			gtk_window_stick(GTK_WINDOW(panel->window));
-#if GTK_CHECK_VERSION(3, 0, 0)
-			panel->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
-#else
-			panel->box = gtk_vbox_new(FALSE, 2);
-#endif
 			g_signal_connect(panel->window, "configure-event",
 					G_CALLBACK(_panel_window_on_configure_event), panel);
 			break;
@@ -152,11 +151,6 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 			gtk_window_set_decorated(GTK_WINDOW(panel->window),
 					FALSE);
 		case PANEL_WINDOW_POSITION_MANAGED:
-#if GTK_CHECK_VERSION(3, 0, 0)
-			panel->box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 2);
-#else
-			panel->box = gtk_hbox_new(FALSE, 2);
-#endif
 			break;
 	}
 	g_signal_connect_swapped(panel->window, "delete-event", G_CALLBACK(
@@ -182,6 +176,30 @@ void panel_window_delete(PanelWindow * panel)
 int panel_window_get_height(PanelWindow * panel)
 {
 	return panel->height;
+}
+
+
+/* panel_window_get_orientation */
+GtkOrientation panel_window_get_orientation(PanelWindow * panel)
+{
+#if GTK_CHECK_VERSION(2, 16, 0)
+	if(panel->box != NULL)
+		return gtk_orientable_get_orientation(GTK_ORIENTABLE(
+					panel->box));
+#endif
+	switch(panel->position)
+	{
+		case PANEL_WINDOW_POSITION_LEFT:
+		case PANEL_WINDOW_POSITION_RIGHT:
+			return GTK_ORIENTATION_VERTICAL;
+		case PANEL_WINDOW_POSITION_BOTTOM:
+		case PANEL_WINDOW_POSITION_CENTER:
+		case PANEL_WINDOW_POSITION_FLOATING:
+		case PANEL_WINDOW_POSITION_MANAGED:
+		case PANEL_WINDOW_POSITION_TOP:
+		default:
+			return GTK_ORIENTATION_HORIZONTAL;
+	}
 }
 
 

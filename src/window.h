@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ void panel_window_delete(PanelWindow * panel);
 
 /* accessors */
 int panel_window_get_height(PanelWindow * panel);
+GtkOrientation panel_window_get_orientation(PanelWindow * panel);
 void panel_window_get_position(PanelWindow * panel, gint * x, gint * y);
 void panel_window_get_size(PanelWindow * panel, gint * width, gint * height);
 int panel_window_get_width(PanelWindow * panel);
