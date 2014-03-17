@@ -84,6 +84,7 @@ typedef struct _WPAEntry
 	/* for WC_ADD_NETWORK */
 	char * ssid;
 	uint32_t flags;
+	gboolean connect;
 } WPAEntry;
 
 typedef struct _WPAChannel
@@ -546,7 +547,7 @@ static void _wpa_connect(WPA * wpa, char const * ssid, uint32_t flags)
 		_wpa_connect_network(wpa, &wpa->networks[i]);
 	else
 		/* add (and then select) this network */
-		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid, flags);
+		_wpa_queue(wpa, channel, WC_ADD_NETWORK, ssid, flags, TRUE);
 }
 
 
@@ -611,6 +612,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	WPAEntry * p;
 	char const * ssid = NULL;
 	uint32_t flags = 0;
+	gboolean connect = FALSE;
 	char const * s;
 	char const * t;
 	char const * format;
@@ -627,6 +629,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			cmd = g_strdup_printf("ADD_NETWORK");
 			ssid = va_arg(ap, char const *);
 			flags = va_arg(ap, uint32_t);
+			connect = va_arg(ap, gboolean);
 			break;
 		case WC_ATTACH:
 			cmd = strdup("ATTACH");
@@ -702,6 +705,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	/* XXX may fail */
 	p->ssid = (ssid != NULL) ? strdup(ssid) : NULL;
 	p->flags = flags;
+	p->connect = connect;
 	if(channel->queue_cnt++ == 0)
 		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
 				_on_watch_can_write, wpa);
@@ -1247,7 +1251,8 @@ static gboolean _on_timeout(gpointer data)
 
 /* on_watch_can_read */
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
-		size_t cnt, char const * ssid, uint32_t flags);
+		size_t cnt, char const * ssid, uint32_t flags,
+		gboolean connect);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
@@ -1314,7 +1319,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			}
 			if(entry->command == WC_ADD_NETWORK)
 				_read_add_network(wpa, channel, buf, cnt,
-						entry->ssid, entry->flags);
+						entry->ssid, entry->flags,
+						entry->connect);
 			else if(entry->command == WC_LIST_NETWORKS)
 				_read_list_networks(wpa, buf, cnt);
 			else if(entry->command == WC_SCAN_RESULTS)
@@ -1344,7 +1350,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 }
 
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
-		size_t cnt, char const * ssid, uint32_t flags)
+		size_t cnt, char const * ssid, uint32_t flags, gboolean connect)
 {
 	unsigned int id;
 
@@ -1366,9 +1372,11 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt", NULL);
 	if(wpa->autosave)
 		_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
-	/* XXX make this optional */
-	_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
-	_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+	if(connect)
+	{
+		_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
+		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
+	}
 }
 
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
