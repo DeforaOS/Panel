@@ -103,8 +103,12 @@ static MPD * _mpd_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	mpd->helper = helper;
-	/* FIXME choose the adequate orientation */
-	mpd->widget = gtk_hbox_new(FALSE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	mpd->widget = gtk_box_new(helper->orientation, 0);
+#else
+	mpd->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
+#endif
 	_init_add(mpd, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
 			_("Previous"), G_CALLBACK(_mpd_on_previous));
 	_init_add(mpd, GTK_STOCK_MEDIA_REWIND, helper->icon_size, _("Rewind"),
