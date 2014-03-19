@@ -1294,6 +1294,8 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
+static char const * _read_scan_results_flag(WPA * wpa, char const * p,
+		uint32_t * ret);
 static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags);
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
 		char const * bssid);
@@ -1610,6 +1612,22 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 {
 	uint32_t ret = 0;
 	char const * p;
+
+	for(p = flags; *p != '\0';)
+		if(*(p++) == '[')
+		{
+			p = _read_scan_results_flag(wpa, p, &ret);
+			for(p++; *p != '\0' && *p != ']'; p++);
+		}
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() => 0x%x\n", __func__, ret);
+#endif
+	return ret;
+}
+
+static char const * _read_scan_results_flag(WPA * wpa, char const * p,
+		uint32_t * ret)
+{
 	char const wep[] = "WEP";
 	char const wpa1[] = "WPA-";
 	char const wpa2[] = "WPA2-";
@@ -1622,83 +1640,74 @@ static uint32_t _read_scan_results_flags(WPA * wpa, char const * flags)
 	char const ess[] = "ESS";
 	char const ibss[] = "IBSS";
 
-	for(p = flags; *p != '\0';)
+	/* FIXME parse more consistently */
+	if(strncmp(wep, p, sizeof(wep) - 1) == 0)
 	{
-		if(*(p++) != '[')
-			continue;
-		/* FIXME parse more consistently */
-		if(strncmp(wep, p, sizeof(wep) - 1) == 0)
-		{
-			ret |= WSRF_WEP;
-			p += sizeof(wep) - 1;
-		}
-		else if(strncmp(wpa1, p, sizeof(wpa1) - 1) == 0)
-		{
-			ret |= WSRF_WPA;
-			p += sizeof(wpa1) - 1;
-		}
-		else if(strncmp(wpa2, p, sizeof(wpa2) - 1) == 0)
-		{
-			ret |= WSRF_WPA2;
-			p += sizeof(wpa2) - 1;
-		}
-		else if(strncmp(ess, p, sizeof(ess) - 1) == 0)
-		{
-			ret |= WSRF_ESS;
-			p += sizeof(ess) - 1;
-		}
-		else if(strncmp(ibss, p, sizeof(ibss) - 1) == 0)
-		{
-			ret |= WSRF_IBSS;
-			p += sizeof(ibss) - 1;
-		}
-		else
-			continue;
-		if(strncmp(psk, p, sizeof(psk) - 1) == 0)
-		{
-			ret |= WSRF_PSK;
-			p += sizeof(psk) - 1;
-		}
-		else if(strncmp(eap, p, sizeof(eap) - 1) == 0)
-		{
-			ret |= WSRF_EAP;
-			p += sizeof(eap) - 1;
-		}
-		if(*p == '-')
-			p++;
-		if(strncmp(ccmp, p, sizeof(ccmp) - 1) == 0)
-		{
-			ret |= WSRF_CCMP;
-			p += sizeof(ccmp) - 1;
-		}
-		else if(strncmp(tkipccmp, p, sizeof(tkipccmp) - 1) == 0)
-		{
-			ret |= WSRF_TKIP | WSRF_CCMP;
-			p += sizeof(tkipccmp) - 1;
-		}
-		else if(strncmp(tkip, p, sizeof(tkip) - 1) == 0)
-		{
-			ret |= WSRF_TKIP;
-			p += sizeof(tkip) - 1;
-		}
-		else
-			continue;
-		if(*p == '-')
-			p++;
-		if(strncmp(preauth, p, sizeof(preauth) - 1) == 0)
-		{
-			ret |= WSRF_PREAUTH;
-			p += sizeof(preauth) - 1;
-		}
-		else
-			continue;
-		/* FIXME implement more */
-		for(p++; *p != '\0' && *p != ']'; p++);
+		*ret |= WSRF_WEP;
+		p += sizeof(wep) - 1;
 	}
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() => 0x%x\n", __func__, ret);
-#endif
-	return ret;
+	else if(strncmp(wpa1, p, sizeof(wpa1) - 1) == 0)
+	{
+		*ret |= WSRF_WPA;
+		p += sizeof(wpa1) - 1;
+	}
+	else if(strncmp(wpa2, p, sizeof(wpa2) - 1) == 0)
+	{
+		*ret |= WSRF_WPA2;
+		p += sizeof(wpa2) - 1;
+	}
+	else if(strncmp(ess, p, sizeof(ess) - 1) == 0)
+	{
+		*ret |= WSRF_ESS;
+		p += sizeof(ess) - 1;
+	}
+	else if(strncmp(ibss, p, sizeof(ibss) - 1) == 0)
+	{
+		*ret |= WSRF_IBSS;
+		p += sizeof(ibss) - 1;
+	}
+	else
+		return p;
+	if(strncmp(psk, p, sizeof(psk) - 1) == 0)
+	{
+		*ret |= WSRF_PSK;
+		p += sizeof(psk) - 1;
+	}
+	else if(strncmp(eap, p, sizeof(eap) - 1) == 0)
+	{
+		*ret |= WSRF_EAP;
+		p += sizeof(eap) - 1;
+	}
+	if(*p == '-')
+		p++;
+	if(strncmp(ccmp, p, sizeof(ccmp) - 1) == 0)
+	{
+		*ret |= WSRF_CCMP;
+		p += sizeof(ccmp) - 1;
+	}
+	else if(strncmp(tkipccmp, p, sizeof(tkipccmp) - 1) == 0)
+	{
+		*ret |= WSRF_TKIP | WSRF_CCMP;
+		p += sizeof(tkipccmp) - 1;
+	}
+	else if(strncmp(tkip, p, sizeof(tkip) - 1) == 0)
+	{
+		*ret |= WSRF_TKIP;
+		p += sizeof(tkip) - 1;
+	}
+	else
+		return p;
+	if(*p == '-')
+		p++;
+	if(strncmp(preauth, p, sizeof(preauth) - 1) == 0)
+	{
+		*ret |= WSRF_PREAUTH;
+		p += sizeof(preauth) - 1;
+	}
+	else
+		return p;
+	/* FIXME implement more */
+	return p;
 }
 
 static void _read_scan_results_iter(WPA * wpa, GtkTreeIter * iter,
@@ -1810,6 +1819,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	char variable[80];
 	char value[80];
 
+	wpa->flags = 0;
 	for(i = 0; i < cnt; i = j)
 	{
 		for(j = i; j < cnt; j++)
@@ -1827,7 +1837,10 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 			continue;
 		variable[sizeof(variable) - 1] = '\0';
 		value[sizeof(value) - 1] = '\0';
-		if(strcmp(variable, "wpa_state") == 0)
+		if(strcmp(variable, "key_mgmt") == 0)
+			/* XXX */
+			_read_scan_results_flag(wpa, value, &wpa->flags);
+		else if(strcmp(variable, "wpa_state") == 0)
 		{
 			if(strcmp(value, "COMPLETED") == 0)
 				associated = TRUE;
@@ -1837,7 +1850,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 				associated = FALSE;
 		}
 #ifndef EMBEDDED
-		if(strcmp(variable, "ssid") == 0)
+		else if(strcmp(variable, "ssid") == 0)
 			/* XXX may fail */
 			network = strdup(value);
 #endif
