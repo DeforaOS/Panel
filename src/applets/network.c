@@ -40,6 +40,8 @@ typedef struct _NetworkInterface
 	unsigned int flags;
 	unsigned long ipackets;
 	unsigned long opackets;
+	unsigned long ibytes;
+	unsigned long obytes;
 	GtkWidget * widget;
 } NetworkInterface;
 
@@ -202,6 +204,8 @@ static int _refresh_interface_add(Network * network, char const * name,
 	p->flags = flags;
 	p->ipackets = 0;
 	p->opackets = 0;
+	p->ibytes = 0;
+	p->obytes = 0;
 	p->widget = gtk_image_new();
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(p->widget, name);
@@ -228,6 +232,11 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 	char const * icon = "network-idle";
 #ifdef SIOCGIFDATA
 	struct ifdatareq ifdr;
+# if GTK_CHECK_VERSION(2, 12, 0)
+	unsigned long ibytes;
+	unsigned long obytes;
+	char tooltip[128];
+# endif
 #endif
 
 #ifdef IFF_UP
@@ -252,8 +261,24 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 					: "network-receive";
 			else if(ifdr.ifdr_data.ifi_opackets > ni->opackets)
 				icon = "network-transmit";
+# if GTK_CHECK_VERSION(2, 12, 0)
+			ibytes = (ifdr.ifdr_data.ifi_ibytes >= ni->ibytes)
+				? ifdr.ifdr_data.ifi_ibytes - ni->ibytes
+				: ULONG_MAX - ni->ibytes
+				+ ifdr.ifdr_data.ifi_ibytes;
+			obytes = (ifdr.ifdr_data.ifi_obytes >= ni->obytes)
+				? ifdr.ifdr_data.ifi_obytes - ni->obytes
+				: ULONG_MAX - ni->obytes
+				+ ifdr.ifdr_data.ifi_obytes;
+			snprintf(tooltip, sizeof(tooltip),
+					"%s\nIn: %lu kB/s\nOut: %lu kB/s",
+					ni->name, ibytes / 512, obytes / 512);
+			gtk_widget_set_tooltip_text(ni->widget, tooltip);
+# endif
 			ni->ipackets = ifdr.ifdr_data.ifi_ipackets;
 			ni->opackets = ifdr.ifdr_data.ifi_opackets;
+			ni->ibytes = ifdr.ifdr_data.ifi_ibytes;
+			ni->obytes = ifdr.ifdr_data.ifi_obytes;
 		}
 #endif
 	}
