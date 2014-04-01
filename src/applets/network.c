@@ -43,6 +43,7 @@ typedef struct _NetworkInterface
 	unsigned long ibytes;
 	unsigned long obytes;
 	GtkWidget * widget;
+	gboolean updated;
 } NetworkInterface;
 
 typedef struct _PanelApplet
@@ -134,6 +135,8 @@ static int _refresh_interface_add(Network * network, char const * name,
 static void _refresh_interface_delete(Network * network, size_t i);
 static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		unsigned int flags);
+static void _refresh_purge(Network * network);
+static void _refresh_reset(Network * network);
 
 static void _network_refresh(Network * network)
 {
@@ -156,6 +159,7 @@ static void _network_refresh(Network * network)
 #ifdef __NetBSD__
 	if(getifaddrs(&ifa) != 0)
 		return;
+	_refresh_reset(network);
 	for(; ifa != NULL; ifa = ifa->ifa_next)
 	{
 		_refresh_interface(network, ifa->ifa_name, ifa->ifa_flags);
@@ -166,6 +170,7 @@ static void _network_refresh(Network * network)
 	}
 	/* FIXME also remove/disable the interfaces not listed */
 	freeifaddrs(ifa);
+	_refresh_purge(network);
 #endif
 }
 
@@ -210,6 +215,7 @@ static int _refresh_interface_add(Network * network, char const * name,
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(p->widget, name);
 #endif
+	p->updated = FALSE;
 	_refresh_interface_flags(network, p, flags);
 	gtk_box_pack_start(GTK_BOX(network->widget), p->widget, FALSE, TRUE, 0);
 	gtk_widget_show(p->widget);
@@ -285,6 +291,25 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), icon,
 			network->helper->icon_size);
 	ni->flags = flags;
+	ni->updated = TRUE;
+}
+
+static void _refresh_purge(Network * network)
+{
+	size_t i;
+
+	for(i = 0; i < network->interfaces_cnt; i++)
+		if(network->interfaces[i].updated == FALSE)
+			/* FIXME do not increment i once really implemented */
+			_refresh_interface_delete(network, i);
+}
+
+static void _refresh_reset(Network * network)
+{
+	size_t i;
+
+	for(i = 0; i < network->interfaces_cnt; i++)
+		network->interfaces[i].updated = FALSE;
 }
 
 
