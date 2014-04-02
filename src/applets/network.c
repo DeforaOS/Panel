@@ -67,6 +67,9 @@ static void _network_refresh(Network * network);
 /* callbacks */
 static gboolean _network_on_timeout(gpointer data);
 
+/* NetworkInterface */
+static void _network_interface_destroy(NetworkInterface * ni);
+
 
 /* public */
 /* variables */
@@ -117,6 +120,11 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* network_destroy */
 static void _network_destroy(Network * network)
 {
+	size_t i;
+
+	for(i = 0; i < network->interfaces_cnt; i++)
+		_network_interface_destroy(&network->interfaces[i]);
+	free(network->interfaces);
 	if(network->fd >= 0)
 		close(network->fd);
 	if(network->source != 0)
@@ -132,7 +140,6 @@ static void _refresh_interface(Network * network, char const * name,
 		unsigned int flags);
 static int _refresh_interface_add(Network * network, char const * name,
 		unsigned int flags);
-static void _refresh_interface_delete(Network * network, size_t i);
 static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		unsigned int flags);
 static void _refresh_purge(Network * network);
@@ -227,9 +234,11 @@ static void _refresh_interface_delete(Network * network, size_t i)
 {
 	NetworkInterface * ni = &network->interfaces[i];
 
-	/* FIXME really implement */
-	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), "network-offline",
-			network->helper->icon_size);
+	_network_interface_destroy(ni);
+	network->interfaces_cnt--;
+	memmove(&network->interfaces[i], &network->interfaces[i + 1],
+			sizeof(*ni) * (network->interfaces_cnt - i));
+	/* XXX realloc() network->interfaces to free some memory */
 }
 
 static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
@@ -298,10 +307,11 @@ static void _refresh_purge(Network * network)
 {
 	size_t i;
 
-	for(i = 0; i < network->interfaces_cnt; i++)
+	for(i = 0; i < network->interfaces_cnt;)
 		if(network->interfaces[i].updated == FALSE)
-			/* FIXME do not increment i once really implemented */
 			_refresh_interface_delete(network, i);
+		else
+			i++;
 }
 
 static void _refresh_reset(Network * network)
@@ -322,4 +332,13 @@ static gboolean _network_on_timeout(gpointer data)
 	_network_refresh(network);
 	network->source = g_timeout_add(500, _network_on_timeout, network);
 	return FALSE;
+}
+
+
+/* NetworkInterface */
+/* network_interface_destroy */
+static void _network_interface_destroy(NetworkInterface * ni)
+{
+	free(ni->name);
+	gtk_widget_destroy(ni->widget);
 }
