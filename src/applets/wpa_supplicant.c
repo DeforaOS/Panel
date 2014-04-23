@@ -1476,10 +1476,8 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 				n->enabled = 0;
 			else if(res >= 4 && strcmp(flags, "CURRENT") == 0)
 			{
-				/* XXX let it be set from the status */
 				wpa->networks_cur = wpa->networks_cnt - 1;
-				/* XXX may be associated already */
-				_wpa_set_status(wpa, TRUE, FALSE, ssid);
+				_wpa_queue(wpa, &wpa->channel[0], WC_STATUS);
 			}
 		}
 	}
@@ -1812,6 +1810,7 @@ static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model)
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 {
 	gboolean associated = FALSE;
+	int id = -1;
 	char * network = NULL;
 	size_t i;
 	size_t j;
@@ -1838,7 +1837,14 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 			continue;
 		variable[sizeof(variable) - 1] = '\0';
 		value[sizeof(value) - 1] = '\0';
-		if(strcmp(variable, "key_mgmt") == 0)
+		if(strcmp(variable, "id") == 0)
+		{
+			errno = 0;
+			id = strtol(value, NULL, 10);
+			if(errno != 0 || value[0] == '\0' || id < 0)
+				id = -1;
+		}
+		else if(strcmp(variable, "key_mgmt") == 0)
 			/* XXX */
 			_read_scan_results_flag(wpa, value, &wpa->flags);
 		else if(strcmp(variable, "wpa_state") == 0)
@@ -1863,11 +1869,20 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	/* reflect the status */
 	if(associated == TRUE)
 	{
+		/* no longer ask for any password */
 		if(wpa->pw_window != NULL)
 			gtk_widget_hide(wpa->pw_window);
 	}
 	_wpa_set_status(wpa, TRUE, associated, network);
 	free(network);
+	if(id >= 0)
+		/* set the current network */
+		for(i = 0; i < wpa->networks_cnt; i++)
+			if(wpa->networks[i].id == (unsigned int)id)
+			{
+				wpa->networks_cur = i;
+				break;
+			}
 }
 
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
