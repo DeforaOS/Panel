@@ -1851,8 +1851,11 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 		}
 #ifndef EMBEDDED
 		else if(strcmp(variable, "ssid") == 0)
+		{
+			free(network);
 			/* XXX may fail */
 			network = strdup(value);
+		}
 #endif
 	}
 	free(p);
