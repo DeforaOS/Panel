@@ -1461,21 +1461,22 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			/* FIXME store the scan results instead */
 			if((n = realloc(wpa->networks, sizeof(*n)
 							* (wpa->networks_cnt
-								+ 1))) != NULL)
-			{
-				wpa->networks = n;
-				n = &wpa->networks[wpa->networks_cnt];
-				/* XXX ignore errors */
-				n->id = u;
-				n->name = strdup(ssid);
-				n->enabled = 1;
-				if(n->name != NULL)
-					wpa->networks_cnt++;
-			}
-			if(res > 3 && strcmp(flags, "DISABLED") == 0)
+								+ 1))) == NULL)
+				/* XXX report errors */
+				continue;
+			wpa->networks = n;
+			n = &wpa->networks[wpa->networks_cnt];
+			n->id = u;
+			if((n->name = strdup(ssid)) == NULL)
+				/* XXX report errors */
+				continue;
+			n->enabled = 1;
+			wpa->networks_cnt++;
+			if(res >= 4 && strcmp(flags, "DISABLED") == 0)
 				n->enabled = 0;
-			if(res > 3 && strcmp(flags, "CURRENT") == 0)
+			else if(res >= 4 && strcmp(flags, "CURRENT") == 0)
 			{
+				/* XXX let it be set from the status */
 				wpa->networks_cur = wpa->networks_cnt - 1;
 				/* XXX may be associated already */
 				_wpa_set_status(wpa, TRUE, FALSE, ssid);
