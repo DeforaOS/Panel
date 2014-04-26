@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -327,7 +327,7 @@ static gdouble _volume_get(Volume * volume)
 		ret = ((value & 0xff) + ((value & 0xff00) >> 8)) / 200.0;
 #endif
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() => %lf\n", __func__, ret);
+	fprintf(stderr, "DEBUG: %s() => %f\n", __func__, ret);
 #endif
 	return ret;
 }
@@ -345,7 +345,7 @@ int _volume_set(Volume * volume, gdouble value)
 	int j;
 
 # ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(%lf)\n", __func__, value);
+	fprintf(stderr, "DEBUG: %s(%f)\n", __func__, value);
 # endif
 	if(volume->fd < 0)
 		return 1;
@@ -383,7 +383,7 @@ int _volume_set(Volume * volume, gdouble value)
 		return 1;
 	v |= v << 8;
 # ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(%lf) 0x%04x\n", __func__, value, v);
+	fprintf(stderr, "DEBUG: %s(%f) 0x%04x\n", __func__, value, v);
 # endif
 	if(ioctl(volume->fd, MIXER_WRITE(SOUND_MIXER_VOLUME), &v) < 0)
 		ret |= helper->error(helper->panel, "MIXER_WRITE", 1);
