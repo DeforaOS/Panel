@@ -204,6 +204,18 @@ static int _refresh_interface_add(Network * network, char const * name,
 		unsigned int flags)
 {
 	NetworkInterface * p;
+#ifdef IFF_LOOPBACK
+	char const * q;
+
+	if(flags & IFF_LOOPBACK)
+	{
+		q = network->helper->config_get(network->helper->panel,
+				"network", "loopback");
+		if(q == NULL || strtol(q, NULL, 10) == 0)
+			/* ignore the interface */
+			return 1;
+	}
+#endif
 
 	if((p = realloc(network->interfaces, sizeof(*p)
 					* (network->interfaces_cnt + 1)))
