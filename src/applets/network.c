@@ -68,7 +68,12 @@ static void _network_refresh(Network * network);
 static gboolean _network_on_timeout(gpointer data);
 
 /* NetworkInterface */
-static void _network_interface_destroy(NetworkInterface * ni);
+static int _networkinterface_init(NetworkInterface * ni, char const * name,
+		unsigned int flags);
+static void _networkinterface_destroy(NetworkInterface * ni);
+static void _networkinterface_update(NetworkInterface * ni, char const * icon,
+		GtkIconSize iconsize, unsigned int flags, gboolean updated,
+		char const * tooltip);
 
 
 /* public */
@@ -123,7 +128,7 @@ static void _network_destroy(Network * network)
 	size_t i;
 
 	for(i = 0; i < network->interfaces_cnt; i++)
-		_network_interface_destroy(&network->interfaces[i]);
+		_networkinterface_destroy(&network->interfaces[i]);
 	free(network->interfaces);
 	if(network->fd >= 0)
 		close(network->fd);
@@ -216,25 +221,14 @@ static int _refresh_interface_add(Network * network, char const * name,
 			return 1;
 	}
 #endif
-
 	if((p = realloc(network->interfaces, sizeof(*p)
 					* (network->interfaces_cnt + 1)))
 			== NULL)
 		return -1;
 	network->interfaces = p;
 	p = &network->interfaces[network->interfaces_cnt];
-	if((p->name = strdup(name)) == NULL)
+	if(_networkinterface_init(p, name, flags) != 0)
 		return -1;
-	p->flags = flags;
-	p->ipackets = 0;
-	p->opackets = 0;
-	p->ibytes = 0;
-	p->obytes = 0;
-	p->widget = gtk_image_new();
-#if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(p->widget, name);
-#endif
-	p->updated = FALSE;
 	_refresh_interface_flags(network, p, flags);
 	gtk_box_pack_start(GTK_BOX(network->widget), p->widget, FALSE, TRUE, 0);
 	gtk_widget_show(p->widget);
@@ -246,7 +240,7 @@ static void _refresh_interface_delete(Network * network, size_t i)
 {
 	NetworkInterface * ni = &network->interfaces[i];
 
-	_network_interface_destroy(ni);
+	_networkinterface_destroy(ni);
 	network->interfaces_cnt--;
 	memmove(&network->interfaces[i], &network->interfaces[i + 1],
 			sizeof(*ni) * (network->interfaces_cnt - i));
@@ -262,9 +256,9 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 # if GTK_CHECK_VERSION(2, 12, 0)
 	unsigned long ibytes;
 	unsigned long obytes;
-	char tooltip[128];
 # endif
 #endif
+	char tooltip[128] = "";
 
 #ifdef IFF_UP
 	if((flags & IFF_UP) != IFF_UP)
@@ -300,7 +294,6 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 			snprintf(tooltip, sizeof(tooltip),
 					"%s\nIn: %lu kB/s\nOut: %lu kB/s",
 					ni->name, ibytes / 512, obytes / 512);
-			gtk_widget_set_tooltip_text(ni->widget, tooltip);
 # endif
 			ni->ipackets = ifdr.ifdr_data.ifi_ipackets;
 			ni->opackets = ifdr.ifdr_data.ifi_opackets;
@@ -309,10 +302,8 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		}
 #endif
 	}
-	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), icon,
-			network->helper->icon_size);
-	ni->flags = flags;
-	ni->updated = TRUE;
+	_networkinterface_update(ni, icon, network->helper->icon_size, flags,
+			TRUE, (tooltip[0] != '\0') ? tooltip : NULL);
 }
 
 static void _refresh_purge(Network * network)
@@ -348,9 +339,44 @@ static gboolean _network_on_timeout(gpointer data)
 
 
 /* NetworkInterface */
-/* network_interface_destroy */
-static void _network_interface_destroy(NetworkInterface * ni)
+/* networkinterface_init */
+static int _networkinterface_init(NetworkInterface * ni, char const * name,
+		unsigned int flags)
+{
+	if((ni->name = strdup(name)) == NULL)
+		return -1;
+	ni->flags = flags;
+	ni->ipackets = 0;
+	ni->opackets = 0;
+	ni->ibytes = 0;
+	ni->obytes = 0;
+	ni->widget = gtk_image_new();
+#if GTK_CHECK_VERSION(2, 12, 0)
+	gtk_widget_set_tooltip_text(ni->widget, name);
+#endif
+	ni->updated = FALSE;
+	return 0;
+}
+
+
+/* networkinterface_destroy */
+static void _networkinterface_destroy(NetworkInterface * ni)
 {
 	free(ni->name);
 	gtk_widget_destroy(ni->widget);
+}
+
+
+/* networkinterface_update */
+static void _networkinterface_update(NetworkInterface * ni, char const * icon,
+		GtkIconSize iconsize, unsigned int flags, gboolean updated,
+		char const * tooltip)
+{
+	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), icon, iconsize);
+#if GTK_CHECK_VERSION(2, 12, 0)
+	if(tooltip != NULL)
+		gtk_widget_set_tooltip_text(ni->widget, tooltip);
+#endif
+	ni->flags = flags;
+	ni->updated = updated;
 }
