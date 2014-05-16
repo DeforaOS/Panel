@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,8 +109,13 @@ static GtkWidget * _lock_settings(Lock * lock, gboolean apply, gboolean reset)
 #endif
 	if(lock->pr_box == NULL)
 	{
+#if GTK_CHECK_VERSION(3, 0, 0)
+		lock->pr_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+		hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 		lock->pr_box = gtk_vbox_new(FALSE, 4);
 		hbox = gtk_hbox_new(FALSE, 4);
+#endif
 		widget = gtk_label_new(_("Command:"));
 		gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 		lock->pr_command = gtk_entry_new();
