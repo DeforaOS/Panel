@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,15 +92,20 @@ static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 #if defined(__NetBSD__) || defined(__linux__)
 	bluetooth->fd = -1;
 #endif
+#if GTK_CHECK_VERSION(3, 0, 0)
+	*widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
+	*widget = gtk_hbox_new(FALSE, 0);
+#endif
 	bluetooth->image = gtk_image_new_from_icon_name(
 			"panel-applet-bluetooth", helper->icon_size);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(bluetooth->image,
 			_("Bluetooth is enabled"));
 #endif
+	gtk_box_pack_start(GTK_BOX(*widget), bluetooth->image, TRUE, TRUE, 0);
 	bluetooth->timeout = g_timeout_add(1000, _on_timeout, bluetooth);
 	_on_timeout(bluetooth);
-	*widget = bluetooth->image;
 	return bluetooth;
 }
 
