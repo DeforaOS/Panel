@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,11 @@ static GSM * _gsm_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if defined(__linux__)
 	gsm->fd = -1;
 #endif
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gsm->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	gsm->hbox = gtk_hbox_new(FALSE, 0);
+#endif
 	/* XXX find a better image */
 	gsm->image = gtk_image_new_from_icon_name("phone", helper->icon_size);
 #if GTK_CHECK_VERSION(2, 12, 0)
