@@ -288,7 +288,7 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(hbox), mixer->pr_command, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 	/* frame */
-	frame = gtk_frame_new("Size:");
+	frame = gtk_frame_new(_("Size:"));
 #if GTK_CHECK_VERSION(3, 0, 0)
 	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 #else
