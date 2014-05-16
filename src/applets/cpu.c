@@ -32,7 +32,7 @@
 #define _(string) gettext(string)
 
 
-/* Cpu */
+/* CPU */
 /* private */
 /* types */
 typedef struct _PanelApplet
@@ -45,12 +45,12 @@ typedef struct _PanelApplet
 	int used;
 	int total;
 #endif
-} Cpu;
+} CPU;
 
 
 /* prototypes */
-static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget);
-static void _cpu_destroy(Cpu * cpu);
+static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget);
+static void _cpu_destroy(CPU * cpu);
 
 /* callbacks */
 #if defined(__FreeBSD__) || defined(__NetBSD__)
@@ -76,10 +76,10 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* cpu_init */
-static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
+static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if defined(__FreeBSD__) || defined(__NetBSD__)
-	Cpu * cpu;
+	CPU * cpu;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -120,7 +120,7 @@ static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 
 
 /* cpu_destroy */
-static void _cpu_destroy(Cpu * cpu)
+static void _cpu_destroy(CPU * cpu)
 {
 	g_source_remove(cpu->timeout);
 	gtk_widget_destroy(cpu->widget);
@@ -133,7 +133,7 @@ static void _cpu_destroy(Cpu * cpu)
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 static gboolean _on_timeout(gpointer data)
 {
-	Cpu * cpu = data;
+	CPU * cpu = data;
 # if defined(__FreeBSD__)
 	char const name[] = "kern.cp_time";
 # elif defined(__NetBSD__)
