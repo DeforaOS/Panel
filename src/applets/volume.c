@@ -122,7 +122,11 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	volume->progress = NULL;
 	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
 	{
+#if GTK_CHECK_VERSION(3, 0, 0)
+		vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 		vbox = gtk_vbox_new(FALSE, 4);
+#endif
 		volume->widget = gtk_image_new_from_icon_name(
 				"stock_volume-med", helper->icon_size);
 		gtk_box_pack_start(GTK_BOX(vbox), volume->widget, TRUE, TRUE,
