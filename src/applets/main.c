@@ -147,7 +147,11 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	main->idle = g_idle_add(_on_idle, main);
 	main->refresh_mti = 0;
 	main->widget = gtk_button_new();
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	image = gtk_image_new_from_icon_name("start-here", helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);
 	/* add some text if configured so */
