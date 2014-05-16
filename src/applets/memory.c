@@ -86,7 +86,11 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	memory->helper = helper;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	memory->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	memory->widget = gtk_hbox_new(FALSE, 0);
+#endif
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("RAM:"));
