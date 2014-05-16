@@ -260,7 +260,11 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->icontheme = gtk_icon_theme_get_default();
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	wpa->image = gtk_image_new();
 	wpa->blink = FALSE;
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->image, FALSE, TRUE, 0);
@@ -523,7 +527,11 @@ static void _ask_password_window(WPA * wpa)
 #else
 	vbox = GTK_DIALOG(dialog)->vbox;
 #endif
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	label = gtk_label_new(_("Key: "));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
 	wpa->pw_entry = gtk_entry_new();
