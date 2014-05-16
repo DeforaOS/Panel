@@ -111,7 +111,11 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	desc = pango_font_description_new();
 	pango_font_description_set_family(desc, "Monospace");
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	cpufreq->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	cpufreq->hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	image = gtk_image_new_from_icon_name("gnome-monitor",
 			helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
