@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2012 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,7 +89,11 @@ static Cpu * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	cpu->helper = helper;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	cpu->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	cpu->widget = gtk_hbox_new(FALSE, 0);
+#endif
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("CPU:"));
