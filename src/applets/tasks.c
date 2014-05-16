@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,7 +177,11 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 				_on_clicked), task);
 	task->image = gtk_image_new();
 	task->delete = FALSE;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	hbox = gtk_hbox_new(FALSE, 0);
+#endif
 	gtk_box_pack_start(GTK_BOX(hbox), task->image, FALSE, TRUE, 0);
 #ifndef EMBEDDED
 	task->label = gtk_label_new(name);
@@ -271,7 +275,12 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tasks->helper = helper;
 	tasks->tasks = NULL;
 	tasks->tasks_cnt = 0;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	tasks->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
+#else
 	tasks->hbox = gtk_hbox_new(TRUE, 0);
+#endif
 	g_signal_connect(tasks->hbox, "screen-changed", G_CALLBACK(
 				_on_screen_changed), tasks);
 	tasks->icon_size = helper->icon_size;
