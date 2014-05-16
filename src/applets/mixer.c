@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -275,8 +275,13 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	GtkWidget * widget;
 
 	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	vbox = gtk_vbox_new(FALSE, 4);
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	widget = gtk_label_new(_("Command:"));
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 	mixer->pr_command = gtk_entry_new();
@@ -284,10 +289,18 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 	/* frame */
 	frame = gtk_frame_new("Size:");
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox2 = gtk_vbox_new(FALSE, 4);
+#endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox2), 4);
 	/* width */
+#if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_hbox_new(FALSE, 4);
+#else
+	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	widget = gtk_label_new(_("Width:"));
 	gtk_size_group_add_widget(group, widget);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
@@ -298,7 +311,11 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(hbox), mixer->pr_width, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, TRUE, 0);
 	/* height */
+#if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_hbox_new(FALSE, 4);
+#else
+	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	widget = gtk_label_new(_("Height:"));
 	gtk_size_group_add_widget(group, widget);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
