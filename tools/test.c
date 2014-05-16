@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,20 +52,19 @@
 
 /* private */
 /* prototypes */
-static int _test(GtkIconSize iconsize, char * applets[]);
+static int _test(PanelAppletType type, GtkIconSize iconsize, char * applets[]);
 
 static int _usage(void);
 
 
 /* functions */
 /* test */
-static int _test(GtkIconSize iconsize, char * applets[])
+static int _test(PanelAppletType type, GtkIconSize iconsize, char * applets[])
 {
 	Panel panel;
 	size_t i;
 
-	_panel_init(&panel, PANEL_WINDOW_POSITION_MANAGED,
-			PANEL_APPLET_TYPE_NORMAL, iconsize);
+	_panel_init(&panel, PANEL_WINDOW_POSITION_MANAGED, type, iconsize);
 	_panel_set_title(&panel, "Applet tester");
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
@@ -80,7 +79,7 @@ static int _test(GtkIconSize iconsize, char * applets[])
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: " PROGNAME " [-L|-S|-X|-x] applet...\n"
+	fputs("Usage: " PROGNAME " [-L|-S|-X|-x][-n] applet...\n"
 "       " PROGNAME " -l\n"
 "  -l	Lists the plug-ins available\n", stderr);
 	return 1;
@@ -92,6 +91,7 @@ static int _usage(void)
 /* main */
 int main(int argc, char * argv[])
 {
+	PanelAppletType type = PANEL_APPLET_TYPE_NORMAL;
 	GtkIconSize iconsize = GTK_ICON_SIZE_LARGE_TOOLBAR;
 	GtkIconSize huge;
 	int o;
@@ -104,7 +104,7 @@ int main(int argc, char * argv[])
 	if((huge = gtk_icon_size_from_name("panel-huge"))
 			== GTK_ICON_SIZE_INVALID)
 		huge = gtk_icon_size_register("panel-huge", 64, 64);
-	while((o = getopt(argc, argv, "LlSXx")) != -1)
+	while((o = getopt(argc, argv, "LlnSXx")) != -1)
 		switch(o)
 		{
 			case 'L':
@@ -112,6 +112,9 @@ int main(int argc, char * argv[])
 				break;
 			case 'l':
 				return _applet_list();
+			case 'n':
+				type = PANEL_APPLET_TYPE_NOTIFICATION;
+				break;
 			case 'S':
 				iconsize = GTK_ICON_SIZE_SMALL_TOOLBAR;
 				break;
@@ -126,6 +129,6 @@ int main(int argc, char * argv[])
 		}
 	if(optind == argc)
 		return _usage();
-	_test(iconsize, &argv[optind]);
+	_test(type, iconsize, &argv[optind]);
 	return 0;
 }
