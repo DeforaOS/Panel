@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2006-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2006-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,8 +105,13 @@ static Run * _run_new(void)
 	g_signal_connect_swapped(window, "delete-event", G_CALLBACK(
 				_on_run_closex), run);
 	group = gtk_size_group_new(GTK_SIZE_GROUP_BOTH);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	vbox = gtk_vbox_new(FALSE, 0);
 	hbox = gtk_hbox_new(FALSE, 0);
+#endif
 	widget = gtk_label_new(_("Command:"));
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, FALSE, 4);
 	run->entry = _new_entry(run->config);
@@ -147,7 +152,11 @@ static Run * _run_new(void)
 	g_signal_connect(widget, "toggled", G_CALLBACK(
 				_on_run_terminal_toggle), run);
 	gtk_box_pack_start(GTK_BOX(vbox), widget, FALSE, FALSE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	hbox = gtk_hbox_new(FALSE, 0);
+#endif
 	widget = gtk_button_new_from_stock(GTK_STOCK_EXECUTE);
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_on_run_execute), run);
