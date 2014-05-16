@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Pager Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,11 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	systray->helper = helper;
+#if GTK_CHECK_VERSION(3, 0, 0)
+	systray->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+#else
 	systray->hbox = gtk_hbox_new(FALSE, 0);
+#endif
 	gtk_icon_size_lookup(helper->icon_size, NULL, &height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
 	systray->owner = NULL;
