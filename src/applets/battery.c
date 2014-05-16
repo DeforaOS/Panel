@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2010-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2010-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,26 +124,29 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if defined(__NetBSD__) || defined(__linux__)
 	battery->fd = -1;
 #endif
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	battery->box = hbox;
 	battery->image = gtk_image_new_from_icon_name("battery",
 			helper->icon_size);
-	gtk_box_pack_start(GTK_BOX(hbox), battery->image, FALSE, TRUE, 0);
-	battery->label = gtk_label_new(" ");
-	gtk_box_pack_start(GTK_BOX(hbox), battery->label, FALSE, TRUE, 0);
-#ifndef EMBEDDED
-	gtk_widget_show(battery->label);
-#endif
+	gtk_box_pack_start(GTK_BOX(hbox), battery->image, TRUE, TRUE, 0);
+	battery->label = NULL;
 	battery->progress = NULL;
 	battery->pr_level = NULL;
 	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
 	{
 		bold = pango_font_description_new();
 		pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
+#if GTK_CHECK_VERSION(3, 0, 0)
+		vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 		vbox = gtk_vbox_new(FALSE, 4);
-		gtk_widget_modify_font(battery->label, bold);
-		gtk_widget_show(battery->label);
+#endif
 		gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
+		gtk_widget_show(hbox);
 		battery->progress = gtk_progress_bar_new();
 		gtk_box_pack_start(GTK_BOX(vbox), battery->progress, TRUE, TRUE,
 				0);
@@ -151,7 +154,15 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		pango_font_description_free(bold);
 	}
 	else
+	{
+#ifndef EMBEDDED
+		battery->label = gtk_label_new(" ");
+		gtk_box_pack_start(GTK_BOX(hbox), battery->label, FALSE, TRUE,
+				0);
+		gtk_widget_show(battery->label);
+#endif
 		battery->box = hbox;
+	}
 	battery->timeout = g_timeout_add(5000, _on_timeout, battery);
 	_on_timeout(battery);
 	gtk_widget_show(battery->image);
@@ -203,10 +214,13 @@ static void _settings_apply(Battery * battery, PanelAppletHelper * helper)
 
 	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 				battery->pr_level));
-	if(active)
-		gtk_widget_show(battery->label);
-	else
-		gtk_widget_hide(battery->label);
+	if(battery->label != NULL)
+	{
+		if(active)
+			gtk_widget_show(battery->label);
+		else
+			gtk_widget_hide(battery->label);
+	}
 	helper->config_set(helper->panel, "battery", "level",
 			active ? "1" : "0");
 }
@@ -272,9 +286,11 @@ static void _battery_set(Battery * battery, gdouble value, gboolean charging)
 		value = 0.0;
 		snprintf(buf, sizeof(buf), "%s", _("Error"));
 	}
-#ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(battery->label), buf);
-#endif
+	if(battery->label != NULL)
+		gtk_label_set_text(GTK_LABEL(battery->label), buf);
+	if(battery->progress != NULL)
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(battery->progress),
+				buf);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	snprintf(buf, sizeof(buf), _("Battery level: %.0lf%%%s"), value,
 			charging ? _(" (charging)") : "");
