@@ -574,13 +574,18 @@ static void _on_clicked(gpointer data)
 		menuitem = gtk_separator_menu_item_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
-	menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT, NULL);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_about),
-			main);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	if((p = helper->config_get(helper->panel, "main", "about")) == NULL
+			|| strtol(p, NULL, 0) != 0)
+	{
+		menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT,
+				NULL);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_on_about), main);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		menuitem = gtk_separator_menu_item_new();
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	}
 	/* lock screen */
-	menuitem = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = _main_menuitem_stock(_("Lock screen"), "gnome-lockscreen");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_lock),
 			main);
