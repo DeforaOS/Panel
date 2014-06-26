@@ -97,7 +97,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 char const * panel_get_config(Panel * panel, char const * section,
 		char const * variable)
 {
-	return NULL;
+	return config_get(panel->config, section, variable);
 }
 
 
