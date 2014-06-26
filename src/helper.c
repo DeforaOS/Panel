@@ -1,6 +1,6 @@
 /* $Id$ */
 static char const _copyright[] =
-"Copyright © 2004-2013 DeforaOS Project <contact@defora.org>";
+"Copyright © 2004-2014 DeforaOS Project <contact@defora.org>";
 /* This file is part of DeforaOS Desktop Panel */
 static char const _license[] =
 "This program is free software: you can redistribute it and/or modify\n"
@@ -98,26 +98,45 @@ static gboolean _about_on_closex(gpointer data);
 
 static void _panel_helper_about_dialog(Panel * panel)
 {
+	char const * p;
+	char const ** q;
+	char const * authors[] = { NULL, NULL };
+
+	/* FIXME let the translator credits also be configurable */
 	if(panel->ab_window != NULL)
 	{
 		gtk_window_present(GTK_WINDOW(panel->ab_window));
 		return;
 	}
 	panel->ab_window = desktop_about_dialog_new();
-	desktop_about_dialog_set_authors(panel->ab_window, _authors);
-	desktop_about_dialog_set_comments(panel->ab_window,
-			_("Panel for the DeforaOS desktop"));
-	desktop_about_dialog_set_copyright(panel->ab_window, _copyright);
-	desktop_about_dialog_set_logo_icon_name(panel->ab_window,
-			"panel-settings"); /* XXX */
-	desktop_about_dialog_set_license(panel->ab_window, _license);
-	desktop_about_dialog_set_name(panel->ab_window, PACKAGE);
-	desktop_about_dialog_set_program_name(panel->ab_window, PACKAGE);
+	if((authors[0] = panel_get_config(panel, "about", "authors")) != NULL)
+		q = authors;
+	else
+		q = _authors;
+	desktop_about_dialog_set_authors(panel->ab_window, q);
+	if((p = panel_get_config(panel, "about", "comment")) == NULL)
+		p = _("Panel for the DeforaOS desktop");
+	desktop_about_dialog_set_comments(panel->ab_window, p);
+	if((p = panel_get_config(panel, "about", "copyright")) == NULL)
+		p = _copyright;
+	desktop_about_dialog_set_copyright(panel->ab_window, p);
+	if((p = panel_get_config(panel, "about", "icon")) == NULL)
+		p = "panel-settings"; /* XXX */
+	desktop_about_dialog_set_logo_icon_name(panel->ab_window, p);
+	if((p = panel_get_config(panel, "about", "license")) == NULL)
+		p = _license;
+	desktop_about_dialog_set_license(panel->ab_window, p);
+	if((p = panel_get_config(panel, "about", "name")) == NULL)
+		p = PACKAGE;
+	desktop_about_dialog_set_program_name(panel->ab_window, p);
 	desktop_about_dialog_set_translator_credits(panel->ab_window,
 			_("translator-credits"));
-	desktop_about_dialog_set_version(panel->ab_window, VERSION);
-	desktop_about_dialog_set_website(panel->ab_window,
-			"http://www.defora.org/");
+	if((p = panel_get_config(panel, "about", "version")) == NULL)
+		p = VERSION;
+	desktop_about_dialog_set_version(panel->ab_window, p);
+	if((p = panel_get_config(panel, "about", "website")) == NULL)
+		p = "http://www.defora.org/";
+	desktop_about_dialog_set_website(panel->ab_window, p);
 	gtk_window_set_position(GTK_WINDOW(panel->ab_window),
 			GTK_WIN_POS_CENTER_ALWAYS);
 	g_signal_connect_swapped(panel->ab_window, "delete-event", G_CALLBACK(

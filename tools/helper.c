@@ -92,6 +92,16 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 
 /* public */
 /* functions */
+/* accessors */
+/* panel_get_config */
+char const * panel_get_config(Panel * panel, char const * section,
+		char const * variable)
+{
+	return NULL;
+}
+
+
+/* useful */
 /* panel_error */
 int panel_error(Panel * panel, char const * message, int ret)
 {

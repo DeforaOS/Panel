@@ -473,6 +473,16 @@ void panel_delete(Panel * panel)
 }
 
 
+/* accessors */
+/* panel_get_config */
+char const * panel_get_config(Panel * panel, char const * section,
+		char const * variable)
+{
+	/* XXX implement */
+	return config_get(panel->config, section, variable);
+}
+
+
 /* useful */
 /* panel_error */
 static int _error_text(char const * message, int ret);
