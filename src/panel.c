@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2009-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -543,7 +543,11 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 	if(pad->settings != NULL
 			&& (widget = pad->settings(pa, FALSE, FALSE)) != NULL)
 	{
+# if GTK_CHECK_VERSION(3, 0, 0)
+		vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+# else
 		vbox = gtk_vbox_new(FALSE, 4);
+# endif
 		/* XXX ugly */
 		g_object_set_data(G_OBJECT(vbox), "definition", pad);
 		g_object_set_data(G_OBJECT(vbox), "applet", pa);
@@ -645,9 +649,17 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	size_t i;
 
 	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox = gtk_vbox_new(FALSE, 4);
+#endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox), 4);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
 	hbox = gtk_hbox_new(FALSE, 4);
+#endif
 	/* plug-ins */
 	frame = gtk_frame_new(_("Applets:"));
 	widget = gtk_scrolled_window_new(NULL, NULL);
@@ -869,7 +881,11 @@ static GtkWidget * _preferences_window_general(Panel * panel)
 {
 	GtkWidget * vbox;
 
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox = gtk_vbox_new(FALSE, 4);
+#endif
 	panel->pr_accept_focus = gtk_check_button_new_with_mnemonic(
 			_("Accept focus"));
 	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_accept_focus, FALSE, TRUE,
