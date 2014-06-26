@@ -548,12 +548,13 @@ static void _on_clicked(gpointer data)
 	Main * main = data;
 	GtkWidget * menu;
 	GtkWidget * menuitem;
+	GtkWidget * widget;
 
 	menu = gtk_menu_new();
 	menuitem = _main_menuitem_stock(_("Applications"),
 			"gnome-applications");
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), _main_applications(
-				main));
+	widget = _main_applications(main);
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), widget);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	menuitem = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
