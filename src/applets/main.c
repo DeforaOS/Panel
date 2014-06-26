@@ -546,18 +546,24 @@ static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 static void _on_clicked(gpointer data)
 {
 	Main * main = data;
+	PanelAppletHelper * helper = main->helper;
 	GtkWidget * menu;
 	GtkWidget * menuitem;
 	GtkWidget * widget;
+	char const * p;
 
 	menu = gtk_menu_new();
-	menuitem = _main_menuitem_stock(_("Applications"),
-			"gnome-applications");
-	widget = _main_applications(main);
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), widget);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	menuitem = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	if((p = helper->config_get(helper->panel, "main", "applications"))
+			== NULL || strtol(p, NULL, 0) != 0)
+	{
+		menuitem = _main_menuitem_stock(_("Applications"),
+				"gnome-applications");
+		widget = _main_applications(main);
+		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), widget);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		menuitem = gtk_separator_menu_item_new();
+		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	}
 	menuitem = _main_menuitem_stock(_("Run..."), GTK_STOCK_EXECUTE);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_run),
 			main);
