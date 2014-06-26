@@ -176,10 +176,10 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->top_helper.about_dialog = _panel_helper_about_dialog;
 	panel->top_helper.lock = _panel_helper_lock;
 #ifndef EMBEDDED
-	if((p = config_get(panel->config, NULL, "logout")) == NULL
+	if((p = panel_get_config(panel, NULL, "logout")) == NULL
 			|| strtol(p, NULL, 0) != 0)
 #else
-	if((p = config_get(panel->config, NULL, "logout")) != NULL
+	if((p = panel_get_config(panel, NULL, "logout")) != NULL
 			&& strtol(p, NULL, 0) != 0)
 #endif
 		panel->top_helper.logout_dialog = _panel_helper_logout_dialog;
@@ -227,13 +227,13 @@ Panel * panel_new(PanelPrefs const * prefs)
 	/* root window */
 	panel->root = gdk_screen_get_root_window(panel->screen);
 	_panel_reset(panel, &rect);
-	focus = ((p = config_get(panel->config, NULL, "accept_focus")) == NULL
+	focus = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
-	above = ((p = config_get(panel->config, NULL, "keep_above")) == NULL
+	above = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	panel->source = 0;
 	/* top panel */
-	if(config_get(panel->config, NULL, "top") != NULL)
+	if(panel_get_config(panel, NULL, "top") != NULL)
 	{
 		panel->top = panel_window_new(PANEL_WINDOW_POSITION_TOP,
 				&panel->top_helper, &rect);
@@ -241,8 +241,8 @@ Panel * panel_new(PanelPrefs const * prefs)
 		panel_window_set_keep_above(panel->top, above);
 	}
 	/* bottom panel */
-	if(config_get(panel->config, NULL, "bottom") != NULL
-			|| config_get(panel->config, NULL, "top") == NULL)
+	if(panel_get_config(panel, NULL, "bottom") != NULL
+			|| panel_get_config(panel, NULL, "top") == NULL)
 	{
 		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
 				&panel->bottom_helper, &rect);
@@ -334,9 +334,9 @@ static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 			break;
 	}
 	if(variable != NULL)
-		p = config_get(panel->config, NULL, variable);
+		p = panel_get_config(panel, NULL, variable);
 	if(p == NULL)
-		p = config_get(panel->config, NULL, "size");
+		p = panel_get_config(panel, NULL, "size");
 	if(p != NULL)
 		ret = gtk_icon_size_from_name(p);
 	if(ret == GTK_ICON_SIZE_INVALID)
@@ -1096,9 +1096,8 @@ static void _preferences_on_response_cancel(gpointer data)
 	_cancel_general(panel);
 	/* applets */
 	_cancel_applets(panel);
-	if((p = config_get(panel->config, NULL, "bottom_size")) == NULL
-			&& (p = config_get(panel->config, NULL, "size"))
-			== NULL)
+	if((p = panel_get_config(panel, NULL, "bottom_size")) == NULL
+			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_bottom_size),
 				0);
 	else
@@ -1110,8 +1109,8 @@ static void _preferences_on_response_cancel(gpointer data)
 						panel->pr_bottom_size), i + 1);
 			break;
 		}
-	if((p = config_get(panel->config, NULL, "top_size")) == NULL
-			&& (p = config_get(panel->config, "", "size")) == NULL)
+	if((p = panel_get_config(panel, NULL, "top_size")) == NULL
+			&& (p = panel_get_config(panel, "", "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_top_size), 0);
 	else
 		for(i = 0; i < cnt; i++)
@@ -1142,11 +1141,11 @@ static void _cancel_general(Panel * panel)
 	char const * p;
 	gboolean b;
 
-	b = ((p = config_get(panel->config, NULL, "accept_focus")) == NULL
+	b = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_accept_focus),
 			b);
-	b = ((p = config_get(panel->config, NULL, "keep_above")) == NULL
+	b = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_keep_above),
 			b);
@@ -1359,11 +1358,11 @@ static char const * _panel_get_plugins(Panel * panel, PanelPosition position)
 	char const * p = NULL;
 
 	if(position == PANEL_POSITION_TOP)
-		p = config_get(panel->config, NULL, "top");
+		p = panel_get_config(panel, NULL, "top");
 	if(position == PANEL_POSITION_BOTTOM)
-		p = config_get(panel->config, NULL, "bottom");
+		p = panel_get_config(panel, NULL, "bottom");
 	if(p == NULL && position == PANEL_POSITION_BOTTOM)
-		if((p = config_get(panel->config, NULL, "plugins")) == NULL)
+		if((p = panel_get_config(panel, NULL, "plugins")) == NULL)
 			p = plugins;
 	return p;
 }
