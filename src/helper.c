@@ -65,11 +65,22 @@ static int _panel_helper_suspend(Panel * panel);
 static char const * _panel_helper_config_get(Panel * panel,
 		char const * section, char const * variable)
 {
+	char const * ret;
+	String * s = NULL;
+
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\")\n", __func__, section,
 			variable);
 #endif
-	return config_get(panel->config, section, variable);
+	if(section != NULL)
+	{
+		if((s = string_new_append("applet::", section, NULL)) == NULL)
+			return NULL;
+		section = s;
+	}
+	ret = panel_get_config(panel, section, variable);
+	string_delete(s);
+	return ret;
 }
 
 
@@ -77,12 +88,23 @@ static char const * _panel_helper_config_get(Panel * panel,
 static int _panel_helper_config_set(Panel * panel, char const * section,
 		char const * variable, char const * value)
 {
+	int ret;
+	String * s = NULL;
+
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\", \"%s\")\n", __func__,
 			section, variable, value);
 #endif
+	if(section != NULL)
+	{
+		if((s = string_new_append("applet::", section, NULL)) == NULL)
+			return -1;
+		section = s;
+	}
 	/* FIXME save the configuration (if not in test mode) */
-	return config_set(panel->config, section, variable, value);
+	ret = config_set(panel->config, section, variable, value);
+	string_delete(s);
+	return ret;
 }
 
 
