@@ -124,7 +124,6 @@ static void _panel_helper_about_dialog(Panel * panel)
 	char const ** q;
 	char const * authors[] = { NULL, NULL };
 
-	/* FIXME let the translator credits also be configurable */
 	if(panel->ab_window != NULL)
 	{
 		gtk_window_present(GTK_WINDOW(panel->ab_window));
@@ -151,8 +150,9 @@ static void _panel_helper_about_dialog(Panel * panel)
 	if((p = panel_get_config(panel, "about", "name")) == NULL)
 		p = PACKAGE;
 	desktop_about_dialog_set_program_name(panel->ab_window, p);
-	desktop_about_dialog_set_translator_credits(panel->ab_window,
-			_("translator-credits"));
+	if((p = panel_get_config(panel, "about", "translator")) == NULL)
+		p = _("translator-credits");
+	desktop_about_dialog_set_translator_credits(panel->ab_window, p);
 	if((p = panel_get_config(panel, "about", "version")) == NULL)
 		p = VERSION;
 	desktop_about_dialog_set_version(panel->ab_window, p);
