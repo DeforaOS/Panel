@@ -403,10 +403,10 @@ static void _panel_window_reset_strut(PanelWindow * panel)
 	cardinal = gdk_atom_intern("CARDINAL", FALSE);
 	atom = gdk_atom_intern("_NET_WM_STRUT", FALSE);
 	gdk_property_change(window, atom, cardinal, 32, GDK_PROP_MODE_REPLACE,
-			(guchar*)strut, 4);
+			(guchar *)strut, 4);
 	atom = gdk_atom_intern("_NET_WM_STRUT_PARTIAL", FALSE);
 	gdk_property_change(window, atom, cardinal, 32, GDK_PROP_MODE_REPLACE,
-			(guchar*)strut, 12);
+			(guchar *)strut, 12);
 }
 
 
