@@ -113,7 +113,7 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	pager->helper = helper;
 #if GTK_CHECK_VERSION(3, 0, 0)
 	pager->box = gtk_box_new(helper->orientation, 0);
-	gtk_box_set_homogeneous(GTK_BOX(helper->box), TRUE);
+	gtk_box_set_homogeneous(GTK_BOX(pager->box), TRUE);
 #else
 	pager->box = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
