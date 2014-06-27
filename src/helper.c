@@ -281,7 +281,10 @@ static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 		gint * y, gboolean * push_in, PanelPosition position)
 {
 	GtkRequisition req;
+	PanelWindow * window = panel->windows[position];
 
+	if(window == NULL)
+		return;
 #if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_get_preferred_size(GTK_WIDGET(menu), NULL, &req);
 #else
@@ -293,16 +296,23 @@ static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
 #endif
 	if(req.height <= 0)
 		return;
-	if(position == PANEL_POSITION_TOP)
-		*y = panel_window_get_height(panel->top);
-	else if(position == PANEL_POSITION_BOTTOM)
-		*y = panel->root_height
-			- panel_window_get_height(panel->bottom) - req.height;
-	else if(position == PANEL_POSITION_LEFT)
-		*x = panel_window_get_width(panel->left);
-	else if(position == PANEL_POSITION_RIGHT)
-		*x = panel->root_width
-			- panel_window_get_width(panel->right) - req.width;
+	switch(position)
+	{
+		case PANEL_POSITION_TOP:
+			*y = panel_window_get_height(window);
+			break;
+		case PANEL_POSITION_BOTTOM:
+			*y = panel->root_height
+				- panel_window_get_height(window) - req.height;
+			break;
+		case PANEL_POSITION_LEFT:
+			*x = panel_window_get_width(window);
+			break;
+		case PANEL_POSITION_RIGHT:
+			*x = panel->root_width
+				- panel_window_get_width(window) - req.width;
+			break;
+	}
 	*push_in = TRUE;
 }
 

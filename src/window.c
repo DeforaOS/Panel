@@ -95,6 +95,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 	}
 	if((panel = object_new(sizeof(*panel))) == NULL)
 		return NULL;
+	panel->position = position;
 	panel->helper = helper;
 	panel->applets = NULL;
 	panel->applets_cnt = 0;
