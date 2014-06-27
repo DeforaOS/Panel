@@ -145,6 +145,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 		case PANEL_WINDOW_POSITION_CENTER:
 			gtk_window_set_position(GTK_WINDOW(panel->window),
 					GTK_WIN_POS_CENTER_ALWAYS);
+			/* fallback */
 		case PANEL_WINDOW_POSITION_FLOATING:
 			gtk_window_set_accept_focus(GTK_WINDOW(panel->window),
 					FALSE);
@@ -340,11 +341,20 @@ static void _panel_window_reset(PanelWindow * panel)
 			gtk_window_resize(GTK_WINDOW(panel->window),
 					panel->root.width, panel->height);
 			break;
-#if 0 /* FIXME implement */
 		case PANEL_WINDOW_POSITION_LEFT:
-		case PANEL_WINDOW_POSITION_RIGHT:
+			/* FIXME really implement */
+			gtk_window_move(GTK_WINDOW(panel->window),
+					panel->root.x, 0);
+			gtk_window_resize(GTK_WINDOW(panel->window), 48,
+					panel->root.height);
 			break;
-#endif
+		case PANEL_WINDOW_POSITION_RIGHT:
+			/* FIXME really implement */
+			gtk_window_move(GTK_WINDOW(panel->window),
+					panel->root.x, panel->root.y - 48);
+			gtk_window_resize(GTK_WINDOW(panel->window), 48,
+					panel->root.height);
+			break;
 		case PANEL_WINDOW_POSITION_CENTER:
 		case PANEL_WINDOW_POSITION_FLOATING:
 		case PANEL_WINDOW_POSITION_MANAGED:
