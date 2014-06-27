@@ -315,26 +315,26 @@ static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 {
 	GtkIconSize ret = GTK_ICON_SIZE_INVALID;
-	char const * variable = NULL;
+	char const * section = NULL;
 	char const * p = NULL;
 
 	switch(position)
 	{
 		case PANEL_POSITION_BOTTOM:
-			variable = "bottom_size";
+			section = "bottom";
 			break;
 		case PANEL_POSITION_TOP:
-			variable = "top_size";
+			section = "top";
 			break;
 		case PANEL_POSITION_LEFT:
-			variable = "left_size";
+			section = "left";
 			break;
 		case PANEL_POSITION_RIGHT:
-			variable = "right_size";
+			section = "right";
 			break;
 	}
-	if(variable != NULL)
-		p = panel_get_config(panel, NULL, variable);
+	if(section != NULL)
+		p = panel_get_config(panel, section, "size");
 	if(p == NULL)
 		p = panel_get_config(panel, NULL, "size");
 	if(p != NULL)
@@ -1037,7 +1037,7 @@ static void _preferences_on_response_apply(gpointer data)
 	/* top panel */
 	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_top_size)))
 			>= 0 && i <= cnt)
-		config_set(panel->config, NULL, "top_size", (i > 0)
+		config_set(panel->config, "top", "size", (i > 0)
 				? _panel_sizes[i - 1].name : NULL);
 	model = GTK_TREE_MODEL(panel->pr_top_store);
 	value = NULL;
@@ -1056,7 +1056,7 @@ static void _preferences_on_response_apply(gpointer data)
 	/* bottom panel */
 	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_bottom_size)))
 			>= 0 && i <= cnt)
-		config_set(panel->config, NULL, "bottom_size", (i > 0)
+		config_set(panel->config, "bottom", "size", (i > 0)
 				? _panel_sizes[i - 1].name : NULL);
 	model = GTK_TREE_MODEL(panel->pr_bottom_store);
 	value = NULL;
@@ -1112,7 +1112,7 @@ static void _preferences_on_response_cancel(gpointer data)
 	_cancel_general(panel);
 	/* applets */
 	_cancel_applets(panel);
-	if((p = panel_get_config(panel, NULL, "bottom_size")) == NULL
+	if((p = panel_get_config(panel, "bottom", "size")) == NULL
 			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_bottom_size),
 				0);
@@ -1125,7 +1125,7 @@ static void _preferences_on_response_cancel(gpointer data)
 						panel->pr_bottom_size), i + 1);
 			break;
 		}
-	if((p = panel_get_config(panel, NULL, "top_size")) == NULL
+	if((p = panel_get_config(panel, "top", "size")) == NULL
 			&& (p = panel_get_config(panel, "", "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_top_size), 0);
 	else
