@@ -145,9 +145,9 @@ static int _new_config(Panel * panel);
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 		PanelPrefs const * user);
 static GtkIconSize _new_size(Panel * panel, PanelPosition position);
-static gboolean _on_idle(gpointer data);
-static void _idle_load(Panel * panel, PanelPosition position);
 /* callbacks */
+static gboolean _new_on_idle(gpointer data);
+static void _idle_load(Panel * panel, PanelPosition position);
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3);
 static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
@@ -294,7 +294,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 				panel->root) | GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(panel->root, _on_root_event, panel);
 	/* load plug-ins when idle */
-	panel->source = g_idle_add(_on_idle, panel);
+	panel->source = g_idle_add(_new_on_idle, panel);
 	return panel;
 }
 
@@ -381,7 +381,7 @@ static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 	return ret;
 }
 
-static gboolean _on_idle(gpointer data)
+static gboolean _new_on_idle(gpointer data)
 {
 	Panel * panel = data;
 
@@ -1135,7 +1135,7 @@ static void _preferences_on_response_apply(gpointer data)
 	if(panel->bottom != NULL)
 		panel_window_remove_all(panel->bottom);
 	if(panel->source == 0)
-		panel->source = g_idle_add(_on_idle, panel);
+		panel->source = g_idle_add(_new_on_idle, panel);
 }
 
 static void _preferences_on_response_cancel(gpointer data)
