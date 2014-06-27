@@ -1126,7 +1126,7 @@ static void _preferences_on_response_cancel(gpointer data)
 			break;
 		}
 	if((p = panel_get_config(panel, "top", "size")) == NULL
-			&& (p = panel_get_config(panel, "", "size")) == NULL)
+			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_top_size), 0);
 	else
 		for(i = 0; i < cnt; i++)
