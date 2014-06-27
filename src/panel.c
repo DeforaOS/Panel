@@ -69,7 +69,9 @@ struct _Panel
 	PanelWindow * top;
 	PanelAppletHelper bottom_helper;
 	PanelWindow * bottom;
+	PanelAppletHelper left_helper;
 	PanelWindow * left;
+	PanelAppletHelper right_helper;
 	PanelWindow * right;
 
 	GdkScreen * screen;
@@ -195,22 +197,35 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->bottom_helper = panel->top_helper;
 	panel->bottom_helper.position_menu = _panel_helper_position_menu_bottom;
 	panel->bottom = NULL;
+	panel->left_helper = panel->top_helper;
+	/* FIXME use a dedicated helper */
+	panel->left_helper.position_menu = _panel_helper_position_menu_bottom;
 	panel->left = NULL;
+	panel->right_helper = panel->top_helper;
+	/* FIXME use a dedicated helper */
+	panel->right_helper.position_menu = _panel_helper_position_menu_bottom;
 	panel->right = NULL;
 	iconsize = GTK_ICON_SIZE_INVALID;
 	if(panel->prefs.iconsize != NULL)
 		iconsize = gtk_icon_size_from_name(panel->prefs.iconsize);
 	if(iconsize == GTK_ICON_SIZE_INVALID)
 	{
+		/* XXX code duplication */
 		panel->top_helper.icon_size = _new_size(panel,
 				PANEL_POSITION_TOP);
 		panel->bottom_helper.icon_size = _new_size(panel,
 				PANEL_POSITION_BOTTOM);
+		panel->left_helper.icon_size = _new_size(panel,
+				PANEL_POSITION_LEFT);
+		panel->right_helper.icon_size = _new_size(panel,
+				PANEL_POSITION_RIGHT);
 	}
 	else
 	{
 		panel->top_helper.icon_size = iconsize;
 		panel->bottom_helper.icon_size = iconsize;
+		panel->left_helper.icon_size = iconsize;
+		panel->right_helper.icon_size = iconsize;
 	}
 	panel->pr_window = NULL;
 	panel->ab_window = NULL;
@@ -232,9 +247,11 @@ Panel * panel_new(PanelPrefs const * prefs)
 	above = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	panel->source = 0;
+	/* XXX code duplication */
 	/* top panel */
 	if(panel_get_config(panel, "top", "applets") != NULL)
 	{
+		/* FIXME may fail */
 		panel->top = panel_window_new(PANEL_WINDOW_POSITION_TOP,
 				&panel->top_helper, &rect);
 		panel_window_set_accept_focus(panel->top, focus);
@@ -244,10 +261,29 @@ Panel * panel_new(PanelPrefs const * prefs)
 	if(panel_get_config(panel, "bottom", "applets") != NULL
 			|| panel_get_config(panel, "top", "applets") == NULL)
 	{
+		/* FIXME may fail */
 		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
 				&panel->bottom_helper, &rect);
 		panel_window_set_accept_focus(panel->bottom, focus);
 		panel_window_set_keep_above(panel->bottom, above);
+	}
+	/* left panel */
+	if(panel_get_config(panel, "left", "applets") != NULL)
+	{
+		/* FIXME may fail */
+		panel->left = panel_window_new(PANEL_WINDOW_POSITION_LEFT,
+				&panel->left_helper, &rect);
+		panel_window_set_accept_focus(panel->left, focus);
+		panel_window_set_keep_above(panel->left, above);
+	}
+	/* right panel */
+	if(panel_get_config(panel, "right", "applets") != NULL)
+	{
+		/* FIXME may fail */
+		panel->right = panel_window_new(PANEL_WINDOW_POSITION_RIGHT,
+				&panel->right_helper, &rect);
+		panel_window_set_accept_focus(panel->right, focus);
+		panel_window_set_keep_above(panel->right, above);
 	}
 	/* messages */
 	desktop_message_register(NULL, PANEL_CLIENT_MESSAGE, _new_on_message,
