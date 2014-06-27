@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-03-04 02:12+0100\n"
+"POT-Creation-Date: 2014-06-27 19:59+0200\n"
 "PO-Revision-Date: 2010-04-22 12:45+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -17,30 +17,30 @@ msgstr ""
 "Language: \n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ../src/applets/battery.c:189
+#: ../src/applets/battery.c:200
 msgid "Show the battery level"
 msgstr "Afficher le niveau de batterie"
 
-#: ../src/applets/battery.c:257
+#: ../src/applets/battery.c:271
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:273 ../src/applets/wpa_supplicant.c:380
-#: ../src/panel.c:490 ../src/panel.c:495 ../src/run.c:224 ../src/run.c:230
+#: ../src/applets/battery.c:287 ../src/applets/wpa_supplicant.c:395
+#: ../src/panel.c:501 ../src/panel.c:506 ../src/run.c:233 ../src/run.c:239
 #: ../tools/message.c:172
 msgid "Error"
 msgstr "Erreur"
 
-#: ../src/applets/battery.c:279
+#: ../src/applets/battery.c:295
 #, c-format
 msgid "Battery level: %.0lf%%%s"
 msgstr "Batterie : %.0lf%%%s"
 
-#: ../src/applets/battery.c:280
+#: ../src/applets/battery.c:296
 msgid " (charging)"
 msgstr " (en charge)"
 
-#: ../src/applets/bluetooth.c:99
+#: ../src/applets/bluetooth.c:104
 msgid "Bluetooth is enabled"
 msgstr "Bluetooth actif"
 
@@ -60,11 +60,11 @@ msgstr ""
 msgid "Close"
 msgstr "Fermer"
 
-#: ../src/applets/cpu.c:95
+#: ../src/applets/cpu.c:99
 msgid "CPU:"
 msgstr "CPU :"
 
-#: ../src/applets/cpu.c:112 ../src/applets/cpufreq.c:138
+#: ../src/applets/cpu.c:121 ../src/applets/cpufreq.c:142
 msgid "Unsupported platform"
 msgstr "Plate-forme non supportée"
 
@@ -72,11 +72,11 @@ msgstr "Plate-forme non supportée"
 msgid "No support detected"
 msgstr "Aucun support détecté"
 
-#: ../src/applets/cpufreq.c:129 ../src/applets/cpufreq.c:170
+#: ../src/applets/cpufreq.c:133 ../src/applets/cpufreq.c:174
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:169
+#: ../src/applets/cpufreq.c:173
 msgid "CPU frequency: "
 msgstr "Fréquence CPU : "
 
@@ -92,7 +92,7 @@ msgstr "Notifications"
 msgid "GPS is enabled"
 msgstr "GPS actif"
 
-#: ../src/applets/gsm.c:90
+#: ../src/applets/gsm.c:94
 msgid "GSM is enabled"
 msgstr "GSM actif"
 
@@ -100,24 +100,28 @@ msgstr "GSM actif"
 msgid "Show keyboard"
 msgstr "Afficher le clavier"
 
-#: ../src/applets/keyboard.c:316 ../src/applets/lock.c:114
-#: ../src/applets/mixer.c:280 ../src/run.c:110
+#: ../src/applets/keyboard.c:321 ../src/applets/lock.c:119
+#: ../src/applets/mixer.c:289 ../src/run.c:115
 msgid "Command:"
 msgstr "Commande :"
 
-#: ../src/applets/keyboard.c:327 ../src/applets/mixer.c:291
+#: ../src/applets/keyboard.c:327 ../src/applets/mixer.c:295
+msgid "Size:"
+msgstr "Taille :"
+
+#: ../src/applets/keyboard.c:340 ../src/applets/mixer.c:308
 msgid "Width:"
 msgstr "Largeur :"
 
-#: ../src/applets/keyboard.c:338 ../src/applets/mixer.c:302
+#: ../src/applets/keyboard.c:355 ../src/applets/mixer.c:323
 msgid "Height:"
 msgstr "Hauteur :"
 
-#: ../src/applets/keyboard.c:349 ../src/applets/mixer.c:313
+#: ../src/applets/keyboard.c:366 ../src/applets/mixer.c:334
 msgid "Keep ratio"
 msgstr "Respecter les proportions"
 
-#: ../src/applets/lock.c:81 ../src/applets/main.c:569
+#: ../src/applets/lock.c:81 ../src/applets/main.c:589
 msgid "Lock screen"
 msgstr "Verrouiller l'écran"
 
@@ -125,76 +129,76 @@ msgstr "Verrouiller l'écran"
 msgid "logout: Logging out is disabled"
 msgstr "logout: Se déconnecter est désactivé"
 
-#: ../src/applets/logout.c:79 ../src/helper.c:186 ../src/helper.c:198
-#: ../src/helper.c:207
+#: ../src/applets/logout.c:79 ../src/helper.c:227 ../src/helper.c:239
+#: ../src/helper.c:248
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: ../src/applets/main.c:166
+#: ../src/applets/main.c:170
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: ../src/applets/main.c:549
+#: ../src/applets/main.c:559
 msgid "Applications"
 msgstr "Programmes"
 
-#: ../src/applets/main.c:556
+#: ../src/applets/main.c:570
 msgid "Run..."
 msgstr "Exécuter..."
 
-#: ../src/applets/main.c:575
+#: ../src/applets/main.c:595
 msgid "Rotate"
 msgstr "Réorienter"
 
-#: ../src/applets/main.c:584
+#: ../src/applets/main.c:604
 msgid "Logout..."
 msgstr "Déconnecter..."
 
-#: ../src/applets/main.c:592
+#: ../src/applets/main.c:612
 msgid "Suspend"
 msgstr "Suspendre"
 
-#: ../src/applets/main.c:599
+#: ../src/applets/main.c:619
 msgid "Shutdown..."
 msgstr "Arrêter..."
 
-#: ../src/applets/memory.c:92
+#: ../src/applets/memory.c:96
 msgid "RAM:"
 msgstr "Mémoire :"
 
-#: ../src/applets/memory.c:108
+#: ../src/applets/memory.c:117
 msgid "memory: Unsupported platform"
 msgstr "memory: Plate-forme non supportée"
 
-#: ../src/applets/mixer.c:124
+#: ../src/applets/mixer.c:128
 msgid "Show mixer"
 msgstr "Afficher le mixer"
 
-#: ../src/applets/player.c:85
+#: ../src/applets/player.c:89
 msgid "Previous"
 msgstr "Précédent"
 
-#: ../src/applets/player.c:87
+#: ../src/applets/player.c:91
 msgid "Rewind"
 msgstr "Reculer"
 
-#: ../src/applets/player.c:89
+#: ../src/applets/player.c:93
 msgid "Play"
 msgstr "Lecture"
 
-#: ../src/applets/player.c:91
+#: ../src/applets/player.c:95
 msgid "Pause"
 msgstr "Pause"
 
-#: ../src/applets/player.c:93
+#: ../src/applets/player.c:97
 msgid "Stop"
 msgstr "Stop"
 
-#: ../src/applets/player.c:95
+#: ../src/applets/player.c:99
 msgid "Forward"
 msgstr "Avancer"
 
-#: ../src/applets/player.c:97
+#: ../src/applets/player.c:101
 msgid "Next"
 msgstr "Suivant"
 
@@ -202,51 +206,51 @@ msgstr "Suivant"
 msgid "Rotate the screen"
 msgstr "Réorienter l'écran"
 
-#: ../src/applets/swap.c:88
+#: ../src/applets/swap.c:92
 msgid "Swap:"
 msgstr "Échange :"
 
-#: ../src/applets/swap.c:103
+#: ../src/applets/swap.c:112
 msgid "swap: Unsupported platform"
 msgstr "swap: Plate-forme non supportée"
 
-#: ../src/applets/tasks.c:469 ../src/applets/title.c:236
+#: ../src/applets/tasks.c:478 ../src/applets/title.c:236
 msgid "(Untitled)"
 msgstr "(Sans titre)"
 
-#: ../src/applets/tasks.c:742
+#: ../src/applets/tasks.c:751
 msgid "Move"
 msgstr "Déplacer"
 
-#: ../src/applets/tasks.c:744
+#: ../src/applets/tasks.c:753
 msgid "Resize"
 msgstr "Redimensionner"
 
-#: ../src/applets/tasks.c:746
+#: ../src/applets/tasks.c:755
 msgid "Minimize"
 msgstr "Réduire"
 
-#: ../src/applets/tasks.c:748
+#: ../src/applets/tasks.c:757
 msgid "Shade"
 msgstr "Masquer"
 
-#: ../src/applets/tasks.c:750
+#: ../src/applets/tasks.c:759
 msgid "Stick"
 msgstr "Attacher"
 
-#: ../src/applets/tasks.c:752
+#: ../src/applets/tasks.c:761
 msgid "Maximize horizontally"
 msgstr "Maximiser horizontalement"
 
-#: ../src/applets/tasks.c:754
+#: ../src/applets/tasks.c:763
 msgid "Maximize vertically"
 msgstr "Maximiser verticalement"
 
-#: ../src/applets/tasks.c:758
+#: ../src/applets/tasks.c:767
 msgid "Change desktop"
 msgstr "Déplacer vers le bureau"
 
-#: ../src/applets/tasks.c:795
+#: ../src/applets/tasks.c:804
 msgid "Maximize"
 msgstr "Maximiser"
 
@@ -254,50 +258,50 @@ msgstr "Maximiser"
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
 
-#: ../src/applets/wpa_supplicant.c:279
+#: ../src/applets/wpa_supplicant.c:291
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:286 ../src/applets/wpa_supplicant.c:894
+#: ../src/applets/wpa_supplicant.c:299 ../src/applets/wpa_supplicant.c:951
 msgid "Unavailable"
 msgstr "Indisponible"
 
-#: ../src/applets/wpa_supplicant.c:393
+#: ../src/applets/wpa_supplicant.c:408
 #, c-format
 msgid "Connected to interface %s"
 msgstr "Connecté à l'interface %s"
 
-#: ../src/applets/wpa_supplicant.c:397
+#: ../src/applets/wpa_supplicant.c:412
 msgid "Connecting..."
 msgstr "Connexion..."
 
-#: ../src/applets/wpa_supplicant.c:405
+#: ../src/applets/wpa_supplicant.c:420
 msgid "Scanning..."
 msgstr "Recherche..."
 
-#: ../src/applets/wpa_supplicant.c:416
+#: ../src/applets/wpa_supplicant.c:431
 #, c-format
 msgid "Connected to network %s"
 msgstr "Connecté au réseau %s"
 
-#: ../src/applets/wpa_supplicant.c:477
-msgid "Password required"
-msgstr "Mot de passe requis"
-
-#: ../src/applets/wpa_supplicant.c:480
+#: ../src/applets/wpa_supplicant.c:493
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr "Le réseau \"%s\" est protégé par une clé."
 
-#: ../src/applets/wpa_supplicant.c:495
+#: ../src/applets/wpa_supplicant.c:510
+msgid "Password required"
+msgstr "Mot de passe requis"
+
+#: ../src/applets/wpa_supplicant.c:524
 msgid "Wireless key"
 msgstr "Clé du réseau"
 
-#: ../src/applets/wpa_supplicant.c:502
+#: ../src/applets/wpa_supplicant.c:535
 msgid "Key: "
 msgstr "Clé : "
 
-#: ../src/applets/wpa_supplicant.c:943
+#: ../src/applets/wpa_supplicant.c:999
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -306,7 +310,7 @@ msgstr ""
 "Fréquence : %u\n"
 "Niveau : %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:944
+#: ../src/applets/wpa_supplicant.c:1000
 msgid ""
 "\n"
 "Security: "
@@ -314,52 +318,52 @@ msgstr ""
 "\n"
 "Sécurité : "
 
-#: ../src/applets/wpa_supplicant.c:990 ../tools/wifibrowser.c:117
+#: ../src/applets/wpa_supplicant.c:1046 ../tools/wifibrowser.c:118
 msgid "Reassociate"
 msgstr "Réassocier"
 
-#: ../src/applets/wpa_supplicant.c:1008 ../tools/wifibrowser.c:118
+#: ../src/applets/wpa_supplicant.c:1064 ../tools/wifibrowser.c:119
 msgid "Rescan"
 msgstr "Rechercher"
 
-#: ../src/applets/wpa_supplicant.c:1015
+#: ../src/applets/wpa_supplicant.c:1071
 msgid "Save configuration"
 msgstr "Sauvegarder la configuration"
 
-#: ../src/applets/wpa_supplicant.c:1035
+#: ../src/applets/wpa_supplicant.c:1091
 msgid "Network list"
 msgstr "Liste des réseaux"
 
-#: ../src/applets/wpa_supplicant.c:1040
+#: ../src/applets/wpa_supplicant.c:1096
 msgid "Any network"
 msgstr "Tous les réseaux"
 
-#: ../src/applets/wpa_supplicant.c:1127
+#: ../src/applets/wpa_supplicant.c:1183
 msgid "Wireless is disabled"
 msgstr "Réseau sans fil désactivé"
 
-#: ../src/applets/wpa_supplicant.c:1302
+#: ../src/applets/wpa_supplicant.c:1361
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1304
+#: ../src/applets/wpa_supplicant.c:1363
 msgid "Could not save the configuration"
 msgstr "Impossible de sauvegarder la configuration"
 
-#: ../src/applets/wpa_supplicant.c:1518
+#: ../src/applets/wpa_supplicant.c:1578
 #, c-format
 msgid "Hidden (%s)"
 msgstr "Masqué (%s)"
 
-#: ../src/helper.c:109
+#: ../src/helper.c:139
 msgid "Panel for the DeforaOS desktop"
 msgstr "Panel pour l'environnement DeforaOS"
 
-#: ../src/helper.c:117
+#: ../src/helper.c:154
 msgid "translator-credits"
 msgstr "Pierre Pronchery <khorben@defora.org>"
 
-#: ../src/helper.c:172
+#: ../src/helper.c:213
 msgid ""
 "This will log you out of the current session, therefore closing any "
 "application currently opened and losing any unsaved data.\n"
@@ -370,7 +374,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:337
+#: ../src/helper.c:378
 msgid ""
 "This will shutdown your device, therefore closing any application currently "
 "opened and losing any unsaved data.\n"
@@ -381,7 +385,7 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:342
+#: ../src/helper.c:383
 msgid ""
 "This will shutdown your computer, therefore closing any application "
 "currently opened and losing any unsaved data.\n"
@@ -392,11 +396,11 @@ msgstr ""
 "sauvegardées.\n"
 "Voulez-vous continuer?"
 
-#: ../src/helper.c:357 ../src/helper.c:369 ../src/helper.c:378
+#: ../src/helper.c:398 ../src/helper.c:410 ../src/helper.c:419
 msgid "Shutdown"
 msgstr "Arrêter"
 
-#: ../src/helper.c:368
+#: ../src/helper.c:409
 msgid "Restart"
 msgstr "Redémarrer"
 
@@ -427,39 +431,39 @@ msgstr "Petite"
 msgid "Smaller"
 msgstr "Très petite"
 
-#: ../src/panel.c:602
+#: ../src/panel.c:617
 msgid "Panel preferences"
 msgstr "Préférences du Panel"
 
-#: ../src/panel.c:619
+#: ../src/panel.c:634
 msgid "General"
 msgstr "Général"
 
-#: ../src/panel.c:623
+#: ../src/panel.c:638
 msgid "Applets"
 msgstr "Applets"
 
-#: ../src/panel.c:651
+#: ../src/panel.c:674
 msgid "Applets:"
 msgstr "Applets :"
 
-#: ../src/panel.c:731
+#: ../src/panel.c:762
 msgid "Top panel:"
 msgstr "Panneau supérieur :"
 
-#: ../src/panel.c:737 ../src/panel.c:741 ../src/panel.c:772 ../src/panel.c:776
+#: ../src/panel.c:772 ../src/panel.c:776 ../src/panel.c:811 ../src/panel.c:815
 msgid "Default"
 msgstr "Par défaut"
 
-#: ../src/panel.c:766
+#: ../src/panel.c:801
 msgid "Bottom panel:"
 msgstr "Panneau inférieur :"
 
-#: ../src/panel.c:873
+#: ../src/panel.c:916
 msgid "Accept focus"
 msgstr "Autoriser le focus"
 
-#: ../src/panel.c:877
+#: ../src/panel.c:920
 msgid "Keep above other windows"
 msgstr "Conserver au dessus des fenêtres"
 
@@ -488,47 +492,47 @@ msgstr ""
 "  -r\tMasquer le panel de droite\n"
 "  -t\tMasquer le panel du haut\n"
 
-#: ../src/run.c:104 ../src/run.c:116
+#: ../src/run.c:104 ../src/run.c:121
 msgid "Run program..."
 msgstr "Exécuter..."
 
-#: ../src/run.c:121
+#: ../src/run.c:126
 msgid "Executable files"
 msgstr "Fichiers exécutables"
 
-#: ../src/run.c:126
+#: ../src/run.c:131
 msgid "Perl scripts"
 msgstr "Scripts Perl"
 
-#: ../src/run.c:130
+#: ../src/run.c:135
 msgid "Python scripts"
 msgstr "Scripts Python"
 
-#: ../src/run.c:134
+#: ../src/run.c:139
 msgid "Shell scripts"
 msgstr "Scripts shell"
 
-#: ../src/run.c:138
+#: ../src/run.c:143
 msgid "All files"
 msgstr "Tous les fichiers"
 
-#: ../src/run.c:146
+#: ../src/run.c:151
 msgid "Run in a terminal"
 msgstr "Exécuter dans un terminal"
 
-#: ../src/run.c:338
+#: ../src/run.c:347
 msgid "Command not found"
 msgstr "Commande non trouvée"
 
-#: ../src/run.c:341
+#: ../src/run.c:350
 msgid "Permission denied"
 msgstr "Permissions insuffisantes"
 
-#: ../src/run.c:430
+#: ../src/run.c:439
 msgid "Usage: run\n"
 msgstr "Usage: run\n"
 
-#: ../src/window.c:92
+#: ../src/window.c:93
 msgid "Invalid panel size"
 msgstr "Taille invalide pour le panel"
 
@@ -541,7 +545,7 @@ msgstr "Impossible d'obtenir le XID"
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s commande [arguments...]\n"
 
-#: ../tools/helper.c:202
+#: ../tools/helper.c:212
 msgid "Applets available:"
 msgstr "Applets disponibles :"
 
@@ -591,19 +595,19 @@ msgstr ""
 "  -t\tDurée d'affichage (0 : illimité)\n"
 "  -l\tLister les applets disponibles\n"
 
-#: ../tools/wifibrowser.c:116
+#: ../tools/wifibrowser.c:117
 msgid "Wireless browser"
 msgstr "Réseaux sans fil"
 
-#: ../tools/wifibrowser.c:159
+#: ../tools/wifibrowser.c:160
 msgid "SSID"
 msgstr "SSID"
 
-#: ../tools/wifibrowser.c:166
+#: ../tools/wifibrowser.c:167
 msgid "BSSID"
 msgstr "BSSID"
 
-#: ../tools/wifibrowser.c:198
+#: ../tools/wifibrowser.c:199
 #, c-format
 msgid ""
 "Usage: %s [-c filename][-i interface]\n"
