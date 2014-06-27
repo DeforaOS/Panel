@@ -392,6 +392,10 @@ static gboolean _on_idle(gpointer data)
 		_idle_load(panel, PANEL_POSITION_TOP);
 	if(panel->bottom != NULL)
 		_idle_load(panel, PANEL_POSITION_BOTTOM);
+	if(panel->left != NULL)
+		_idle_load(panel, PANEL_POSITION_LEFT);
+	if(panel->right != NULL)
+		_idle_load(panel, PANEL_POSITION_RIGHT);
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(panel->pr_notebook), 0);
 	return FALSE;
 }
