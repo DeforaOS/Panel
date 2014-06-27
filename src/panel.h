@@ -15,8 +15,8 @@
 
 
 
-#ifndef PANEL_COMMON_H
-# define PANEL_COMMON_H
+#ifndef PANEL_PANEL_H
+# define PANEL_PANEL_H
 
 # include <gtk/gtk.h>
 # include "../include/Panel.h"
@@ -66,4 +66,4 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet);
 
 void panel_show_preferences(Panel * panel, gboolean show);
 
-#endif /* !PANEL_COMMON_H */
+#endif /* !PANEL_PANEL_H */
