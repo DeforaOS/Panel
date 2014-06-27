@@ -687,7 +687,11 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	gtk_container_add(GTK_CONTAINER(frame), widget);
 	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
 	/* controls */
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox2 = gtk_vbox_new(FALSE, 4);
+#endif
 	widget = gtk_label_new(NULL);
 	gtk_box_pack_start(GTK_BOX(vbox2), widget, TRUE, TRUE, 0);
 	widget = gtk_button_new();
@@ -749,10 +753,18 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 				_preferences_on_bottom_add), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox2, FALSE, TRUE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox2 = gtk_vbox_new(FALSE, 4);
+#endif
 	/* top plug-ins */
 	frame = gtk_frame_new(_("Top panel:"));
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox3 = gtk_vbox_new(FALSE, 4);
+#endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	panel->pr_top_size = gtk_combo_box_text_new();
@@ -787,7 +799,11 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	gtk_box_pack_start(GTK_BOX(vbox2), frame, TRUE, TRUE, 0);
 	/* bottom plug-ins */
 	frame = gtk_frame_new(_("Bottom panel:"));
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
 	vbox3 = gtk_vbox_new(FALSE, 4);
+#endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	panel->pr_bottom_size = gtk_combo_box_text_new();
