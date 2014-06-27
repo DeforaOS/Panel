@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,14 @@
 
 
 
-#include "Panel.h"
 #include <stdlib.h>
 #include <libintl.h>
+#include <Desktop.h>
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
 #include <gdk/gdkx.h>
-#include <Desktop.h>
+#include "Panel.h"
 #define _(string) gettext(string)
 #define N_(string) (string)
 
