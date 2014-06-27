@@ -257,16 +257,6 @@ Panel * panel_new(PanelPrefs const * prefs)
 		panel_window_set_accept_focus(panel->top, focus);
 		panel_window_set_keep_above(panel->top, above);
 	}
-	/* bottom panel */
-	if(panel_get_config(panel, "bottom", "applets") != NULL
-			|| panel_get_config(panel, "top", "applets") == NULL)
-	{
-		/* FIXME may fail */
-		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
-				&panel->bottom_helper, &rect);
-		panel_window_set_accept_focus(panel->bottom, focus);
-		panel_window_set_keep_above(panel->bottom, above);
-	}
 	/* left panel */
 	if(panel_get_config(panel, "left", "applets") != NULL)
 	{
@@ -284,6 +274,17 @@ Panel * panel_new(PanelPrefs const * prefs)
 				&panel->right_helper, &rect);
 		panel_window_set_accept_focus(panel->right, focus);
 		panel_window_set_keep_above(panel->right, above);
+	}
+	/* bottom panel */
+	if(panel_get_config(panel, "bottom", "applets") != NULL
+			|| (panel->top == NULL && panel->left == NULL
+				&& panel->right == NULL))
+	{
+		/* FIXME may fail */
+		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
+				&panel->bottom_helper, &rect);
+		panel_window_set_accept_focus(panel->bottom, focus);
+		panel_window_set_keep_above(panel->bottom, above);
 	}
 	/* messages */
 	desktop_message_register(NULL, PANEL_CLIENT_MESSAGE, _new_on_message,
