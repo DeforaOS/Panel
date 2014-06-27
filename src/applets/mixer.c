@@ -28,7 +28,11 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
+#include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+#if GTK_CHECK_VERSION(3, 0, 0)
+# include <gtk/gtkx.h>
+#endif
 #include "Panel.h"
 #define _(string) gettext(string)
 
@@ -297,7 +301,7 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_container_set_border_width(GTK_CONTAINER(vbox2), 4);
 	/* width */
 #if GTK_CHECK_VERSION(3, 0, 0)
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
@@ -312,7 +316,7 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, TRUE, 0);
 	/* height */
 #if GTK_CHECK_VERSION(3, 0, 0)
-	hbox = gtk_hbox_new(FALSE, 4);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
