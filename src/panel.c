@@ -126,7 +126,7 @@ static const struct
 /* accessors */
 static gboolean _panel_can_suspend(void);
 
-static char const * _panel_get_plugins(Panel * panel, PanelPosition position);
+static char const * _panel_get_applets(Panel * panel, PanelPosition position);
 
 /* useful */
 static void _panel_reset(Panel * panel, GdkRectangle * rect);
@@ -233,7 +233,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	panel->source = 0;
 	/* top panel */
-	if(panel_get_config(panel, NULL, "top") != NULL)
+	if(panel_get_config(panel, "top", "applets") != NULL)
 	{
 		panel->top = panel_window_new(PANEL_WINDOW_POSITION_TOP,
 				&panel->top_helper, &rect);
@@ -241,8 +241,8 @@ Panel * panel_new(PanelPrefs const * prefs)
 		panel_window_set_keep_above(panel->top, above);
 	}
 	/* bottom panel */
-	if(panel_get_config(panel, NULL, "bottom") != NULL
-			|| panel_get_config(panel, NULL, "top") == NULL)
+	if(panel_get_config(panel, "bottom", "applets") != NULL
+			|| panel_get_config(panel, "top", "applets") == NULL)
 	{
 		panel->bottom = panel_window_new(PANEL_WINDOW_POSITION_BOTTOM,
 				&panel->bottom_helper, &rect);
@@ -1051,7 +1051,7 @@ static void _preferences_on_response_apply(gpointer data)
 		sep = ",";
 		g_free(p);
 	}
-	config_set(panel->config, NULL, "top", value);
+	config_set(panel->config, "top", "applets", value);
 	string_delete(value);
 	/* bottom panel */
 	if((i = gtk_combo_box_get_active(GTK_COMBO_BOX(panel->pr_bottom_size)))
@@ -1070,7 +1070,7 @@ static void _preferences_on_response_apply(gpointer data)
 		sep = ",";
 		g_free(p);
 	}
-	config_set(panel->config, NULL, "bottom", value);
+	config_set(panel->config, "bottom", "applets", value);
 	string_delete(value);
 	/* XXX applets should be known from Panel already */
 	cnt = gtk_notebook_get_n_pages(GTK_NOTEBOOK(panel->pr_notebook));
@@ -1203,7 +1203,7 @@ static void _cancel_applets(Panel * panel)
 	}
 	closedir(dir);
 	/* top panel */
-	r = _panel_get_plugins(panel, PANEL_POSITION_TOP);
+	r = _panel_get_applets(panel, PANEL_POSITION_TOP);
 	q = (r != NULL) ? strdup(r) : NULL;
 	for(i = 0, r = q; q != NULL; i++)
 	{
@@ -1218,7 +1218,7 @@ static void _cancel_applets(Panel * panel)
 	}
 	free(q);
 	/* bottom panel */
-	r = _panel_get_plugins(panel, PANEL_POSITION_BOTTOM);
+	r = _panel_get_applets(panel, PANEL_POSITION_BOTTOM);
 	q = (r != NULL) ? strdup(r) : NULL;
 	for(i = 0, r = q; q != NULL; i++)
 	{
@@ -1360,26 +1360,38 @@ static gboolean _panel_can_suspend(void)
 }
 
 
-/* panel_get_plugins */
-static char const * _panel_get_plugins(Panel * panel, PanelPosition position)
+/* panel_get_applets */
+static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 {
 #ifndef EMBEDDED
-	char const * plugins = "main,desktop,lock,logout,pager,tasks"
+	char const * applets = "main,desktop,lock,logout,pager,tasks"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock";
 #else /* EMBEDDED */
-	char const * plugins = "main,desktop,keyboard,tasks,spacer"
+	char const * applets = "main,desktop,keyboard,tasks,spacer"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
 #endif
 	char const * p = NULL;
 
-	if(position == PANEL_POSITION_TOP)
-		p = panel_get_config(panel, NULL, "top");
-	if(position == PANEL_POSITION_BOTTOM)
-		p = panel_get_config(panel, NULL, "bottom");
-	if(p == NULL && position == PANEL_POSITION_BOTTOM)
-		if((p = panel_get_config(panel, NULL, "plugins")) == NULL)
-			p = plugins;
+	switch(position)
+	{
+		case PANEL_POSITION_TOP:
+			p = panel_get_config(panel, "top", "applets");
+			break;
+		case PANEL_POSITION_BOTTOM:
+			p = panel_get_config(panel, "bottom", "applets");
+			if(p == NULL)
+				p = panel_get_config(panel, NULL, "applets");
+			if(p == NULL)
+				p = applets;
+			break;
+		case PANEL_POSITION_LEFT:
+			p = panel_get_config(panel, "left", "applets");
+			break;
+		case PANEL_POSITION_RIGHT:
+			p = panel_get_config(panel, "right", "applets");
+			break;
+	}
 	return p;
 }
 
