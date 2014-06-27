@@ -361,15 +361,15 @@ static gboolean _on_idle(gpointer data)
 
 static void _idle_load(Panel * panel, PanelPosition position)
 {
-	char const * plugins;
+	char const * applets;
 	char * p;
 	char * q;
 	size_t i;
 
-	if((plugins = _panel_get_plugins(panel, position)) == NULL
-			|| strlen(plugins) == 0)
+	if((applets = _panel_get_applets(panel, position)) == NULL
+			|| strlen(applets) == 0)
 		return;
-	if((p = string_new(plugins)) == NULL)
+	if((p = string_new(applets)) == NULL)
 	{
 		panel_error(panel, error_get(), FALSE);
 		return;
