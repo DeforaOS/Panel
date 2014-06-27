@@ -99,7 +99,12 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	label = gtk_label_new(_("CPU:"));
 	gtk_widget_modify_font(label, desc);
 	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	cpu->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100,
+			1);
+#else
 	cpu->scale = gtk_vscale_new_with_range(0, 100, 1);
+#endif
 	gtk_widget_set_sensitive(cpu->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);

@@ -92,7 +92,12 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	label = gtk_label_new(_("Swap:"));
 	gtk_widget_modify_font(label, desc);
 	gtk_box_pack_start(GTK_BOX(swap->widget), label, FALSE, FALSE, 0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	swap->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100,
+			1);
+#else
 	swap->scale = gtk_vscale_new_with_range(0, 100, 1);
+#endif
 	gtk_widget_set_sensitive(swap->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(swap->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(swap->scale), GTK_POS_RIGHT);
