@@ -346,12 +346,13 @@ static int _new_window(Panel * panel, PanelPosition position,
 		GdkRectangle * rect)
 {
 	PanelAppletHelper * helper = &panel->helpers[position];
+	const char * sections[PANEL_POSITION_COUNT] = {
+		"bottom", "top", "left", "right" };
 	gboolean focus;
 	gboolean above;
 	String const * p;
 
-	/* FIXME */
-	if(panel_get_config(panel, "top", "applets") == NULL)
+	if(panel_get_config(panel, sections[position], "applets") == NULL)
 		return 0;
 	if((panel->windows[position] = panel_window_new(position, helper,
 					rect)) == NULL)
