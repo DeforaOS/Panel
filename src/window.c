@@ -352,7 +352,8 @@ static void _panel_window_reset(PanelWindow * panel)
 		case PANEL_WINDOW_POSITION_RIGHT:
 			/* FIXME really implement */
 			gtk_window_move(GTK_WINDOW(panel->window),
-					panel->root.x, panel->root.y - 48);
+					panel->root.x + panel->root.width - 48,
+					panel->root.y);
 			gtk_window_resize(GTK_WINDOW(panel->window), 48,
 					panel->root.height);
 			break;
