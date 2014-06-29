@@ -1446,7 +1446,7 @@ static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 /* panel_get_section */
 static char const * _panel_get_section(Panel * panel, PanelPosition position)
 {
-	const char const * sections[PANEL_POSITION_COUNT] = {
+	char const * sections[PANEL_POSITION_COUNT] = {
 		"bottom", "top", "left", "right" };
 
 	return sections[position];
