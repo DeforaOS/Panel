@@ -1093,6 +1093,7 @@ static void _preferences_on_response_apply(gpointer data)
 static void _preferences_on_response_apply_panel(Panel * panel,
 		PanelPosition position)
 {
+	char const * section;
 	gint i;
 	const gint cnt = sizeof(_panel_sizes) / sizeof(*_panel_sizes);
 	GtkTreeModel * model;
@@ -1102,11 +1103,12 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 	String * value;
 	String * sep;
 
+	section = _panel_get_section(panel, position);
 	i = gtk_combo_box_get_active(
 			GTK_COMBO_BOX(panel->pr_panels[position].size));
 	if(i >= 0 && i <= cnt)
-		/* FIXME "top" is wrong */
-		config_set(panel->config, "top", "size", (i > 0)
+		/* XXX may fail */
+		config_set(panel->config, section, "size", (i > 0)
 				? _panel_sizes[i - 1].name : NULL);
 	model = GTK_TREE_MODEL(panel->pr_panels[position].store);
 	value = NULL;
@@ -1120,15 +1122,14 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 		sep = ",";
 		g_free(p);
 	}
-	/* FIXME "top" is wrong */
-	config_set(panel->config, "top", "applets", value);
+	/* XXX may fail */
+	config_set(panel->config, section, "applets", value);
 	string_delete(value);
 }
 
 static void _preferences_on_response_cancel(gpointer data)
 {
 	Panel * panel = data;
-	char const * p;
 	size_t i;
 	size_t cnt = sizeof(_panel_sizes) / sizeof(*_panel_sizes);
 	GtkWidget * widget;
@@ -1140,32 +1141,6 @@ static void _preferences_on_response_cancel(gpointer data)
 	_cancel_general(panel);
 	/* applets */
 	_cancel_applets(panel);
-	/* FIXME handle all panels */
-	if((p = panel_get_config(panel, "bottom", "size")) == NULL
-			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_panels[PANEL_POSITION_BOTTOM].size),
-				0);
-	else
-		for(i = 0; i < cnt; i++)
-		{
-			if(strcmp(p, _panel_sizes[i].name) != 0)
-				continue;
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						panel->pr_panels[PANEL_POSITION_BOTTOM].size), i + 1);
-			break;
-		}
-	if((p = panel_get_config(panel, "top", "size")) == NULL
-			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
-		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_panels[PANEL_POSITION_TOP].size), 0);
-	else
-		for(i = 0; i < cnt; i++)
-		{
-			if(strcmp(p, _panel_sizes[i].name) != 0)
-				continue;
-			gtk_combo_box_set_active(GTK_COMBO_BOX(
-						panel->pr_panels[PANEL_POSITION_TOP].size), i + 1);
-			break;
-		}
 	/* XXX applets should be known from Panel already */
 	cnt = gtk_notebook_get_n_pages(GTK_NOTEBOOK(panel->pr_notebook));
 	for(i = 1; i < cnt; i++)
@@ -1181,21 +1156,6 @@ static void _preferences_on_response_cancel(gpointer data)
 	}
 }
 
-static void _cancel_general(Panel * panel)
-{
-	char const * p;
-	gboolean b;
-
-	b = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
-			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_accept_focus),
-			b);
-	b = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
-			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_keep_above),
-			b);
-}
-
 static void _cancel_applets(Panel * panel)
 {
 	DIR * dir;
@@ -1206,12 +1166,14 @@ static void _cancel_applets(Panel * panel)
 	char const ext[] = ".so";
 #endif
 	size_t len;
+	char const * section;
+	char const * p;
 	char * q;
-	char const * r;
 	gboolean enabled;
 	char c;
 	size_t i;
 	size_t j;
+	const size_t cnt = sizeof(_panel_sizes) / sizeof(*_panel_sizes);
 
 	gtk_list_store_clear(panel->pr_store);
 	for(j = 0; j < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
@@ -1237,27 +1199,61 @@ static void _cancel_applets(Panel * panel)
 	for(j = 0; j < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
 			j++)
 	{
-		r = _panel_get_section(panel, j);
-		enabled = ((r = panel_get_config(panel, r, "enabled")) != NULL
-				&& strtol(r, NULL, 0) != 0) ? TRUE : FALSE;
+		section = _panel_get_section(panel, j);
+		/* enabled */
+		enabled = ((p = panel_get_config(panel, section, "enabled"))
+				!= NULL
+				&& strtol(p, NULL, 0) != 0) ? TRUE : FALSE;
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					panel->pr_panels[j].enabled), enabled);
-		r = _panel_get_applets(panel, j);
-		q = (r != NULL) ? strdup(r) : NULL;
-		for(i = 0, r = q; q != NULL; i++)
+		/* applets */
+		p = _panel_get_applets(panel, j);
+		q = (p != NULL) ? strdup(p) : NULL;
+		for(i = 0, p = q; q != NULL; i++)
 		{
 			if(q[i] != '\0' && q[i] != ',')
 				continue;
 			c = q[i];
 			q[i] = '\0';
 			_preferences_window_applets_add(
-					panel->pr_panels[j].store, r);
+					panel->pr_panels[j].store, p);
 			if(c == '\0')
 				break;
-			r = &q[i + 1];
+			p = &q[i + 1];
 		}
 		free(q);
+		/* size */
+		if((p = panel_get_config(panel, section, "size")) == NULL
+				&& (p = panel_get_config(panel, NULL, "size"))
+				== NULL)
+			gtk_combo_box_set_active(GTK_COMBO_BOX(
+						panel->pr_panels[j].size), 0);
+		else
+			for(i = 0; i < cnt; i++)
+			{
+				if(strcmp(p, _panel_sizes[i].name) != 0)
+					continue;
+				gtk_combo_box_set_active(GTK_COMBO_BOX(
+							panel->pr_panels[j].size),
+						i + 1);
+				break;
+			}
 	}
+}
+
+static void _cancel_general(Panel * panel)
+{
+	char const * p;
+	gboolean b;
+
+	b = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
+			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_accept_focus),
+			b);
+	b = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
+			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(panel->pr_keep_above),
+			b);
 }
 
 static void _preferences_on_panel_toggled(gpointer data)
