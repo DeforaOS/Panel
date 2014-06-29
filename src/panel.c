@@ -1083,7 +1083,7 @@ static void _preferences_on_response_apply(gpointer data)
 			continue;
 		pad->settings(pa, TRUE, FALSE);
 	}
-	for(j = 0; j < sizeof(panel->windows) / sizeof(*panel->windows); i++)
+	for(j = 0; j < sizeof(panel->windows) / sizeof(*panel->windows); j++)
 		if(panel->windows[j] != NULL)
 			panel_window_remove_all(panel->windows[j]);
 	if(panel->source == 0)
