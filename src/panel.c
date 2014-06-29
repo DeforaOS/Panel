@@ -925,7 +925,7 @@ static GtkWidget * _preferences_window_panel(Panel * panel,
 #endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
 	panel->pr_panels[position].enabled = gtk_check_button_new_with_mnemonic(
-			"_Enabled");
+			_("_Enabled"));
 	g_signal_connect_swapped(panel->pr_panels[position].enabled, "toggled",
 			G_CALLBACK(_preferences_on_panel_toggled), panel);
 	gtk_box_pack_start(GTK_BOX(vbox3), panel->pr_panels[position].enabled,
