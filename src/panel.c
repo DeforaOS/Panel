@@ -908,13 +908,16 @@ static GtkWidget * _preferences_window_general(Panel * panel)
 static GtkWidget * _preferences_window_panel(Panel * panel,
 		PanelPosition position)
 {
+	const char * titles[PANEL_POSITION_COUNT] = {
+		N_("Bottom panel:"), N_("Top panel:"),
+		N_("Left panel:"), N_("Right panel:")
+	};
 	GtkWidget * frame;
 	GtkWidget * vbox3;
 	GtkWidget * widget;
 	size_t i;
 
-	/* FIXME wrong */
-	frame = gtk_frame_new(_("Bottom panel:"));
+	frame = gtk_frame_new(_(titles[position]));
 #if GTK_CHECK_VERSION(3, 0, 0)
 	vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 #else
