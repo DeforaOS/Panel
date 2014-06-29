@@ -204,8 +204,8 @@ Panel * panel_new(PanelPrefs const * prefs)
 	desktop_message_register(NULL, PANEL_CLIENT_MESSAGE, _new_on_message,
 			panel);
 	/* manage root window events */
-	gdk_window_set_events(panel->root, gdk_window_get_events(
-				panel->root) | GDK_PROPERTY_CHANGE_MASK);
+	gdk_window_set_events(panel->root, gdk_window_get_events(panel->root)
+			| GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(panel->root, _on_root_event, panel);
 	/* load plug-ins when idle */
 	panel->source = g_idle_add(_new_on_idle, panel);
