@@ -113,11 +113,9 @@ static const struct
 	gint size;
 } _panel_sizes[] =
 {
-	{ "panel-large",	N_("Large"),	GTK_ICON_SIZE_LARGE_TOOLBAR,
-		48 },
-	{ "panel-small",	N_("Small"),	GTK_ICON_SIZE_SMALL_TOOLBAR,
-		24 },
-	{ "panel-smaller",	N_("Smaller"),	GTK_ICON_SIZE_MENU, 16 }
+	{ "panel-large",   N_("Large"),   GTK_ICON_SIZE_LARGE_TOOLBAR, 48 },
+	{ "panel-small",   N_("Small"),   GTK_ICON_SIZE_SMALL_TOOLBAR, 24 },
+	{ "panel-smaller", N_("Smaller"), GTK_ICON_SIZE_MENU,          16 }
 };
 
 
