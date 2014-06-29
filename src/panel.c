@@ -207,7 +207,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	gdk_window_set_events(panel->root, gdk_window_get_events(panel->root)
 			| GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(panel->root, _on_root_event, panel);
-	/* load plug-ins when idle */
+	/* load applets when idle */
 	panel->source = g_idle_add(_new_on_idle, panel);
 	return panel;
 }
@@ -628,11 +628,11 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 /* panel_show_preferences */
 static void _show_preferences_window(Panel * panel);
 static GtkWidget * _preferences_window_applets(Panel * panel);
+static void _preferences_window_applets_add(GtkListStore * store,
+		char const * name);
 static GtkListStore * _preferences_window_applets_model(void);
 static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
 		gboolean reorderable);
-static void _preferences_window_applets_plugin_add(GtkListStore * store,
-		char const * name);
 static GtkWidget * _preferences_window_general(Panel * panel);
 static GtkWidget * _preferences_window_panel(Panel * panel,
 		PanelPosition position);
@@ -699,7 +699,7 @@ static void _show_preferences_window(Panel * panel)
 	vbox = GTK_DIALOG(panel->pr_window)->vbox;
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_notebook, TRUE, TRUE, 0);
-	/* FIXME implement a way to enable plug-ins per panel (and in order) */
+	/* FIXME implement a way to enable applets per panel (and in order) */
 	_preferences_on_response_cancel(panel);
 	gtk_widget_show_all(vbox);
 }
@@ -726,7 +726,7 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
-	/* plug-ins */
+	/* applets */
 	frame = gtk_frame_new(_("Applets:"));
 	widget = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(widget), 4);
@@ -815,7 +815,7 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 #else
 	vbox2 = gtk_vbox_new(FALSE, 4);
 #endif
-	/* panel plug-ins */
+	/* panel applets */
 	for(i = 0; i < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
 			i++)
 	{
@@ -825,6 +825,34 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	return vbox;
+}
+
+static void _preferences_window_applets_add(GtkListStore * store,
+		char const * name)
+{
+	Plugin * p;
+	PanelAppletDefinition * pad;
+	GtkTreeIter iter;
+	GtkIconTheme * theme;
+	GdkPixbuf * pixbuf = NULL;
+
+	if((p = plugin_new(LIBDIR, PACKAGE, "applets", name)) == NULL)
+		return;
+	if((pad = plugin_lookup(p, "applet")) == NULL)
+	{
+		plugin_delete(p);
+		return;
+	}
+	theme = gtk_icon_theme_get_default();
+	if(pad->icon != NULL)
+		pixbuf = gtk_icon_theme_load_icon(theme, pad->icon, 24, 0,
+				NULL);
+	if(pixbuf == NULL)
+		pixbuf = gtk_icon_theme_load_icon(theme, "gnome-settings", 24,
+				0, NULL);
+	gtk_list_store_append(store, &iter);
+	gtk_list_store_set(store, &iter, 0, name, 1, pixbuf, 2, pad->name, -1);
+	plugin_delete(p);
 }
 
 static GtkListStore * _preferences_window_applets_model(void)
@@ -856,34 +884,6 @@ static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
 			"text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	return view;
-}
-
-static void _preferences_window_applets_plugin_add(GtkListStore * store,
-		char const * name)
-{
-	Plugin * p;
-	PanelAppletDefinition * pad;
-	GtkTreeIter iter;
-	GtkIconTheme * theme;
-	GdkPixbuf * pixbuf = NULL;
-
-	if((p = plugin_new(LIBDIR, PACKAGE, "applets", name)) == NULL)
-		return;
-	if((pad = plugin_lookup(p, "applet")) == NULL)
-	{
-		plugin_delete(p);
-		return;
-	}
-	theme = gtk_icon_theme_get_default();
-	if(pad->icon != NULL)
-		pixbuf = gtk_icon_theme_load_icon(theme, pad->icon, 24, 0,
-				NULL);
-	if(pixbuf == NULL)
-		pixbuf = gtk_icon_theme_load_icon(theme, "gnome-settings", 24,
-				0, NULL);
-	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, name, 1, pixbuf, 2, pad->name, -1);
-	plugin_delete(p);
 }
 
 static GtkWidget * _preferences_window_general(Panel * panel)
@@ -979,8 +979,7 @@ static void _preferences_on_bottom_add(gpointer data)
 	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
 		return;
 	gtk_tree_model_get(model, &iter, 0, &p, -1);
-	_preferences_window_applets_plugin_add(panel->pr_panels[position].store,
-			p);
+	_preferences_window_applets_add(panel->pr_panels[position].store, p);
 	g_free(p);
 }
 
@@ -1229,7 +1228,7 @@ static void _cancel_applets(Panel * panel)
 		gtk_list_store_clear(panel->pr_panels[j].store);
 	if((dir = opendir(LIBDIR "/" PACKAGE "/applets")) == NULL)
 		return;
-	/* plug-ins */
+	/* applets */
 	while((de = readdir(dir)) != NULL)
 	{
 		if((len = strlen(de->d_name)) < sizeof(ext))
@@ -1240,8 +1239,7 @@ static void _cancel_applets(Panel * panel)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, de->d_name);
 #endif
-		_preferences_window_applets_plugin_add(panel->pr_store,
-				de->d_name);
+		_preferences_window_applets_add(panel->pr_store, de->d_name);
 	}
 	closedir(dir);
 	/* panels */
@@ -1257,7 +1255,7 @@ static void _cancel_applets(Panel * panel)
 				continue;
 			c = q[i];
 			q[i] = '\0';
-			_preferences_window_applets_plugin_add(
+			_preferences_window_applets_add(
 					panel->pr_panels[j].store, r);
 			if(c == '\0')
 				break;
@@ -1309,8 +1307,7 @@ static void _preferences_on_top_add(gpointer data)
 	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
 		return;
 	gtk_tree_model_get(model, &iter, 0, &p, -1);
-	_preferences_window_applets_plugin_add(panel->pr_panels[position].store,
-			p);
+	_preferences_window_applets_add(panel->pr_panels[position].store, p);
 	g_free(p);
 }
 
