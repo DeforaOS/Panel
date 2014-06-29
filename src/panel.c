@@ -125,6 +125,7 @@ static const struct
 static gboolean _panel_can_suspend(void);
 
 static char const * _panel_get_applets(Panel * panel, PanelPosition position);
+static char const * _panel_get_section(Panel * panel, PanelPosition position);
 
 /* useful */
 static void _panel_reset(Panel * panel, GdkRectangle * rect);
@@ -313,25 +314,10 @@ static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 {
 	GtkIconSize ret = GTK_ICON_SIZE_INVALID;
-	char const * section = NULL;
+	char const * section;
 	char const * p = NULL;
 
-	switch(position)
-	{
-		case PANEL_POSITION_BOTTOM:
-			section = "bottom";
-			break;
-		case PANEL_POSITION_TOP:
-			section = "top";
-			break;
-		case PANEL_POSITION_LEFT:
-			section = "left";
-			break;
-		case PANEL_POSITION_RIGHT:
-			section = "right";
-			break;
-	}
-	if(section != NULL)
+	if((section = _panel_get_section(panel, position)) != NULL)
 		p = panel_get_config(panel, section, "size");
 	if(p == NULL)
 		p = panel_get_config(panel, NULL, "size");
@@ -358,11 +344,10 @@ static PanelWindow * _new_window(PanelPosition position,
 static int _new_windows(Panel * panel, GdkRectangle * rect)
 {
 	size_t i;
+	char const * section;
 	String const * p;
 	gboolean focus;
 	gboolean above;
-	const char * sections[PANEL_POSITION_COUNT] = { "bottom", "top", "left",
-		"right" };
 
 	focus = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
@@ -370,10 +355,11 @@ static int _new_windows(Panel * panel, GdkRectangle * rect)
 			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
 	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
 	{
-		if((p = panel_get_config(panel, sections[i], "enabled")) == NULL
+		section = _panel_get_section(panel, i);
+		if((p = panel_get_config(panel, section, "enabled")) == NULL
 				|| strtol(p, NULL, 0) == 0)
 			continue;
-		if(panel_get_config(panel, sections[i], "applets") == NULL)
+		if(panel_get_config(panel, section, "applets") == NULL)
 			continue;
 		if((panel->windows[i] = _new_window(i, &panel->helpers[i], rect,
 						focus, above)) == NULL)
@@ -1154,6 +1140,7 @@ static void _preferences_on_response_cancel(gpointer data)
 	_cancel_general(panel);
 	/* applets */
 	_cancel_applets(panel);
+	/* FIXME handle all panels */
 	if((p = panel_get_config(panel, "bottom", "size")) == NULL
 			&& (p = panel_get_config(panel, NULL, "size")) == NULL)
 		gtk_combo_box_set_active(GTK_COMBO_BOX(panel->pr_panels[PANEL_POSITION_BOTTOM].size),
@@ -1221,6 +1208,7 @@ static void _cancel_applets(Panel * panel)
 	size_t len;
 	char * q;
 	char const * r;
+	gboolean enabled;
 	char c;
 	size_t i;
 	size_t j;
@@ -1249,7 +1237,11 @@ static void _cancel_applets(Panel * panel)
 	for(j = 0; j < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
 			j++)
 	{
-		/* top panel */
+		r = _panel_get_section(panel, j);
+		enabled = ((r = panel_get_config(panel, r, "enabled")) != NULL
+				&& strtol(r, NULL, 0) != 0) ? TRUE : FALSE;
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+					panel->pr_panels[j].enabled), enabled);
 		r = _panel_get_applets(panel, j);
 		q = (r != NULL) ? strdup(r) : NULL;
 		for(i = 0, r = q; q != NULL; i++)
@@ -1428,28 +1420,36 @@ static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
 #endif
+	char const * section;
 	char const * p = NULL;
 
+	section = _panel_get_section(panel, position);
 	switch(position)
 	{
+		case PANEL_POSITION_LEFT:
+		case PANEL_POSITION_RIGHT:
 		case PANEL_POSITION_TOP:
-			p = panel_get_config(panel, "top", "applets");
+			p = panel_get_config(panel, section, "applets");
 			break;
 		case PANEL_POSITION_BOTTOM:
-			p = panel_get_config(panel, "bottom", "applets");
+			p = panel_get_config(panel, section, "applets");
 			if(p == NULL)
 				p = panel_get_config(panel, NULL, "applets");
 			if(p == NULL)
 				p = applets;
 			break;
-		case PANEL_POSITION_LEFT:
-			p = panel_get_config(panel, "left", "applets");
-			break;
-		case PANEL_POSITION_RIGHT:
-			p = panel_get_config(panel, "right", "applets");
-			break;
 	}
 	return p;
+}
+
+
+/* panel_get_section */
+static char const * _panel_get_section(Panel * panel, PanelPosition position)
+{
+	const char const * sections[PANEL_POSITION_COUNT] = {
+		"bottom", "top", "left", "right" };
+
+	return sections[position];
 }
 
 
