@@ -829,11 +829,9 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 
 static GtkListStore * _preferences_window_applets_model(void)
 {
-	GtkListStore * store;
-
-	store = gtk_list_store_new(3, G_TYPE_STRING, GDK_TYPE_PIXBUF,
-			G_TYPE_STRING);
-	return store;
+	return gtk_list_store_new(3, G_TYPE_STRING,	/* name */
+			GDK_TYPE_PIXBUF,		/* icon */
+			G_TYPE_STRING);			/* full name */
 }
 
 static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
