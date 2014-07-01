@@ -1060,12 +1060,16 @@ static void _preferences_on_response_apply(gpointer data)
 	size_t j;
 
 	/* general */
-	config_set(panel->config, NULL, "accept_focus",
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-					panel->pr_accept_focus)) ? "1" : "0");
-	config_set(panel->config, NULL, "keep_above",
-			gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-					panel->pr_keep_above)) ? "1" : "0");
+	if(config_set(panel->config, NULL, "accept_focus",
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						panel->pr_accept_focus))
+				? "1" : "0") != 0)
+		panel_error(NULL, NULL, 1);
+	if(config_set(panel->config, NULL, "keep_above",
+				gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+						panel->pr_keep_above))
+				? "1" : "0") != 0)
+		panel_error(NULL, NULL, 1);
 	/* panels */
 	for(j = 0; j < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
 			j++)
@@ -1107,9 +1111,9 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 	i = gtk_combo_box_get_active(
 			GTK_COMBO_BOX(panel->pr_panels[position].size));
 	if(i >= 0 && i <= cnt)
-		/* XXX may fail */
-		config_set(panel->config, section, "size", (i > 0)
-				? _panel_sizes[i - 1].name : NULL);
+		if(config_set(panel->config, section, "size", (i > 0)
+					? _panel_sizes[i - 1].name : NULL) != 0)
+			panel_error(NULL, NULL, 1);
 	model = GTK_TREE_MODEL(panel->pr_panels[position].store);
 	value = NULL;
 	sep = "";
@@ -1122,8 +1126,8 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 		sep = ",";
 		g_free(p);
 	}
-	/* XXX may fail */
-	config_set(panel->config, section, "applets", value);
+	if(config_set(panel->config, section, "applets", value) != 0)
+		panel_error(NULL, NULL, 1);
 	string_delete(value);
 }
 
