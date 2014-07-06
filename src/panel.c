@@ -81,12 +81,13 @@ struct _Panel
 	GtkWidget * pr_keep_above;
 	GtkListStore * pr_store;
 	GtkWidget * pr_view;
+	GtkWidget * pr_panels_panel;
+	GtkWidget * pr_panels_view;
 	struct
 	{
 		GtkWidget * enabled;
 		GtkWidget * size;
 		GtkListStore * store;
-		GtkWidget * view;
 	} pr_panels[PANEL_POSITION_COUNT];
 
 	/* dialogs */
@@ -613,19 +614,14 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 
 /* panel_show_preferences */
 static void _show_preferences_window(Panel * panel);
-static GtkWidget * _preferences_window_applets(Panel * panel);
-static void _preferences_window_applets_add(GtkListStore * store,
-		char const * name);
-static GtkListStore * _preferences_window_applets_model(void);
-static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
-		gboolean reorderable);
 static GtkWidget * _preferences_window_general(Panel * panel);
-static GtkWidget * _preferences_window_panel(Panel * panel,
-		PanelPosition position);
-static void _preferences_on_bottom_add(gpointer data);
-static void _preferences_on_bottom_down(gpointer data);
-static void _preferences_on_bottom_remove(gpointer data);
-static void _preferences_on_bottom_up(gpointer data);
+static GtkWidget * _preferences_window_panel(Panel * panel);
+static GtkWidget * _preferences_window_panels(Panel * panel);
+static void _preferences_window_panels_add(GtkListStore * store,
+		char const * name);
+static GtkListStore * _preferences_window_panels_model(void);
+static GtkWidget * _preferences_window_panels_view(GtkListStore * store,
+		gboolean reorderable);
 static gboolean _preferences_on_closex(gpointer data);
 static void _preferences_on_response(GtkWidget * widget, gint response,
 		gpointer data);
@@ -637,10 +633,11 @@ static void _cancel_general(Panel * panel);
 static void _cancel_applets(Panel * panel);
 static void _preferences_on_panel_toggled(gpointer data);
 static void _preferences_on_response_ok(gpointer data);
-static void _preferences_on_top_add(gpointer data);
-static void _preferences_on_top_down(gpointer data);
-static void _preferences_on_top_remove(gpointer data);
-static void _preferences_on_top_up(gpointer data);
+static void _preferences_on_panel_add(gpointer data);
+static void _preferences_on_panel_changed(gpointer data);
+static void _preferences_on_panel_down(gpointer data);
+static void _preferences_on_panel_remove(gpointer data);
+static void _preferences_on_panel_up(gpointer data);
 
 void panel_show_preferences(Panel * panel, gboolean show)
 {
@@ -675,10 +672,10 @@ static void _show_preferences_window(Panel * panel)
 	widget = _preferences_window_general(panel);
 	gtk_notebook_append_page(GTK_NOTEBOOK(panel->pr_notebook), widget,
 			gtk_label_new(_("General")));
-	/* applets */
-	widget = _preferences_window_applets(panel);
+	/* panels */
+	widget = _preferences_window_panels(panel);
 	gtk_notebook_append_page(GTK_NOTEBOOK(panel->pr_notebook), widget,
-			gtk_label_new(_("Applets")));
+			gtk_label_new(_("Panels")));
 #if GTK_CHECK_VERSION(2, 14, 0)
 	vbox = gtk_dialog_get_content_area(GTK_DIALOG(panel->pr_window));
 #else
@@ -690,7 +687,113 @@ static void _show_preferences_window(Panel * panel)
 	gtk_widget_show_all(vbox);
 }
 
-static GtkWidget * _preferences_window_applets(Panel * panel)
+static GtkWidget * _preferences_window_general(Panel * panel)
+{
+	GtkWidget * vbox;
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
+	vbox = gtk_vbox_new(FALSE, 4);
+#endif
+	panel->pr_accept_focus = gtk_check_button_new_with_mnemonic(
+			_("Accept focus"));
+	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_accept_focus, FALSE, TRUE,
+			0);
+	panel->pr_keep_above = gtk_check_button_new_with_mnemonic(
+			_("Keep above other windows"));
+	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_keep_above, FALSE, TRUE, 0);
+	return vbox;
+}
+
+static GtkWidget * _preferences_window_panel(Panel * panel)
+{
+	const char * titles[PANEL_POSITION_COUNT] = {
+		N_("Bottom panel:"), N_("Top panel:"),
+		N_("Left panel:"), N_("Right panel:")
+	};
+	GtkWidget * frame;
+	GtkWidget * vbox3;
+	GtkWidget * widget;
+	size_t i;
+	size_t j;
+
+	frame = gtk_frame_new(NULL);
+#if GTK_CHECK_VERSION(2, 24, 0)
+	widget = gtk_combo_box_text_new();
+#else
+	widget = gtk_combo_box_new_text();
+#endif
+	panel->pr_panels_panel = widget;
+	gtk_frame_set_label_widget(GTK_FRAME(frame), widget);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
+	vbox3 = gtk_vbox_new(FALSE, 4);
+#endif
+	gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
+	for(i = 0; i < sizeof(titles) / sizeof(*titles); i++)
+	{
+#if GTK_CHECK_VERSION(2, 24, 0)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(widget), _(titles[i]));
+#else
+		gtk_combo_box_append_text(GTK_COMBO_BOX(widget), _(titles[i]));
+#endif
+		/* enabled */
+		panel->pr_panels[i].enabled = gtk_check_button_new_with_mnemonic(
+				_("_Enabled"));
+		g_signal_connect_swapped(panel->pr_panels[i].enabled, "toggled",
+				G_CALLBACK(_preferences_on_panel_toggled),
+				panel);
+		gtk_box_pack_start(GTK_BOX(vbox3), panel->pr_panels[i].enabled,
+				FALSE, TRUE, 0);
+		gtk_widget_set_no_show_all(panel->pr_panels[i].enabled, TRUE);
+		/* size */
+#if GTK_CHECK_VERSION(3, 0, 0)
+		panel->pr_panels[i].size = gtk_combo_box_text_new();
+		gtk_combo_box_text_append(
+				GTK_COMBO_BOX_TEXT(panel->pr_panels[i].size),
+				NULL, _("Default"));
+#else
+		panel->pr_panels[i].size = gtk_combo_box_new_text();
+		gtk_combo_box_append_text(
+				GTK_COMBO_BOX(panel->pr_panels[i].size),
+				_("Default"));
+#endif
+		for(j = 0; j < sizeof(_panel_sizes) / sizeof(*_panel_sizes);
+				j++)
+		{
+#if GTK_CHECK_VERSION(3, 0, 0)
+			gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(
+						panel->pr_panels[i].size), NULL,
+					_(_panel_sizes[j].alias));
+#else
+			gtk_combo_box_append_text(
+					GTK_COMBO_BOX(panel->pr_panels[i].size),
+					_(_panel_sizes[j].alias));
+#endif
+		}
+		gtk_widget_set_no_show_all(panel->pr_panels[i].size, TRUE);
+		gtk_box_pack_start(GTK_BOX(vbox3), panel->pr_panels[i].size,
+				FALSE, TRUE, 0);
+		panel->pr_panels[i].store = _preferences_window_panels_model();
+	}
+	gtk_combo_box_set_active(GTK_COMBO_BOX(widget), 0);
+	g_signal_connect_swapped(widget, "changed", G_CALLBACK(
+				_preferences_on_panel_changed), panel);
+	widget = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
+			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(widget),
+			GTK_SHADOW_ETCHED_IN);
+	panel->pr_panels_view = _preferences_window_panels_view(NULL, TRUE);
+	gtk_container_add(GTK_CONTAINER(widget), panel->pr_panels_view);
+	gtk_box_pack_start(GTK_BOX(vbox3), widget, TRUE, TRUE, 0);
+	gtk_container_add(GTK_CONTAINER(frame), vbox3);
+	return frame;
+}
+
+static GtkWidget * _preferences_window_panels(Panel * panel)
 {
 	GtkSizeGroup * group;
 	GtkWidget * vbox;
@@ -698,7 +801,6 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 	GtkWidget * hbox;
 	GtkWidget * frame;
 	GtkWidget * widget;
-	size_t i;
 
 	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -720,100 +822,65 @@ static GtkWidget * _preferences_window_applets(Panel * panel)
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(widget),
 			GTK_SHADOW_ETCHED_IN);
-	panel->pr_store = _preferences_window_applets_model();
+	panel->pr_store = _preferences_window_panels_model();
 	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(panel->pr_store),
 			2, GTK_SORT_ASCENDING);
-	panel->pr_view = _preferences_window_applets_view(panel->pr_store,
+	panel->pr_view = _preferences_window_panels_view(panel->pr_store,
 			FALSE);
 	gtk_container_add(GTK_CONTAINER(widget), panel->pr_view);
 	gtk_container_add(GTK_CONTAINER(frame), widget);
 	gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 0);
 	/* controls */
-	/* FIXME the controls are wrong (and incomplete) */
 #if GTK_CHECK_VERSION(3, 0, 0)
 	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 #else
 	vbox2 = gtk_vbox_new(FALSE, 4);
 #endif
-	widget = gtk_label_new(NULL);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, TRUE, TRUE, 0);
-	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
-				GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_BUTTON));
-	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_top_add), panel);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
-#ifndef EMBEDDED
-	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
-				GTK_STOCK_GO_UP, GTK_ICON_SIZE_BUTTON));
-	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_top_up), panel);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
-	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
-				GTK_STOCK_GO_DOWN, GTK_ICON_SIZE_BUTTON));
-	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_top_down), panel);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
-#endif
+	/* remove */
 	widget = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
 				GTK_STOCK_DELETE, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_top_remove), panel);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
-	widget = gtk_label_new(NULL);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, TRUE, TRUE, 0);
-	widget = gtk_label_new(NULL);
-	gtk_box_pack_start(GTK_BOX(vbox2), widget, TRUE, TRUE, 0);
-	widget = gtk_label_new(NULL);
-	gtk_box_pack_end(GTK_BOX(vbox2), widget, TRUE, TRUE, 0);
-	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
-				GTK_STOCK_DELETE, GTK_ICON_SIZE_BUTTON));
-	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_bottom_remove), panel);
+				_preferences_on_panel_remove), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
 #ifndef EMBEDDED
+	/* bottom */
 	widget = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
 				GTK_STOCK_GO_DOWN, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_bottom_down), panel);
+				_preferences_on_panel_down), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
+	/* top */
 	widget = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
 				GTK_STOCK_GO_UP, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_bottom_up), panel);
+				_preferences_on_panel_up), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
 #endif
+	/* add */
 	widget = gtk_button_new();
 	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
 				GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
-				_preferences_on_bottom_add), panel);
+				_preferences_on_panel_add), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox), vbox2, FALSE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 0);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 #else
 	vbox2 = gtk_vbox_new(FALSE, 4);
 #endif
 	/* panel applets */
-	for(i = 0; i < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
-			i++)
-	{
-		frame = _preferences_window_panel(panel, i);
-		gtk_box_pack_start(GTK_BOX(vbox2), frame, TRUE, TRUE, 0);
-	}
+	frame = _preferences_window_panel(panel);
+	gtk_box_pack_start(GTK_BOX(vbox2), frame, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox2, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 0);
 	return vbox;
 }
 
-static void _preferences_window_applets_add(GtkListStore * store,
+static void _preferences_window_panels_add(GtkListStore * store,
 		char const * name)
 {
 	Plugin * p;
@@ -841,14 +908,14 @@ static void _preferences_window_applets_add(GtkListStore * store,
 	plugin_delete(p);
 }
 
-static GtkListStore * _preferences_window_applets_model(void)
+static GtkListStore * _preferences_window_panels_model(void)
 {
 	return gtk_list_store_new(3, G_TYPE_STRING,	/* name */
 			GDK_TYPE_PIXBUF,		/* icon */
 			G_TYPE_STRING);			/* full name */
 }
 
-static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
+static GtkWidget * _preferences_window_panels_view(GtkListStore * store,
 		gboolean reorderable)
 {
 	GtkWidget * view;
@@ -856,7 +923,9 @@ static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
 	GtkCellRenderer * renderer;
 	GtkTreeViewColumn * column;
 
-	view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+	view = (store != NULL)
+		? gtk_tree_view_new_with_model(GTK_TREE_MODEL(store))
+		: gtk_tree_view_new();
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(view), FALSE);
 	gtk_tree_view_set_reorderable(GTK_TREE_VIEW(view), reorderable);
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
@@ -870,160 +939,6 @@ static GtkWidget * _preferences_window_applets_view(GtkListStore * store,
 			"text", 2, NULL);
 	gtk_tree_view_append_column(GTK_TREE_VIEW(view), column);
 	return view;
-}
-
-static GtkWidget * _preferences_window_general(Panel * panel)
-{
-	GtkWidget * vbox;
-
-#if GTK_CHECK_VERSION(3, 0, 0)
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
-#else
-	vbox = gtk_vbox_new(FALSE, 4);
-#endif
-	panel->pr_accept_focus = gtk_check_button_new_with_mnemonic(
-			_("Accept focus"));
-	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_accept_focus, FALSE, TRUE,
-			0);
-	panel->pr_keep_above = gtk_check_button_new_with_mnemonic(
-			_("Keep above other windows"));
-	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_keep_above, FALSE, TRUE, 0);
-	return vbox;
-}
-
-static GtkWidget * _preferences_window_panel(Panel * panel,
-		PanelPosition position)
-{
-	const char * titles[PANEL_POSITION_COUNT] = {
-		N_("Bottom panel:"), N_("Top panel:"),
-		N_("Left panel:"), N_("Right panel:")
-	};
-	GtkWidget * frame;
-	GtkWidget * vbox3;
-	GtkWidget * widget;
-	size_t i;
-
-	frame = gtk_frame_new(_(titles[position]));
-#if GTK_CHECK_VERSION(3, 0, 0)
-	vbox3 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
-#else
-	vbox3 = gtk_vbox_new(FALSE, 4);
-#endif
-	gtk_container_set_border_width(GTK_CONTAINER(vbox3), 4);
-	panel->pr_panels[position].enabled = gtk_check_button_new_with_mnemonic(
-			_("_Enabled"));
-	g_signal_connect_swapped(panel->pr_panels[position].enabled, "toggled",
-			G_CALLBACK(_preferences_on_panel_toggled), panel);
-	gtk_box_pack_start(GTK_BOX(vbox3), panel->pr_panels[position].enabled,
-			FALSE, TRUE, 0);
-#if GTK_CHECK_VERSION(3, 0, 0)
-	panel->pr_panels[position].size = gtk_combo_box_text_new();
-	gtk_combo_box_text_append(
-			GTK_COMBO_BOX_TEXT(panel->pr_panels[position].size),
-			NULL, _("Default"));
-#else
-	panel->pr_panels[position].size = gtk_combo_box_new_text();
-	gtk_combo_box_append_text(
-			GTK_COMBO_BOX(panel->pr_panels[position].size),
-			_("Default"));
-#endif
-	for(i = 0; i < sizeof(_panel_sizes) / sizeof(*_panel_sizes); i++)
-#if GTK_CHECK_VERSION(3, 0, 0)
-		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(
-					panel->pr_panels[position].size), NULL,
-				_(_panel_sizes[i].alias));
-#else
-	gtk_combo_box_append_text(
-			GTK_COMBO_BOX(panel->pr_panels[position].size),
-			_(_panel_sizes[i].alias));
-#endif
-	gtk_box_pack_start(GTK_BOX(vbox3), panel->pr_panels[position].size,
-			FALSE, TRUE, 0);
-	widget = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
-			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(widget),
-			GTK_SHADOW_ETCHED_IN);
-	panel->pr_panels[position].store = _preferences_window_applets_model();
-	panel->pr_panels[position].view = _preferences_window_applets_view(
-			panel->pr_panels[position].store, TRUE);
-	gtk_container_add(GTK_CONTAINER(widget),
-			panel->pr_panels[position].view);
-	gtk_box_pack_start(GTK_BOX(vbox3), widget, TRUE, TRUE, 0);
-	gtk_container_add(GTK_CONTAINER(frame), vbox3);
-	return frame;
-}
-
-
-static void _preferences_on_bottom_add(gpointer data)
-{
-	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_BOTTOM;
-	GtkTreeModel * model;
-	GtkTreeIter iter;
-	GtkTreeSelection * treesel;
-	gchar * p;
-
-	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(panel->pr_view));
-	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
-		return;
-	gtk_tree_model_get(model, &iter, 0, &p, -1);
-	_preferences_window_applets_add(panel->pr_panels[position].store, p);
-	g_free(p);
-}
-
-static void _preferences_on_bottom_down(gpointer data)
-{
-	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_BOTTOM;
-	GtkTreeModel * model;
-	GtkTreeIter iter;
-	GtkTreeIter iter2;
-	GtkTreeSelection * treesel;
-
-	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
-	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
-		return;
-	iter2 = iter;
-	if(!gtk_tree_model_iter_next(model, &iter))
-		return;
-	gtk_list_store_swap(panel->pr_panels[position].store, &iter, &iter2);
-}
-
-static void _preferences_on_bottom_remove(gpointer data)
-{
-	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_BOTTOM;
-	GtkTreeModel * model;
-	GtkTreeIter iter;
-	GtkTreeSelection * treesel;
-
-	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
-	if(gtk_tree_selection_get_selected(treesel, &model, &iter))
-		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
-}
-
-static void _preferences_on_bottom_up(gpointer data)
-{
-	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_BOTTOM;
-	GtkTreeModel * model;
-	GtkTreeIter iter;
-	GtkTreeIter iter2;
-	GtkTreePath * path;
-	GtkTreeSelection * treesel;
-
-	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
-	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
-		return;
-	path = gtk_tree_model_get_path(model, &iter);
-	gtk_tree_path_prev(path);
-	gtk_tree_model_get_iter(model, &iter2, path);
-	gtk_tree_path_free(path);
-	gtk_list_store_swap(panel->pr_panels[position].store, &iter, &iter2);
 }
 
 static gboolean _preferences_on_closex(gpointer data)
@@ -1196,7 +1111,7 @@ static void _cancel_applets(Panel * panel)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, de->d_name);
 #endif
-		_preferences_window_applets_add(panel->pr_store, de->d_name);
+		_preferences_window_panels_add(panel->pr_store, de->d_name);
 	}
 	closedir(dir);
 	/* panels */
@@ -1219,7 +1134,7 @@ static void _cancel_applets(Panel * panel)
 				continue;
 			c = q[i];
 			q[i] = '\0';
-			_preferences_window_applets_add(
+			_preferences_window_panels_add(
 					panel->pr_panels[j].store, p);
 			if(c == '\0')
 				break;
@@ -1243,6 +1158,7 @@ static void _cancel_applets(Panel * panel)
 				break;
 			}
 	}
+	_preferences_on_panel_changed(panel);
 }
 
 static void _cancel_general(Panel * panel)
@@ -1263,16 +1179,20 @@ static void _cancel_general(Panel * panel)
 static void _preferences_on_panel_toggled(gpointer data)
 {
 	Panel * panel = data;
+	PanelPosition position;
 	size_t i;
 	gboolean active;
 
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
 	for(i = 0; i < sizeof(panel->pr_panels) / sizeof(*panel->pr_panels);
 			i++)
 	{
 		active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 					panel->pr_panels[i].enabled));
 		gtk_widget_set_sensitive(panel->pr_panels[i].size, active);
-		gtk_widget_set_sensitive(panel->pr_panels[i].view, active);
+		if(i == position)
+			gtk_widget_set_sensitive(panel->pr_panels_view, active);
 	}
 }
 
@@ -1288,36 +1208,65 @@ static void _preferences_on_response_ok(gpointer data)
 	free(filename);
 }
 
-static void _preferences_on_top_add(gpointer data)
+static void _preferences_on_panel_add(gpointer data)
 {
-	/* XXX code duplication */
 	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_TOP;
+	PanelPosition position;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	GtkTreeSelection * treesel;
 	gchar * p;
 
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(panel->pr_view));
 	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
 		return;
 	gtk_tree_model_get(model, &iter, 0, &p, -1);
-	_preferences_window_applets_add(panel->pr_panels[position].store, p);
+	_preferences_window_panels_add(panel->pr_panels[position].store, p);
 	g_free(p);
 }
 
-static void _preferences_on_top_down(gpointer data)
+static void _preferences_on_panel_changed(gpointer data)
 {
-	/* XXX code duplication */
 	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_TOP;
+	PanelPosition position;
+	size_t i;
+	gboolean active;
+
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
+	for(i = 0; i < PANEL_POSITION_COUNT; i++)
+		if(i == position)
+		{
+			gtk_widget_show(panel->pr_panels[i].enabled);
+			gtk_widget_show(panel->pr_panels[i].size);
+		}
+		else
+		{
+			gtk_widget_hide(panel->pr_panels[i].enabled);
+			gtk_widget_hide(panel->pr_panels[i].size);
+		}
+	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+				panel->pr_panels[position].enabled));
+	gtk_widget_set_sensitive(panel->pr_panels_view, active);
+	gtk_tree_view_set_model(GTK_TREE_VIEW(panel->pr_panels_view),
+			GTK_TREE_MODEL(panel->pr_panels[position].store));
+}
+
+static void _preferences_on_panel_down(gpointer data)
+{
+	Panel * panel = data;
+	PanelPosition position;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	GtkTreeIter iter2;
 	GtkTreeSelection * treesel;
 
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
+				panel->pr_panels_view));
 	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
 		return;
 	iter2 = iter;
@@ -1326,34 +1275,36 @@ static void _preferences_on_top_down(gpointer data)
 	gtk_list_store_swap(panel->pr_panels[position].store, &iter, &iter2);
 }
 
-static void _preferences_on_top_remove(gpointer data)
+static void _preferences_on_panel_remove(gpointer data)
 {
-	/* XXX code duplication */
 	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_TOP;
+	PanelPosition position;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	GtkTreeSelection * treesel;
 
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
+				panel->pr_panels_view));
 	if(gtk_tree_selection_get_selected(treesel, &model, &iter))
 		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
 }
 
-static void _preferences_on_top_up(gpointer data)
+static void _preferences_on_panel_up(gpointer data)
 {
-	/* XXX code duplication */
 	Panel * panel = data;
-	const PanelPosition position = PANEL_POSITION_TOP;
+	PanelPosition position;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	GtkTreeIter iter2;
 	GtkTreePath * path;
 	GtkTreeSelection * treesel;
 
+	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
+				panel->pr_panels_panel));
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
-				panel->pr_panels[position].view));
+				panel->pr_panels_view));
 	if(!gtk_tree_selection_get_selected(treesel, &model, &iter))
 		return;
 	path = gtk_tree_model_get_path(model, &iter);
