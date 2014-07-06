@@ -98,7 +98,7 @@ static Run * _run_new(void)
 #if GTK_CHECK_VERSION(2, 6, 0)
 	gtk_window_set_icon_name(window, GTK_STOCK_EXECUTE);
 #endif
-	gtk_window_set_position(window, GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_window_set_position(window, GTK_WIN_POS_CENTER);
 	gtk_window_set_resizable(window, FALSE);
 	gtk_window_set_skip_pager_hint(window, TRUE);
 	gtk_window_set_title(window, _("Run program..."));
@@ -235,7 +235,7 @@ static int _run_error(Run * run, char const * message, int ret)
 			"%s",
 #endif
 			message);
-	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Error"));
 	gtk_widget_show(dialog);
 	gtk_dialog_run(GTK_DIALOG(dialog));

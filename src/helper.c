@@ -160,7 +160,7 @@ static void _panel_helper_about_dialog(Panel * panel)
 		p = "http://www.defora.org/";
 	desktop_about_dialog_set_website(panel->ab_window, p);
 	gtk_window_set_position(GTK_WINDOW(panel->ab_window),
-			GTK_WIN_POS_CENTER_ALWAYS);
+			GTK_WIN_POS_CENTER);
 	g_signal_connect_swapped(panel->ab_window, "delete-event", G_CALLBACK(
 				_about_on_closex), panel);
 	gtk_widget_show(panel->ab_window);
@@ -244,7 +244,7 @@ static void _panel_helper_logout_dialog(Panel * panel)
 			GTK_RESPONSE_ACCEPT);
 	gtk_window_set_keep_above(GTK_WINDOW(panel->lo_window), TRUE);
 	gtk_window_set_position(GTK_WINDOW(panel->lo_window),
-			GTK_WIN_POS_CENTER_ALWAYS);
+			GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(panel->lo_window), _("Logout"));
 	g_signal_connect_swapped(panel->lo_window, "delete-event", G_CALLBACK(
 				_logout_dialog_on_closex), panel);
@@ -425,7 +425,7 @@ static void _panel_helper_shutdown_dialog(Panel * panel)
 			RES_SHUTDOWN);
 	gtk_window_set_keep_above(GTK_WINDOW(panel->sh_window), TRUE);
 	gtk_window_set_position(GTK_WINDOW(panel->sh_window),
-			GTK_WIN_POS_CENTER_ALWAYS);
+			GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(panel->sh_window), _("Shutdown"));
 	g_signal_connect(panel->sh_window, "delete-event", G_CALLBACK(
 				_shutdown_dialog_on_closex), panel);

@@ -544,7 +544,7 @@ int panel_error(Panel * panel, char const * message, int ret)
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
 #endif
 			"%s: %s", message, strerror(errno));
-	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Error"));
 	g_signal_connect(dialog, "delete-event", G_CALLBACK(_error_on_closex),
 			NULL);
@@ -659,7 +659,7 @@ static void _show_preferences_window(Panel * panel)
 			GTK_STOCK_OK, GTK_RESPONSE_OK, NULL);
 	gtk_window_set_default_size(GTK_WINDOW(panel->pr_window), 400, 300);
 	gtk_window_set_position(GTK_WINDOW(panel->pr_window),
-			GTK_WIN_POS_CENTER_ALWAYS);
+			GTK_WIN_POS_CENTER);
 	g_signal_connect_swapped(panel->pr_window, "delete-event", G_CALLBACK(
 				_preferences_on_closex), panel);
 	g_signal_connect(panel->pr_window, "response", G_CALLBACK(
