@@ -12,37 +12,37 @@ all: $(TARGETS)
 panel.1: panel.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel.1"
 
-panel.html: panel.xml
+panel.html: manual.css.xml panel.css.xml panel.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel.html"
 
 panelctl.1: panelctl.xml
 	./docbook.sh -P "$(PREFIX)" -- "panelctl.1"
 
-panelctl.html: panelctl.xml
+panelctl.html: manual.css.xml panelctl.css.xml panelctl.xml
 	./docbook.sh -P "$(PREFIX)" -- "panelctl.html"
 
 panel-embed.1: panel-embed.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-embed.1"
 
-panel-embed.html: panel-embed.xml
+panel-embed.html: manual.css.xml panel-embed.css.xml panel-embed.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-embed.html"
 
 panel-message.1: panel-message.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-message.1"
 
-panel-message.html: panel-message.xml
+panel-message.html: manual.css.xml panel-message.css.xml panel-message.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-message.html"
 
 panel-notify.1: panel-notify.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-notify.1"
 
-panel-notify.html: panel-notify.xml
+panel-notify.html: manual.css.xml panel-notify.css.xml panel-notify.xml
 	./docbook.sh -P "$(PREFIX)" -- "panel-notify.html"
 
 wifibrowser.1: wifibrowser.xml
 	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.1"
 
-wifibrowser.html: wifibrowser.xml
+wifibrowser.html: manual.css.xml wifibrowser.css.xml wifibrowser.xml
 	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.html"
 
 clean:

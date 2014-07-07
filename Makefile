@@ -59,11 +59,18 @@ dist:
 		$(PACKAGE)-$(VERSION)/data/scalable/project.conf \
 		$(PACKAGE)-$(VERSION)/doc/Makefile \
 		$(PACKAGE)-$(VERSION)/doc/docbook.sh \
+		$(PACKAGE)-$(VERSION)/doc/manual.css.xml \
+		$(PACKAGE)-$(VERSION)/doc/panel.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/panel.xml \
+		$(PACKAGE)-$(VERSION)/doc/panelctl.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/panelctl.xml \
+		$(PACKAGE)-$(VERSION)/doc/panel-embed.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/panel-embed.xml \
+		$(PACKAGE)-$(VERSION)/doc/panel-message.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/panel-message.xml \
+		$(PACKAGE)-$(VERSION)/doc/panel-notify.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/panel-notify.xml \
+		$(PACKAGE)-$(VERSION)/doc/wifibrowser.css.xml \
 		$(PACKAGE)-$(VERSION)/doc/wifibrowser.xml \
 		$(PACKAGE)-$(VERSION)/doc/project.conf \
 		$(PACKAGE)-$(VERSION)/include/Panel.h \
