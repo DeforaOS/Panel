@@ -313,11 +313,18 @@ static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 {
 	GtkIconSize ret = GTK_ICON_SIZE_INVALID;
-	char const * section;
-	char const * p = NULL;
+	String const * section;
+	String * s;
+	String const * p = NULL;
 
 	if((section = _panel_get_section(panel, position)) != NULL)
-		p = panel_get_config(panel, section, "size");
+	{
+		if((s = string_new_append("panel::", section, NULL)) == NULL)
+			panel_error(NULL, NULL, 1);
+		else
+			p = panel_get_config(panel, s, "size");
+		string_delete(s);
+	}
 	if(p == NULL)
 		p = panel_get_config(panel, NULL, "size");
 	if(p != NULL)
@@ -343,8 +350,11 @@ static PanelWindow * _new_window(PanelPosition position,
 static int _new_windows(Panel * panel, GdkRectangle * rect)
 {
 	size_t i;
-	char const * section;
 	String const * p;
+	char const * section;
+	String * s;
+	String const * applets;
+	String const * enabled;
 	gboolean focus;
 	gboolean above;
 
@@ -355,10 +365,16 @@ static int _new_windows(Panel * panel, GdkRectangle * rect)
 	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
 	{
 		section = _panel_get_section(panel, i);
-		if((p = panel_get_config(panel, section, "enabled")) == NULL
-				|| strtol(p, NULL, 0) == 0)
+		if((s = string_new_append("panel::", section, NULL)) == NULL)
+		{
+			panel_error(NULL, NULL, 1);
 			continue;
-		if(panel_get_config(panel, section, "applets") == NULL)
+		}
+		applets = panel_get_config(panel, s, "applets");
+		enabled = panel_get_config(panel, s, "enabled");
+		string_delete(s);
+		if(enabled == NULL || strtol(enabled, NULL, 0) == 0
+				|| applets == NULL)
 			continue;
 		if((panel->windows[i] = _new_window(i, &panel->helpers[i], rect,
 						focus, above)) == NULL)
@@ -1019,12 +1035,18 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 	gchar * p;
 	String * value;
 	String * sep;
+	String * s;
 
 	section = _panel_get_section(panel, position);
+	if((s = string_new_append("panel::", section, NULL)) == NULL)
+	{
+		panel_error(NULL, NULL, 1);
+		return;
+	}
 	i = gtk_combo_box_get_active(
 			GTK_COMBO_BOX(panel->pr_panels[position].size));
 	if(i >= 0 && i <= cnt)
-		if(config_set(panel->config, section, "size", (i > 0)
+		if(config_set(panel->config, s, "size", (i > 0)
 					? _panel_sizes[i - 1].name : NULL) != 0)
 			panel_error(NULL, NULL, 1);
 	model = GTK_TREE_MODEL(panel->pr_panels[position].store);
@@ -1039,9 +1061,10 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 		sep = ",";
 		g_free(p);
 	}
-	if(config_set(panel->config, section, "applets", value) != 0)
+	if(config_set(panel->config, s, "applets", value) != 0)
 		panel_error(NULL, NULL, 1);
 	string_delete(value);
+	string_delete(s);
 }
 
 static void _preferences_on_response_cancel(gpointer data)
@@ -1083,7 +1106,8 @@ static void _cancel_applets(Panel * panel)
 	char const ext[] = ".so";
 #endif
 	size_t len;
-	char const * section;
+	String const * section;
+	String * s;
 	char const * p;
 	char * q;
 	gboolean enabled;
@@ -1117,9 +1141,13 @@ static void _cancel_applets(Panel * panel)
 			j++)
 	{
 		section = _panel_get_section(panel, j);
+		if((s = string_new_append("panel::", section, NULL)) == NULL)
+		{
+			panel_error(NULL, NULL, 1);
+			continue;
+		}
 		/* enabled */
-		enabled = ((p = panel_get_config(panel, section, "enabled"))
-				!= NULL
+		enabled = ((p = panel_get_config(panel, s, "enabled")) != NULL
 				&& strtol(p, NULL, 0) != 0) ? TRUE : FALSE;
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
 					panel->pr_panels[j].enabled), enabled);
@@ -1140,7 +1168,7 @@ static void _cancel_applets(Panel * panel)
 		}
 		free(q);
 		/* size */
-		if((p = panel_get_config(panel, section, "size")) == NULL
+		if((p = panel_get_config(panel, s, "size")) == NULL
 				&& (p = panel_get_config(panel, NULL, "size"))
 				== NULL)
 			gtk_combo_box_set_active(GTK_COMBO_BOX(
@@ -1155,6 +1183,7 @@ static void _cancel_applets(Panel * panel)
 						i + 1);
 				break;
 			}
+		string_delete(s);
 	}
 	_preferences_on_panel_changed(panel);
 }
@@ -1369,25 +1398,29 @@ static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
 #endif
-	char const * section;
-	char const * p = NULL;
+	String const * section;
+	String * s;
+	String const * p = NULL;
 
 	section = _panel_get_section(panel, position);
+	if((s = string_new_append("panel::", section, NULL)) == NULL)
+		return NULL;
 	switch(position)
 	{
 		case PANEL_POSITION_LEFT:
 		case PANEL_POSITION_RIGHT:
 		case PANEL_POSITION_TOP:
-			p = panel_get_config(panel, section, "applets");
+			p = panel_get_config(panel, s, "applets");
 			break;
 		case PANEL_POSITION_BOTTOM:
-			p = panel_get_config(panel, section, "applets");
+			p = panel_get_config(panel, s, "applets");
 			if(p == NULL)
 				p = panel_get_config(panel, NULL, "applets");
 			if(p == NULL)
 				p = applets;
 			break;
 	}
+	string_delete(s);
 	return p;
 }
 
