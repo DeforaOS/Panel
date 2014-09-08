@@ -184,7 +184,7 @@ static int _panel_append(Panel * panel, PanelPosition position,
 {
 	if(position == PANEL_POSITION_TOP)
 		return panel_window_append(panel->top, applet);
-	return -error_set_code(1, "%s", "Invalid panel position");
+	return -error_set_code(1, "%s", _("Invalid panel position"));
 }
 
 
