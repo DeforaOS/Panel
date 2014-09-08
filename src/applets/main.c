@@ -463,26 +463,27 @@ static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
 	size_t i;
 	size_t j;
 
-	if((path = getenv("XDG_DATA_DIRS")) != NULL
-			&& strlen(path) > 0
-			&& (p = strdup(path)) != NULL)
+	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
+		/* FIXME use DATADIR */
+		path = "/usr/local/share:/usr/share";
+	if((p = strdup(path)) == NULL)
 	{
-		for(i = 0, j = 0;; i++)
-			if(p[i] == '\0')
-			{
-				_xdg_dirs_path(main, callback, &p[j]);
-				break;
-			}
-			else if(p[i] == ':')
-			{
-				p[i] = '\0';
-				_xdg_dirs_path(main, callback, &p[j]);
-				j = i + 1;
-			}
-		free(p);
+		main->helper->error(NULL, "strdup", 1);
+		return;
 	}
-	else
-		_xdg_dirs_path(main, callback, DATADIR);
+	for(i = 0, j = 0;; i++)
+		if(p[i] == '\0')
+		{
+			_xdg_dirs_path(main, callback, &p[j]);
+			break;
+		}
+		else if(p[i] == ':')
+		{
+			p[i] = '\0';
+			_xdg_dirs_path(main, callback, &p[j]);
+			j = i + 1;
+		}
+	free(p);
 	_xdg_dirs_home(main, callback);
 }
 
