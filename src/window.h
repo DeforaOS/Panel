@@ -18,6 +18,7 @@
 #ifndef PANEL_WINDOW_H
 # define PANEL_WINDOW_H
 
+# include <stdint.h>
 # include "panel.h"
 
 
@@ -31,7 +32,8 @@ typedef enum _PanelWindowPosition
 	PANEL_WINDOW_POSITION_RIGHT,
 	PANEL_WINDOW_POSITION_CENTER,
 	PANEL_WINDOW_POSITION_FLOATING,
-	PANEL_WINDOW_POSITION_MANAGED
+	PANEL_WINDOW_POSITION_MANAGED,
+	PANEL_WINDOW_POSITION_EMBEDDED
 } PanelWindowPosition;
 # define PANEL_WINDOW_POSITION_DEFAULT PANEL_WINDOW_POSITION_BOTTOM
 
@@ -49,6 +51,7 @@ GtkOrientation panel_window_get_orientation(PanelWindow * panel);
 void panel_window_get_position(PanelWindow * panel, gint * x, gint * y);
 void panel_window_get_size(PanelWindow * panel, gint * width, gint * height);
 int panel_window_get_width(PanelWindow * panel);
+uint32_t panel_window_get_xid(PanelWindow * panel);
 
 void panel_window_set_accept_focus(PanelWindow * panel, gboolean accept);
 void panel_window_set_keep_above(PanelWindow * panel, gboolean keep);

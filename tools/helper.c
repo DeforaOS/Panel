@@ -71,8 +71,11 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 		PanelAppletType type, GtkIconSize iconsize);
 static void _panel_destroy(Panel * panel);
 
+/* accessors */
+static uint32_t _panel_get_xid(Panel * panel);
 static void _panel_set_title(Panel * panel, char const * title);
 
+/* useful */
 #define HELPER_POSITION_MENU_WIDGET
 #include "../src/helper.c"
 static int _panel_append(Panel * panel, PanelPosition position,
@@ -171,6 +174,14 @@ static void _panel_destroy(Panel * panel)
 }
 
 
+/* accessors */
+/* panel_get_xid */
+static uint32_t _panel_get_xid(Panel * panel)
+{
+	return panel_window_get_xid(panel->top);
+}
+
+
 /* panel_set_title */
 static void _panel_set_title(Panel * panel, char const * title)
 {
@@ -178,6 +189,7 @@ static void _panel_set_title(Panel * panel, char const * title)
 }
 
 
+/* useful */
 /* panel_append */
 static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)

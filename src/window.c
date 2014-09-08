@@ -21,6 +21,9 @@
 #include <errno.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
+#if GTK_CHECK_VERSION(3, 0, 0)
+# include <gtk/gtkx.h>
+#endif
 #include "window.h"
 #include "../config.h"
 #define _(string) gettext(string)
@@ -99,11 +102,20 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 	panel->helper = helper;
 	panel->applets = NULL;
 	panel->applets_cnt = 0;
-	panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 4);
+	if(position != PANEL_WINDOW_POSITION_EMBEDDED)
+	{
+		panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	gtk_window_set_has_resize_grip(GTK_WINDOW(panel->window), FALSE);
+		gtk_window_set_has_resize_grip(GTK_WINDOW(panel->window),
+				FALSE);
 #endif
+	}
+	else
+	{
+		panel->window = gtk_plug_new(0);
+		gtk_widget_show(panel->window);
+	}
+	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 4);
 	panel->height = icon_height + (PANEL_BORDER_WIDTH * 4);
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %u height=%d\n", __func__, position,
@@ -152,6 +164,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 					FALSE);
 			gtk_window_set_decorated(GTK_WINDOW(panel->window),
 					FALSE);
+		case PANEL_WINDOW_POSITION_EMBEDDED:
 		case PANEL_WINDOW_POSITION_MANAGED:
 			break;
 	}
@@ -208,7 +221,10 @@ GtkOrientation panel_window_get_orientation(PanelWindow * panel)
 /* panel_window_get_position */
 void panel_window_get_position(PanelWindow * panel, gint * x, gint * y)
 {
-	gtk_window_get_position(GTK_WINDOW(panel->window), x, y);
+	GdkWindow * window;
+
+	window = gtk_widget_get_window(panel->window);
+	gdk_window_get_position(window, x, y);
 }
 
 
@@ -226,6 +242,14 @@ int panel_window_get_width(PanelWindow * panel)
 
 	gtk_window_get_size(GTK_WINDOW(panel->window), &width, NULL);
 	return width;
+}
+
+
+/* panel_window_get_xid */
+uint32_t panel_window_get_xid(PanelWindow * panel)
+{
+	return (panel->position == PANEL_WINDOW_POSITION_EMBEDDED)
+		? gtk_plug_get_id(GTK_PLUG(panel->window)) : 0;
 }
 
 
@@ -360,6 +384,7 @@ static void _panel_window_reset(PanelWindow * panel)
 		case PANEL_WINDOW_POSITION_CENTER:
 		case PANEL_WINDOW_POSITION_FLOATING:
 		case PANEL_WINDOW_POSITION_MANAGED:
+		case PANEL_WINDOW_POSITION_EMBEDDED:
 			break;
 	}
 }
@@ -400,6 +425,7 @@ static void _panel_window_reset_strut(PanelWindow * panel)
 		case PANEL_WINDOW_POSITION_CENTER:
 		case PANEL_WINDOW_POSITION_FLOATING:
 		case PANEL_WINDOW_POSITION_MANAGED:
+		case PANEL_WINDOW_POSITION_EMBEDDED:
 			break;
 	}
 	cardinal = gdk_atom_intern("CARDINAL", FALSE);

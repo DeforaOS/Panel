@@ -53,7 +53,8 @@
 
 /* private */
 /* prototypes */
-static int _notify(GtkIconSize iconsize, int timeout, char * applets[]);
+static int _notify(int embed, GtkIconSize iconsize, int timeout,
+		char * applets[]);
 /* callbacks */
 static gboolean _notify_on_timeout(gpointer data);
 
@@ -62,7 +63,38 @@ static int _usage(void);
 
 /* functions */
 /* notify */
-static int _notify(GtkIconSize iconsize, int timeout, char * applets[])
+static int _notify_embed(GtkIconSize iconsize, int timeout, char * applets[]);
+static int _notify_panel(GtkIconSize iconsize, int timeout, char * applets[]);
+
+static int _notify(int embed, GtkIconSize iconsize, int timeout,
+		char * applets[])
+{
+	return (embed != 0) ? _notify_embed(iconsize, timeout, applets)
+		: _notify_panel(iconsize, timeout, applets);
+}
+
+static int _notify_embed(GtkIconSize iconsize, int timeout, char * applets[])
+{
+	Panel panel;
+	size_t i;
+	uint32_t xid;
+
+	_panel_init(&panel, PANEL_WINDOW_POSITION_EMBEDDED,
+			PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
+	for(i = 0; applets[i] != NULL; i++)
+		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
+			error_print(PROGNAME);
+	if((xid = _panel_get_xid(&panel)) == 0)
+		/* XXX report error */
+		return -1;
+	desktop_message_send(PANEL_CLIENT_MESSAGE, PANEL_MESSAGE_EMBED, xid, 0);
+	if(timeout > 0)
+		g_timeout_add(timeout * 1000, _notify_on_timeout, NULL);
+	gtk_main();
+	return 0;
+}
+
+static int _notify_panel(GtkIconSize iconsize, int timeout, char * applets[])
 {
 	Panel panel;
 	size_t i;
@@ -89,7 +121,8 @@ static gboolean _notify_on_timeout(gpointer data)
 {
 	Panel * panel = data;
 
-	panel->timeout = 0;
+	if(panel != NULL)
+		panel->timeout = 0;
 	gtk_main_quit();
 	return FALSE;
 }
@@ -98,8 +131,9 @@ static gboolean _notify_on_timeout(gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s [-L|-S|-X|-x][-t timeout] applet...\n"
+	fprintf(stderr, _("Usage: %s [-e][-L|-S|-X|-x][-t timeout] applet...\n"
 "       %s -l\n"
+"  -e	Embed the notification in the panel\n"
 "  -L	Use icons the size of a large toolbar\n"
 "  -S	Use icons the size of a small toolbar\n"
 "  -X	Use huge icons\n"
@@ -117,6 +151,7 @@ int main(int argc, char * argv[])
 {
 	GtkIconSize iconsize;
 	GtkIconSize huge;
+	int embed = 0;
 	int timeout = 3;
 	int o;
 	char * p;
@@ -130,9 +165,12 @@ int main(int argc, char * argv[])
 			== GTK_ICON_SIZE_INVALID)
 		huge = gtk_icon_size_register("panel-huge", 64, 64);
 	iconsize = huge;
-	while((o = getopt(argc, argv, "LlSt:Xx")) != -1)
+	while((o = getopt(argc, argv, "eLlSt:Xx")) != -1)
 		switch(o)
 		{
+			case 'e':
+				embed = 1;
+				break;
 			case 'L':
 				iconsize = GTK_ICON_SIZE_LARGE_TOOLBAR;
 				break;
@@ -158,6 +196,6 @@ int main(int argc, char * argv[])
 		}
 	if(optind == argc)
 		return _usage();
-	_notify(iconsize, timeout, &argv[optind]);
+	_notify(embed, iconsize, timeout, &argv[optind]);
 	return 0;
 }

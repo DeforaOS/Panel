@@ -29,6 +29,7 @@
 		<copyright>
 			<year>2012</year>
 			<year>2013</year>
+			<year>2014</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
@@ -50,6 +51,7 @@
 	<refsynopsisdiv>
 		<cmdsynopsis>
 			<command>&name;</command>
+			<arg choice="opt"><option>-e</option></arg>
 			<group choice="opt">
 				<arg choice="plain"><option>-L</option></arg>
 				<arg choice="plain"><option>-S</option></arg>
@@ -62,7 +64,7 @@
 		</cmdsynopsis>
 		<cmdsynopsis>
 			<command>&name;</command>
-			<arg choice="plain">-l</arg>
+			<arg choice="plain"><option>-l</option></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	<refsect1 id="description">
@@ -79,6 +81,12 @@
 			to be specified as arguments on the command line.</para>
 		<para>The following options are available:</para>
 		<variablelist>
+			<varlistentry>
+				<term><option>-e</option></term>
+				<listitem>
+					<para>Embed the notification in the panel.</para>
+				</listitem>
+			</varlistentry>
 			<varlistentry>
 				<term><option>-L</option></term>
 				<listitem>
