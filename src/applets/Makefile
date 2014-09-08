@@ -1,4 +1,4 @@
-TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so volume.so wpa_supplicant.so
+TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so user.so volume.so wpa_supplicant.so
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -229,6 +229,13 @@ usb_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 usb.so: $(usb_OBJS)
 	$(CCSHARED) -o usb.so $(usb_OBJS) $(usb_LDFLAGS)
 
+user_OBJS = user.o
+user_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
+user_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+
+user.so: $(user_OBJS)
+	$(CCSHARED) -o user.so $(user_OBJS) $(user_LDFLAGS)
+
 volume_OBJS = volume.o
 volume_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) `pkg-config --cflags alsa` $(CFLAGSF) $(CFLAGS)
 volume_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs alsa`
@@ -333,6 +340,9 @@ title.o: title.c ../../include/Panel.h
 usb.o: usb.c ../../include/Panel.h
 	$(CC) $(usb_CFLAGS) -c usb.c
 
+user.o: user.c ../../include/Panel.h
+	$(CC) $(user_CFLAGS) -c user.c
+
 volume.o: volume.c ../../include/Panel.h
 	$(CC) $(volume_CFLAGS) -c volume.c
 
@@ -340,7 +350,7 @@ wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -403,6 +413,8 @@ install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 usb.so $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
+	$(INSTALL) -m 0644 user.so $(DESTDIR)$(LIBDIR)/Panel/applets/user.so
+	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 volume.so $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 wpa_supplicant.so $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
@@ -436,6 +448,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/tasks.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/title.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
+	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/user.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
 

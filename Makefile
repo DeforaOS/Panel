@@ -121,6 +121,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/template.c \
 		$(PACKAGE)-$(VERSION)/src/applets/title.c \
 		$(PACKAGE)-$(VERSION)/src/applets/usb.c \
+		$(PACKAGE)-$(VERSION)/src/applets/user.c \
 		$(PACKAGE)-$(VERSION)/src/applets/volume.c \
 		$(PACKAGE)-$(VERSION)/src/applets/wpa_supplicant.c \
 		$(PACKAGE)-$(VERSION)/src/applets/Makefile \
