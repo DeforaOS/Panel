@@ -1,4 +1,4 @@
-TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so keyboard.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so user.so volume.so wpa_supplicant.so
+TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so user.so volume.so wpa_supplicant.so
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -88,13 +88,6 @@ gsm_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
 gsm.so: $(gsm_OBJS)
 	$(CCSHARED) -o gsm.so $(gsm_OBJS) $(gsm_LDFLAGS)
-
-keyboard_OBJS = keyboard.o
-keyboard_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
-keyboard_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
-
-keyboard.so: $(keyboard_OBJS)
-	$(CCSHARED) -o keyboard.so $(keyboard_OBJS) $(keyboard_LDFLAGS)
 
 lock_OBJS = lock.o
 lock_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
@@ -280,9 +273,6 @@ gps.o: gps.c ../../include/Panel.h
 gsm.o: gsm.c ../../include/Panel.h
 	$(CC) $(gsm_CFLAGS) -c gsm.c
 
-keyboard.o: keyboard.c ../../include/Panel.h
-	$(CC) $(keyboard_CFLAGS) -c keyboard.c
-
 lock.o: lock.c ../../include/Panel.h
 	$(CC) $(lock_CFLAGS) -c lock.c
 
@@ -350,7 +340,7 @@ wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(keyboard_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -376,8 +366,6 @@ install: $(TARGETS)
 	$(INSTALL) -m 0644 gps.so $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 gsm.so $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
-	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 keyboard.so $(DESTDIR)$(LIBDIR)/Panel/applets/keyboard.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 lock.so $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
@@ -430,7 +418,6 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/embed.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
-	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/keyboard.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
