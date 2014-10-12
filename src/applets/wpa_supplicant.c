@@ -16,7 +16,6 @@
  * - make sure it works with WEP networks
  * - remove the network list from the applet
  * - manage the network list from the browser (networks without reception...)
- * - automatically save the configuration by default (and remove the button)
  * - tooltip with details on the button (interface tracked...) */
 
 
@@ -249,9 +248,9 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	wpa->networks = NULL;
 	wpa->networks_cnt = 0;
 	wpa->networks_cur = -1;
-	/* autosave only if explicitly configured */
+	/* autosave except if explicitly disabled */
 	p = helper->config_get(helper->panel, "wpa_supplicant", "autosave");
-	wpa->autosave = (p != NULL && strtol(p, NULL, 10) != 0) ? TRUE : FALSE;
+	wpa->autosave = (p == NULL || strtol(p, NULL, 10) != 0) ? TRUE : FALSE;
 	wpa->connected = FALSE;
 	wpa->associated = FALSE;
 	wpa->level = 0;
@@ -1016,7 +1015,6 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data);
 static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data);
 static void _clicked_on_reassociate(gpointer data);
 static void _clicked_on_rescan(gpointer data);
-static void _clicked_on_save_configuration(gpointer data);
 
 static void _on_clicked(gpointer data)
 {
@@ -1066,13 +1064,6 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_rescan), wpa);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	/* save configuration */
-	menuitem = gtk_image_menu_item_new_with_label(_("Save configuration"));
-	image = gtk_image_new_from_stock(GTK_STOCK_SAVE, GTK_ICON_SIZE_MENU);
-	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_clicked_on_save_configuration), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* view */
 	_clicked_network_view(wpa, menu);
@@ -1249,14 +1240,6 @@ static void _clicked_on_rescan(gpointer data)
 	WPA * wpa = data;
 
 	_wpa_rescan(wpa);
-}
-
-static void _clicked_on_save_configuration(gpointer data)
-{
-	WPA * wpa = data;
-	WPAChannel * channel = &wpa->channel[0];
-
-	_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 }
 
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
