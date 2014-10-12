@@ -409,8 +409,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	{
 		/* connected to an interface */
 		icon = "network-offline";
-		if(wpa->connected != connected && wpa->associated != associated
-				&& network != NULL)
+		if(wpa->connected != connected && network != NULL)
 		{
 			snprintf(buf, sizeof(buf),
 					_("Connected to interface %s"),
@@ -433,8 +432,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		icon = "network-idle";
 		/* XXX use real values */
 		pixbuf = _wpa_get_icon(wpa, size, wpa->level, wpa->flags);
-		if(wpa->connected != connected && wpa->associated != associated
-				&& network != NULL)
+		if(wpa->associated != associated && network != NULL)
 		{
 			snprintf(buf, sizeof(buf), _("Connected to network %s"),
 					network);
