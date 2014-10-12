@@ -390,6 +390,10 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	GdkPixbuf * pixbuf = NULL;
 	char buf[80];
 
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(%u, %u, \"%s\")\n", __func__, connected,
+			associated, network);
+#endif
 	gtk_icon_size_lookup(wpa->helper->icon_size, &size, &size);
 	if(connected == FALSE && network == NULL)
 	{
@@ -636,6 +640,9 @@ static void _wpa_notify(WPA * wpa, char const * message)
 	const unsigned int flags = 0;
 	GError * error = NULL;
 
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, message);
+#endif
 	/* check if notifications are enabled */
 	if((p = wpa->helper->config_get(wpa->helper->panel, "wpa_supplicant",
 					"notify")) == NULL
