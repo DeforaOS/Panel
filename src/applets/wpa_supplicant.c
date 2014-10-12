@@ -15,7 +15,7 @@
 /* TODO:
  * - implement more control events
  * - make sure it works with WEP networks
- * - manage the network list from the browser (networks without reception...)
+ * - fix the case where every network available is disabled
  * - tooltip with details on the button (interface tracked...) */
 
 
