@@ -631,7 +631,8 @@ static void _wpa_disconnect(WPA * wpa)
 static void _wpa_notify(WPA * wpa, char const * message)
 {
 	char const * p;
-	char * argv[] = { BINDIR "/panel-message", "-I", "--", NULL, NULL };
+	char * argv[] = { BINDIR "/panel-message", "-N", NULL, "--", NULL,
+		NULL };
 	const unsigned int flags = 0;
 	GError * error = NULL;
 
@@ -640,18 +641,18 @@ static void _wpa_notify(WPA * wpa, char const * message)
 					"notify")) == NULL
 			|| strtol(p, NULL, 10) != 1)
 		return;
-	if((argv[3] = strdup(message)) == NULL)
-	{
+	argv[2] = strdup(applet.icon);
+	argv[4] = strdup(message);
+	if(argv[2] == NULL || argv[4] == NULL)
 		wpa->helper->error(NULL, strerror(errno), 1);
-		return;
-	}
-	if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
+	else if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
 			== FALSE)
 	{
 		wpa->helper->error(NULL, error->message, 1);
 		g_error_free(error);
 	}
-	free(argv[3]);
+	free(argv[4]);
+	free(argv[2]);
 }
 
 
