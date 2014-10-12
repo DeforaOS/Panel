@@ -36,6 +36,12 @@
 #define _(string) gettext(string)
 
 /* constants */
+#ifndef PREFIX
+# define PREFIX			"/usr/local"
+#endif
+#ifndef BINDIR
+# define BINDIR			PREFIX "/bin"
+#endif
 #ifndef TMPDIR
 # define TMPDIR			"/tmp"
 #endif
@@ -625,7 +631,8 @@ static void _wpa_disconnect(WPA * wpa)
 static void _wpa_notify(WPA * wpa, char const * message)
 {
 	char const * p;
-	char * argv[] = { "panel-message", "-I", "--", NULL, NULL };
+	char * argv[] = { BINDIR "/panel-message", "-I", "--", NULL, NULL };
+	const unsigned int flags = 0;
 	GError * error = NULL;
 
 	/* check if notifications are enabled */
@@ -638,8 +645,8 @@ static void _wpa_notify(WPA * wpa, char const * message)
 		wpa->helper->error(NULL, strerror(errno), 1);
 		return;
 	}
-	if(g_spawn_async(NULL, argv, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL,
-				NULL, &error) == FALSE)
+	if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
+			== FALSE)
 	{
 		wpa->helper->error(NULL, error->message, 1);
 		g_error_free(error);
