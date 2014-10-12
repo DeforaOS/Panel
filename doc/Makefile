@@ -47,6 +47,17 @@ wifibrowser.html: manual.css.xml wifibrowser.css.xml wifibrowser.xml
 
 clean:
 	$(RM) -- $(panel.1_OBJS) $(panel.html_OBJS) $(panelctl.1_OBJS) $(panelctl.html_OBJS) $(panel-embed.1_OBJS) $(panel-embed.html_OBJS) $(panel-message.1_OBJS) $(panel-message.html_OBJS) $(panel-notify.1_OBJS) $(panel-notify.html_OBJS) $(wifibrowser.1_OBJS) $(wifibrowser.html_OBJS)
+	./docbook.sh -c -P "$(PREFIX)" -- "panel.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "panelctl.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "panelctl.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-embed.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-embed.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-message.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-message.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-notify.1"
+	./docbook.sh -c -P "$(PREFIX)" -- "panel-notify.html"
+	./docbook.sh -c -P "$(PREFIX)" -- "wifibrowser.1"
 	./docbook.sh -c -P "$(PREFIX)" -- "wifibrowser.html"
 
 distclean: clean
