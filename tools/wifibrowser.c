@@ -12,6 +12,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+/* TODO:
+ * - list every network known
+ * - show only connect or disconnect in the popup menu
+ * - also allow removing networks */
 
 
 
