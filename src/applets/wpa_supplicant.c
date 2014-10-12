@@ -14,7 +14,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
  * - make sure it works with WEP networks
- * - remove the network list from the applet
  * - manage the network list from the browser (networks without reception...)
  * - tooltip with details on the button (interface tracked...) */
 
@@ -1004,7 +1003,6 @@ static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
 /* callbacks */
 /* on_clicked */
 static void _clicked_available(WPA * wpa, GtkWidget * menu);
-static void _clicked_network_list(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
@@ -1012,7 +1010,6 @@ static void _clicked_unavailable(GtkWidget * menu);
 /* callbacks */
 static void _clicked_on_disconnect(gpointer data);
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data);
-static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data);
 static void _clicked_on_reassociate(gpointer data);
 static void _clicked_on_rescan(gpointer data);
 
@@ -1036,8 +1033,6 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 	GtkWidget * menuitem;
 	GtkWidget * image;
 
-	/* FIXME summarize the status instead */
-	_clicked_network_list(wpa, menu);
 	if(wpa->networks_cur >= 0)
 	{
 		/* reassociate */
@@ -1067,50 +1062,6 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	/* view */
 	_clicked_network_view(wpa, menu);
-}
-
-static void _clicked_network_list(WPA * wpa, GtkWidget * menu)
-{
-	GtkWidget * menuitem;
-	GtkWidget * submenu;
-	GSList * group;
-	size_t i;
-
-	if(wpa->networks_cnt == 0)
-		return;
-	/* network list */
-	menuitem = gtk_image_menu_item_new_with_label(_("Network list"));
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	submenu = gtk_menu_new();
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), submenu);
-	/* network list: any network */
-	menuitem = gtk_radio_menu_item_new_with_label(NULL, _("Any network"));
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menuitem), TRUE);
-	group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(menuitem));
-	g_signal_connect(menuitem, "toggled", G_CALLBACK(
-				_clicked_on_network_toggled), wpa);
-	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
-	menuitem = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
-	/* network list: every known network */
-	for(i = 0; i < wpa->networks_cnt; i++)
-	{
-		menuitem = gtk_radio_menu_item_new_with_label(group,
-				wpa->networks[i].name);
-		group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(
-					menuitem));
-		g_object_set_data(G_OBJECT(menuitem), "network",
-				&wpa->networks[i]);
-		if(wpa->networks_cur >= 0 && i == (size_t)wpa->networks_cur)
-			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
-						menuitem), TRUE);
-		g_signal_connect(menuitem, "toggled", G_CALLBACK(
-					_clicked_on_network_toggled), wpa);
-		gtk_menu_shell_append(GTK_MENU_SHELL(submenu), menuitem);
-	}
-	/* separator */
-	menuitem = gtk_separator_menu_item_new();
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 }
 
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
@@ -1212,19 +1163,6 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 #if 1 /* XXX partly remediate memory leak (see above) */
 	gtk_tree_row_reference_free(row);
 #endif
-}
-
-static void _clicked_on_network_toggled(GtkWidget * widget, gpointer data)
-{
-	WPA * wpa = data;
-	WPANetwork * network;
-
-	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget)) == FALSE)
-		return;
-	if((network = g_object_get_data(G_OBJECT(widget), "network")) != NULL)
-		_wpa_connect_network(wpa, network);
-	else
-		_wpa_disconnect(wpa);
 }
 
 static void _clicked_on_reassociate(gpointer data)
