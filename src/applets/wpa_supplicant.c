@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* TODO:
+ * - implement more control events
  * - make sure it works with WEP networks
  * - manage the network list from the browser (networks without reception...)
  * - tooltip with details on the button (interface tracked...) */
@@ -1234,6 +1235,8 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid, uint32_t flags,
 		gboolean connect);
 static WPAChannel * _read_channel(WPA * wpa, GIOChannel * source);
+static void _read_event_ctrl(WPA * wpa, char const * event);
+static void _read_event_wpa(WPA * wpa, char const * event);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
@@ -1365,6 +1368,37 @@ static WPAChannel * _read_channel(WPA * wpa, GIOChannel * source)
 	else if(source == wpa->channel[1].channel)
 		return &wpa->channel[1];
 	return NULL;
+}
+
+static void _read_event_ctrl(WPA * wpa, char const * event)
+{
+	char const password_changed[] = "PASSWORD-CHANGED ";
+	char const scan_results[] = "SCAN-RESULTS";
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, event);
+#endif
+	if(strncmp(event, password_changed, sizeof(password_changed) - 1) == 0)
+		_wpa_notify(wpa, &event[sizeof(password_changed)]);
+	else if(strncmp(event, password_changed, sizeof(password_changed) - 2)
+			== 0)
+		_wpa_notify(wpa, _("Password changed"));
+	else if(strncmp(event, scan_results, sizeof(scan_results) - 1) == 0)
+		_wpa_queue(wpa, &wpa->channel[0], WC_SCAN_RESULTS);
+}
+
+static void _read_event_wpa(WPA * wpa, char const * event)
+{
+	char const handshake[] = "4-Way Handshake failed"
+		" - pre-shared key may be incorrect";
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s()\n", __func__);
+#endif
+	/* XXX hackish, blame wpa_supplicant(8) */
+	if(strcmp(event, handshake) == 0 && wpa->networks_cur >= 0)
+		/* FIXME does not work if networks_cur is not set */
+		_wpa_ask_password(wpa, &wpa->networks[wpa->networks_cur]);
 }
 
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
@@ -1835,17 +1869,14 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
 {
-	char const scan_results[] = "CTRL-EVENT-SCAN-RESULTS";
-	char const wpa_handshake[] = "WPA: 4-Way Handshake failed"
-		" - pre-shared key may be incorrect";
+	char const ctrl_event[] = "CTRL-EVENT-";
+	char const wpa_event[] = "WPA: ";
 	size_t i;
 	size_t j;
 	char * p = NULL;
 	char * q;
 	unsigned int u;
-	char event[80];
-	unsigned int v;
-	char bssid[80];
+	char event[128];
 
 	for(i = 0; i < cnt; i = j)
 	{
@@ -1860,19 +1891,13 @@ static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: line \"%s\"\n", p);
 #endif
-		if(sscanf(p, "<%u>%79s %u %79s\n", &u, event, &v, bssid) < 2)
+		if(sscanf(p, "<%u>%127[^\n]\n", &u, event) != 2)
 			continue;
 		event[sizeof(event) - 1] = '\0';
-		bssid[sizeof(bssid) - 1] = '\0';
-		if(strcmp(event, scan_results) == 0)
-			_wpa_queue(wpa, &wpa->channel[0], WC_SCAN_RESULTS);
-		/* XXX hackish, blame wpa_supplicant(8) */
-		else if(strncmp(&p[3], wpa_handshake, sizeof(wpa_handshake) - 1)
-				== 0 && wpa->networks_cur >= 0)
-			/* FIXME does not work if networks_cur is not set */
-			_wpa_ask_password(wpa,
-					&wpa->networks[wpa->networks_cur]);
-		/* FIXME implement the other events */
+		if(strncmp(event, ctrl_event, sizeof(ctrl_event) - 1) == 0)
+			_read_event_ctrl(wpa, event + sizeof(ctrl_event) - 1);
+		else if(strncmp(event, wpa_event, sizeof(wpa_event) - 1) == 0)
+			_read_event_wpa(wpa, event + sizeof(wpa_event) - 1);
 	}
 	free(p);
 }
