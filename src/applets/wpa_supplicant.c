@@ -1299,6 +1299,7 @@ static gboolean _on_timeout(gpointer data)
 static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid, uint32_t flags,
 		gboolean connect);
+static WPAChannel * _read_channel(WPA * wpa, GIOChannel * source);
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt);
 static void _read_scan_results_cleanup(WPA * wpa, GtkTreeModel * model);
@@ -1329,13 +1330,7 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 
 	if(condition != G_IO_IN)
 		return FALSE; /* should not happen */
-	if(source == wpa->channel[0].channel
-			&& wpa->channel[0].queue_cnt > 0
-			&& wpa->channel[0].queue[0].buf_cnt == 0)
-		channel = &wpa->channel[0];
-	else if(source == wpa->channel[1].channel)
-		channel = &wpa->channel[1];
-	else
+	if((channel = _read_channel(wpa, source)) == NULL)
 		return FALSE; /* should not happen */
 	entry = (channel->queue_cnt > 0) ? &channel->queue[0] : NULL;
 	status = g_io_channel_read_chars(source, buf, sizeof(buf), &cnt,
@@ -1425,6 +1420,17 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		_wpa_queue(wpa, channel, WC_SELECT_NETWORK, id);
 		_wpa_queue(wpa, channel, WC_LIST_NETWORKS);
 	}
+}
+
+static WPAChannel * _read_channel(WPA * wpa, GIOChannel * source)
+{
+	if(source == wpa->channel[0].channel
+			&& wpa->channel[0].queue_cnt > 0
+			&& wpa->channel[0].queue[0].buf_cnt == 0)
+		return &wpa->channel[0];
+	else if(source == wpa->channel[1].channel)
+		return &wpa->channel[1];
+	return NULL;
 }
 
 static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
