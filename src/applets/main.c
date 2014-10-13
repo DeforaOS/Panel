@@ -66,19 +66,18 @@ typedef struct _MainMenu
 /* constants */
 static const MainMenu _main_menus[] =
 {
-	{ "Audio;",	"Audio",	"gnome-mime-audio",		},
-	{ "Development;","Development",	"applications-development",	},
-	{ "Education;",	"Education",	"applications-science",		},
-	{ "Game;",	"Games",	"applications-games",		},
-	{ "Graphics;",	"Graphics",	"applications-graphics",	},
-	{ "AudioVideo;","Multimedia",	"applications-multimedia",	},
-	{ "Network;",	"Network",	"applications-internet",	},
-	{ "Office;",	"Office",	"applications-office",		},
-	{ "Settings;",	"Settings",	"gnome-settings",		},
-	{ "System;",	"System",	"applications-system",		},
-	{ "Utility;",	"Utilities",	"applications-utilities",	},
-	{ "Video;",	"Video",	"video",			},
-	{ NULL,		NULL,		NULL,				}
+	{ "Audio",	"Audio",	"gnome-mime-audio",		},
+	{ "Development","Development",	"applications-development",	},
+	{ "Education",	"Education",	"applications-science",		},
+	{ "Game",	"Games",	"applications-games",		},
+	{ "Graphics",	"Graphics",	"applications-graphics",	},
+	{ "AudioVideo",	"Multimedia",	"applications-multimedia",	},
+	{ "Network",	"Network",	"applications-internet",	},
+	{ "Office",	"Office",	"applications-office",		},
+	{ "Settings",	"Settings",	"gnome-settings",		},
+	{ "System",	"System",	"applications-system",		},
+	{ "Utility",	"Utilities",	"applications-utilities",	},
+	{ "Video",	"Video",	"video",			}
 };
 #define MAIN_MENUS_COUNT (sizeof(_main_menus) / sizeof(*_main_menus))
 
@@ -207,6 +206,7 @@ static GtkWidget * _main_applications(Main * main)
 	Config * config;
 	const char section[] = "Desktop Entry";
 	char const * q;
+	char const * r;
 	char const * path;
 	size_t i;
 
@@ -238,9 +238,15 @@ static GtkWidget * _main_applications(Main * main)
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 			continue;
 		}
-		for(i = 0; _main_menus[i].category != NULL && string_find(q,
-					_main_menus[i].category) == NULL; i++);
-		if(_main_menus[i].category == NULL)
+		for(i = 0; i < MAIN_MENUS_COUNT; i++)
+		{
+			if((r = string_find(q, _main_menus[i].category)) == NULL)
+				continue;
+			r += string_length(_main_menus[i].category);
+			if(*r == '\0' || *r == ';')
+				break;
+		}
+		if(i == MAIN_MENUS_COUNT)
 		{
 			gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 			continue;
@@ -367,7 +373,7 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 	GtkWidget * menuitem;
 	size_t pos = 0;
 
-	for(i = 0; _main_menus[i].category != NULL; i++)
+	for(i = 0; i < MAIN_MENUS_COUNT; i++)
 	{
 		if(menus[i] == NULL)
 			continue;
