@@ -349,8 +349,8 @@ static void _applications_on_activate_url(Config * config)
 	const char section[] = "Desktop Entry";
 	char const * url;
 	/* XXX open with the default web browser instead */
-	char * argv[] = { "surfer", "--", NULL, NULL };
-	GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
+	char * argv[] = { BINDIR "/surfer", "--", NULL, NULL };
+	unsigned int flags = 0;
 	GError * error = NULL;
 
 	if((url = config_get(config, section, "URL")) == NULL)
