@@ -774,8 +774,10 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 						&& de->d_name[2] == '\0'))
 				continue;
 		len = strlen(de->d_name);
-		if(len < sizeof(ext) || strncmp(&de->d_name[len - sizeof(ext)
-					+ 1], ext, sizeof(ext)) != 0)
+		if(len < sizeof(ext))
+			continue;
+		if(strncmp(&de->d_name[len - sizeof(ext) + 1], ext,
+					sizeof(ext)) != 0)
 			continue;
 		if((p = realloc(name, strlen(apppath) + len + 2)) == NULL)
 		{
@@ -788,10 +790,10 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, name);
 #endif
-		if(config != NULL)
-			config_reset(config);
-		else
+		if(config == NULL)
 			config = config_new();
+		else
+			config_reset(config);
 		if(config == NULL || config_load(config, name) != 0)
 		{
 			main->helper->error(NULL, NULL, 0); /* XXX */
