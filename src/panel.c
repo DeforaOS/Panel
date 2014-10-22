@@ -143,13 +143,7 @@ static void _new_helper(Panel * panel, PanelPosition position,
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 		PanelPrefs const * user);
 static GtkIconSize _new_size(Panel * panel, PanelPosition position);
-static PanelWindow * _new_window(PanelPosition position,
-		PanelAppletHelper * helper, GdkRectangle * rect, gboolean focus,
-		gboolean above);
-static int _new_windows(Panel * panel, GdkRectangle * rect);
 /* callbacks */
-static gboolean _new_on_idle(gpointer data);
-static void _idle_load(Panel * panel, PanelPosition position);
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3);
 static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
@@ -159,7 +153,6 @@ static GdkFilterReturn _event_configure_notify(Panel * panel);
 Panel * panel_new(PanelPrefs const * prefs)
 {
 	Panel * panel;
-	GdkRectangle rect;
 	GtkIconSize iconsize;
 	size_t i;
 
@@ -172,7 +165,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	if(panel->prefs.iconsize != NULL)
 		iconsize = gtk_icon_size_from_name(panel->prefs.iconsize);
 	/* helpers */
-	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
+	for(i = 0; i < PANEL_POSITION_COUNT; i++)
 	{
 		_new_helper(panel, i, iconsize);
 		panel->windows[i] = NULL;
@@ -191,10 +184,9 @@ Panel * panel_new(PanelPrefs const * prefs)
 	}
 	/* root window */
 	panel->root = gdk_screen_get_root_window(panel->screen);
-	_panel_reset(panel, &rect);
 	panel->source = 0;
 	/* panel windows */
-	if(_new_windows(panel, &rect) != 0)
+	if(panel_reset(panel) != 0)
 	{
 		panel_error(NULL, error_get(), 0); /* XXX as above */
 		panel_delete(panel);
@@ -207,8 +199,6 @@ Panel * panel_new(PanelPrefs const * prefs)
 	gdk_window_set_events(panel->root, gdk_window_get_events(panel->root)
 			| GDK_PROPERTY_CHANGE_MASK);
 	gdk_window_add_filter(panel->root, _on_root_event, panel);
-	/* load applets when idle */
-	panel->source = g_idle_add(_new_on_idle, panel);
 	return panel;
 }
 
@@ -332,114 +322,6 @@ static GtkIconSize _new_size(Panel * panel, PanelPosition position)
 	if(ret == GTK_ICON_SIZE_INVALID)
 		ret = GTK_ICON_SIZE_SMALL_TOOLBAR;
 	return ret;
-}
-
-static PanelWindow * _new_window(PanelPosition position,
-		PanelAppletHelper * helper, GdkRectangle * rect, gboolean focus,
-		gboolean above)
-{
-	PanelWindow * window;
-
-	if((window = panel_window_new(position, helper, rect)) == NULL)
-		return NULL;
-	panel_window_set_accept_focus(window, focus);
-	panel_window_set_keep_above(window, above);
-	return window;
-}
-
-static int _new_windows(Panel * panel, GdkRectangle * rect)
-{
-	size_t i;
-	String const * p;
-	char const * section;
-	String * s;
-	String const * applets;
-	String const * enabled;
-	gboolean focus;
-	gboolean above;
-
-	focus = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
-			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
-	above = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
-			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
-	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
-	{
-		section = _panel_get_section(panel, i);
-		if((s = string_new_append("panel::", section, NULL)) == NULL)
-		{
-			panel_error(NULL, NULL, 1);
-			continue;
-		}
-		applets = panel_get_config(panel, s, "applets");
-		enabled = panel_get_config(panel, s, "enabled");
-		string_delete(s);
-		if(enabled == NULL || strtol(enabled, NULL, 0) == 0
-				|| applets == NULL)
-			continue;
-		if((panel->windows[i] = _new_window(i, &panel->helpers[i], rect,
-						focus, above)) == NULL)
-			return -1;
-	}
-	/* create at least PANEL_POSITION_DEFAULT */
-	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
-		if(panel->windows[i] != NULL)
-			return 0;
-	i = PANEL_POSITION_DEFAULT;
-	if((panel->windows[i] = _new_window(i, &panel->helpers[i], rect, focus,
-					above)) == NULL)
-		return -1;
-	return 0;
-}
-
-static gboolean _new_on_idle(gpointer data)
-{
-	Panel * panel = data;
-	size_t i;
-
-	panel->source = 0;
-	if(panel->pr_window == NULL)
-		panel_show_preferences(panel, FALSE);
-	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
-		if(panel->windows[i] != NULL)
-			_idle_load(panel, i);
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(panel->pr_notebook), 0);
-	return FALSE;
-}
-
-static void _idle_load(Panel * panel, PanelPosition position)
-{
-	char const * applets;
-	char * p;
-	char * q;
-	size_t i;
-
-	if((applets = _panel_get_applets(panel, position)) == NULL
-			|| strlen(applets) == 0)
-		return;
-	if((p = string_new(applets)) == NULL)
-	{
-		panel_error(panel, error_get(), FALSE);
-		return;
-	}
-	for(q = p, i = 0;;)
-	{
-		if(q[i] == '\0')
-		{
-			if(panel_load(panel, position, q) != 0)
-				/* ignore errors */
-				error_print(PROGNAME);
-			break;
-		}
-		if(q[i++] != ',')
-			continue;
-		q[i - 1] = '\0';
-		if(panel_load(panel, position, q) != 0)
-			/* ignore errors */
-			error_print(PROGNAME);
-		q += i;
-		i = 0;
-	}
-	free(p);
 }
 
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
@@ -623,6 +505,145 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 	if(ret == 0)
 		panel_window_show(window, TRUE);
 	return (ret == 0) ? 0 : -1;
+}
+
+
+/* panel_reset */
+static void _reset_window_delete(Panel * panel, PanelPosition position);
+static int _reset_window_new(Panel * panel, PanelPosition position,
+		PanelAppletHelper * helper, GdkRectangle * rect,
+		gboolean focus, gboolean above);
+/* callbacks */
+static gboolean _reset_on_idle(gpointer data);
+static void _reset_on_idle_load(Panel * panel, PanelPosition position);
+
+int panel_reset(Panel * panel)
+{
+	GdkRectangle rect;
+	PanelWindowPosition position;
+	String const * section;
+	gboolean focus;
+	gboolean above;
+	gboolean enabled;
+	String const * applets;
+	String const * p;
+	String * s;
+
+	_panel_reset(panel, &rect);
+	focus = ((p = panel_get_config(panel, NULL, "accept_focus")) == NULL
+			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
+	above = ((p = panel_get_config(panel, NULL, "keep_above")) == NULL
+			|| strcmp(p, "1") == 0) ? TRUE : FALSE;
+	for(position = 0; position < PANEL_POSITION_COUNT; position++)
+	{
+		if((section = _panel_get_section(panel, position)) == NULL
+				|| (s = string_new_append("panel::", section,
+						NULL)) == NULL)
+			return -1;
+		enabled = ((p = panel_get_config(panel, s, "enabled"))
+				== NULL || strcmp(p, "1") == 0) ? TRUE : FALSE;
+		if((applets = panel_get_config(panel, s, "applets"))
+				!= NULL && string_length(applets) == 0)
+			applets = NULL;
+		fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, position,
+				applets);
+		string_delete(s);
+		if(enabled == FALSE || applets == NULL)
+		{
+			_reset_window_delete(panel, position);
+			continue;
+		}
+		if(_reset_window_new(panel, position, &panel->helpers[position],
+					&rect, focus, above) != 0)
+			return -panel_error(NULL, NULL, 1);
+	}
+	/* create at least PANEL_POSITION_DEFAULT */
+	for(position = 0; position < PANEL_POSITION_COUNT; position++)
+		if(panel->windows[position] != NULL)
+			break;
+	if(position == PANEL_POSITION_COUNT)
+	{
+		position = PANEL_POSITION_DEFAULT;
+		if(_reset_window_new(panel, position, &panel->helpers[position],
+					&rect, focus, above) != 0)
+			return -1;
+	}
+	/* load applets when idle */
+	if(panel->source != 0)
+		g_source_remove(panel->source);
+	panel->source = g_idle_add(_reset_on_idle, panel);
+	return 0;
+}
+
+static int _reset_window_new(Panel * panel, PanelPosition position,
+		PanelAppletHelper * helper, GdkRectangle * rect,
+		gboolean focus, gboolean above)
+{
+	if(panel->windows[position] == NULL
+			&& (panel->windows[position] = panel_window_new(
+					position, helper, rect)) == NULL)
+		return -1;
+	panel_window_set_accept_focus(panel->windows[position], focus);
+	panel_window_set_keep_above(panel->windows[position], above);
+	return 0;
+}
+
+static void _reset_window_delete(Panel * panel, PanelPosition position)
+{
+	if(panel->windows[position] != NULL)
+		panel_window_delete(panel->windows[position]);
+	panel->windows[position] = NULL;
+}
+
+static gboolean _reset_on_idle(gpointer data)
+{
+	Panel * panel = data;
+	PanelPosition position;
+
+	panel->source = 0;
+	if(panel->pr_window == NULL)
+		panel_show_preferences(panel, FALSE);
+	for(position = 0; position < PANEL_POSITION_COUNT; position++)
+		if(panel->windows[position] != NULL)
+			_reset_on_idle_load(panel, position);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(panel->pr_notebook), 0);
+	return FALSE;
+}
+
+static void _reset_on_idle_load(Panel * panel, PanelPosition position)
+{
+	char const * applets;
+	char * p;
+	char * q;
+	size_t i;
+
+	if((applets = _panel_get_applets(panel, position)) == NULL
+			|| strlen(applets) == 0)
+		return;
+	if((p = string_new(applets)) == NULL)
+	{
+		panel_error(panel, error_get(), FALSE);
+		return;
+	}
+	for(q = p, i = 0;;)
+	{
+		if(q[i] == '\0')
+		{
+			if(panel_load(panel, position, q) != 0)
+				/* ignore errors */
+				error_print(PROGNAME);
+			break;
+		}
+		if(q[i++] != ',')
+			continue;
+		q[i - 1] = '\0';
+		if(panel_load(panel, position, q) != 0)
+			/* ignore errors */
+			error_print(PROGNAME);
+		q += i;
+		i = 0;
+	}
+	free(p);
 }
 
 
@@ -1020,8 +1041,7 @@ static void _preferences_on_response_apply(gpointer data)
 	for(j = 0; j < sizeof(panel->windows) / sizeof(*panel->windows); j++)
 		if(panel->windows[j] != NULL)
 			panel_window_remove_all(panel->windows[j]);
-	if(panel->source == 0)
-		panel->source = g_idle_add(_new_on_idle, panel); /* XXX */
+	panel_reset(panel);
 }
 
 static void _preferences_on_response_apply_panel(Panel * panel,
