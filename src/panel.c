@@ -1016,11 +1016,12 @@ static void _preferences_on_response_apply(gpointer data)
 			continue;
 		pad->settings(pa, TRUE, FALSE);
 	}
+	/* remove the applets from every active panel */
 	for(j = 0; j < sizeof(panel->windows) / sizeof(*panel->windows); j++)
 		if(panel->windows[j] != NULL)
 			panel_window_remove_all(panel->windows[j]);
 	if(panel->source == 0)
-		panel->source = g_idle_add(_new_on_idle, panel);
+		panel->source = g_idle_add(_new_on_idle, panel); /* XXX */
 }
 
 static void _preferences_on_response_apply_panel(Panel * panel,
