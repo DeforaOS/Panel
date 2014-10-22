@@ -1033,6 +1033,7 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	gboolean valid;
+	gboolean enabled;
 	gchar * p;
 	String * value;
 	String * sep;
@@ -1044,6 +1045,10 @@ static void _preferences_on_response_apply_panel(Panel * panel,
 		panel_error(NULL, NULL, 1);
 		return;
 	}
+	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+				panel->pr_panels[position].enabled));
+	if(config_set(panel->config, s, "enabled", enabled ? "1" : "0") != 0)
+		panel_error(NULL, NULL, 1);
 	i = gtk_combo_box_get_active(
 			GTK_COMBO_BOX(panel->pr_panels[position].size));
 	if(i >= 0 && i <= cnt)
