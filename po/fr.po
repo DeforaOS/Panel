@@ -204,6 +204,9 @@ msgid ""
 "In: %lu kB/s\n"
 "Out: %lu kB/s"
 msgstr ""
+"%s\n"
+"Entrée : %lu kio/s\n"
+"Sortie : %lu kio/s"
 
 #: ../src/applets/rotate.c:73
 msgid "Rotate the screen"
@@ -436,7 +439,7 @@ msgstr "Général"
 
 #: ../src/panel.c:713
 msgid "Panels"
-msgstr ""
+msgstr "Panneaux"
 
 #: ../src/panel.c:735
 msgid "Accept focus"
