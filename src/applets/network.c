@@ -26,9 +26,11 @@
 #ifdef __NetBSD__
 # include <ifaddrs.h>
 #endif
+#include <libintl.h>
 #include <net/if.h>
 #include <System.h>
 #include "Panel.h"
+#define _(string) gettext(string)
 
 
 /* Network */
@@ -292,7 +294,7 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 				: ULONG_MAX - ni->obytes
 				+ ifdr.ifdr_data.ifi_obytes;
 			snprintf(tooltip, sizeof(tooltip),
-					"%s\nIn: %lu kB/s\nOut: %lu kB/s",
+					_("%s\nIn: %lu kB/s\nOut: %lu kB/s"),
 					ni->name, ibytes / 512, obytes / 512);
 # endif
 			ni->ipackets = ifdr.ifdr_data.ifi_ipackets;
