@@ -341,7 +341,7 @@ static int _tasks_get_current_desktop(Tasks * tasks)
 
 	if(_tasks_get_window_property(tasks, GDK_WINDOW_XID(tasks->root),
 				TASKS_ATOM__NET_CURRENT_DESKTOP, XA_CARDINAL,
-				&cnt, (void*)&p) != 0)
+				&cnt, (void *)&p) != 0)
 		return -1;
 	cnt = *p;
 	XFree(p);
@@ -448,7 +448,7 @@ static void _tasks_do(Tasks * tasks)
 #endif
 	if(_tasks_get_window_property(tasks, GDK_WINDOW_XID(tasks->root),
 				TASKS_ATOM__NET_CLIENT_LIST,
-				XA_WINDOW, &cnt, (void*)&windows) != 0)
+				XA_WINDOW, &cnt, (void *)&windows) != 0)
 		return;
 	desktop = _tasks_get_current_desktop(tasks);
 	for(i = 0; i < tasks->tasks_cnt; i++)
@@ -486,7 +486,7 @@ static char * _do_name_text(Tasks * tasks, Window window, Atom property)
 {
 	char * ret = NULL;
 
-	if(_tasks_get_text_property(tasks, window, property, (void*)&ret) != 0)
+	if(_tasks_get_text_property(tasks, window, property, (void *)&ret) != 0)
 		return NULL;
 	return ret;
 }
@@ -499,7 +499,7 @@ static char * _do_name_utf8(Tasks * tasks, Window window, Atom property)
 
 	if(_tasks_get_window_property(tasks, window, property,
 				tasks->atom[TASKS_ATOM_UTF8_STRING], &cnt,
-				(void*)&str) != 0)
+				(void *)&str) != 0)
 		return NULL;
 	if(g_utf8_validate(str, cnt, NULL))
 		ret = g_strndup(str, cnt);
@@ -522,7 +522,7 @@ static GdkPixbuf * _do_pixbuf(Tasks * tasks, Window window)
 	unsigned long * best = NULL;
 
 	if(_tasks_get_window_property(tasks, window, TASKS_ATOM__NET_WM_ICON,
-				XA_CARDINAL, &cnt, (void*)&buf) != 0)
+				XA_CARDINAL, &cnt, (void *)&buf) != 0)
 		return NULL;
 	for(i = 0; i < cnt - 3; i += 2 + (width * height))
 	{
@@ -585,7 +585,7 @@ static int _do_tasks_add(Tasks * tasks, int desktop, Window window,
 
 #ifndef EMBEDDED
 	if(_tasks_get_window_property(tasks, window, TASKS_ATOM__NET_WM_DESKTOP,
-			XA_CARDINAL, &cnt, (void*)&l) == 0)
+			XA_CARDINAL, &cnt, (void *)&l) == 0)
 	{
 		if(cnt == 1)
 			cur = *l;
@@ -652,7 +652,7 @@ static int _do_typehint_normal(Tasks * tasks, Window window)
 
 	if(_tasks_get_window_property(tasks, window,
 				TASKS_ATOM__NET_WM_WINDOW_TYPE, XA_ATOM, &cnt,
-				(void*)&p) == 0)
+				(void *)&p) == 0)
 	{
 		typehint = *p;
 		XFree(p);
@@ -780,7 +780,7 @@ static gboolean _on_popup(gpointer data)
 
 	if(_tasks_get_window_property(task->tasks, task->window,
 				TASKS_ATOM__NET_WM_ALLOWED_ACTIONS, XA_ATOM,
-				&cnt, (void*)&buf) != 0)
+				&cnt, (void *)&buf) != 0)
 		return FALSE;
 	for(i = 0; i < cnt; i++)
 	{
