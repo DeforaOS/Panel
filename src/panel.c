@@ -545,8 +545,6 @@ int panel_reset(Panel * panel)
 		if((applets = panel_get_config(panel, s, "applets"))
 				!= NULL && string_length(applets) == 0)
 			applets = NULL;
-		fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, position,
-				applets);
 		string_delete(s);
 		if(enabled == FALSE || applets == NULL)
 		{
