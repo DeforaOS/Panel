@@ -31,6 +31,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
+	gulong source;
 } Phone;
 
 
@@ -83,8 +84,8 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 				_on_plug_added), NULL);
 	g_signal_connect(phone->widget, "plug-removed", G_CALLBACK(
 				_on_plug_removed), NULL);
-	g_signal_connect(phone->widget, "screen-changed", G_CALLBACK(
-				_on_screen_changed), NULL);
+	phone->source = g_signal_connect(phone->widget, "screen-changed",
+			G_CALLBACK(_on_screen_changed), NULL);
 	*widget = phone->widget;
 	return phone;
 }
@@ -93,6 +94,9 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* phone_destroy */
 static void _phone_destroy(Phone * phone)
 {
+	if(phone->source != 0)
+		g_signal_handler_disconnect(phone->widget, phone->source);
+	phone->source = 0;
 	desktop_message_unregister(NULL, _on_message, phone->widget);
 	gtk_widget_destroy(phone->widget);
 	free(phone);

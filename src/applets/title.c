@@ -34,6 +34,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
+	gulong source;
 
 	GdkDisplay * display;
 	GdkScreen * screen;
@@ -96,8 +97,8 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	title->widget = gtk_label_new("");
 	gtk_widget_modify_font(title->widget, bold);
 	pango_font_description_free(bold);
-	g_signal_connect(title->widget, "screen-changed", G_CALLBACK(
-				_on_screen_changed), title);
+	title->source = g_signal_connect(title->widget, "screen-changed",
+			G_CALLBACK(_on_screen_changed), title);
 	title->display = NULL;
 	title->screen = NULL;
 	title->root = NULL;
@@ -113,6 +114,9 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* title_destroy */
 static void _title_destroy(Title * title)
 {
+	if(title->source != 0)
+		g_signal_handler_disconnect(title->widget, title->source);
+	title->source = 0;
 	if(title->root != NULL)
 		gdk_window_remove_filter(title->root, _on_filter, title);
 	gtk_widget_destroy(title->widget);

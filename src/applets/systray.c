@@ -35,6 +35,7 @@ typedef struct _PanelApplet
 	PanelAppletHelper * helper;
 	GtkWidget * hbox;
 	GtkWidget * owner;
+	gulong source;
 } Systray;
 
 
@@ -93,8 +94,8 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_icon_size_lookup(helper->icon_size, NULL, &height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
 	systray->owner = NULL;
-	g_signal_connect(systray->hbox, "screen-changed", G_CALLBACK(
-				_on_screen_changed), systray);
+	systray->source = g_signal_connect(systray->hbox, "screen-changed",
+			G_CALLBACK(_on_screen_changed), systray);
 	gtk_widget_show(systray->hbox);
 	*widget = systray->hbox;
 	return systray;
@@ -104,11 +105,12 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* systray_destroy */
 static void _systray_destroy(Systray * systray)
 {
-#if 0 /* FIXME crashes */
+	if(systray->source != 0)
+		g_signal_handler_disconnect(systray->hbox, systray->source);
+	systray->source = 0;
 	if(systray->owner != NULL)
 		gtk_widget_destroy(systray->owner);
 	gtk_widget_destroy(systray->hbox);
-#endif
 	free(systray);
 }
 

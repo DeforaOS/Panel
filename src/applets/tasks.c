@@ -64,6 +64,7 @@ struct _PanelApplet
 	GtkIconSize icon_size;
 	int icon_width;
 	int icon_height;
+	gulong source;
 
 	Atom atom[TASKS_ATOM_COUNT];
 	GdkDisplay * display;
@@ -281,8 +282,8 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	tasks->hbox = gtk_hbox_new(TRUE, 0);
 #endif
-	g_signal_connect(tasks->hbox, "screen-changed", G_CALLBACK(
-				_on_screen_changed), tasks);
+	tasks->source = g_signal_connect(tasks->hbox, "screen-changed",
+			G_CALLBACK(_on_screen_changed), tasks);
 	tasks->icon_size = helper->icon_size;
 	tasks->icon_width = 48;
 	tasks->icon_height = 48;
@@ -315,6 +316,9 @@ static void _tasks_destroy(Tasks * tasks)
 {
 	size_t i;
 
+	if(tasks->source != 0)
+		g_signal_handler_disconnect(tasks->widget, tasks->source);
+	tasks->source = 0;
 	if(tasks->root != NULL)
 		gdk_window_remove_filter(tasks->root, _on_filter, tasks);
 	for(i = 0; i < tasks->tasks_cnt; i++)

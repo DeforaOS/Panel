@@ -40,6 +40,7 @@ typedef struct _PanelApplet
 	PanelAppletHelper * helper;
 
 	GtkWidget * box;
+	gulong source;
 
 	GtkWidget ** widgets;
 	size_t widgets_cnt;
@@ -118,8 +119,8 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	pager->box = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
-	g_signal_connect(pager->box, "screen-changed", G_CALLBACK(
-				_on_screen_changed), pager);
+	pager->source = g_signal_connect(pager->box, "screen-changed",
+			G_CALLBACK(_on_screen_changed), pager);
 	pager->widgets = NULL;
 	pager->widgets_cnt = 0;
 	pager->screen = NULL;
@@ -133,6 +134,9 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* pager_destroy */
 static void _pager_destroy(Pager * pager)
 {
+	if(pager->source != 0)
+		g_signal_handler_disconnect(pager->box, pager->source);
+	pager->source = 0;
 	if(pager->root != NULL)
 		gdk_window_remove_filter(pager->root, _on_filter, pager);
 	gtk_widget_destroy(pager->box);

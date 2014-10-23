@@ -33,6 +33,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
+	gulong source;
 
 	GdkDisplay * display;
 	GdkScreen * screen;
@@ -94,10 +95,10 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, helper->icon_size);
 	gtk_button_set_image(GTK_BUTTON(close->widget), image);
-	g_signal_connect_swapped(G_OBJECT(close->widget), "clicked", G_CALLBACK(
+	g_signal_connect_swapped(close->widget, "clicked", G_CALLBACK(
 				_on_close), close);
-	g_signal_connect(G_OBJECT(close->widget), "screen-changed", G_CALLBACK(
-				_on_screen_changed), close);
+	close->source = g_signal_connect(close->widget, "screen-changed",
+			G_CALLBACK(_on_screen_changed), close);
 	close->display = NULL;
 	close->screen = NULL;
 	close->root = NULL;
@@ -114,6 +115,9 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* close_destroy */
 static void _close_destroy(Close * close)
 {
+	if(close->source != 0)
+		g_signal_handler_disconnect(close->widget, close->source);
+	close->source = 0;
 	gtk_widget_destroy(close->widget);
 	free(close);
 }
