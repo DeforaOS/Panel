@@ -793,8 +793,12 @@ static gboolean _on_popup(gpointer data)
 			continue; /* FIXME implement as a special case */
 		if(menu == NULL)
 			menu = gtk_menu_new();
-		menuitem = gtk_image_menu_item_new_from_stock(_(items[j].stock),
-				NULL); /* XXX they're not always stock */
+		if(strncmp(items[j].stock, "gtk-", 4) == 0)
+			menuitem = gtk_image_menu_item_new_from_stock(
+					items[j].stock, NULL);
+		else
+			menuitem = gtk_menu_item_new_with_label(
+					_(items[j].stock));
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					items[j].callback), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
