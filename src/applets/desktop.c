@@ -68,8 +68,7 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, _("Show desktop"));
 #endif
-	g_signal_connect(G_OBJECT(ret), "clicked", G_CALLBACK(_on_clicked),
-			NULL);
+	g_signal_connect(ret, "clicked", G_CALLBACK(_on_clicked), NULL);
 	gtk_widget_show_all(ret);
 	*widget = ret;
 	/* XXX ugly workaround */

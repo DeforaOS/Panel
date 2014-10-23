@@ -277,8 +277,8 @@ static void _pager_do(Pager * pager)
 		pager->widgets[i] = gtk_button_new_with_label(buf);
 		if(i == cur)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
-		g_signal_connect(G_OBJECT(pager->widgets[i]), "clicked",
-				G_CALLBACK(_on_clicked), pager);
+		g_signal_connect(pager->widgets[i], "clicked", G_CALLBACK(
+					_on_clicked), pager);
 		gtk_box_pack_start(GTK_BOX(pager->box), pager->widgets[i],
 				FALSE, TRUE, 0);
 	}
