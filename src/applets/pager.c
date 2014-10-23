@@ -17,9 +17,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
 #include "Panel.h"
+#define _(string) gettext(string)
 
 
 /* Pager */
@@ -273,7 +275,8 @@ static void _pager_do(Pager * pager)
 			g_free(names[i]);
 		}
 		else
-			snprintf(buf, sizeof(buf), "Desk %lu\n", i + 1);
+			snprintf(buf, sizeof(buf), "%s %lu\n", _("Desk"),
+					i + 1);
 		pager->widgets[i] = gtk_button_new_with_label(buf);
 		if(i == cur)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
