@@ -19,7 +19,7 @@
 
 
 #include <sys/ioctl.h>
-#if defined(__NetBSD__) || defined(__sun__)
+#if defined(__NetBSD__)
 # include <sys/audioio.h>
 #elif defined(__linux__)
 # include <alsa/asoundlib.h>
