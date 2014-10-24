@@ -768,7 +768,7 @@ static GtkWidget * _preferences_window_panel(Panel * panel)
 	for(i = 0; i < sizeof(titles) / sizeof(*titles); i++)
 	{
 #if GTK_CHECK_VERSION(2, 24, 0)
-		gtk_combo_box_text_append(GTK_COMBO_BOX(widget), _(titles[i]));
+		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widget), _(titles[i]));
 #else
 		gtk_combo_box_append_text(GTK_COMBO_BOX(widget), _(titles[i]));
 #endif
