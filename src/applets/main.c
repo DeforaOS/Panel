@@ -754,7 +754,7 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 	Config * config = NULL;
 	String const * q;
 
-#if defined(__sun__)
+#if defined(__sun)
 	if((fd = open(apppath, O_RDONLY)) < 0
 			|| fstat(fd, &st) != 0
 			|| (dir = fdopendir(fd)) == NULL)
