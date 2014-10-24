@@ -23,6 +23,7 @@
 # include <sys/sysinfo.h>
 #elif defined(__NetBSD__)
 # include <sys/sysctl.h>
+# include <uvm/uvm_extern.h>
 #endif
 #include <libintl.h>
 #include "Panel.h"
