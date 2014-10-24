@@ -16,6 +16,9 @@
 
 
 #include <sys/stat.h>
+#if defined(__sun__)
+# include <fcntl.h>
+#endif
 #include <dirent.h>
 #include <unistd.h>
 #include <stdlib.h>
