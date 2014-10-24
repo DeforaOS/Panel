@@ -21,12 +21,13 @@
 #include <errno.h>
 #if defined(__linux__)
 # include <sys/sysinfo.h>
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#elif defined(__FreeBSD__)
 # include <sys/sysctl.h>
 # include <sys/vmmeter.h>
-# if defined(__FreeBSD__)
-#  include <vm/vm_param.h>
-# endif
+# include <vm/vm_param.h>
+#elif defined(__NetBSD__)
+# include <sys/sysctl.h>
+# include <sys/vmmeter.h>
 #endif
 #include <libintl.h>
 #include "Panel.h"
