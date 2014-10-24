@@ -768,7 +768,8 @@ static GtkWidget * _preferences_window_panel(Panel * panel)
 	for(i = 0; i < sizeof(titles) / sizeof(*titles); i++)
 	{
 #if GTK_CHECK_VERSION(2, 24, 0)
-		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widget), _(titles[i]));
+		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(widget), NULL,
+				_(titles[i]));
 #else
 		gtk_combo_box_append_text(GTK_COMBO_BOX(widget), _(titles[i]));
 #endif
@@ -782,7 +783,7 @@ static GtkWidget * _preferences_window_panel(Panel * panel)
 				FALSE, TRUE, 0);
 		gtk_widget_set_no_show_all(panel->pr_panels[i].enabled, TRUE);
 		/* size */
-#if GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(2, 24, 0)
 		panel->pr_panels[i].size = gtk_combo_box_text_new();
 		gtk_combo_box_text_append(
 				GTK_COMBO_BOX_TEXT(panel->pr_panels[i].size),
@@ -796,7 +797,7 @@ static GtkWidget * _preferences_window_panel(Panel * panel)
 		for(j = 0; j < sizeof(_panel_sizes) / sizeof(*_panel_sizes);
 				j++)
 		{
-#if GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(2, 24, 0)
 			gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(
 						panel->pr_panels[i].size), NULL,
 					_(_panel_sizes[j].alias));
