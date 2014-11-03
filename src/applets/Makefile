@@ -1,4 +1,5 @@
-TARGETS	= battery.so bluetooth.so clock.so close.so cpu.so cpufreq.so desktop.so embed.so gps.so gsm.so lock.so logout.so main.so memory.so mixer.so mpd.so network.so pager.so phone.so player.so rotate.so separator.so spacer.so swap.so systray.so tasks.so template.so title.so usb.so user.so volume.so wpa_supplicant.so
+TARGETS	= $(OBJDIR)battery.so $(OBJDIR)bluetooth.so $(OBJDIR)clock.so $(OBJDIR)close.so $(OBJDIR)cpu.so $(OBJDIR)cpufreq.so $(OBJDIR)desktop.so $(OBJDIR)embed.so $(OBJDIR)gps.so $(OBJDIR)gsm.so $(OBJDIR)lock.so $(OBJDIR)logout.so $(OBJDIR)main.so $(OBJDIR)memory.so $(OBJDIR)mixer.so $(OBJDIR)mpd.so $(OBJDIR)network.so $(OBJDIR)pager.so $(OBJDIR)phone.so $(OBJDIR)player.so $(OBJDIR)rotate.so $(OBJDIR)separator.so $(OBJDIR)spacer.so $(OBJDIR)swap.so $(OBJDIR)systray.so $(OBJDIR)tasks.so $(OBJDIR)template.so $(OBJDIR)title.so $(OBJDIR)usb.so $(OBJDIR)user.so $(OBJDIR)volume.so $(OBJDIR)wpa_supplicant.so
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 LIBDIR	= $(PREFIX)/lib
@@ -19,325 +20,325 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-battery_OBJS = battery.o
+battery_OBJS = $(OBJDIR)battery.o
 battery_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 battery_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-battery.so: $(battery_OBJS)
-	$(CCSHARED) -o battery.so $(battery_OBJS) $(battery_LDFLAGS)
+$(OBJDIR)battery.so: $(battery_OBJS)
+	$(CCSHARED) -o $(OBJDIR)battery.so $(battery_OBJS) $(battery_LDFLAGS)
 
-bluetooth_OBJS = bluetooth.o
+bluetooth_OBJS = $(OBJDIR)bluetooth.o
 bluetooth_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 bluetooth_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-bluetooth.so: $(bluetooth_OBJS)
-	$(CCSHARED) -o bluetooth.so $(bluetooth_OBJS) $(bluetooth_LDFLAGS)
+$(OBJDIR)bluetooth.so: $(bluetooth_OBJS)
+	$(CCSHARED) -o $(OBJDIR)bluetooth.so $(bluetooth_OBJS) $(bluetooth_LDFLAGS)
 
-clock_OBJS = clock.o
+clock_OBJS = $(OBJDIR)clock.o
 clock_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 clock_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-clock.so: $(clock_OBJS)
-	$(CCSHARED) -o clock.so $(clock_OBJS) $(clock_LDFLAGS)
+$(OBJDIR)clock.so: $(clock_OBJS)
+	$(CCSHARED) -o $(OBJDIR)clock.so $(clock_OBJS) $(clock_LDFLAGS)
 
-close_OBJS = close.o
+close_OBJS = $(OBJDIR)close.o
 close_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 close_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-close.so: $(close_OBJS)
-	$(CCSHARED) -o close.so $(close_OBJS) $(close_LDFLAGS)
+$(OBJDIR)close.so: $(close_OBJS)
+	$(CCSHARED) -o $(OBJDIR)close.so $(close_OBJS) $(close_LDFLAGS)
 
-cpu_OBJS = cpu.o
+cpu_OBJS = $(OBJDIR)cpu.o
 cpu_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 cpu_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-cpu.so: $(cpu_OBJS)
-	$(CCSHARED) -o cpu.so $(cpu_OBJS) $(cpu_LDFLAGS)
+$(OBJDIR)cpu.so: $(cpu_OBJS)
+	$(CCSHARED) -o $(OBJDIR)cpu.so $(cpu_OBJS) $(cpu_LDFLAGS)
 
-cpufreq_OBJS = cpufreq.o
+cpufreq_OBJS = $(OBJDIR)cpufreq.o
 cpufreq_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 cpufreq_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-cpufreq.so: $(cpufreq_OBJS)
-	$(CCSHARED) -o cpufreq.so $(cpufreq_OBJS) $(cpufreq_LDFLAGS)
+$(OBJDIR)cpufreq.so: $(cpufreq_OBJS)
+	$(CCSHARED) -o $(OBJDIR)cpufreq.so $(cpufreq_OBJS) $(cpufreq_LDFLAGS)
 
-desktop_OBJS = desktop.o
+desktop_OBJS = $(OBJDIR)desktop.o
 desktop_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 desktop_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-desktop.so: $(desktop_OBJS)
-	$(CCSHARED) -o desktop.so $(desktop_OBJS) $(desktop_LDFLAGS)
+$(OBJDIR)desktop.so: $(desktop_OBJS)
+	$(CCSHARED) -o $(OBJDIR)desktop.so $(desktop_OBJS) $(desktop_LDFLAGS)
 
-embed_OBJS = embed.o
+embed_OBJS = $(OBJDIR)embed.o
 embed_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
 embed_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
 
-embed.so: $(embed_OBJS)
-	$(CCSHARED) -o embed.so $(embed_OBJS) $(embed_LDFLAGS)
+$(OBJDIR)embed.so: $(embed_OBJS)
+	$(CCSHARED) -o $(OBJDIR)embed.so $(embed_OBJS) $(embed_LDFLAGS)
 
-gps_OBJS = gps.o
+gps_OBJS = $(OBJDIR)gps.o
 gps_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 gps_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-gps.so: $(gps_OBJS)
-	$(CCSHARED) -o gps.so $(gps_OBJS) $(gps_LDFLAGS)
+$(OBJDIR)gps.so: $(gps_OBJS)
+	$(CCSHARED) -o $(OBJDIR)gps.so $(gps_OBJS) $(gps_LDFLAGS)
 
-gsm_OBJS = gsm.o
+gsm_OBJS = $(OBJDIR)gsm.o
 gsm_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 gsm_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-gsm.so: $(gsm_OBJS)
-	$(CCSHARED) -o gsm.so $(gsm_OBJS) $(gsm_LDFLAGS)
+$(OBJDIR)gsm.so: $(gsm_OBJS)
+	$(CCSHARED) -o $(OBJDIR)gsm.so $(gsm_OBJS) $(gsm_LDFLAGS)
 
-lock_OBJS = lock.o
+lock_OBJS = $(OBJDIR)lock.o
 lock_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 lock_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-lock.so: $(lock_OBJS)
-	$(CCSHARED) -o lock.so $(lock_OBJS) $(lock_LDFLAGS)
+$(OBJDIR)lock.so: $(lock_OBJS)
+	$(CCSHARED) -o $(OBJDIR)lock.so $(lock_OBJS) $(lock_LDFLAGS)
 
-logout_OBJS = logout.o
+logout_OBJS = $(OBJDIR)logout.o
 logout_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 logout_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-logout.so: $(logout_OBJS)
-	$(CCSHARED) -o logout.so $(logout_OBJS) $(logout_LDFLAGS)
+$(OBJDIR)logout.so: $(logout_OBJS)
+	$(CCSHARED) -o $(OBJDIR)logout.so $(logout_OBJS) $(logout_LDFLAGS)
 
-main_OBJS = main.o
+main_OBJS = $(OBJDIR)main.o
 main_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
 main_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-main.so: $(main_OBJS)
-	$(CCSHARED) -o main.so $(main_OBJS) $(main_LDFLAGS)
+$(OBJDIR)main.so: $(main_OBJS)
+	$(CCSHARED) -o $(OBJDIR)main.so $(main_OBJS) $(main_LDFLAGS)
 
-memory_OBJS = memory.o
+memory_OBJS = $(OBJDIR)memory.o
 memory_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 memory_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-memory.so: $(memory_OBJS)
-	$(CCSHARED) -o memory.so $(memory_OBJS) $(memory_LDFLAGS)
+$(OBJDIR)memory.so: $(memory_OBJS)
+	$(CCSHARED) -o $(OBJDIR)memory.so $(memory_OBJS) $(memory_LDFLAGS)
 
-mixer_OBJS = mixer.o
+mixer_OBJS = $(OBJDIR)mixer.o
 mixer_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 mixer_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-mixer.so: $(mixer_OBJS)
-	$(CCSHARED) -o mixer.so $(mixer_OBJS) $(mixer_LDFLAGS)
+$(OBJDIR)mixer.so: $(mixer_OBJS)
+	$(CCSHARED) -o $(OBJDIR)mixer.so $(mixer_OBJS) $(mixer_LDFLAGS)
 
-mpd_OBJS = mpd.o
+mpd_OBJS = $(OBJDIR)mpd.o
 mpd_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 mpd_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-mpd.so: $(mpd_OBJS)
-	$(CCSHARED) -o mpd.so $(mpd_OBJS) $(mpd_LDFLAGS)
+$(OBJDIR)mpd.so: $(mpd_OBJS)
+	$(CCSHARED) -o $(OBJDIR)mpd.so $(mpd_OBJS) $(mpd_LDFLAGS)
 
-network_OBJS = network.o
+network_OBJS = $(OBJDIR)network.o
 network_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 network_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-network.so: $(network_OBJS)
-	$(CCSHARED) -o network.so $(network_OBJS) $(network_LDFLAGS)
+$(OBJDIR)network.so: $(network_OBJS)
+	$(CCSHARED) -o $(OBJDIR)network.so $(network_OBJS) $(network_LDFLAGS)
 
-pager_OBJS = pager.o
+pager_OBJS = $(OBJDIR)pager.o
 pager_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 pager_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-pager.so: $(pager_OBJS)
-	$(CCSHARED) -o pager.so $(pager_OBJS) $(pager_LDFLAGS)
+$(OBJDIR)pager.so: $(pager_OBJS)
+	$(CCSHARED) -o $(OBJDIR)pager.so $(pager_OBJS) $(pager_LDFLAGS)
 
-phone_OBJS = phone.o
+phone_OBJS = $(OBJDIR)phone.o
 phone_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
 phone_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
 
-phone.so: $(phone_OBJS)
-	$(CCSHARED) -o phone.so $(phone_OBJS) $(phone_LDFLAGS)
+$(OBJDIR)phone.so: $(phone_OBJS)
+	$(CCSHARED) -o $(OBJDIR)phone.so $(phone_OBJS) $(phone_LDFLAGS)
 
-player_OBJS = player.o
+player_OBJS = $(OBJDIR)player.o
 player_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
 player_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
 
-player.so: $(player_OBJS)
-	$(CCSHARED) -o player.so $(player_OBJS) $(player_LDFLAGS)
+$(OBJDIR)player.so: $(player_OBJS)
+	$(CCSHARED) -o $(OBJDIR)player.so $(player_OBJS) $(player_LDFLAGS)
 
-rotate_OBJS = rotate.o
+rotate_OBJS = $(OBJDIR)rotate.o
 rotate_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 rotate_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-rotate.so: $(rotate_OBJS)
-	$(CCSHARED) -o rotate.so $(rotate_OBJS) $(rotate_LDFLAGS)
+$(OBJDIR)rotate.so: $(rotate_OBJS)
+	$(CCSHARED) -o $(OBJDIR)rotate.so $(rotate_OBJS) $(rotate_LDFLAGS)
 
-separator_OBJS = separator.o
+separator_OBJS = $(OBJDIR)separator.o
 separator_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 separator_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-separator.so: $(separator_OBJS)
-	$(CCSHARED) -o separator.so $(separator_OBJS) $(separator_LDFLAGS)
+$(OBJDIR)separator.so: $(separator_OBJS)
+	$(CCSHARED) -o $(OBJDIR)separator.so $(separator_OBJS) $(separator_LDFLAGS)
 
-spacer_OBJS = spacer.o
+spacer_OBJS = $(OBJDIR)spacer.o
 spacer_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 spacer_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-spacer.so: $(spacer_OBJS)
-	$(CCSHARED) -o spacer.so $(spacer_OBJS) $(spacer_LDFLAGS)
+$(OBJDIR)spacer.so: $(spacer_OBJS)
+	$(CCSHARED) -o $(OBJDIR)spacer.so $(spacer_OBJS) $(spacer_LDFLAGS)
 
-swap_OBJS = swap.o
+swap_OBJS = $(OBJDIR)swap.o
 swap_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 swap_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-swap.so: $(swap_OBJS)
-	$(CCSHARED) -o swap.so $(swap_OBJS) $(swap_LDFLAGS)
+$(OBJDIR)swap.so: $(swap_OBJS)
+	$(CCSHARED) -o $(OBJDIR)swap.so $(swap_OBJS) $(swap_LDFLAGS)
 
-systray_OBJS = systray.o
+systray_OBJS = $(OBJDIR)systray.o
 systray_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 systray_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-systray.so: $(systray_OBJS)
-	$(CCSHARED) -o systray.so $(systray_OBJS) $(systray_LDFLAGS)
+$(OBJDIR)systray.so: $(systray_OBJS)
+	$(CCSHARED) -o $(OBJDIR)systray.so $(systray_OBJS) $(systray_LDFLAGS)
 
-tasks_OBJS = tasks.o
+tasks_OBJS = $(OBJDIR)tasks.o
 tasks_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 tasks_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-tasks.so: $(tasks_OBJS)
-	$(CCSHARED) -o tasks.so $(tasks_OBJS) $(tasks_LDFLAGS)
+$(OBJDIR)tasks.so: $(tasks_OBJS)
+	$(CCSHARED) -o $(OBJDIR)tasks.so $(tasks_OBJS) $(tasks_LDFLAGS)
 
-template_OBJS = template.o
+template_OBJS = $(OBJDIR)template.o
 template_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 template_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-template.so: $(template_OBJS)
-	$(CCSHARED) -o template.so $(template_OBJS) $(template_LDFLAGS)
+$(OBJDIR)template.so: $(template_OBJS)
+	$(CCSHARED) -o $(OBJDIR)template.so $(template_OBJS) $(template_LDFLAGS)
 
-title_OBJS = title.o
+title_OBJS = $(OBJDIR)title.o
 title_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags x11`
 title_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs x11`
 
-title.so: $(title_OBJS)
-	$(CCSHARED) -o title.so $(title_OBJS) $(title_LDFLAGS)
+$(OBJDIR)title.so: $(title_OBJS)
+	$(CCSHARED) -o $(OBJDIR)title.so $(title_OBJS) $(title_LDFLAGS)
 
-usb_OBJS = usb.o
+usb_OBJS = $(OBJDIR)usb.o
 usb_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 usb_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-usb.so: $(usb_OBJS)
-	$(CCSHARED) -o usb.so $(usb_OBJS) $(usb_LDFLAGS)
+$(OBJDIR)usb.so: $(usb_OBJS)
+	$(CCSHARED) -o $(OBJDIR)usb.so $(usb_OBJS) $(usb_LDFLAGS)
 
-user_OBJS = user.o
+user_OBJS = $(OBJDIR)user.o
 user_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 user_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-user.so: $(user_OBJS)
-	$(CCSHARED) -o user.so $(user_OBJS) $(user_LDFLAGS)
+$(OBJDIR)user.so: $(user_OBJS)
+	$(CCSHARED) -o $(OBJDIR)user.so $(user_OBJS) $(user_LDFLAGS)
 
-volume_OBJS = volume.o
+volume_OBJS = $(OBJDIR)volume.o
 volume_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) `pkg-config --cflags alsa` $(CFLAGSF) $(CFLAGS)
 volume_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs alsa`
 
-volume.so: $(volume_OBJS)
-	$(CCSHARED) -o volume.so $(volume_OBJS) $(volume_LDFLAGS)
+$(OBJDIR)volume.so: $(volume_OBJS)
+	$(CCSHARED) -o $(OBJDIR)volume.so $(volume_OBJS) $(volume_LDFLAGS)
 
-wpa_supplicant_OBJS = wpa_supplicant.o
+wpa_supplicant_OBJS = $(OBJDIR)wpa_supplicant.o
 wpa_supplicant_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 wpa_supplicant_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-wpa_supplicant.so: $(wpa_supplicant_OBJS)
-	$(CCSHARED) -o wpa_supplicant.so $(wpa_supplicant_OBJS) $(wpa_supplicant_LDFLAGS)
+$(OBJDIR)wpa_supplicant.so: $(wpa_supplicant_OBJS)
+	$(CCSHARED) -o $(OBJDIR)wpa_supplicant.so $(wpa_supplicant_OBJS) $(wpa_supplicant_LDFLAGS)
 
-battery.o: battery.c ../../include/Panel.h
-	$(CC) $(battery_CFLAGS) -c battery.c
+$(OBJDIR)battery.o: battery.c ../../include/Panel.h
+	$(CC) $(battery_CFLAGS) -o $(OBJDIR)battery.o -c battery.c
 
-bluetooth.o: bluetooth.c ../../include/Panel.h
-	$(CC) $(bluetooth_CFLAGS) -c bluetooth.c
+$(OBJDIR)bluetooth.o: bluetooth.c ../../include/Panel.h
+	$(CC) $(bluetooth_CFLAGS) -o $(OBJDIR)bluetooth.o -c bluetooth.c
 
-clock.o: clock.c ../../include/Panel.h
-	$(CC) $(clock_CFLAGS) -c clock.c
+$(OBJDIR)clock.o: clock.c ../../include/Panel.h
+	$(CC) $(clock_CFLAGS) -o $(OBJDIR)clock.o -c clock.c
 
-close.o: close.c ../../include/Panel.h
-	$(CC) $(close_CFLAGS) -c close.c
+$(OBJDIR)close.o: close.c ../../include/Panel.h
+	$(CC) $(close_CFLAGS) -o $(OBJDIR)close.o -c close.c
 
-cpu.o: cpu.c ../../include/Panel.h
-	$(CC) $(cpu_CFLAGS) -c cpu.c
+$(OBJDIR)cpu.o: cpu.c ../../include/Panel.h
+	$(CC) $(cpu_CFLAGS) -o $(OBJDIR)cpu.o -c cpu.c
 
-cpufreq.o: cpufreq.c ../../include/Panel.h
-	$(CC) $(cpufreq_CFLAGS) -c cpufreq.c
+$(OBJDIR)cpufreq.o: cpufreq.c ../../include/Panel.h
+	$(CC) $(cpufreq_CFLAGS) -o $(OBJDIR)cpufreq.o -c cpufreq.c
 
-desktop.o: desktop.c ../../include/Panel.h
-	$(CC) $(desktop_CFLAGS) -c desktop.c
+$(OBJDIR)desktop.o: desktop.c ../../include/Panel.h
+	$(CC) $(desktop_CFLAGS) -o $(OBJDIR)desktop.o -c desktop.c
 
-embed.o: embed.c ../../include/Panel.h
-	$(CC) $(embed_CFLAGS) -c embed.c
+$(OBJDIR)embed.o: embed.c ../../include/Panel.h
+	$(CC) $(embed_CFLAGS) -o $(OBJDIR)embed.o -c embed.c
 
-gps.o: gps.c ../../include/Panel.h
-	$(CC) $(gps_CFLAGS) -c gps.c
+$(OBJDIR)gps.o: gps.c ../../include/Panel.h
+	$(CC) $(gps_CFLAGS) -o $(OBJDIR)gps.o -c gps.c
 
-gsm.o: gsm.c ../../include/Panel.h
-	$(CC) $(gsm_CFLAGS) -c gsm.c
+$(OBJDIR)gsm.o: gsm.c ../../include/Panel.h
+	$(CC) $(gsm_CFLAGS) -o $(OBJDIR)gsm.o -c gsm.c
 
-lock.o: lock.c ../../include/Panel.h
-	$(CC) $(lock_CFLAGS) -c lock.c
+$(OBJDIR)lock.o: lock.c ../../include/Panel.h
+	$(CC) $(lock_CFLAGS) -o $(OBJDIR)lock.o -c lock.c
 
-logout.o: logout.c ../../include/Panel.h
-	$(CC) $(logout_CFLAGS) -c logout.c
+$(OBJDIR)logout.o: logout.c ../../include/Panel.h
+	$(CC) $(logout_CFLAGS) -o $(OBJDIR)logout.o -c logout.c
 
-main.o: main.c ../../include/Panel.h ../../config.h
-	$(CC) $(main_CFLAGS) -c main.c
+$(OBJDIR)main.o: main.c ../../include/Panel.h ../../config.h
+	$(CC) $(main_CFLAGS) -o $(OBJDIR)main.o -c main.c
 
-memory.o: memory.c ../../include/Panel.h
-	$(CC) $(memory_CFLAGS) -c memory.c
+$(OBJDIR)memory.o: memory.c ../../include/Panel.h
+	$(CC) $(memory_CFLAGS) -o $(OBJDIR)memory.o -c memory.c
 
-mixer.o: mixer.c ../../include/Panel.h
-	$(CC) $(mixer_CFLAGS) -c mixer.c
+$(OBJDIR)mixer.o: mixer.c ../../include/Panel.h
+	$(CC) $(mixer_CFLAGS) -o $(OBJDIR)mixer.o -c mixer.c
 
-mpd.o: mpd.c ../../include/Panel.h
-	$(CC) $(mpd_CFLAGS) -c mpd.c
+$(OBJDIR)mpd.o: mpd.c ../../include/Panel.h
+	$(CC) $(mpd_CFLAGS) -o $(OBJDIR)mpd.o -c mpd.c
 
-network.o: network.c ../../include/Panel.h
-	$(CC) $(network_CFLAGS) -c network.c
+$(OBJDIR)network.o: network.c ../../include/Panel.h
+	$(CC) $(network_CFLAGS) -o $(OBJDIR)network.o -c network.c
 
-pager.o: pager.c ../../include/Panel.h
-	$(CC) $(pager_CFLAGS) -c pager.c
+$(OBJDIR)pager.o: pager.c ../../include/Panel.h
+	$(CC) $(pager_CFLAGS) -o $(OBJDIR)pager.o -c pager.c
 
-phone.o: phone.c ../../include/Panel.h
-	$(CC) $(phone_CFLAGS) -c phone.c
+$(OBJDIR)phone.o: phone.c ../../include/Panel.h
+	$(CC) $(phone_CFLAGS) -o $(OBJDIR)phone.o -c phone.c
 
-player.o: player.c ../../include/Panel.h
-	$(CC) $(player_CFLAGS) -c player.c
+$(OBJDIR)player.o: player.c ../../include/Panel.h
+	$(CC) $(player_CFLAGS) -o $(OBJDIR)player.o -c player.c
 
-rotate.o: rotate.c ../../include/Panel.h
-	$(CC) $(rotate_CFLAGS) -c rotate.c
+$(OBJDIR)rotate.o: rotate.c ../../include/Panel.h
+	$(CC) $(rotate_CFLAGS) -o $(OBJDIR)rotate.o -c rotate.c
 
-separator.o: separator.c ../../include/Panel.h
-	$(CC) $(separator_CFLAGS) -c separator.c
+$(OBJDIR)separator.o: separator.c ../../include/Panel.h
+	$(CC) $(separator_CFLAGS) -o $(OBJDIR)separator.o -c separator.c
 
-spacer.o: spacer.c ../../include/Panel.h
-	$(CC) $(spacer_CFLAGS) -c spacer.c
+$(OBJDIR)spacer.o: spacer.c ../../include/Panel.h
+	$(CC) $(spacer_CFLAGS) -o $(OBJDIR)spacer.o -c spacer.c
 
-swap.o: swap.c ../../include/Panel.h
-	$(CC) $(swap_CFLAGS) -c swap.c
+$(OBJDIR)swap.o: swap.c ../../include/Panel.h
+	$(CC) $(swap_CFLAGS) -o $(OBJDIR)swap.o -c swap.c
 
-systray.o: systray.c ../../include/Panel.h
-	$(CC) $(systray_CFLAGS) -c systray.c
+$(OBJDIR)systray.o: systray.c ../../include/Panel.h
+	$(CC) $(systray_CFLAGS) -o $(OBJDIR)systray.o -c systray.c
 
-tasks.o: tasks.c ../../include/Panel.h tasks.atoms
-	$(CC) $(tasks_CFLAGS) -c tasks.c
+$(OBJDIR)tasks.o: tasks.c ../../include/Panel.h tasks.atoms
+	$(CC) $(tasks_CFLAGS) -o $(OBJDIR)tasks.o -c tasks.c
 
-template.o: template.c ../../include/Panel.h
-	$(CC) $(template_CFLAGS) -c template.c
+$(OBJDIR)template.o: template.c ../../include/Panel.h
+	$(CC) $(template_CFLAGS) -o $(OBJDIR)template.o -c template.c
 
-title.o: title.c ../../include/Panel.h
-	$(CC) $(title_CFLAGS) -c title.c
+$(OBJDIR)title.o: title.c ../../include/Panel.h
+	$(CC) $(title_CFLAGS) -o $(OBJDIR)title.o -c title.c
 
-usb.o: usb.c ../../include/Panel.h
-	$(CC) $(usb_CFLAGS) -c usb.c
+$(OBJDIR)usb.o: usb.c ../../include/Panel.h
+	$(CC) $(usb_CFLAGS) -o $(OBJDIR)usb.o -c usb.c
 
-user.o: user.c ../../include/Panel.h
-	$(CC) $(user_CFLAGS) -c user.c
+$(OBJDIR)user.o: user.c ../../include/Panel.h
+	$(CC) $(user_CFLAGS) -o $(OBJDIR)user.o -c user.c
 
-volume.o: volume.c ../../include/Panel.h
-	$(CC) $(volume_CFLAGS) -c volume.c
+$(OBJDIR)volume.o: volume.c ../../include/Panel.h
+	$(CC) $(volume_CFLAGS) -o $(OBJDIR)volume.o -c volume.c
 
-wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
-	$(CC) $(wpa_supplicant_CFLAGS) -c wpa_supplicant.c
+$(OBJDIR)wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
+	$(CC) $(wpa_supplicant_CFLAGS) -o $(OBJDIR)wpa_supplicant.o -c wpa_supplicant.c
 
 clean:
 	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
@@ -347,65 +348,65 @@ distclean: clean
 
 install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 battery.so $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so
+	$(INSTALL) -m 0644 $(OBJDIR)battery.so $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 bluetooth.so $(DESTDIR)$(LIBDIR)/Panel/applets/bluetooth.so
+	$(INSTALL) -m 0644 $(OBJDIR)bluetooth.so $(DESTDIR)$(LIBDIR)/Panel/applets/bluetooth.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 clock.so $(DESTDIR)$(LIBDIR)/Panel/applets/clock.so
+	$(INSTALL) -m 0644 $(OBJDIR)clock.so $(DESTDIR)$(LIBDIR)/Panel/applets/clock.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 close.so $(DESTDIR)$(LIBDIR)/Panel/applets/close.so
+	$(INSTALL) -m 0644 $(OBJDIR)close.so $(DESTDIR)$(LIBDIR)/Panel/applets/close.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 cpu.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpu.so
+	$(INSTALL) -m 0644 $(OBJDIR)cpu.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpu.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 cpufreq.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpufreq.so
+	$(INSTALL) -m 0644 $(OBJDIR)cpufreq.so $(DESTDIR)$(LIBDIR)/Panel/applets/cpufreq.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 desktop.so $(DESTDIR)$(LIBDIR)/Panel/applets/desktop.so
+	$(INSTALL) -m 0644 $(OBJDIR)desktop.so $(DESTDIR)$(LIBDIR)/Panel/applets/desktop.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 embed.so $(DESTDIR)$(LIBDIR)/Panel/applets/embed.so
+	$(INSTALL) -m 0644 $(OBJDIR)embed.so $(DESTDIR)$(LIBDIR)/Panel/applets/embed.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 gps.so $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
+	$(INSTALL) -m 0644 $(OBJDIR)gps.so $(DESTDIR)$(LIBDIR)/Panel/applets/gps.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 gsm.so $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
+	$(INSTALL) -m 0644 $(OBJDIR)gsm.so $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 lock.so $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
+	$(INSTALL) -m 0644 $(OBJDIR)lock.so $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 logout.so $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
+	$(INSTALL) -m 0644 $(OBJDIR)logout.so $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 main.so $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
+	$(INSTALL) -m 0644 $(OBJDIR)main.so $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
+	$(INSTALL) -m 0644 $(OBJDIR)memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 mixer.so $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
+	$(INSTALL) -m 0644 $(OBJDIR)mixer.so $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 network.so $(DESTDIR)$(LIBDIR)/Panel/applets/network.so
+	$(INSTALL) -m 0644 $(OBJDIR)network.so $(DESTDIR)$(LIBDIR)/Panel/applets/network.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 pager.so $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
+	$(INSTALL) -m 0644 $(OBJDIR)pager.so $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 phone.so $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
+	$(INSTALL) -m 0644 $(OBJDIR)phone.so $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 player.so $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
+	$(INSTALL) -m 0644 $(OBJDIR)player.so $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 rotate.so $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
+	$(INSTALL) -m 0644 $(OBJDIR)rotate.so $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 separator.so $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
+	$(INSTALL) -m 0644 $(OBJDIR)separator.so $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 spacer.so $(DESTDIR)$(LIBDIR)/Panel/applets/spacer.so
+	$(INSTALL) -m 0644 $(OBJDIR)spacer.so $(DESTDIR)$(LIBDIR)/Panel/applets/spacer.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 swap.so $(DESTDIR)$(LIBDIR)/Panel/applets/swap.so
+	$(INSTALL) -m 0644 $(OBJDIR)swap.so $(DESTDIR)$(LIBDIR)/Panel/applets/swap.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 systray.so $(DESTDIR)$(LIBDIR)/Panel/applets/systray.so
+	$(INSTALL) -m 0644 $(OBJDIR)systray.so $(DESTDIR)$(LIBDIR)/Panel/applets/systray.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 tasks.so $(DESTDIR)$(LIBDIR)/Panel/applets/tasks.so
+	$(INSTALL) -m 0644 $(OBJDIR)tasks.so $(DESTDIR)$(LIBDIR)/Panel/applets/tasks.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 title.so $(DESTDIR)$(LIBDIR)/Panel/applets/title.so
+	$(INSTALL) -m 0644 $(OBJDIR)title.so $(DESTDIR)$(LIBDIR)/Panel/applets/title.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 usb.so $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
+	$(INSTALL) -m 0644 $(OBJDIR)usb.so $(DESTDIR)$(LIBDIR)/Panel/applets/usb.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 user.so $(DESTDIR)$(LIBDIR)/Panel/applets/user.so
+	$(INSTALL) -m 0644 $(OBJDIR)user.so $(DESTDIR)$(LIBDIR)/Panel/applets/user.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 volume.so $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
+	$(INSTALL) -m 0644 $(OBJDIR)volume.so $(DESTDIR)$(LIBDIR)/Panel/applets/volume.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 wpa_supplicant.so $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
+	$(INSTALL) -m 0644 $(OBJDIR)wpa_supplicant.so $(DESTDIR)$(LIBDIR)/Panel/applets/wpa_supplicant.so
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/battery.so

@@ -1,4 +1,5 @@
-TARGETS	= applets applets2 tests.log
+TARGETS	= $(OBJDIR)applets $(OBJDIR)applets2 $(OBJDIR)tests.log
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 BINDIR	= $(PREFIX)/bin
@@ -17,28 +18,28 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-applets_OBJS = applets.o
+applets_OBJS = $(OBJDIR)applets.o
 applets_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 applets_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-applets: $(applets_OBJS)
-	$(CC) -o applets $(applets_OBJS) $(applets_LDFLAGS)
+$(OBJDIR)applets: $(applets_OBJS)
+	$(CC) -o $(OBJDIR)applets $(applets_OBJS) $(applets_LDFLAGS)
 
-applets2_OBJS = applets2.o
+applets2_OBJS = $(OBJDIR)applets2.o
 applets2_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 applets2_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-applets2: $(applets2_OBJS)
-	$(CC) -o applets2 $(applets2_OBJS) $(applets2_LDFLAGS)
+$(OBJDIR)applets2: $(applets2_OBJS)
+	$(CC) -o $(OBJDIR)applets2 $(applets2_OBJS) $(applets2_LDFLAGS)
 
-tests.log: applets applets2 tests.sh
-	./tests.sh -P "$(PREFIX)" -- "tests.log"
+$(OBJDIR)tests.log: applets applets2 tests.sh
+	./tests.sh -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 
-applets.o: applets.c
-	$(CC) $(applets_CFLAGS) -c applets.c
+$(OBJDIR)applets.o: applets.c
+	$(CC) $(applets_CFLAGS) -o $(OBJDIR)applets.o -c applets.c
 
-applets2.o: applets2.c
-	$(CC) $(applets2_CFLAGS) -c applets2.c
+$(OBJDIR)applets2.o: applets2.c
+	$(CC) $(applets2_CFLAGS) -o $(OBJDIR)applets2.o -c applets2.c
 
 clean:
 	$(RM) -- $(applets_OBJS) $(applets2_OBJS) $(tests.log_OBJS)

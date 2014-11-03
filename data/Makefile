@@ -2,7 +2,8 @@ SUBDIRS	= 16x16 22x22 24x24 32x32 48x48 scalable
 MKDIR	= mkdir -m 0755 -p
 INSTALL	= install
 RM	= rm -f
-TARGETS	= Panel.pc
+TARGETS	= $(OBJDIR)Panel.pc
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -16,8 +17,8 @@ all: subdirs $(TARGETS)
 subdirs:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE)) || exit; done
 
-Panel.pc: Panel.pc.in ../config.sh
-	./pkgconfig.sh -P "$(PREFIX)" -- "Panel.pc"
+$(OBJDIR)Panel.pc: Panel.pc.in ../config.sh
+	./pkgconfig.sh -P "$(PREFIX)" -- "$(OBJDIR)Panel.pc"
 
 clean:
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) clean) || exit; done
@@ -32,7 +33,7 @@ distclean:
 
 install: $(TARGETS)
 	@for i in $(SUBDIRS); do (cd "$$i" && $(MAKE) install) || exit; done
-	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "Panel.pc"
+	./pkgconfig.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)Panel.pc"
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/applications
 	$(INSTALL) -m 0644 deforaos-panel-settings.desktop $(DESTDIR)$(PREFIX)/share/applications/deforaos-panel-settings.desktop
 	$(MKDIR) $(DESTDIR)$(PREFIX)/share/applications

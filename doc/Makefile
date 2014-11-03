@@ -1,4 +1,5 @@
-TARGETS	= panel.1 panel.html panelctl.1 panelctl.html panel-embed.1 panel-embed.html panel-message.1 panel-message.html panel-notify.1 panel-notify.html wifibrowser.1 wifibrowser.html
+TARGETS	= $(OBJDIR)panel.1 $(OBJDIR)panel.html $(OBJDIR)panelctl.1 $(OBJDIR)panelctl.html $(OBJDIR)panel-embed.1 $(OBJDIR)panel-embed.html $(OBJDIR)panel-message.1 $(OBJDIR)panel-message.html $(OBJDIR)panel-notify.1 $(OBJDIR)panel-notify.html $(OBJDIR)wifibrowser.1 $(OBJDIR)wifibrowser.html
+OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
 RM	= rm -f
@@ -9,41 +10,41 @@ INSTALL	= install
 
 all: $(TARGETS)
 
-panel.1: panel.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel.1"
+$(OBJDIR)panel.1: panel.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel.1"
 
-panel.html: manual.css.xml panel.css.xml panel.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel.html"
+$(OBJDIR)panel.html: manual.css.xml panel.css.xml panel.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel.html"
 
-panelctl.1: panelctl.xml
-	./docbook.sh -P "$(PREFIX)" -- "panelctl.1"
+$(OBJDIR)panelctl.1: panelctl.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panelctl.1"
 
-panelctl.html: manual.css.xml panelctl.css.xml panelctl.xml
-	./docbook.sh -P "$(PREFIX)" -- "panelctl.html"
+$(OBJDIR)panelctl.html: manual.css.xml panelctl.css.xml panelctl.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panelctl.html"
 
-panel-embed.1: panel-embed.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-embed.1"
+$(OBJDIR)panel-embed.1: panel-embed.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-embed.1"
 
-panel-embed.html: manual.css.xml panel-embed.css.xml panel-embed.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-embed.html"
+$(OBJDIR)panel-embed.html: manual.css.xml panel-embed.css.xml panel-embed.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-embed.html"
 
-panel-message.1: panel-message.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-message.1"
+$(OBJDIR)panel-message.1: panel-message.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-message.1"
 
-panel-message.html: manual.css.xml panel-message.css.xml panel-message.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-message.html"
+$(OBJDIR)panel-message.html: manual.css.xml panel-message.css.xml panel-message.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-message.html"
 
-panel-notify.1: panel-notify.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-notify.1"
+$(OBJDIR)panel-notify.1: panel-notify.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-notify.1"
 
-panel-notify.html: manual.css.xml panel-notify.css.xml panel-notify.xml
-	./docbook.sh -P "$(PREFIX)" -- "panel-notify.html"
+$(OBJDIR)panel-notify.html: manual.css.xml panel-notify.css.xml panel-notify.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)panel-notify.html"
 
-wifibrowser.1: wifibrowser.xml
-	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.1"
+$(OBJDIR)wifibrowser.1: wifibrowser.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)wifibrowser.1"
 
-wifibrowser.html: manual.css.xml wifibrowser.css.xml wifibrowser.xml
-	./docbook.sh -P "$(PREFIX)" -- "wifibrowser.html"
+$(OBJDIR)wifibrowser.html: manual.css.xml wifibrowser.css.xml wifibrowser.xml
+	./docbook.sh -P "$(PREFIX)" -- "$(OBJDIR)wifibrowser.html"
 
 clean:
 	$(RM) -- $(panel.1_OBJS) $(panel.html_OBJS) $(panelctl.1_OBJS) $(panelctl.html_OBJS) $(panel-embed.1_OBJS) $(panel-embed.html_OBJS) $(panel-message.1_OBJS) $(panel-message.html_OBJS) $(panel-notify.1_OBJS) $(panel-notify.html_OBJS) $(wifibrowser.1_OBJS) $(wifibrowser.html_OBJS)
@@ -64,18 +65,18 @@ distclean: clean
 	$(RM) -- $(TARGETS)
 
 install: $(TARGETS)
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panelctl.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panelctl.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-embed.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-embed.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-message.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-message.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-notify.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "panel-notify.html"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "wifibrowser.1"
-	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "wifibrowser.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panelctl.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panelctl.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-embed.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-embed.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-message.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-message.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-notify.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)panel-notify.html"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)wifibrowser.1"
+	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -i -- "$(OBJDIR)wifibrowser.html"
 
 uninstall:
 	./docbook.sh -P "$(DESTDIR)$(PREFIX)" -u -- "panel.1"
