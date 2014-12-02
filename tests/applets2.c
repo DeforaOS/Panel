@@ -42,7 +42,7 @@ static int _applets2_helper_error(Panel * panel, char const * message, int ret);
 static gboolean _applets2(gpointer data)
 {
 	int * ret = data;
-	const char path[] = "../src/applets";
+	char const * path = "../src/applets";
 #ifdef __APPLE__
 	const char ext[] = ".dylib";
 #else
@@ -58,6 +58,8 @@ static gboolean _applets2(gpointer data)
 	PanelApplet * pa;
 	GtkWidget * widget;
 
+	if((p = getenv("OBJDIR")) != NULL)
+		path = p;
 	if((dir = opendir(path)) == NULL)
 	{
 		*ret = _perror(path, 1);
@@ -76,12 +78,13 @@ static gboolean _applets2(gpointer data)
 			continue;
 		if(strcmp(&de->d_name[len - sizeof(ext) + 1], ext) != 0)
 			continue;
-		if((s = malloc(sizeof(path) + len + 1)) == NULL)
+		if((s = malloc(strlen(path) + 1 + len + 1)) == NULL)
 		{
 			*ret += _perror(de->d_name, 1);
 			continue;
 		}
-		snprintf(s, sizeof(path) + len + 1, "%s/%s", path, de->d_name);
+		snprintf(s, strlen(path) + 1 + len + 1, "%s/%s", path,
+				de->d_name);
 		if((p = dlopen(s, RTLD_LAZY)) == NULL)
 		{
 			*ret += _dlerror(s, 1);
