@@ -32,7 +32,7 @@ applets2_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)applets2: $(applets2_OBJS)
 	$(CC) -o $(OBJDIR)applets2 $(applets2_OBJS) $(applets2_LDFLAGS)
 
-$(OBJDIR)tests.log: applets applets2 tests.sh
+$(OBJDIR)tests.log: $(OBJDIR)applets $(OBJDIR)applets2 tests.sh
 	./tests.sh -P "$(PREFIX)" -- "$(OBJDIR)tests.log"
 
 $(OBJDIR)applets.o: applets.c
