@@ -1,5 +1,5 @@
 SUBDIRS	= applets
-TARGETS	= $(OBJDIR)libPanel.a $(OBJDIR)libPanel.so.0.0 libPanel.so.0 libPanel.so $(OBJDIR)panel $(OBJDIR)panelctl $(OBJDIR)run
+TARGETS	= $(OBJDIR)libPanel.a $(OBJDIR)libPanel.so.0.0 $(OBJDIR)libPanel.so.0 $(OBJDIR)libPanel.so $(OBJDIR)panel $(OBJDIR)panelctl $(OBJDIR)run
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -33,7 +33,7 @@ $(OBJDIR)libPanel.a: $(libPanel_OBJS)
 	$(AR) -rc $(OBJDIR)libPanel.a $(libPanel_OBJS)
 	$(RANLIB) $(OBJDIR)libPanel.a
 
-$(OBJDIR)libPanel.so.0.0 libPanel.so.0 libPanel.so: $(libPanel_OBJS)
+$(OBJDIR)libPanel.so.0.0 $(OBJDIR)libPanel.so.0 $(OBJDIR)libPanel.so: $(libPanel_OBJS)
 	$(CCSHARED) -o $(OBJDIR)libPanel.so.0.0 -Wl,-soname,libPanel.so.0 $(libPanel_OBJS) $(libPanel_LDFLAGS)
 	$(LN) -s -- libPanel.so.0.0 $(OBJDIR)libPanel.so.0
 	$(LN) -s -- libPanel.so.0.0 $(OBJDIR)libPanel.so
