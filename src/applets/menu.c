@@ -41,11 +41,8 @@
 # define DATADIR	PREFIX "/share"
 #endif
 
-/* XXX to avoid pointless warnings with GCC */
-#define main _main
 
-
-/* Main */
+/* Menu */
 /* private */
 /* types */
 typedef struct _PanelApplet
@@ -56,18 +53,18 @@ typedef struct _PanelApplet
 	gboolean refresh;
 	time_t refresh_mti;
 	GtkWidget * widget;
-} Main;
+} Menu;
 
-typedef struct _MainMenu
+typedef struct _MenuMenu
 {
 	char const * category;
 	char const * label;
 	char const * stock;
-} MainMenu;
+} MenuMenu;
 
 
 /* constants */
-static const MainMenu _main_menus[] =
+static const MenuMenu _menu_menus[] =
 {
 	{ "Audio",	"Audio",	"gnome-mime-audio",		},
 	{ "Development","Development",	"applications-development",	},
@@ -82,22 +79,22 @@ static const MainMenu _main_menus[] =
 	{ "Utility",	"Utilities",	"applications-utilities",	},
 	{ "Video",	"Video",	"video",			}
 };
-#define MAIN_MENUS_COUNT (sizeof(_main_menus) / sizeof(*_main_menus))
+#define MENU_MENUS_COUNT (sizeof(_menu_menus) / sizeof(*_menu_menus))
 
 
 /* prototypes */
-static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget);
-static void _main_destroy(Main * main);
+static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget);
+static void _menu_destroy(Menu * menu);
 
 /* helpers */
-static GtkWidget * _main_applications(Main * main);
-static GtkWidget * _main_icon(Main * main, char const * path,
+static GtkWidget * _menu_applications(Menu * menu);
+static GtkWidget * _menu_icon(Menu * menu, char const * path,
 		char const * icon);
-static GtkWidget * _main_menuitem(Main * main, char const * path,
+static GtkWidget * _menu_menuitem(Menu * menu, char const * path,
 		char const * label, char const * icon);
-static GtkWidget * _main_menuitem_stock(char const * label, char const * stock);
+static GtkWidget * _menu_menuitem_stock(char const * label, char const * stock);
 
-static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
+static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath));
 
 /* callbacks */
@@ -122,8 +119,8 @@ PanelAppletDefinition applet =
 	"Main menu",
 	"start-here",
 	NULL,
-	_main_init,
-	_main_destroy,
+	_menu_init,
+	_menu_destroy,
 	NULL,
 	FALSE,
 	TRUE
@@ -132,23 +129,23 @@ PanelAppletDefinition applet =
 
 /* private */
 /* functions */
-/* main_init */
-static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
+/* menu_init */
+static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-	Main * main;
+	Menu * menu;
 	GtkWidget * hbox;
 	GtkWidget * image;
 	char const * p;
 	PangoFontDescription * bold;
 	GtkWidget * label;
 
-	if((main = malloc(sizeof(*main))) == NULL)
+	if((menu = malloc(sizeof(*menu))) == NULL)
 		return NULL;
-	main->helper = helper;
-	main->apps = NULL;
-	main->idle = g_idle_add(_on_idle, main);
-	main->refresh_mti = 0;
-	main->widget = gtk_button_new();
+	menu->helper = helper;
+	menu->apps = NULL;
+	menu->idle = g_idle_add(_on_idle, menu);
+	menu->refresh_mti = 0;
+	menu->widget = gtk_button_new();
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
@@ -157,7 +154,7 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_icon_name("start-here", helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);
 	/* add some text if configured so */
-	if((p = helper->config_get(helper->panel, "main", "text")) != NULL
+	if((p = helper->config_get(helper->panel, "menu", "text")) != NULL
 			&& strlen(p) > 0)
 	{
 		bold = pango_font_description_new();
@@ -167,44 +164,44 @@ static Main * _main_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		pango_font_description_free(bold);
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	}
-	gtk_button_set_relief(GTK_BUTTON(main->widget), GTK_RELIEF_NONE);
+	gtk_button_set_relief(GTK_BUTTON(menu->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	gtk_widget_set_tooltip_text(main->widget, _("Main menu"));
+	gtk_widget_set_tooltip_text(menu->widget, _("Main menu"));
 #endif
-	g_signal_connect_swapped(main->widget, "clicked", G_CALLBACK(
-				_on_clicked), main);
-	gtk_container_add(GTK_CONTAINER(main->widget), hbox);
-	gtk_widget_show_all(main->widget);
-	*widget = main->widget;
-	return main;
+	g_signal_connect_swapped(menu->widget, "clicked", G_CALLBACK(
+				_on_clicked), menu);
+	gtk_container_add(GTK_CONTAINER(menu->widget), hbox);
+	gtk_widget_show_all(menu->widget);
+	*widget = menu->widget;
+	return menu;
 }
 
 
-/* main_destroy */
-static void _main_destroy(Main * main)
+/* menu_destroy */
+static void _menu_destroy(Menu * menu)
 {
-	if(main->idle != 0)
-		g_source_remove(main->idle);
-	g_slist_foreach(main->apps, (GFunc)config_delete, NULL);
-	g_slist_free(main->apps);
-	gtk_widget_destroy(main->widget);
-	free(main);
+	if(menu->idle != 0)
+		g_source_remove(menu->idle);
+	g_slist_foreach(menu->apps, (GFunc)config_delete, NULL);
+	g_slist_free(menu->apps);
+	gtk_widget_destroy(menu->widget);
+	free(menu);
 }
 
 
 /* helpers */
-/* main_applications */
+/* menu_applications */
 static void _applications_on_activate(gpointer data);
 static void _applications_on_activate_application(Config * config);
 static void _applications_on_activate_directory(Config * config);
 static void _applications_on_activate_url(Config * config);
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus);
 
-static GtkWidget * _main_applications(Main * main)
+static GtkWidget * _menu_applications(Menu * menu)
 {
-	GtkWidget * menus[MAIN_MENUS_COUNT];
+	GtkWidget * menus[MENU_MENUS_COUNT];
 	GSList * p;
-	GtkWidget * menu;
+	GtkWidget * menushell;
 	GtkWidget * menuitem;
 	Config * config;
 	const char section[] = "Desktop Entry";
@@ -213,16 +210,16 @@ static GtkWidget * _main_applications(Main * main)
 	char const * path;
 	size_t i;
 
-	if(main->apps == NULL)
-		_on_idle(main);
+	if(menu->apps == NULL)
+		_on_idle(menu);
 	memset(&menus, 0, sizeof(menus));
-	menu = gtk_menu_new();
-	for(p = main->apps; p != NULL; p = p->next)
+	menushell = gtk_menu_new();
+	for(p = menu->apps; p != NULL; p = p->next)
 	{
 		config = p->data;
 		q = config_get(config, section, "Name"); /* should not fail */
 		path = config_get(config, NULL, "path");
-		menuitem = _main_menuitem(main, path, q,
+		menuitem = _menu_menuitem(menu, path, q,
 				config_get(config, section, "Icon"));
 #if GTK_CHECK_VERSION(2, 12, 0)
 		if((q = config_get(config, section, "Comment")) != NULL)
@@ -238,28 +235,29 @@ static GtkWidget * _main_applications(Main * main)
 					config);
 		if((q = config_get(config, section, "Categories")) == NULL)
 		{
-			gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 			continue;
 		}
-		for(i = 0; i < MAIN_MENUS_COUNT; i++)
+		for(i = 0; i < MENU_MENUS_COUNT; i++)
 		{
-			if((r = string_find(q, _main_menus[i].category)) == NULL)
+			if((r = string_find(q, _menu_menus[i].category)) == NULL)
 				continue;
-			r += string_length(_main_menus[i].category);
+			r += string_length(_menu_menus[i].category);
 			if(*r == '\0' || *r == ';')
 				break;
 		}
-		if(i == MAIN_MENUS_COUNT)
+		if(i == MENU_MENUS_COUNT)
 		{
-			gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menushell),
+					menuitem);
 			continue;
 		}
 		if(menus[i] == NULL)
 			menus[i] = gtk_menu_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(menus[i]), menuitem);
 	}
-	_applications_categories(menu, menus);
-	return menu;
+	_applications_categories(menushell, menus);
+	return menushell;
 }
 
 static void _applications_on_activate(gpointer data)
@@ -372,24 +370,24 @@ static void _applications_on_activate_url(Config * config)
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 {
 	size_t i;
-	MainMenu const * m;
+	MenuMenu const * m;
 	GtkWidget * menuitem;
 	size_t pos = 0;
 
-	for(i = 0; i < MAIN_MENUS_COUNT; i++)
+	for(i = 0; i < MENU_MENUS_COUNT; i++)
 	{
 		if(menus[i] == NULL)
 			continue;
-		m = &_main_menus[i];
-		menuitem = _main_menuitem_stock(m->label, m->stock);
+		m = &_menu_menus[i];
+		menuitem = _menu_menuitem_stock(m->label, m->stock);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), menus[i]);
 		gtk_menu_shell_insert(GTK_MENU_SHELL(menu), menuitem, pos++);
 	}
 }
 
 
-/* main_icon */
-static GtkWidget * _main_icon(Main * main, char const * path, char const * icon)
+/* menu_icon */
+static GtkWidget * _menu_icon(Menu * menu, char const * path, char const * icon)
 {
 	const char pixmaps[] = "/pixmaps/";
 	int width = 16;
@@ -415,7 +413,7 @@ static GtkWidget * _main_icon(Main * main, char const * path, char const * icon)
 	}
 	if(error != NULL)
 	{
-		main->helper->error(NULL, error->message, 1);
+		menu->helper->error(NULL, error->message, 1);
 		g_error_free(error);
 	}
 	if(pixbuf == NULL)
@@ -424,8 +422,8 @@ static GtkWidget * _main_icon(Main * main, char const * path, char const * icon)
 }
 
 
-/* main_menuitem */
-static GtkWidget * _main_menuitem(Main * main, char const * path,
+/* menu_menuitem */
+static GtkWidget * _menu_menuitem(Menu * menu, char const * path,
 		char const * label, char const * icon)
 {
 	GtkWidget * ret;
@@ -434,15 +432,15 @@ static GtkWidget * _main_menuitem(Main * main, char const * path,
 	ret = gtk_image_menu_item_new_with_label(label);
 	if(icon != NULL)
 	{
-		image = _main_icon(main, path, icon);
+		image = _menu_icon(menu, path, icon);
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(ret), image);
 	}
 	return ret;
 }
 
 
-/* main_menuitem_stock */
-static GtkWidget * _main_menuitem_stock(char const * label, char const * stock)
+/* menu_menuitem_stock */
+static GtkWidget * _menu_menuitem_stock(char const * label, char const * stock)
 {
 	GtkWidget * ret;
 	GtkWidget * image;
@@ -457,14 +455,14 @@ static GtkWidget * _main_menuitem_stock(char const * label, char const * stock)
 }
 
 
-/* main_xdg_dirs */
-static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
+/* menu_xdg_dirs */
+static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath));
-static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
+static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath),
 		char const * path);
 
-static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
+static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath))
 {
 	char const * path;
@@ -477,26 +475,26 @@ static void _main_xdg_dirs(Main * main, void (*callback)(Main * main,
 		path = "/usr/local/share:/usr/share";
 	if((p = strdup(path)) == NULL)
 	{
-		main->helper->error(NULL, "strdup", 1);
+		menu->helper->error(NULL, "strdup", 1);
 		return;
 	}
 	for(i = 0, j = 0;; i++)
 		if(p[i] == '\0')
 		{
-			_xdg_dirs_path(main, callback, &p[j]);
+			_xdg_dirs_path(menu, callback, &p[j]);
 			break;
 		}
 		else if(p[i] == ':')
 		{
 			p[i] = '\0';
-			_xdg_dirs_path(main, callback, &p[j]);
+			_xdg_dirs_path(menu, callback, &p[j]);
 			j = i + 1;
 		}
 	free(p);
-	_xdg_dirs_home(main, callback);
+	_xdg_dirs_home(menu, callback);
 }
 
-static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
+static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath))
 {
 	char const fallback[] = ".local/share";
@@ -508,7 +506,7 @@ static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
 	/* use $XDG_DATA_HOME if set and not empty */
 	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
 	{
-		_xdg_dirs_path(main, callback, path);
+		_xdg_dirs_path(menu, callback, path);
 		return;
 	}
 	/* fallback to "$HOME/.local/share" */
@@ -517,15 +515,15 @@ static void _xdg_dirs_home(Main * main, void (*callback)(Main * main,
 	len = strlen(homedir) + 1 + sizeof(fallback);
 	if((p = malloc(len)) == NULL)
 	{
-		main->helper->error(NULL, homedir, 1);
+		menu->helper->error(NULL, homedir, 1);
 		return;
 	}
 	snprintf(p, len, "%s/%s", homedir, fallback);
-	_xdg_dirs_path(main, callback, p);
+	_xdg_dirs_path(menu, callback, p);
 	free(p);
 }
 
-static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
+static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath),
 		char const * path)
 {
@@ -533,8 +531,8 @@ static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
 	char * apppath;
 
 	if((apppath = string_new_append(path, applications, NULL)) == NULL)
-		main->helper->error(NULL, path, 1);
-	callback(main, path, apppath);
+		menu->helper->error(NULL, path, 1);
+	callback(menu, path, apppath);
 	string_delete(apppath);
 }
 
@@ -543,137 +541,137 @@ static void _xdg_dirs_path(Main * main, void (*callback)(Main * main,
 /* on_about */
 static void _on_about(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->about_dialog(main->helper->panel);
+	menu->helper->about_dialog(menu->helper->panel);
 }
 
 
 /* on_clicked */
-static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
+static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 
 static void _on_clicked(gpointer data)
 {
-	Main * main = data;
-	PanelAppletHelper * helper = main->helper;
-	GtkWidget * menu;
+	Menu * menu = data;
+	PanelAppletHelper * helper = menu->helper;
+	GtkWidget * menushell;
 	GtkWidget * menuitem;
 	GtkWidget * widget;
 	char const * p;
 
-	menu = gtk_menu_new();
-	if((p = helper->config_get(helper->panel, "main", "applications"))
+	menushell = gtk_menu_new();
+	if((p = helper->config_get(helper->panel, "menu", "applications"))
 			== NULL || strtol(p, NULL, 0) != 0)
 	{
-		menuitem = _main_menuitem_stock(_("Applications"),
+		menuitem = _menu_menuitem_stock(_("Applications"),
 				"gnome-applications");
-		widget = _main_applications(main);
+		widget = _menu_applications(menu);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), widget);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 		menuitem = gtk_separator_menu_item_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
-	if((p = helper->config_get(helper->panel, "main", "run")) == NULL
+	if((p = helper->config_get(helper->panel, "menu", "run")) == NULL
 			|| strtol(p, NULL, 0) != 0)
 	{
-		menuitem = _main_menuitem_stock(_("Run..."), GTK_STOCK_EXECUTE);
+		menuitem = _menu_menuitem_stock(_("Run..."), GTK_STOCK_EXECUTE);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_run), main);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+					_on_run), menu);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 		menuitem = gtk_separator_menu_item_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
-	if((p = helper->config_get(helper->panel, "main", "about")) == NULL
+	if((p = helper->config_get(helper->panel, "menu", "about")) == NULL
 			|| strtol(p, NULL, 0) != 0)
 	{
 		menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT,
 				NULL);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_about), main);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+					_on_about), menu);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 		menuitem = gtk_separator_menu_item_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* lock screen */
-	menuitem = _main_menuitem_stock(_("Lock screen"), "gnome-lockscreen");
+	menuitem = _menu_menuitem_stock(_("Lock screen"), "gnome-lockscreen");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_lock),
-			main);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+			menu);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 #ifdef EMBEDDED
 	/* rotate screen */
-	menuitem = _main_menuitem_stock(_("Rotate"),
+	menuitem = _menu_menuitem_stock(_("Rotate"),
 			GTK_STOCK_REFRESH); /* XXX */
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_rotate),
 			data);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 #endif
 	/* logout */
-	if(main->helper->logout_dialog != NULL)
+	if(menu->helper->logout_dialog != NULL)
 	{
-		menuitem = _main_menuitem_stock(_("Logout..."), "gnome-logout");
+		menuitem = _menu_menuitem_stock(_("Logout..."), "gnome-logout");
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_on_logout), data);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* suspend */
-	if(main->helper->suspend != NULL)
+	if(menu->helper->suspend != NULL)
 	{
-		menuitem = _main_menuitem_stock(_("Suspend"),
+		menuitem = _menu_menuitem_stock(_("Suspend"),
 				"gtk-media-pause");
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_on_suspend), data);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* shutdown */
-	menuitem = _main_menuitem_stock(_("Shutdown..."), "gnome-shutdown");
+	menuitem = _menu_menuitem_stock(_("Shutdown..."), "gnome-shutdown");
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_on_shutdown), data);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
-	gtk_widget_show_all(menu);
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
-			main, 0, gtk_get_current_event_time());
+	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
+	gtk_widget_show_all(menushell);
+	gtk_menu_popup(GTK_MENU(menushell), NULL, NULL, _clicked_position_menu,
+			menu, 0, gtk_get_current_event_time());
 }
 
-static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
+static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 		gboolean * push_in, gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 	GtkAllocation a;
 
 #if GTK_CHECK_VERSION(2, 18, 0)
-	gtk_widget_get_allocation(main->widget, &a);
+	gtk_widget_get_allocation(menu->widget, &a);
 #else
-	a = main->widget->allocation;
+	a = menu->widget->allocation;
 #endif
 	*x = a.x;
 	*y = a.y;
-	main->helper->position_menu(main->helper->panel, menu, x, y, push_in);
+	menu->helper->position_menu(menu->helper->panel, widget, x, y, push_in);
 }
 
 
 /* on_idle */
-static int _idle_access(Main * main, char const * path, int mode);
-static int _idle_access_path(Main * main, char const * path,
+static int _idle_access(Menu * menu, char const * path, int mode);
+static int _idle_access_path(Menu * menu, char const * path,
 		char const * filename, int mode);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
-static void _idle_path(Main * main, char const * path, char const * apppath);
+static void _idle_path(Menu * menu, char const * path, char const * apppath);
 
 static gboolean _on_idle(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	if(main->apps != NULL)
+	if(menu->apps != NULL)
 	{
-		main->idle = 0;
+		menu->idle = 0;
 		return FALSE;
 	}
-	_main_xdg_dirs(main, _idle_path);
-	main->idle = g_timeout_add(10000, _on_timeout, main);
+	_menu_xdg_dirs(menu, _idle_path);
+	menu->idle = g_timeout_add(10000, _on_timeout, menu);
 	return FALSE;
 }
 
-static int _idle_access(Main * main, char const * path, int mode)
+static int _idle_access(Menu * menu, char const * path, int mode)
 {
 	int ret = -1;
 	char const * p;
@@ -687,20 +685,20 @@ static int _idle_access(Main * main, char const * path, int mode)
 		return 0;
 	if((q = strdup(p)) == NULL)
 	{
-		main->helper->error(NULL, path, 1);
+		menu->helper->error(NULL, path, 1);
 		return 0;
 	}
 	errno = ENOENT;
 	for(i = 0, j = 0;; i++)
 		if(q[i] == '\0')
 		{
-			ret = _idle_access_path(main, &q[j], path, mode);
+			ret = _idle_access_path(menu, &q[j], path, mode);
 			break;
 		}
 		else if(q[i] == ':')
 		{
 			q[i] = '\0';
-			if((ret = _idle_access_path(main, &q[j], path, mode))
+			if((ret = _idle_access_path(menu, &q[j], path, mode))
 					== 0)
 				break;
 			j = i + 1;
@@ -709,7 +707,7 @@ static int _idle_access(Main * main, char const * path, int mode)
 	return ret;
 }
 
-static int _idle_access_path(Main * main, char const * path,
+static int _idle_access_path(Menu * menu, char const * path,
 		char const * filename, int mode)
 {
 	int ret;
@@ -718,7 +716,7 @@ static int _idle_access_path(Main * main, char const * path,
 
 	len = strlen(path) + 1 + strlen(filename) + 1;
 	if((p = malloc(len)) == NULL)
-		return -main->helper->error(NULL, path, 1);
+		return -menu->helper->error(NULL, path, 1);
 	snprintf(p, len, "%s/%s", path, filename);
 	ret = access(p, mode);
 	free(p);
@@ -740,7 +738,7 @@ static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
 	return string_compare(cap, cbp);
 }
 
-static void _idle_path(Main * main, char const * path, char const * apppath)
+static void _idle_path(Menu * menu, char const * path, char const * apppath)
 {
 	DIR * dir;
 	int fd;
@@ -765,11 +763,11 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 #endif
 	{
 		if(errno != ENOENT)
-			main->helper->error(NULL, apppath, 1);
+			menu->helper->error(NULL, apppath, 1);
 		return;
 	}
-	if(st.st_mtime > main->refresh_mti)
-		main->refresh_mti = st.st_mtime;
+	if(st.st_mtime > menu->refresh_mti)
+		menu->refresh_mti = st.st_mtime;
 	while((de = readdir(dir)) != NULL)
 	{
 		if(de->d_name[0] == '.')
@@ -784,7 +782,7 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 			continue;
 		if((p = realloc(name, strlen(apppath) + len + 2)) == NULL)
 		{
-			main->helper->error(NULL, apppath, 1);
+			menu->helper->error(NULL, apppath, 1);
 			continue;
 		}
 		name = p;
@@ -799,7 +797,7 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 			config_reset(config);
 		if(config == NULL || config_load(config, name) != 0)
 		{
-			main->helper->error(NULL, NULL, 0); /* XXX */
+			menu->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
 		/* skip this entry if it has an unknown type */
@@ -818,12 +816,12 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 			continue;
 		/* skip this entry if the binary cannot be executed */
 		if((q = config_get(config, section, "TryExec")) != NULL
-				&& _idle_access(main, q, X_OK) != 0
+				&& _idle_access(menu, q, X_OK) != 0
 				&& errno == ENOENT)
 			continue;
 		/* remember the path */
 		config_set(config, NULL, "path", path);
-		main->apps = g_slist_insert_sorted(main->apps, config,
+		menu->apps = g_slist_insert_sorted(menu->apps, config,
 				_idle_apps_compare);
 		config = NULL;
 	}
@@ -837,18 +835,18 @@ static void _idle_path(Main * main, char const * path, char const * apppath)
 /* on_lock */
 static void _on_lock(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->lock(main->helper->panel);
+	menu->helper->lock(menu->helper->panel);
 }
 
 
 /* on_logout */
 static void _on_logout(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->logout_dialog(main->helper->panel);
+	menu->helper->logout_dialog(menu->helper->panel);
 }
 
 
@@ -856,9 +854,9 @@ static void _on_logout(gpointer data)
 /* on_rotate */
 static void _on_rotate(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->rotate_screen(main->helper->panel);
+	menu->helper->rotate_screen(menu->helper->panel);
 }
 #endif
 
@@ -866,7 +864,7 @@ static void _on_rotate(gpointer data)
 /* on_run */
 static void _on_run(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 	char * argv[] = { BINDIR "/run", NULL };
 	GSpawnFlags flags = G_SPAWN_STDOUT_TO_DEV_NULL
 		| G_SPAWN_STDERR_TO_DEV_NULL;
@@ -875,7 +873,7 @@ static void _on_run(gpointer data)
 	if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
 			!= TRUE)
 	{
-		main->helper->error(main->helper->panel, error->message, 1);
+		menu->helper->error(menu->helper->panel, error->message, 1);
 		g_error_free(error);
 	}
 }
@@ -884,48 +882,48 @@ static void _on_run(gpointer data)
 /* on_shutdown */
 static void _on_shutdown(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->shutdown_dialog(main->helper->panel);
+	menu->helper->shutdown_dialog(menu->helper->panel);
 }
 
 
 /* on_suspend */
 static void _on_suspend(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->helper->suspend(main->helper->panel);
+	menu->helper->suspend(menu->helper->panel);
 }
 
 
 /* on_timeout */
-static void _timeout_path(Main * main, char const * path, char const * apppath);
+static void _timeout_path(Menu * menu, char const * path, char const * apppath);
 
 static gboolean _on_timeout(gpointer data)
 {
-	Main * main = data;
+	Menu * menu = data;
 
-	main->refresh = FALSE;
-	_main_xdg_dirs(main, _timeout_path);
-	if(main->refresh == FALSE)
+	menu->refresh = FALSE;
+	_menu_xdg_dirs(menu, _timeout_path);
+	if(menu->refresh == FALSE)
 		return TRUE;
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() resetting the menu\n", __func__);
 #endif
-	g_slist_foreach(main->apps, (GFunc)config_delete, NULL);
-	g_slist_free(main->apps);
-	main->apps = NULL;
-	main->idle = g_idle_add(_on_idle, main);
+	g_slist_foreach(menu->apps, (GFunc)config_delete, NULL);
+	g_slist_free(menu->apps);
+	menu->apps = NULL;
+	menu->idle = g_idle_add(_on_idle, menu);
 	return FALSE;
 }
 
-static void _timeout_path(Main * main, char const * path, char const * apppath)
+static void _timeout_path(Menu * menu, char const * path, char const * apppath)
 {
 	struct stat st;
 
-	if(main->refresh != TRUE
+	if(menu->refresh != TRUE
 			&& stat(apppath, &st) == 0
-			&& st.st_mtime > main->refresh_mti)
-		main->refresh = TRUE;
+			&& st.st_mtime > menu->refresh_mti)
+		menu->refresh = TRUE;
 }

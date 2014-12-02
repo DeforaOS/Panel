@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)battery.so $(OBJDIR)bluetooth.so $(OBJDIR)clock.so $(OBJDIR)close.so $(OBJDIR)cpu.so $(OBJDIR)cpufreq.so $(OBJDIR)desktop.so $(OBJDIR)embed.so $(OBJDIR)gps.so $(OBJDIR)gsm.so $(OBJDIR)lock.so $(OBJDIR)logout.so $(OBJDIR)main.so $(OBJDIR)memory.so $(OBJDIR)mixer.so $(OBJDIR)mpd.so $(OBJDIR)network.so $(OBJDIR)pager.so $(OBJDIR)phone.so $(OBJDIR)player.so $(OBJDIR)rotate.so $(OBJDIR)separator.so $(OBJDIR)spacer.so $(OBJDIR)swap.so $(OBJDIR)systray.so $(OBJDIR)tasks.so $(OBJDIR)template.so $(OBJDIR)title.so $(OBJDIR)usb.so $(OBJDIR)user.so $(OBJDIR)volume.so $(OBJDIR)wpa_supplicant.so
+TARGETS	= $(OBJDIR)battery.so $(OBJDIR)bluetooth.so $(OBJDIR)clock.so $(OBJDIR)close.so $(OBJDIR)cpu.so $(OBJDIR)cpufreq.so $(OBJDIR)desktop.so $(OBJDIR)embed.so $(OBJDIR)gps.so $(OBJDIR)gsm.so $(OBJDIR)lock.so $(OBJDIR)logout.so $(OBJDIR)menu.so $(OBJDIR)memory.so $(OBJDIR)mixer.so $(OBJDIR)mpd.so $(OBJDIR)network.so $(OBJDIR)pager.so $(OBJDIR)phone.so $(OBJDIR)player.so $(OBJDIR)rotate.so $(OBJDIR)separator.so $(OBJDIR)spacer.so $(OBJDIR)swap.so $(OBJDIR)systray.so $(OBJDIR)tasks.so $(OBJDIR)template.so $(OBJDIR)title.so $(OBJDIR)usb.so $(OBJDIR)user.so $(OBJDIR)volume.so $(OBJDIR)wpa_supplicant.so
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -104,12 +104,12 @@ logout_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 $(OBJDIR)logout.so: $(logout_OBJS)
 	$(CCSHARED) -o $(OBJDIR)logout.so $(logout_OBJS) $(logout_LDFLAGS)
 
-main_OBJS = $(OBJDIR)main.o
-main_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
-main_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
+menu_OBJS = $(OBJDIR)menu.o
+menu_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) -D PREFIX=\"$(PREFIX)\" $(CFLAGSF) $(CFLAGS)
+menu_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
 
-$(OBJDIR)main.so: $(main_OBJS)
-	$(CCSHARED) -o $(OBJDIR)main.so $(main_OBJS) $(main_LDFLAGS)
+$(OBJDIR)menu.so: $(menu_OBJS)
+	$(CCSHARED) -o $(OBJDIR)menu.so $(menu_OBJS) $(menu_LDFLAGS)
 
 memory_OBJS = $(OBJDIR)memory.o
 memory_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
@@ -280,8 +280,8 @@ $(OBJDIR)lock.o: lock.c ../../include/Panel.h
 $(OBJDIR)logout.o: logout.c ../../include/Panel.h
 	$(CC) $(logout_CFLAGS) -o $(OBJDIR)logout.o -c logout.c
 
-$(OBJDIR)main.o: main.c ../../include/Panel.h ../../config.h
-	$(CC) $(main_CFLAGS) -o $(OBJDIR)main.o -c main.c
+$(OBJDIR)menu.o: menu.c ../../include/Panel.h ../../config.h
+	$(CC) $(menu_CFLAGS) -o $(OBJDIR)menu.o -c menu.c
 
 $(OBJDIR)memory.o: memory.c ../../include/Panel.h
 	$(CC) $(memory_CFLAGS) -o $(OBJDIR)memory.o -c memory.c
@@ -341,7 +341,7 @@ $(OBJDIR)wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -o $(OBJDIR)wpa_supplicant.o -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(main_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(menu_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -372,7 +372,7 @@ install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 $(OBJDIR)logout.so $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0644 $(OBJDIR)main.so $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
+	$(INSTALL) -m 0644 $(OBJDIR)menu.so $(DESTDIR)$(LIBDIR)/Panel/applets/menu.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0644 $(OBJDIR)memory.so $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
@@ -421,7 +421,7 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/gsm.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/lock.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/logout.so
-	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/main.so
+	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/menu.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/memory.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/mixer.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/network.so

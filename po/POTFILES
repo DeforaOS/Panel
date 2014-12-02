@@ -10,7 +10,7 @@
 ../src/applets/gsm.c
 ../src/applets/lock.c
 ../src/applets/logout.c
-../src/applets/main.c
+../src/applets/menu.c
 ../src/applets/memory.c
 ../src/applets/mixer.c
 ../src/applets/mpd.c

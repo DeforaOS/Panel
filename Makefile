@@ -104,7 +104,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/gsm.c \
 		$(PACKAGE)-$(VERSION)/src/applets/lock.c \
 		$(PACKAGE)-$(VERSION)/src/applets/logout.c \
-		$(PACKAGE)-$(VERSION)/src/applets/main.c \
+		$(PACKAGE)-$(VERSION)/src/applets/menu.c \
 		$(PACKAGE)-$(VERSION)/src/applets/memory.c \
 		$(PACKAGE)-$(VERSION)/src/applets/mixer.c \
 		$(PACKAGE)-$(VERSION)/src/applets/mpd.c \

@@ -1416,10 +1416,10 @@ static gboolean _panel_can_suspend(void)
 static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 {
 #ifndef EMBEDDED
-	char const * applets = "main,desktop,lock,logout,pager,tasks"
+	char const * applets = "menu,desktop,lock,logout,pager,tasks"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock";
 #else /* EMBEDDED */
-	char const * applets = "main,desktop,keyboard,tasks,spacer"
+	char const * applets = "menu,desktop,keyboard,tasks,spacer"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
 #endif
