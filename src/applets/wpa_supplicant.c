@@ -349,13 +349,13 @@ static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
 	/* FIXME check if the mapping is right (and use our own icons) */
 	if(flags & WSRF_IBSS)
 		name = "nm-adhoc";
-	else if(level >= 100)
+	else if(level >= 200)
 		name = "phone-signal-100";
-	else if(level >= 75)
+	else if(level >= 150)
 		name = "phone-signal-75";
-	else if(level >= 50)
+	else if(level >= 100)
 		name = "phone-signal-50";
-	else if(level >= 25)
+	else if(level >= 50)
 		name = "phone-signal-25";
 	else
 		name = "phone-signal-00";
