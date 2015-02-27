@@ -14,7 +14,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: \n"
+"Language: French\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ../src/applets/battery.c:200
@@ -637,18 +637,3 @@ msgstr ""
 "Usage: %s [-c fichier][-i interface]\n"
 "  -c\tFichier de configuration\n"
 "  -i\tInterface réseau à connecter\n"
-
-#~ msgid "Show keyboard"
-#~ msgstr "Afficher le clavier"
-
-#~ msgid "Save configuration"
-#~ msgstr "Sauvegarder la configuration"
-
-#~ msgid "Network list"
-#~ msgstr "Liste des réseaux"
-
-#~ msgid "Any network"
-#~ msgstr "Tous les réseaux"
-
-#~ msgid "Applets"
-#~ msgstr "Applets"
