@@ -145,6 +145,7 @@ dist:
 		$(PACKAGE)-$(VERSION)/tools/helper.c \
 		$(PACKAGE)-$(VERSION)/tools/project.conf \
 		$(PACKAGE)-$(VERSION)/COPYING \
+		$(PACKAGE)-$(VERSION)/README.md \
 		$(PACKAGE)-$(VERSION)/Makefile \
 		$(PACKAGE)-$(VERSION)/config.h \
 		$(PACKAGE)-$(VERSION)/config.sh \
