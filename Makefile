@@ -116,7 +116,6 @@ dist:
 		$(PACKAGE)-$(VERSION)/src/applets/network.c \
 		$(PACKAGE)-$(VERSION)/src/applets/pager.c \
 		$(PACKAGE)-$(VERSION)/src/applets/phone.c \
-		$(PACKAGE)-$(VERSION)/src/applets/player.c \
 		$(PACKAGE)-$(VERSION)/src/applets/rotate.c \
 		$(PACKAGE)-$(VERSION)/src/applets/separator.c \
 		$(PACKAGE)-$(VERSION)/src/applets/spacer.c \

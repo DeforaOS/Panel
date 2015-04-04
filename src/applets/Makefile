@@ -1,4 +1,4 @@
-TARGETS	= $(OBJDIR)battery.so $(OBJDIR)bluetooth.so $(OBJDIR)clock.so $(OBJDIR)close.so $(OBJDIR)cpu.so $(OBJDIR)cpufreq.so $(OBJDIR)desktop.so $(OBJDIR)embed.so $(OBJDIR)gps.so $(OBJDIR)gsm.so $(OBJDIR)lock.so $(OBJDIR)logout.so $(OBJDIR)menu.so $(OBJDIR)memory.so $(OBJDIR)mixer.so $(OBJDIR)mpd.so $(OBJDIR)network.so $(OBJDIR)pager.so $(OBJDIR)phone.so $(OBJDIR)player.so $(OBJDIR)rotate.so $(OBJDIR)separator.so $(OBJDIR)spacer.so $(OBJDIR)swap.so $(OBJDIR)systray.so $(OBJDIR)tasks.so $(OBJDIR)template.so $(OBJDIR)title.so $(OBJDIR)usb.so $(OBJDIR)user.so $(OBJDIR)volume.so $(OBJDIR)wpa_supplicant.so
+TARGETS	= $(OBJDIR)battery.so $(OBJDIR)bluetooth.so $(OBJDIR)clock.so $(OBJDIR)close.so $(OBJDIR)cpu.so $(OBJDIR)cpufreq.so $(OBJDIR)desktop.so $(OBJDIR)embed.so $(OBJDIR)gps.so $(OBJDIR)gsm.so $(OBJDIR)lock.so $(OBJDIR)logout.so $(OBJDIR)menu.so $(OBJDIR)memory.so $(OBJDIR)mixer.so $(OBJDIR)mpd.so $(OBJDIR)network.so $(OBJDIR)pager.so $(OBJDIR)phone.so $(OBJDIR)rotate.so $(OBJDIR)separator.so $(OBJDIR)spacer.so $(OBJDIR)swap.so $(OBJDIR)systray.so $(OBJDIR)tasks.so $(OBJDIR)template.so $(OBJDIR)title.so $(OBJDIR)usb.so $(OBJDIR)user.so $(OBJDIR)volume.so $(OBJDIR)wpa_supplicant.so
 OBJDIR	=
 PREFIX	= /usr/local
 DESTDIR	=
@@ -153,13 +153,6 @@ phone_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
 $(OBJDIR)phone.so: $(phone_OBJS)
 	$(CCSHARED) -o $(OBJDIR)phone.so $(phone_OBJS) $(phone_LDFLAGS)
 
-player_OBJS = $(OBJDIR)player.o
-player_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS) `pkg-config --cflags libDesktop`
-player_LDFLAGS = $(LDFLAGSF) $(LDFLAGS) `pkg-config --libs libDesktop`
-
-$(OBJDIR)player.so: $(player_OBJS)
-	$(CCSHARED) -o $(OBJDIR)player.so $(player_OBJS) $(player_LDFLAGS)
-
 rotate_OBJS = $(OBJDIR)rotate.o
 rotate_CFLAGS = $(CPPFLAGSF) $(CPPFLAGS) $(CFLAGSF) $(CFLAGS)
 rotate_LDFLAGS = $(LDFLAGSF) $(LDFLAGS)
@@ -301,9 +294,6 @@ $(OBJDIR)pager.o: pager.c ../../include/Panel.h
 $(OBJDIR)phone.o: phone.c ../../include/Panel.h
 	$(CC) $(phone_CFLAGS) -o $(OBJDIR)phone.o -c phone.c
 
-$(OBJDIR)player.o: player.c ../../include/Panel.h
-	$(CC) $(player_CFLAGS) -o $(OBJDIR)player.o -c player.c
-
 $(OBJDIR)rotate.o: rotate.c ../../include/Panel.h
 	$(CC) $(rotate_CFLAGS) -o $(OBJDIR)rotate.o -c rotate.c
 
@@ -341,7 +331,7 @@ $(OBJDIR)wpa_supplicant.o: wpa_supplicant.c ../../include/Panel.h
 	$(CC) $(wpa_supplicant_CFLAGS) -o $(OBJDIR)wpa_supplicant.o -c wpa_supplicant.c
 
 clean:
-	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(menu_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(player_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
+	$(RM) -- $(battery_OBJS) $(bluetooth_OBJS) $(clock_OBJS) $(close_OBJS) $(cpu_OBJS) $(cpufreq_OBJS) $(desktop_OBJS) $(embed_OBJS) $(gps_OBJS) $(gsm_OBJS) $(lock_OBJS) $(logout_OBJS) $(menu_OBJS) $(memory_OBJS) $(mixer_OBJS) $(mpd_OBJS) $(network_OBJS) $(pager_OBJS) $(phone_OBJS) $(rotate_OBJS) $(separator_OBJS) $(spacer_OBJS) $(swap_OBJS) $(systray_OBJS) $(tasks_OBJS) $(template_OBJS) $(title_OBJS) $(usb_OBJS) $(user_OBJS) $(volume_OBJS) $(wpa_supplicant_OBJS)
 
 distclean: clean
 	$(RM) -- $(TARGETS)
@@ -384,8 +374,6 @@ install: $(TARGETS)
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0755 $(OBJDIR)phone.so $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
-	$(INSTALL) -m 0755 $(OBJDIR)player.so $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
-	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0755 $(OBJDIR)rotate.so $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
 	$(MKDIR) $(DESTDIR)$(LIBDIR)/Panel/applets
 	$(INSTALL) -m 0755 $(OBJDIR)separator.so $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
@@ -427,7 +415,6 @@ uninstall:
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/network.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/pager.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/phone.so
-	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/player.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/rotate.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/separator.so
 	$(RM) -- $(DESTDIR)$(LIBDIR)/Panel/applets/spacer.so
