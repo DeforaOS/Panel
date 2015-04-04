@@ -1,4 +1,6 @@
 Makefile
+/config.h
+/config.sh
 *~
 *.a
 *.dll
