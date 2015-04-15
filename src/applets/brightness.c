@@ -62,8 +62,7 @@ static gboolean _brightness_on_timeout(gpointer data);
 PanelAppletDefinition applet =
 {
 	"Brightness",
-	/* FIXME choose a corresponding image */
-	"image-missing",
+	"video-display",
 	NULL,
 	_brightness_init,
 	_brightness_destroy,
@@ -94,8 +93,7 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	brightness->box = hbox;
-	/* FIXME choose a corresponding image */
-	brightness->image = gtk_image_new_from_icon_name("image-missing",
+	brightness->image = gtk_image_new_from_icon_name(applet.icon,
 			helper->icon_size);
 	gtk_box_pack_start(GTK_BOX(hbox), brightness->image, TRUE, TRUE, 0);
 	brightness->label = NULL;
