@@ -800,6 +800,10 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 			menu->helper->error(NULL, NULL, 0); /* XXX */
 			continue;
 		}
+		/* skip this entry if it is deleted */
+		if((q = config_get(config, section, "Hidden")) != NULL
+				&& strcmp(q, "true") == 0)
+			continue;
 		/* skip this entry if it has an unknown type */
 		if((q = config_get(config, section, "Type")) == NULL)
 			continue;
