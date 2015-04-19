@@ -350,7 +350,7 @@ static void _applications_on_activate_url(Config * config)
 	const char section[] = "Desktop Entry";
 	char const * url;
 	/* XXX open with the default web browser instead */
-	char * argv[] = { BINDIR "/surfer", "--", NULL, NULL };
+	char * argv[] = { BINDIR "/htmlapp", "--", NULL, NULL };
 	unsigned int flags = 0;
 	GError * error = NULL;
 
