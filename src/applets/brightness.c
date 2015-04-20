@@ -18,11 +18,11 @@
 #if defined(__NetBSD__)
 # include <sys/param.h>
 # include <sys/sysctl.h>
-# include <errno.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <System.h>
 #include "Panel.h"
