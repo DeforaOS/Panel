@@ -16,7 +16,6 @@
 ../src/applets/mpd.c
 ../src/applets/network.c
 ../src/applets/pager.c
-../src/applets/player.c
 ../src/applets/rotate.c
 ../src/applets/swap.c
 ../src/applets/systray.c
