@@ -453,7 +453,9 @@ int main(int argc, char * argv[])
 	int o;
 	Run * run;
 
-	setlocale(LC_ALL, "");
+	if(setlocale(LC_ALL, "") != 0)
+		fprintf(stderr, PROGNAME ": %s: %s\n", "setlocale",
+				strerror(errno));
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
