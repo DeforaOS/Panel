@@ -28,6 +28,10 @@
 #define _(string) gettext(string)
 
 /* constants */
+#ifndef PROGNAME
+# define PROGNAME	"run"
+#endif
+
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -190,7 +194,7 @@ static GtkWidget * _new_entry(Config * config)
 	if((p = _run_get_config_filename()) == NULL)
 		return entry;
 	if(config_load(config, p) != 0)
-		error_print("run");
+		error_print(PROGNAME);
 	free(p);
 	completion = gtk_entry_completion_new();
 	gtk_entry_set_completion(GTK_ENTRY(entry), completion);
@@ -301,7 +305,7 @@ static void _on_run_execute(gpointer data)
 	const GSpawnFlags flags = G_SPAWN_FILE_AND_ARGV_ZERO
 		| G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
 	char const * path;
-	char * argv_shell[] = { "/bin/sh", "run", "-c", NULL, NULL };
+	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };
 	char * argv_xterm[] = { "xterm", "xterm", "-e", "sh", "-c", NULL,
 		NULL };
 	char ** argv = argv_shell;
@@ -377,7 +381,7 @@ static void _execute_save_config(Run * run)
 	config_reset(run->config);
 	if(config_load(run->config, filename) != 0)
 		/* XXX this risks losing the configuration */
-		error_print("run");
+		error_print(PROGNAME);
 	p = gtk_entry_get_text(GTK_ENTRY(run->entry));
 	for(i = 0; i < 100; i++)
 	{
@@ -402,7 +406,7 @@ static void _execute_save_config(Run * run)
 			break;
 	}
 	if(config_save(run->config, filename) != 0)
-		error_print("run");
+		error_print(PROGNAME);
 	free(filename);
 }
 
