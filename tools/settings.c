@@ -274,7 +274,8 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		p = config_get(config, section, "Type");
 		name = config_get(config, section, "Name");
 		exec = config_get(config, section, "Exec");
-		if(p == NULL || name == NULL || exec == NULL)
+		if(p == NULL || name == NULL || exec == NULL
+				|| strcmp(exec, PROGNAME) == 0)
 			continue;
 		if(strcmp(p, application) != 0)
 			continue;
