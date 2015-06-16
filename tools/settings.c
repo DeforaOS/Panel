@@ -197,10 +197,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	GError * error = NULL;
 
 	if((dir = opendir(folder)) == NULL)
-	{
-		config_delete(config);
 		return -_settings_error(strerror(errno), 1);
-	}
 	theme = gtk_icon_theme_get_default();
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
 	store = GTK_LIST_STORE(model);
