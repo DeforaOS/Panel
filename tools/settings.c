@@ -17,6 +17,7 @@
 
 #include <dirent.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -157,17 +158,46 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 
 static int _settings_browse(Settings * settings)
 {
-	int ret;
+	int ret = 0;
 	Config * config;
 	GtkTreeModel * model;
+	char const * path;
+	char * p;
+	size_t i;
+	size_t j;
+	int datadir = 0;
 
 	if((config = config_new()) == NULL)
 		return -_settings_error(error_get(), 1);
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
 	gtk_list_store_clear(GTK_LIST_STORE(model));
-	/* FIXME read through every XDG folder as expected */
-	ret = _settings_browse_folder(settings, config,
-			DATADIR "/applications");
+	/* read through every XDG application folder */
+	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
+		path = "/usr/local/share:/usr/share";
+	if((p = strdup(path)) == NULL)
+		_settings_error(error_get(), 1);
+	else
+	{
+		for(i = 0, j = 0;; i++)
+			if(p[i] == '\0')
+			{
+				_settings_browse_folder(settings, config,
+						&p[j]);
+				datadir |= (strcmp(&p[j], DATADIR) == 0);
+				break;
+			}
+			else if(p[i] == ':')
+			{
+				p[i] = '\0';
+				_settings_browse_folder(settings, config,
+						&p[j]);
+				datadir |= (strcmp(&p[j], DATADIR) == 0);
+				j = i + 1;
+			}
+		free(p);
+	}
+	if(datadir == 0)
+		ret = _settings_browse_folder(settings, config, DATADIR);
 	config_delete(config);
 	return ret;
 }
@@ -196,7 +226,14 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	GtkTreeIter iter;
 	GError * error = NULL;
 
-	if((dir = opendir(folder)) == NULL)
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, folder);
+#endif
+	if((path = string_new_append(folder, "/applications", NULL)) == NULL)
+		return -_settings_error(error_get(), 1);
+	dir = opendir(path);
+	string_delete(path);
+	if(dir == NULL)
 		return -_settings_error(strerror(errno), 1);
 	theme = gtk_icon_theme_get_default();
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
