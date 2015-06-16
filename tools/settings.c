@@ -21,10 +21,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <locale.h>
+#include <libintl.h>
 #include <gtk/gtk.h>
 #include <System.h>
 #include "../config.h"
-
+#define _(string) gettext(string)
 
 /* constants */
 #ifndef PROGNAME
@@ -39,6 +41,9 @@
 #endif
 #ifndef DATADIR
 # define DATADIR	PREFIX "/share"
+#endif
+#ifndef LOCALEDIR
+# define LOCALEDIR	DATADIR "/locale"
 #endif
 
 
@@ -80,7 +85,8 @@ static int _settings(void)
 	gtk_window_set_default_size(GTK_WINDOW(settings.window), 400, 300);
 	gtk_window_set_icon_name(GTK_WINDOW(settings.window),
 			GTK_STOCK_PREFERENCES);
-	gtk_window_set_title(GTK_WINDOW(settings.window), "System preferences");
+	gtk_window_set_title(GTK_WINDOW(settings.window),
+			_("System preferences"));
 	g_signal_connect_swapped(settings.window, "delete-event", G_CALLBACK(
 				_settings_on_closex), NULL);
 	widget = gtk_scrolled_window_new(NULL, NULL);
@@ -416,6 +422,10 @@ int main(int argc, char * argv[])
 {
 	int o;
 
+	if(setlocale(LC_ALL, "") == NULL)
+		_settings_error(strerror(errno), 1); /* XXX mention setlocale */
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
 	while((o = getopt(argc, argv, "")) != -1)
 		switch(o)

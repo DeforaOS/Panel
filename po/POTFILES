@@ -33,4 +33,5 @@
 ../tools/helper.c
 ../tools/message.c
 ../tools/notify.c
+../tools/settings.c
 ../tools/wifibrowser.c
