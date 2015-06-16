@@ -23,7 +23,6 @@
 #include <gtk/gtk.h>
 #include <System.h>
 #include <Desktop.h>
-#include <Desktop/Browser.h>
 #include "../src/window.h"
 #include "../config.h"
 

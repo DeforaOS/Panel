@@ -35,7 +35,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <X11/X.h>
-#include <Desktop/Browser.h>
 #include "window.h"
 #include "panel.h"
 #include "../config.h"
