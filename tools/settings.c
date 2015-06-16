@@ -179,9 +179,8 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	const char section[] = "Desktop Entry";
 	const char type[] = "Application";
 	const int flags = GTK_ICON_LOOKUP_FORCE_SIZE;
+	const gint iconsize = 48;
 	GtkIconTheme * theme;
-	gint width = 48;
-	gint height = 48;
 	GtkTreeModel * model;
 	GtkListStore * store;
 	DIR * dir;
@@ -203,7 +202,6 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		return -_settings_error(strerror(errno), 1);
 	}
 	theme = gtk_icon_theme_get_default();
-	gtk_icon_size_lookup(GTK_ICON_SIZE_LARGE_TOOLBAR, &width, &height);
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
 	store = GTK_LIST_STORE(model);
 	while((de = readdir(dir)) != NULL)
@@ -259,8 +257,8 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		fprintf(stderr, "DEBUG: %s() \"%s\" %s\n", __func__, name,
 				icon);
 #endif
-		if((pixbuf = gtk_icon_theme_load_icon(theme, icon, width, flags,
-						&error)) == NULL)
+		if((pixbuf = gtk_icon_theme_load_icon(theme, icon, iconsize,
+						flags, &error)) == NULL)
 		{
 			_settings_error(error->message, 0);
 			g_error_free(error);
