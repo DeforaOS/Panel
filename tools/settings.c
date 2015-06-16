@@ -245,7 +245,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		if(strncmp(&de->d_name[len - sizeof(ext)], ext, sizeof(ext))
 				!= 0)
 			continue;
-		if((path = string_new_append(DATADIR "/applications/",
+		if((path = string_new_append(folder, "/applications/",
 						de->d_name, NULL)) == NULL)
 		{
 			_settings_error(error_get(), 1);
