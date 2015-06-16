@@ -155,6 +155,9 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 /* settings_browse */
 static int _settings_browse_folder(Settings * settings, Config * config,
 		char const * folder);
+static int _settings_browse_folder_access(char const * filename, int mode);
+static int _settings_browse_folder_access_path(char const * path,
+		char const * filename, int mode);
 static void _settings_rtrim(String * string, char c);
 
 static int _settings_browse(Settings * settings)
@@ -275,19 +278,10 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		if((p = config_get(config, section, "Categories")) == NULL
 				|| string_find(p, "Settings") == NULL)
 			continue;
-		if((p = config_get(config, section, "TryExec")) != NULL)
-		{
-			if((path = string_new_append(BINDIR "/", p, NULL))
-					== NULL)
-			{
-				_settings_error(error_get(), 1);
+		if((p = config_get(config, section, "TryExec")) != NULL
+				&& _settings_browse_folder_access(path, X_OK)
+				!= 0 && errno == ENOENT)
 				continue;
-			}
-			res = access(path, X_OK);
-			string_delete(path);
-			if(res != 0)
-				continue;
-		}
 		if((icon = config_get(config, section, "Icon")) == NULL)
 			icon = GTK_STOCK_PREFERENCES;
 #ifdef DEBUG
@@ -307,6 +301,60 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	}
 	closedir(dir);
 	return FALSE;
+}
+
+static int _settings_browse_folder_access(char const * path, int mode)
+{
+	int ret = -1;
+	char const * p;
+	char * q;
+	size_t i;
+	size_t j;
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\", %d)\n", __func__, path, mode);
+#endif
+	if(path[0] == '/')
+		return access(path, mode);
+	if((p = getenv("PATH")) == NULL)
+		return 0;
+	if((q = string_new(p)) == NULL)
+		return -1;
+	errno = ENOENT;
+	for(i = 0, j = 0;; i++)
+		if(q[i] == '\0')
+		{
+			ret = _settings_browse_folder_access_path(&q[j], path,
+					mode);
+			break;
+		}
+		else if(q[i] == ':')
+		{
+			q[i] = '\0';
+			if((ret = _settings_browse_folder_access_path(&q[j],
+							path, mode)) == 0)
+				break;
+			j = i + 1;
+		}
+	string_delete(q);
+	return ret;
+}
+
+static int _settings_browse_folder_access_path(char const * path,
+		char const * filename, int mode)
+{
+	int ret;
+	String * p;
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\", %d)\n", __func__, path,
+			filename, mode);
+#endif
+	if((p = string_new_append(path, "/", filename, NULL)) == NULL)
+		return -1;
+	ret = access(p, mode);
+	string_delete(p);
+	return ret;
 }
 
 static void _settings_rtrim(String * string, char c)
