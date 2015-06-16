@@ -184,7 +184,6 @@ static int _settings_browse(Settings * settings)
 	if((p = strdup(path)) == NULL)
 		_settings_error(error_get(), 1);
 	else
-	{
 		for(i = 0, j = 0;; i++)
 			if(p[i] == '\0')
 			{
@@ -203,8 +202,7 @@ static int _settings_browse(Settings * settings)
 				datadir |= (strcmp(&p[j], DATADIR) == 0);
 				j = i + 1;
 			}
-		free(p);
-	}
+	free(p);
 	if(datadir == 0)
 		ret = _settings_browse_folder(settings, config, DATADIR);
 	config_delete(config);
