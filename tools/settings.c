@@ -169,7 +169,7 @@ static int _settings_browse(Settings * settings)
 	char * p;
 	size_t i;
 	size_t j;
-	int datadir = 0;
+	int datadir = 1;
 
 	if((config = config_new()) == NULL)
 		return -_settings_error(error_get(), 1);
@@ -177,7 +177,10 @@ static int _settings_browse(Settings * settings)
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 	/* read through every XDG application folder */
 	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
+	{
 		path = "/usr/local/share:/usr/share";
+		datadir = 0;
+	}
 	if((p = strdup(path)) == NULL)
 		_settings_error(error_get(), 1);
 	else
