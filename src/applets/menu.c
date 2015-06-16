@@ -464,6 +464,7 @@ static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath),
 		char const * path);
+static void _xdg_dirs_rtrim(String * string, char c);
 
 static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath))
@@ -472,28 +473,36 @@ static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 	char * p;
 	size_t i;
 	size_t j;
+	int datadir = 1;
 
+	/* read through every XDG application folder */
 	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
-		/* FIXME use DATADIR */
-		path = "/usr/local/share:/usr/share";
-	if((p = strdup(path)) == NULL)
 	{
-		menu->helper->error(NULL, "strdup", 1);
-		return;
+		path = "/usr/local/share:/usr/share";
+		datadir = 0;
 	}
-	for(i = 0, j = 0;; i++)
-		if(p[i] == '\0')
-		{
-			_xdg_dirs_path(menu, callback, &p[j]);
-			break;
-		}
-		else if(p[i] == ':')
-		{
-			p[i] = '\0';
-			_xdg_dirs_path(menu, callback, &p[j]);
-			j = i + 1;
-		}
+	if((p = strdup(path)) == NULL)
+		menu->helper->error(NULL, "strdup", 1);
+	else
+		for(i = 0, j = 0;; i++)
+			if(p[i] == '\0')
+			{
+				_xdg_dirs_rtrim(&p[j], '/');
+				_xdg_dirs_path(menu, callback, &p[j]);
+				datadir |= (strcmp(&p[j], DATADIR) == 0);
+				break;
+			}
+			else if(p[i] == ':')
+			{
+				p[i] = '\0';
+				_xdg_dirs_rtrim(&p[j], '/');
+				_xdg_dirs_path(menu, callback, &p[j]);
+				datadir |= (strcmp(&p[j], DATADIR) == 0);
+				j = i + 1;
+			}
 	free(p);
+	if(datadir == 0)
+		_xdg_dirs_path(menu, callback, DATADIR);
 	_xdg_dirs_home(menu, callback);
 }
 
@@ -537,6 +546,17 @@ static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 		menu->helper->error(NULL, path, 1);
 	callback(menu, path, apppath);
 	string_delete(apppath);
+}
+
+static void _xdg_dirs_rtrim(String * string, char c)
+{
+	size_t len;
+
+	for(len = string_length(string); len > 0; len--)
+		if(string[len - 1] == c)
+			string[len - 1] = '\0';
+		else
+			break;
 }
 
 
