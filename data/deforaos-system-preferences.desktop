@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=System preferences
+Comment=Preferences for the system
+TryExec=settings
+Exec=settings
+Icon=preferences-system
+Type=Application
+Categories=Settings;GTK;
