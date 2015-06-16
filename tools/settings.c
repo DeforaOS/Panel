@@ -177,7 +177,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 {
 	const char ext[8] = ".desktop";
 	const char section[] = "Desktop Entry";
-	const char type[] = "Application";
+	const char application[] = "Application";
 	const int flags = GTK_ICON_LOOKUP_FORCE_SIZE;
 	const gint iconsize = 48;
 	GtkIconTheme * theme;
@@ -230,7 +230,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		exec = config_get(config, section, "Exec");
 		if(p == NULL || name == NULL || exec == NULL)
 			continue;
-		if(strcmp(p, type) != 0)
+		if(strcmp(p, application) != 0)
 			continue;
 		if((p = config_get(config, section, "Categories")) == NULL
 				|| string_find(p, "Settings") == NULL)
