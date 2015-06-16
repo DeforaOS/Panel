@@ -158,6 +158,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 static int _settings_browse_folder_access(char const * filename, int mode);
 static int _settings_browse_folder_access_path(char const * path,
 		char const * filename, int mode);
+static int _settings_browse_home(Settings * settings, Config * config);
 static void _settings_rtrim(String * string, char c);
 
 static int _settings_browse(Settings * settings)
@@ -205,6 +206,7 @@ static int _settings_browse(Settings * settings)
 	free(p);
 	if(datadir == 0)
 		ret = _settings_browse_folder(settings, config, DATADIR);
+	ret |= _settings_browse_home(settings, config);
 	config_delete(config);
 	return ret;
 }
@@ -355,6 +357,27 @@ static int _settings_browse_folder_access_path(char const * path,
 		return -1;
 	ret = access(p, mode);
 	string_delete(p);
+	return ret;
+}
+
+static int _settings_browse_home(Settings * settings, Config * config)
+{
+	int ret;
+	char const fallback[] = ".local/share";
+	char const * path;
+	char const * homedir;
+	String * p;
+
+	/* use $XDG_DATA_HOME if set and not empty */
+	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
+		return _settings_browse_folder(settings, config, path);
+	/* fallback to "$HOME/.local/share" */
+	if((homedir = getenv("HOME")) == NULL)
+		homedir = g_get_home_dir();
+	if((p = string_new_append(homedir, "/", fallback, NULL)) == NULL)
+		return -_settings_error(error_get(), 1);
+	ret = _settings_browse_folder(settings, config, p);
+	free(p);
 	return ret;
 }
 
