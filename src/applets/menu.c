@@ -206,6 +206,10 @@ static GtkWidget * _menu_applications(Menu * menu)
 	GtkWidget * menuitem;
 	Config * config;
 	const char section[] = "Desktop Entry";
+	char const * name;
+#if GTK_CHECK_VERSION(2, 12, 0)
+	char const * comment;
+#endif
 	char const * q;
 	char const * r;
 	char const * path;
@@ -218,15 +222,25 @@ static GtkWidget * _menu_applications(Menu * menu)
 	for(p = menu->apps; p != NULL; p = p->next)
 	{
 		config = p->data;
-		if((q = config_get(config, section, "GenericName")) == NULL)
-			/* should not fail */
-			q = config_get(config, section, "Name");
+		/* should not fail */
+		name = config_get(config, section, "Name");
+#if GTK_CHECK_VERSION(2, 12, 0)
+		comment = config_get(config, section, "Comment");
+#endif
+		if((q = config_get(config, section, "GenericName")) != NULL)
+		{
+#if GTK_CHECK_VERSION(2, 12, 0)
+			if(comment == NULL)
+				comment = name;
+#endif
+			name = q;
+		}
 		path = config_get(config, NULL, "path");
-		menuitem = _menu_menuitem(menu, path, q,
+		menuitem = _menu_menuitem(menu, path, name,
 				config_get(config, section, "Icon"));
 #if GTK_CHECK_VERSION(2, 12, 0)
-		if((q = config_get(config, section, "Comment")) != NULL)
-			gtk_widget_set_tooltip_text(menuitem, q);
+		if(comment != NULL)
+			gtk_widget_set_tooltip_text(menuitem, comment);
 #endif
 		if((q = config_get(config, section, "Type")) != NULL
 				&& strcmp(q, "Application") == 0
