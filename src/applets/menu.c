@@ -512,8 +512,7 @@ static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 	char const fallback[] = ".local/share";
 	char const * path;
 	char const * homedir;
-	size_t len;
-	char * p;
+	String * p;
 
 	/* use $XDG_DATA_HOME if set and not empty */
 	if((path = getenv("XDG_DATA_HOME")) != NULL && strlen(path) > 0)
@@ -524,15 +523,13 @@ static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 	/* fallback to "$HOME/.local/share" */
 	if((homedir = getenv("HOME")) == NULL)
 		homedir = g_get_home_dir();
-	len = strlen(homedir) + 1 + sizeof(fallback);
-	if((p = malloc(len)) == NULL)
+	if((p = string_new_append(homedir, "/", fallback, NULL)) == NULL)
 	{
 		menu->helper->error(NULL, homedir, 1);
 		return;
 	}
-	snprintf(p, len, "%s/%s", homedir, fallback);
 	_xdg_dirs_path(menu, callback, p);
-	free(p);
+	string_delete(p);
 }
 
 static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
