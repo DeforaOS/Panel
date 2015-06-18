@@ -218,7 +218,9 @@ static GtkWidget * _menu_applications(Menu * menu)
 	for(p = menu->apps; p != NULL; p = p->next)
 	{
 		config = p->data;
-		q = config_get(config, section, "Name"); /* should not fail */
+		if((q = config_get(config, section, "GenericName")) == NULL)
+			/* should not fail */
+			q = config_get(config, section, "Name");
 		path = config_get(config, NULL, "path");
 		menuitem = _menu_menuitem(menu, path, q,
 				config_get(config, section, "Icon"));
