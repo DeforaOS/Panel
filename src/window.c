@@ -105,7 +105,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 	if(position != PANEL_WINDOW_POSITION_EMBEDDED)
 	{
 		panel->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-#if GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(3, 0, 0) && !GTK_CHECK_VERSION(3, 14, 0)
 		gtk_window_set_has_resize_grip(GTK_WINDOW(panel->window),
 				FALSE);
 #endif
