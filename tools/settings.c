@@ -194,7 +194,7 @@ static int _settings_browse(Settings * settings)
 		for(i = 0, j = 0;; i++)
 			if(p[i] == '\0')
 			{
-				_settings_rtrim(&p[j], '/');
+				string_rtrim(&p[j], "/");
 				_settings_browse_folder(settings, config,
 						&p[j]);
 				datadir |= (strcmp(&p[j], DATADIR) == 0);
@@ -203,7 +203,7 @@ static int _settings_browse(Settings * settings)
 			else if(p[i] == ':')
 			{
 				p[i] = '\0';
-				_settings_rtrim(&p[j], '/');
+				string_rtrim(&p[j], "/");
 				_settings_browse_folder(settings, config,
 						&p[j]);
 				datadir |= (strcmp(&p[j], DATADIR) == 0);
@@ -386,17 +386,6 @@ static int _settings_browse_home(Settings * settings, Config * config)
 	ret = _settings_browse_folder(settings, config, p);
 	free(p);
 	return ret;
-}
-
-static void _settings_rtrim(String * string, char c)
-{
-	size_t len;
-
-	for(len = string_length(string); len > 0; len--)
-		if(string[len - 1] == c)
-			string[len - 1] = '\0';
-		else
-			break;
 }
 
 
