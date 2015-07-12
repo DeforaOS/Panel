@@ -111,10 +111,10 @@ static int _settings(void)
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	store = gtk_list_store_new(SC_COUNT,
-			GDK_TYPE_PIXBUF,	/* icon */
-			G_TYPE_STRING,		/* name */
-			G_TYPE_STRING,		/* exec */
-			G_TYPE_BOOLEAN);	/* privileged */
+			GDK_TYPE_PIXBUF,	/* SC_ICON */
+			G_TYPE_STRING,		/* SC_NAME */
+			G_TYPE_STRING,		/* SC_EXEC */
+			G_TYPE_BOOLEAN);	/* SC_PRIVILEGED */
 	model = gtk_tree_model_filter_new(GTK_TREE_MODEL(store), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(model),
 			_settings_on_filter_view, &settings, NULL);
