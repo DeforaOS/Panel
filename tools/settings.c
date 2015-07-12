@@ -61,9 +61,10 @@ typedef enum _SettingsColumn
 {
 	SC_ICON = 0,
 	SC_NAME,
-	SC_EXEC
+	SC_EXEC,
+	SC_PRIVILEGED
 } SettingsColumn;
-#define SC_LAST SC_EXEC
+#define SC_LAST SC_PRIVILEGED
 #define SC_COUNT (SC_LAST + 1)
 
 /* prototypes */
@@ -106,7 +107,8 @@ static int _settings(void)
 	store = gtk_list_store_new(SC_COUNT,
 			GDK_TYPE_PIXBUF,	/* icon */
 			G_TYPE_STRING,		/* name */
-			G_TYPE_STRING);		/* exec */
+			G_TYPE_STRING,		/* exec */
+			G_TYPE_BOOLEAN);	/* privileged */
 	settings.view = gtk_icon_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(settings.view), 96);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), SC_ICON);
@@ -322,7 +324,8 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		gtk_list_store_set(store, &iter,
 #endif
 				SC_ICON, pixbuf, SC_NAME, name, SC_EXEC, exec,
-				-1);
+				/* FIXME detect privileged settings */
+				SC_PRIVILEGED, FALSE, -1);
 	}
 	closedir(dir);
 	return FALSE;
