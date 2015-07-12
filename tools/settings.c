@@ -305,9 +305,13 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 			g_error_free(error);
 			error = NULL;
 		}
+#if GTK_CHECK_VERSION(2, 6, 0)
+		gtk_list_store_insert_with_values(store, &iter, -1,
+#else
 		gtk_list_store_append(store, &iter);
-		gtk_list_store_set(store, &iter, 0, pixbuf, 1, name, 2, exec,
-				-1);
+		gtk_list_store_set(store, &iter,
+#endif
+				0, pixbuf, 1, name, 2, exec, -1);
 	}
 	closedir(dir);
 	return FALSE;
