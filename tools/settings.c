@@ -176,7 +176,6 @@ static int _settings_browse_folder_access(char const * filename, int mode);
 static int _settings_browse_folder_access_path(char const * path,
 		char const * filename, int mode);
 static int _settings_browse_home(Settings * settings, Config * config);
-static void _settings_rtrim(String * string, char c);
 
 static int _settings_browse(Settings * settings)
 {
