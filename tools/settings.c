@@ -71,6 +71,8 @@ typedef enum _SettingsColumn
 static int _settings(void);
 
 /* accessors */
+static gboolean _settings_get_iter(Settings * settings, GtkTreeIter * iter,
+		GtkTreePath * path);
 static GtkTreeModel * _settings_get_model(Settings * settings);
 
 /* useful */
@@ -118,6 +120,7 @@ static int _settings(void)
 	model = gtk_tree_model_filter_new(GTK_TREE_MODEL(store), NULL);
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(model),
 			_settings_on_filter_view, &settings, NULL);
+	model = gtk_tree_model_sort_new_with_model(model);
 	settings.view = gtk_icon_view_new_with_model(model);
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(settings.view), 96);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), SC_ICON);
@@ -174,9 +177,9 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 	GError * error = NULL;
 	char * argv[] = { "/bin/sh", "sh", "-c", NULL, NULL };
 
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
-	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path) == FALSE)
+	if(_settings_get_iter(settings, &iter, path) == FALSE)
 		return;
+	model = _settings_get_model(settings);
 	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, SC_EXEC, &exec, -1);
 # ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, exec);
@@ -191,12 +194,32 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 
 
 /* accessors */
+/* settings_get_iter */
+static gboolean _settings_get_iter(Settings * settings, GtkTreeIter * iter,
+		GtkTreePath * path)
+{
+	GtkTreeModel * model;
+	GtkTreeIter p;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
+	if(gtk_tree_model_get_iter(model, iter, path) == FALSE)
+		return FALSE;
+	gtk_tree_model_sort_convert_iter_to_child_iter(GTK_TREE_MODEL_SORT(
+				model), &p, iter);
+	model = gtk_tree_model_sort_get_model(GTK_TREE_MODEL_SORT(model));
+	gtk_tree_model_filter_convert_iter_to_child_iter(GTK_TREE_MODEL_FILTER(
+				model), iter, &p);
+	return TRUE;
+}
+
+
 /* settings_get_model */
 static GtkTreeModel * _settings_get_model(Settings * settings)
 {
 	GtkTreeModel * model;
 
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
+	model = gtk_tree_model_sort_get_model(GTK_TREE_MODEL_SORT(model));
 	return gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
 }
 
