@@ -121,6 +121,8 @@ static int _settings(void)
 	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(model),
 			_settings_on_filter_view, &settings, NULL);
 	model = gtk_tree_model_sort_new_with_model(model);
+	gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(model), SC_NAME,
+			GTK_SORT_ASCENDING);
 	settings.view = gtk_icon_view_new_with_model(model);
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(settings.view), 96);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), SC_ICON);
