@@ -47,6 +47,7 @@
 #endif
 
 
+/* settings */
 /* private */
 /* types */
 typedef struct _Settings
@@ -54,6 +55,16 @@ typedef struct _Settings
 	GtkWidget * window;
 	GtkWidget * view;
 } Settings;
+
+/* constants */
+typedef enum _SettingsColumn
+{
+	SC_ICON = 0,
+	SC_NAME,
+	SC_EXEC
+} SettingsColumn;
+#define SC_LAST SC_EXEC
+#define SC_COUNT (SC_LAST + 1)
 
 /* prototypes */
 static int _settings(void);
@@ -92,14 +103,14 @@ static int _settings(void)
 	widget = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	store = gtk_list_store_new(3,
+	store = gtk_list_store_new(SC_COUNT,
 			GDK_TYPE_PIXBUF,	/* icon */
 			G_TYPE_STRING,		/* name */
 			G_TYPE_STRING);		/* exec */
 	settings.view = gtk_icon_view_new_with_model(GTK_TREE_MODEL(store));
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(settings.view), 96);
-	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), 0);
-	gtk_icon_view_set_text_column(GTK_ICON_VIEW(settings.view), 1);
+	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), SC_ICON);
+	gtk_icon_view_set_text_column(GTK_ICON_VIEW(settings.view), SC_NAME);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(settings.view),
 			GTK_SELECTION_SINGLE);
 #if GTK_CHECK_VERSION(2, 10, 0)
@@ -144,7 +155,7 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 	model = gtk_icon_view_get_model(GTK_ICON_VIEW(widget));
 	if(gtk_tree_model_get_iter(GTK_TREE_MODEL(model), &iter, path) == FALSE)
 		return;
-	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, 2, &exec, -1);
+	gtk_tree_model_get(GTK_TREE_MODEL(model), &iter, SC_EXEC, &exec, -1);
 # ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, exec);
 # endif
@@ -311,7 +322,8 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter,
 #endif
-				0, pixbuf, 1, name, 2, exec, -1);
+				SC_ICON, pixbuf, SC_NAME, name, SC_EXEC, exec,
+				-1);
 	}
 	closedir(dir);
 	return FALSE;
