@@ -70,6 +70,9 @@ typedef enum _SettingsColumn
 /* prototypes */
 static int _settings(void);
 
+/* accessors */
+static GtkTreeModel * _settings_get_model(Settings * settings);
+
 /* useful */
 static int _settings_browse(Settings * settings);
 
@@ -81,6 +84,8 @@ static int _settings_usage(void);
 /* settings */
 /* callbacks */
 static gboolean _settings_on_closex(gpointer data);
+static gboolean _settings_on_filter_view(GtkTreeModel * model,
+		GtkTreeIter * iter, gpointer data);
 static gboolean _settings_on_idle(gpointer data);
 #if GTK_CHECK_VERSION(2, 10, 0)
 static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
@@ -92,6 +97,7 @@ static int _settings(void)
 	Settings settings;
 	GtkWidget * widget;
 	GtkListStore * store;
+	GtkTreeModel * model;
 
 	settings.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(settings.window), 400, 300);
@@ -109,7 +115,10 @@ static int _settings(void)
 			G_TYPE_STRING,		/* name */
 			G_TYPE_STRING,		/* exec */
 			G_TYPE_BOOLEAN);	/* privileged */
-	settings.view = gtk_icon_view_new_with_model(GTK_TREE_MODEL(store));
+	model = gtk_tree_model_filter_new(GTK_TREE_MODEL(store), NULL);
+	gtk_tree_model_filter_set_visible_func(GTK_TREE_MODEL_FILTER(model),
+			_settings_on_filter_view, &settings, NULL);
+	settings.view = gtk_icon_view_new_with_model(model);
 	gtk_icon_view_set_item_width(GTK_ICON_VIEW(settings.view), 96);
 	gtk_icon_view_set_pixbuf_column(GTK_ICON_VIEW(settings.view), SC_ICON);
 	gtk_icon_view_set_text_column(GTK_ICON_VIEW(settings.view), SC_NAME);
@@ -131,6 +140,17 @@ static gboolean _settings_on_closex(gpointer data)
 {
 	gtk_main_quit();
 	return FALSE;
+}
+
+static gboolean _settings_on_filter_view(GtkTreeModel * model,
+		GtkTreeIter * iter, gpointer data)
+{
+	gboolean privileged;
+
+	if(geteuid() == 0)
+		return TRUE;
+	gtk_tree_model_get(model, iter, SC_PRIVILEGED, &privileged, -1);
+	return (SC_PRIVILEGED == TRUE) ? FALSE : TRUE;
 }
 
 static gboolean _settings_on_idle(gpointer data)
@@ -170,6 +190,17 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 #endif
 
 
+/* accessors */
+/* settings_get_model */
+static GtkTreeModel * _settings_get_model(Settings * settings)
+{
+	GtkTreeModel * model;
+
+	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
+	return gtk_tree_model_filter_get_model(GTK_TREE_MODEL_FILTER(model));
+}
+
+
 /* useful */
 /* settings_browse */
 static int _settings_browse_folder(Settings * settings, Config * config,
@@ -192,7 +223,7 @@ static int _settings_browse(Settings * settings)
 
 	if((config = config_new()) == NULL)
 		return -_settings_error(error_get(), 1);
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
+	model = _settings_get_model(settings);
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 	/* read through every XDG application folder */
 	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
@@ -263,7 +294,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	if(dir == NULL)
 		return -_settings_error(strerror(errno), 1);
 	theme = gtk_icon_theme_get_default();
-	model = gtk_icon_view_get_model(GTK_ICON_VIEW(settings->view));
+	model = _settings_get_model(settings);
 	store = GTK_LIST_STORE(model);
 	while((de = readdir(dir)) != NULL)
 	{
