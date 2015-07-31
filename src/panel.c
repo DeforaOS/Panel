@@ -209,7 +209,9 @@ static int _new_config(Panel * panel)
 		return -1;
 	if((filename = _config_get_filename()) == NULL)
 		return -1;
-	config_load(panel->config, filename); /* we can ignore errors */
+	if(config_load(panel->config, filename) != 0)
+		/* we can ignore this error */
+		panel_error(NULL, "Could not load configuration", 1);
 	free(filename);
 	return 0;
 }
