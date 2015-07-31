@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2009-2013 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2015 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,24 @@
 
 
 
-#ifndef DESKTOP_PANEL_H
-# define DESKTOP_PANEL_H
+#ifndef DESKTOP_PANEL_WINDOW_H
+# define DESKTOP_PANEL_WINDOW_H
 
-# include "Panel/panel.h"
-# include "Panel/window.h"
+
+/* PanelWindow */
+/* types */
+typedef struct _PanelWindow PanelWindow;
+
+typedef enum _PanelWindowType
+{
+	PANEL_WINDOW_TYPE_NORMAL = 0,
+	PANEL_WINDOW_TYPE_NOTIFICATION
+} PanelWindowType;
+
+
+/* functions */
+GtkIconSize panel_window_get_icon_size(PanelWindow * panel);
+GtkOrientation panel_window_get_orientation(PanelWindow * panel);
+PanelWindowType panel_window_get_type(PanelWindow * panel);
 
 #endif /* !DESKTOP_PANEL_H */

@@ -19,7 +19,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/X.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -62,7 +62,7 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget)
 
 	ret = gtk_button_new();
 	image = gtk_image_new_from_icon_name("panel-applet-desktop",
-			helper->icon_size);
+			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(ret), image);
 	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

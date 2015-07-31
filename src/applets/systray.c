@@ -24,7 +24,7 @@
 #endif
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* Systray */
@@ -91,7 +91,8 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	systray->hbox = gtk_hbox_new(FALSE, 0);
 #endif
-	gtk_icon_size_lookup(helper->icon_size, NULL, &height);
+	gtk_icon_size_lookup(panel_window_get_icon_size(helper->window), NULL,
+			&height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
 	systray->owner = NULL;
 	systray->source = g_signal_connect(systray->hbox, "screen-changed",

@@ -54,7 +54,9 @@ struct _PanelApplet
 
 struct _PanelWindow
 {
+	PanelWindowType type;
 	PanelWindowPosition position;
+	GtkIconSize iconsize;
 	gint height;
 	GdkRectangle root;
 
@@ -82,23 +84,25 @@ static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 /* public */
 /* functions */
 /* panel_window_new */
-PanelWindow * panel_window_new(PanelWindowPosition position,
-		PanelAppletHelper * helper, GdkRectangle * root)
+PanelWindow * panel_window_new(PanelAppletHelper * helper,
+		PanelWindowType type, PanelWindowPosition position,
+		GtkIconSize iconsize, GdkRectangle * root)
 {
 	PanelWindow * panel;
 	int icon_width;
 	int icon_height;
 	GtkOrientation orientation;
 
-	if(gtk_icon_size_lookup(helper->icon_size, &icon_width, &icon_height)
-			!= TRUE)
+	if(gtk_icon_size_lookup(iconsize, &icon_width, &icon_height) != TRUE)
 	{
 		error_set_code(1, _("Invalid panel size"));
 		return NULL;
 	}
 	if((panel = object_new(sizeof(*panel))) == NULL)
 		return NULL;
+	panel->type = type;
 	panel->position = position;
+	panel->iconsize = iconsize;
 	panel->helper = helper;
 	panel->applets = NULL;
 	panel->applets_cnt = 0;
@@ -141,7 +145,8 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 					GDK_WINDOW_TYPE_HINT_DOCK);
 			gtk_window_stick(GTK_WINDOW(panel->window));
 			g_signal_connect(panel->window, "configure-event",
-					G_CALLBACK(_panel_window_on_configure_event), panel);
+					G_CALLBACK(_panel_window_on_configure_event),
+					panel);
 			break;
 		case PANEL_WINDOW_POSITION_LEFT:
 		case PANEL_WINDOW_POSITION_RIGHT:
@@ -153,7 +158,8 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 					GDK_WINDOW_TYPE_HINT_DOCK);
 			gtk_window_stick(GTK_WINDOW(panel->window));
 			g_signal_connect(panel->window, "configure-event",
-					G_CALLBACK(_panel_window_on_configure_event), panel);
+					G_CALLBACK(_panel_window_on_configure_event),
+					panel);
 			break;
 		case PANEL_WINDOW_POSITION_CENTER:
 			gtk_window_set_position(GTK_WINDOW(panel->window),
@@ -172,7 +178,7 @@ PanelWindow * panel_window_new(PanelWindowPosition position,
 				_panel_window_on_closex), panel);
 	gtk_container_add(GTK_CONTAINER(panel->window), panel->box);
 	gtk_widget_show_all(panel->box);
-	panel_window_reset(panel, position, root);
+	panel_window_reset(panel, root);
 	return panel;
 }
 
@@ -191,6 +197,13 @@ void panel_window_delete(PanelWindow * panel)
 int panel_window_get_height(PanelWindow * panel)
 {
 	return panel->height;
+}
+
+
+/* panel_window_get_icon_size */
+GtkIconSize panel_window_get_icon_size(PanelWindow * panel)
+{
+	return panel->iconsize;
 }
 
 
@@ -232,6 +245,13 @@ void panel_window_get_position(PanelWindow * panel, gint * x, gint * y)
 void panel_window_get_size(PanelWindow * panel, gint * width, gint * height)
 {
 	gtk_window_get_size(GTK_WINDOW(panel->window), width, height);
+}
+
+
+/* panel_window_get_type */
+PanelWindowType panel_window_get_type(PanelWindow * panel)
+{
+	return panel->type;
 }
 
 
@@ -326,10 +346,8 @@ void panel_window_remove_all(PanelWindow * panel)
 
 
 /* panel_window_reset */
-void panel_window_reset(PanelWindow * panel, PanelWindowPosition position,
-		GdkRectangle * root)
+void panel_window_reset(PanelWindow * panel, GdkRectangle * root)
 {
-	panel->position = position;
 	memcpy(&panel->root, root, sizeof(*root));
 	_panel_window_reset(panel);
 }

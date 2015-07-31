@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -79,6 +79,7 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
 	Brightness * brightness;
+	GtkIconSize iconsize;
 	GtkWidget * vbox;
 	GtkWidget * hbox;
 	PangoFontDescription * bold;
@@ -87,18 +88,19 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 		return NULL;
 	brightness->helper = helper;
 	brightness->timeout = 0;
+	iconsize = panel_window_get_icon_size(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	brightness->box = hbox;
-	brightness->image = gtk_image_new_from_icon_name(applet.icon,
-			helper->icon_size);
+	brightness->image = gtk_image_new_from_icon_name(applet.icon, iconsize);
 	gtk_box_pack_start(GTK_BOX(hbox), brightness->image, TRUE, TRUE, 0);
 	brightness->label = NULL;
 	brightness->progress = NULL;
-	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
+	if(panel_window_get_type(helper->window)
+			== PANEL_WINDOW_TYPE_NOTIFICATION)
 	{
 		bold = pango_font_description_new();
 		pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);

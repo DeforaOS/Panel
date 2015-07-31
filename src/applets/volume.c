@@ -32,7 +32,7 @@
 #ifdef DEBUG
 # include <stdio.h>
 #endif
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* Volume */
@@ -113,6 +113,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if GTK_CHECK_VERSION(2, 12, 0)
 	Volume * volume;
+	GtkIconSize iconsize;
 	GtkWidget * vbox;
 
 	if((volume = _volume_new(helper)) == NULL)
@@ -120,7 +121,9 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	volume->helper = helper;
 	volume->button = NULL;
 	volume->progress = NULL;
-	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
+	iconsize = panel_window_get_icon_size(helper->window);
+	if(panel_window_get_type(helper->window)
+			== PANEL_WINDOW_TYPE_NOTIFICATION)
 	{
 #if GTK_CHECK_VERSION(3, 0, 0)
 		vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
@@ -128,7 +131,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		vbox = gtk_vbox_new(FALSE, 4);
 #endif
 		volume->widget = gtk_image_new_from_icon_name(
-				"stock_volume-med", helper->icon_size);
+				"stock_volume-med", iconsize);
 		gtk_box_pack_start(GTK_BOX(vbox), volume->widget, TRUE, TRUE,
 				0);
 		volume->progress = gtk_progress_bar_new();
@@ -140,8 +143,7 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	{
 		volume->button = gtk_volume_button_new();
 		/* FIXME doesn't like registered sizes */
-		g_object_set(volume->button, "size",
-				helper->icon_size, NULL);
+		g_object_set(volume->button, "size", iconsize, NULL);
 		g_signal_connect_swapped(volume->button, "value-changed",
 				G_CALLBACK(_on_value_changed), volume);
 		volume->widget = volume->button;

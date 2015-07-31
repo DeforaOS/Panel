@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -84,21 +84,23 @@ static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
 	Bluetooth * bluetooth;
+	GtkIconSize iconsize;
 
-	if((bluetooth = malloc(sizeof(*bluetooth))) == NULL)
+	if((bluetooth = object_new(sizeof(*bluetooth))) == NULL)
 		return NULL;
 	bluetooth->helper = helper;
 	bluetooth->timeout = 0;
 #if defined(__NetBSD__) || defined(__linux__)
 	bluetooth->fd = -1;
 #endif
+	iconsize = panel_window_get_icon_size(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	*widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 #else
 	*widget = gtk_hbox_new(FALSE, 0);
 #endif
 	bluetooth->image = gtk_image_new_from_icon_name(
-			"panel-applet-bluetooth", helper->icon_size);
+			"panel-applet-bluetooth", iconsize);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(bluetooth->image,
 			_("Bluetooth is enabled"));
@@ -120,7 +122,7 @@ static void _bluetooth_destroy(Bluetooth * bluetooth)
 		close(bluetooth->fd);
 #endif
 	gtk_widget_destroy(bluetooth->image);
-	free(bluetooth);
+	object_delete(bluetooth);
 }
 
 

@@ -16,7 +16,7 @@
 
 
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* Template */

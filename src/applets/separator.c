@@ -16,7 +16,7 @@
 
 
 #include <stdlib.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* Separator */
@@ -57,14 +57,16 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
 	Separator * separator;
+	GtkOrientation orientation;
 
 	if((separator = malloc(sizeof(*separator))) == NULL)
 		return NULL;
 	separator->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	separator->widget = gtk_separator_new(helper->orientation);
+	separator->widget = gtk_separator_new(orientation);
 #else
-	separator->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+	separator->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_vseparator_new() : gtk_hseparator_new();
 #endif
 	gtk_widget_show(separator->widget);

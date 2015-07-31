@@ -20,7 +20,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -107,6 +107,7 @@ PanelAppletDefinition applet =
 static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Pager * pager;
+	GtkOrientation orientation;
 
 	if((pager = malloc(sizeof(*pager))) == NULL)
 	{
@@ -114,11 +115,12 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	pager->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	pager->box = gtk_box_new(helper->orientation, 0);
+	pager->box = gtk_box_new(orientation, 0);
 	gtk_box_set_homogeneous(GTK_BOX(pager->box), TRUE);
 #else
-	pager->box = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+	pager->box = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
 	pager->source = g_signal_connect(pager->box, "screen-changed",

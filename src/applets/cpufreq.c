@@ -27,7 +27,7 @@
 #endif
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -120,7 +120,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	cpufreq->hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	image = gtk_image_new_from_icon_name("gnome-monitor",
-			helper->icon_size);
+			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
 	cpufreq->min = 0;
 	cpufreq->max = 0;

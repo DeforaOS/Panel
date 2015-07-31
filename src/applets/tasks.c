@@ -22,7 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 #define N_(string) (string)
 
@@ -61,7 +61,7 @@ struct _PanelApplet
 
 	GtkWidget * widget;
 	GtkWidget * hbox;
-	GtkIconSize icon_size;
+	GtkIconSize iconsize;
 	int icon_width;
 	int icon_height;
 	gulong source;
@@ -189,7 +189,7 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 #if 0 /* FIXME doesn't seem to work properly */
 	gtk_label_set_ellipsize(GTK_LABEL(task->label), PANGO_ELLIPSIZE_END);
 #endif
-	if(task->tasks->helper->icon_size == GTK_ICON_SIZE_LARGE_TOOLBAR)
+	if(task->tasks->iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
 		gtk_label_set_line_wrap(GTK_LABEL(task->label), TRUE);
 #if GTK_CHECK_VERSION(2, 10, 0)
 	gtk_label_set_line_wrap_mode(GTK_LABEL(task->label),
@@ -227,7 +227,7 @@ static void _task_set(Task * task, char const * name, GdkPixbuf * pixbuf)
 	else
 		gtk_image_set_from_icon_name(GTK_IMAGE(task->image),
 				"application-x-executable",
-				task->tasks->icon_size);
+				task->tasks->iconsize);
 }
 
 
@@ -284,10 +284,10 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	tasks->source = g_signal_connect(tasks->hbox, "screen-changed",
 			G_CALLBACK(_on_screen_changed), tasks);
-	tasks->icon_size = helper->icon_size;
+	tasks->iconsize = panel_window_get_icon_size(helper->window);
 	tasks->icon_width = 48;
 	tasks->icon_height = 48;
-	gtk_icon_size_lookup(tasks->icon_size, &tasks->icon_width,
+	gtk_icon_size_lookup(tasks->iconsize, &tasks->icon_width,
 			&tasks->icon_height);
 	tasks->icon_width -= 4;
 	tasks->icon_height -= 4;

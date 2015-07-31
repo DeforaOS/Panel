@@ -22,7 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -83,9 +83,10 @@ PanelAppletDefinition applet =
 static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Close * close;
+	GtkIconSize iconsize;
 	GtkWidget * image;
 
-	if((close = malloc(sizeof(*close))) == NULL)
+	if((close = object_new(sizeof(*close))) == NULL)
 		return NULL;
 	close->helper = helper;
 	close->widget = gtk_button_new();
@@ -93,7 +94,8 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(close->widget, _("Close"));
 #endif
-	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, helper->icon_size);
+	iconsize = panel_window_get_icon_size(helper->window);
+	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, iconsize);
 	gtk_button_set_image(GTK_BUTTON(close->widget), image);
 	g_signal_connect_swapped(close->widget, "clicked", G_CALLBACK(
 				_on_close), close);
@@ -119,7 +121,7 @@ static void _close_destroy(Close * close)
 		g_signal_handler_disconnect(close->widget, close->source);
 	close->source = 0;
 	gtk_widget_destroy(close->widget);
-	free(close);
+	object_delete(close);
 }
 
 

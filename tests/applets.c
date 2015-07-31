@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* private */

@@ -18,7 +18,7 @@
 #include <libintl.h>
 #include <System.h>
 #include <Desktop.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 /* constants */
@@ -96,6 +96,8 @@ static void _init_add(MPD * mpd, char const * stock, GtkIconSize iconsize,
 static MPD * _mpd_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	MPD * mpd;
+	GtkOrientation orientation;
+	GtkIconSize iconsize;
 
 	if((mpd = object_new(sizeof(*mpd))) == NULL)
 	{
@@ -103,25 +105,27 @@ static MPD * _mpd_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	mpd->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	mpd->widget = gtk_box_new(helper->orientation, 0);
+	mpd->widget = gtk_box_new(orientation, 0);
 #else
-	mpd->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+	mpd->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
 #endif
-	_init_add(mpd, GTK_STOCK_MEDIA_PREVIOUS, helper->icon_size,
-			_("Previous"), G_CALLBACK(_mpd_on_previous));
-	_init_add(mpd, GTK_STOCK_MEDIA_REWIND, helper->icon_size, _("Rewind"),
+	iconsize = panel_window_get_icon_size(helper->window);
+	_init_add(mpd, GTK_STOCK_MEDIA_PREVIOUS, iconsize, _("Previous"),
+			G_CALLBACK(_mpd_on_previous));
+	_init_add(mpd, GTK_STOCK_MEDIA_REWIND, iconsize, _("Rewind"),
 			G_CALLBACK(_mpd_on_rewind));
-	_init_add(mpd, GTK_STOCK_MEDIA_PLAY, helper->icon_size, _("Play"),
+	_init_add(mpd, GTK_STOCK_MEDIA_PLAY, iconsize, _("Play"),
 			G_CALLBACK(_mpd_on_play));
-	_init_add(mpd, GTK_STOCK_MEDIA_PAUSE, helper->icon_size, _("Pause"),
+	_init_add(mpd, GTK_STOCK_MEDIA_PAUSE, iconsize, _("Pause"),
 			G_CALLBACK(_mpd_on_pause));
-	_init_add(mpd, GTK_STOCK_MEDIA_STOP, helper->icon_size, _("Stop"),
+	_init_add(mpd, GTK_STOCK_MEDIA_STOP, iconsize, _("Stop"),
 			G_CALLBACK(_mpd_on_stop));
-	_init_add(mpd, GTK_STOCK_MEDIA_FORWARD, helper->icon_size, _("Forward"),
+	_init_add(mpd, GTK_STOCK_MEDIA_FORWARD, iconsize, _("Forward"),
 			G_CALLBACK(_mpd_on_forward));
-	_init_add(mpd, GTK_STOCK_MEDIA_NEXT, helper->icon_size, _("Next"),
+	_init_add(mpd, GTK_STOCK_MEDIA_NEXT, iconsize, _("Next"),
 			G_CALLBACK(_mpd_on_next));
 	gtk_widget_show_all(mpd->widget);
 	*widget = mpd->widget;

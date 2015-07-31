@@ -26,7 +26,7 @@
 # include <uvm/uvm_extern.h>
 #endif
 #include <libintl.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 

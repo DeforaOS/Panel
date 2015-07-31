@@ -67,7 +67,7 @@ static char const * _authors[] =
 /* prototypes */
 /* Panel */
 static int _panel_init(Panel * panel, PanelWindowPosition position,
-		PanelAppletType type, GtkIconSize iconsize);
+		PanelWindowType type, GtkIconSize iconsize);
 static void _panel_destroy(Panel * panel);
 
 /* accessors */
@@ -89,7 +89,7 @@ static int _error(char const * message, int ret);
 /* helper */
 /* essential */
 static void _helper_init(PanelAppletHelper * helper, Panel * panel,
-		PanelAppletType type, GtkIconSize iconsize);
+		PanelWindowType type, GtkIconSize iconsize);
 
 
 /* public */
@@ -125,7 +125,7 @@ void panel_show_preferences(Panel * panel, gboolean show)
 /* Panel */
 /* panel_init */
 static int _panel_init(Panel * panel, PanelWindowPosition position,
-		PanelAppletType type, GtkIconSize iconsize)
+		PanelWindowType type, GtkIconSize iconsize)
 {
 	char * filename;
 	GdkScreen * screen;
@@ -146,7 +146,8 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	panel->root_width = rect.width;
 	/* panel window */
 	_helper_init(&panel->helper, panel, type, iconsize);
-	panel->top = panel_window_new(position, &panel->helper, &rect);
+	panel->top = panel_window_new(&panel->helper, PANEL_WINDOW_TYPE_NORMAL,
+			position, iconsize, &rect);
 	panel->timeout = 0;
 	panel->source = 0;
 	panel->ab_window = NULL;
@@ -267,15 +268,12 @@ static int _error(char const * message, int ret)
 /* essential */
 /* helper_init */
 static void _helper_init(PanelAppletHelper * helper, Panel * panel,
-		PanelAppletType type, GtkIconSize iconsize)
+		PanelWindowType type, GtkIconSize iconsize)
 {
 	char const * p;
 
 	memset(helper, 0, sizeof(*helper));
 	helper->panel = panel;
-	helper->type = type;
-	helper->icon_size = iconsize;
-	helper->orientation = GTK_ORIENTATION_HORIZONTAL;
 	helper->config_get = _panel_helper_config_get;
 	helper->config_set = _panel_helper_config_set;
 	helper->error = _panel_helper_error;

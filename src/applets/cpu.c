@@ -28,7 +28,7 @@
 #endif
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 

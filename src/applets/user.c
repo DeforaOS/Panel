@@ -20,7 +20,7 @@
 #include <pwd.h>
 #include <errno.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* User */

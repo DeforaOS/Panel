@@ -80,7 +80,7 @@ static int _notify_embed(GtkIconSize iconsize, int timeout, char * applets[])
 	uint32_t xid;
 
 	_panel_init(&panel, PANEL_WINDOW_POSITION_EMBEDDED,
-			PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
+			PANEL_WINDOW_TYPE_NOTIFICATION, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
 			error_print(PROGNAME);
@@ -100,7 +100,7 @@ static int _notify_panel(GtkIconSize iconsize, int timeout, char * applets[])
 	size_t i;
 
 	_panel_init(&panel, PANEL_WINDOW_POSITION_CENTER,
-			PANEL_APPLET_TYPE_NOTIFICATION, iconsize);
+			PANEL_WINDOW_TYPE_NOTIFICATION, iconsize);
 	_panel_set_title(&panel, _("Notification"));
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)

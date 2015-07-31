@@ -21,7 +21,7 @@
 # include <gtk/gtkx.h>
 #endif
 #include <gdk/gdkx.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 
 
 /* Phone */

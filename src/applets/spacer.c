@@ -15,8 +15,8 @@
 
 
 
-#include "Panel.h"
 #include <stdlib.h>
+#include "Panel/applet.h"
 
 
 /* Spacer */

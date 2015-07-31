@@ -33,7 +33,7 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 /* constants */
@@ -285,7 +285,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
-	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
+	if(panel_window_get_type(helper->window)
+			== PANEL_WINDOW_TYPE_NOTIFICATION)
 		wpa->widget = hbox;
 	else
 	{
@@ -384,6 +385,7 @@ static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
 static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		char const * network)
 {
+	GtkIconSize iconsize;
 	char const * stock = connected
 		? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT;
 	char const * icon;
@@ -395,7 +397,8 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	fprintf(stderr, "DEBUG: %s(%u, %u, \"%s\")\n", __func__, connected,
 			associated, network);
 #endif
-	gtk_icon_size_lookup(wpa->helper->icon_size, &size, &size);
+	iconsize = panel_window_get_icon_size(wpa->helper->window);
+	gtk_icon_size_lookup(iconsize, &size, &size);
 	if(connected == FALSE && network == NULL)
 	{
 		/* an error occurred */
@@ -448,7 +451,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	}
 	else
 		gtk_image_set_from_icon_name(GTK_IMAGE(wpa->image), icon,
-				wpa->helper->icon_size);
+				iconsize);
 #else
 	if(pixbuf != NULL || (pixbuf = gtk_icon_theme_load_icon(wpa->icontheme,
 					icon, size, 0, NULL)) != NULL)
@@ -460,7 +463,7 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		gtk_image_set_from_stock(GTK_IMAGE(wpa->image),
 				(connected && associated)
 				? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT,
-				wpa->helper->icon_size);
+				iconsize);
 #endif
 #ifndef EMBEDDED
 	gtk_label_set_text(GTK_LABEL(wpa->label), network);

@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -72,7 +72,8 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	logout->widget = gtk_button_new();
-	image = gtk_image_new_from_icon_name("gnome-logout", helper->icon_size);
+	image = gtk_image_new_from_icon_name("gnome-logout",
+			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(logout->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(logout->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

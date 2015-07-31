@@ -19,6 +19,8 @@
 # define PANEL_WINDOW_H
 
 # include <stdint.h>
+# include "../include/Panel/applet.h"
+# include "../include/Panel/window.h"
 # include "panel.h"
 
 
@@ -37,12 +39,11 @@ typedef enum _PanelWindowPosition
 } PanelWindowPosition;
 # define PANEL_WINDOW_POSITION_DEFAULT PANEL_WINDOW_POSITION_BOTTOM
 
-typedef struct _PanelWindow PanelWindow;
-
 
 /* functions */
-PanelWindow * panel_window_new(PanelWindowPosition position,
-		PanelAppletHelper * helper, GdkRectangle * root);
+PanelWindow * panel_window_new(PanelAppletHelper * helper,
+		PanelWindowType type, PanelWindowPosition position,
+		GtkIconSize iconsize, GdkRectangle * root);
 void panel_window_delete(PanelWindow * panel);
 
 /* accessors */
@@ -61,8 +62,7 @@ void panel_window_set_title(PanelWindow * panel, char const * title);
 int panel_window_append(PanelWindow * panel, char const * applet);
 void panel_window_remove_all(PanelWindow * panel);
 
-void panel_window_reset(PanelWindow * panel, PanelWindowPosition position,
-		GdkRectangle * root);
+void panel_window_reset(PanelWindow * panel, GdkRectangle * root);
 void panel_window_show(PanelWindow * panel, gboolean show);
 
 #endif /* !PANEL_WINDOW_H */

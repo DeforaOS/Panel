@@ -19,22 +19,11 @@
 # define PANEL_PANEL_H
 
 # include <gtk/gtk.h>
-# include "../include/Panel.h"
+# include "../include/Panel/panel.h"
 
 
 /* Panel */
 /* types */
-typedef enum _PanelPosition
-{
-	PANEL_POSITION_BOTTOM = 0,
-	PANEL_POSITION_TOP,
-	PANEL_POSITION_LEFT,
-	PANEL_POSITION_RIGHT
-} PanelPosition;
-# define PANEL_POSITION_LAST		PANEL_POSITION_RIGHT
-# define PANEL_POSITION_COUNT		(PANEL_POSITION_LAST + 1)
-# define PANEL_POSITION_DEFAULT		PANEL_POSITION_BOTTOM
-
 typedef struct _PanelPrefs
 {
 	char const * iconsize;

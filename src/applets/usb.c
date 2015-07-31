@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -90,7 +90,7 @@ static USB * _usb_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tooltip = _("USB networking device connected");
 #endif
 	usb->image = gtk_image_new_from_icon_name("panel-applet-usb",
-			helper->icon_size);
+			panel_window_get_icon_size(helper->window));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	if(tooltip != NULL)
 		gtk_widget_set_tooltip_text(usb->image, tooltip);

@@ -111,9 +111,6 @@ static int _wifibrowser(char const * configfile, char const * interface)
 	/* FIXME load the configuration */
 	memset(&helper, 0, sizeof(helper));
 	helper.panel = &panel;
-	helper.type = PANEL_APPLET_TYPE_NORMAL;
-	helper.icon_size = GTK_ICON_SIZE_MENU;
-	helper.orientation = GTK_ORIENTATION_HORIZONTAL;
 	helper.error = _error;
 	helper.config_get = _helper_config_get;
 	if((wpa = _wpa_init(&helper, &widget)) == NULL)

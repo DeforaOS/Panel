@@ -34,7 +34,7 @@
 #endif
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -111,11 +111,12 @@ PanelAppletDefinition applet =
 static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Battery * battery;
+	GtkIconSize iconsize;
 	GtkWidget * vbox;
 	GtkWidget * hbox;
 	PangoFontDescription * bold;
 
-	if((battery = malloc(sizeof(*battery))) == NULL)
+	if((battery = object_new(sizeof(*battery))) == NULL)
 		return NULL;
 	battery->helper = helper;
 	battery->level = -1;
@@ -124,19 +125,20 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if defined(__NetBSD__) || defined(__linux__)
 	battery->fd = -1;
 #endif
+	iconsize = panel_window_get_icon_size(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	battery->box = hbox;
-	battery->image = gtk_image_new_from_icon_name("battery",
-			helper->icon_size);
+	battery->image = gtk_image_new_from_icon_name("battery", iconsize);
 	gtk_box_pack_start(GTK_BOX(hbox), battery->image, TRUE, TRUE, 0);
 	battery->label = NULL;
 	battery->progress = NULL;
 	battery->pr_level = NULL;
-	if(helper->type == PANEL_APPLET_TYPE_NOTIFICATION)
+	if(panel_window_get_type(helper->window)
+			== PANEL_WINDOW_TYPE_NOTIFICATION)
 	{
 		bold = pango_font_description_new();
 		pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
@@ -181,7 +183,7 @@ static void _battery_destroy(Battery * battery)
 		close(battery->fd);
 #endif
 	gtk_widget_destroy(battery->box);
-	free(battery);
+	object_delete(battery);
 }
 
 
@@ -317,7 +319,7 @@ static void _set_image(Battery * battery, BatteryLevel level, gboolean charging)
 	battery->charging = charging;
 	gtk_image_set_from_icon_name(GTK_IMAGE(battery->image),
 			icons[level][charging ? 1 : 0],
-			battery->helper->icon_size);
+			panel_window_get_icon_size(battery->helper->window));
 }
 
 

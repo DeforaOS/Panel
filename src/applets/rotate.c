@@ -17,7 +17,7 @@
 
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -66,7 +66,8 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	rotate->helper = helper;
 	rotate->widget = gtk_button_new();
-	image = gtk_image_new_from_stock(applet.icon, helper->icon_size);
+	image = gtk_image_new_from_stock(applet.icon,
+			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(rotate->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(rotate->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

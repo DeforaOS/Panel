@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -84,7 +84,7 @@ static GPS * _gps_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	/* XXX find a better image */
 	gps->image = gtk_image_new_from_icon_name("network-wireless",
-			helper->icon_size);
+			panel_window_get_icon_size(helper->window));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(gps->image, _("GPS is enabled"));
 #endif

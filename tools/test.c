@@ -52,14 +52,14 @@
 
 /* private */
 /* prototypes */
-static int _test(PanelAppletType type, GtkIconSize iconsize, char * applets[]);
+static int _test(PanelWindowType type, GtkIconSize iconsize, char * applets[]);
 
 static int _usage(void);
 
 
 /* functions */
 /* test */
-static int _test(PanelAppletType type, GtkIconSize iconsize, char * applets[])
+static int _test(PanelWindowType type, GtkIconSize iconsize, char * applets[])
 {
 	Panel panel;
 	size_t i;
@@ -91,7 +91,7 @@ static int _usage(void)
 /* main */
 int main(int argc, char * argv[])
 {
-	PanelAppletType type = PANEL_APPLET_TYPE_NORMAL;
+	PanelWindowType type = PANEL_WINDOW_TYPE_NORMAL;
 	GtkIconSize iconsize = GTK_ICON_SIZE_LARGE_TOOLBAR;
 	GtkIconSize huge;
 	int o;
@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
 			case 'l':
 				return _applet_list();
 			case 'n':
-				type = PANEL_APPLET_TYPE_NOTIFICATION;
+				type = PANEL_WINDOW_TYPE_NOTIFICATION;
 				break;
 			case 'S':
 				iconsize = GTK_ICON_SIZE_SMALL_TOOLBAR;

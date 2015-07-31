@@ -28,7 +28,7 @@
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -118,7 +118,8 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 	gtk_widget_set_sensitive(embed->button, FALSE);
 	g_signal_connect_swapped(embed->button, "toggled", G_CALLBACK(
 				_embed_on_toggled), embed);
-	image = gtk_image_new_from_icon_name(applet.icon, helper->icon_size);
+	image = gtk_image_new_from_icon_name(applet.icon,
+			panel_window_get_icon_size(helper->window));
 	gtk_container_add(GTK_CONTAINER(embed->button), image);
 	gtk_widget_show(image);
 #ifndef EMBEDDED

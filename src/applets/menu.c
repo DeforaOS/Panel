@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <libintl.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #include "../../config.h"
 #define _(string) gettext(string)
 
@@ -152,7 +152,8 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
-	image = gtk_image_new_from_icon_name("start-here", helper->icon_size);
+	image = gtk_image_new_from_icon_name("start-here",
+			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);
 	/* add some text if configured so */
 	if((p = helper->config_get(helper->panel, "menu", "text")) != NULL

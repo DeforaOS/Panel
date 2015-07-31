@@ -29,7 +29,7 @@
 #include <libintl.h>
 #include <net/if.h>
 #include <System.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -99,6 +99,7 @@ PanelAppletDefinition applet =
 static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Network * network;
+	GtkOrientation orientation;
 
 	if((network = object_new(sizeof(*network))) == NULL)
 	{
@@ -106,10 +107,11 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	network->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	network->widget = gtk_box_new(helper->orientation, 0);
+	network->widget = gtk_box_new(orientation, 0);
 #else
-	network->widget = (helper->orientation == GTK_ORIENTATION_HORIZONTAL)
+	network->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
 	gtk_widget_show(network->widget);
@@ -304,8 +306,9 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		}
 #endif
 	}
-	_networkinterface_update(ni, icon, network->helper->icon_size, flags,
-			TRUE, (tooltip[0] != '\0') ? tooltip : NULL);
+	_networkinterface_update(ni, icon,
+			panel_window_get_icon_size(network->helper->window),
+			flags, TRUE, (tooltip[0] != '\0') ? tooltip : NULL);
 }
 
 static void _refresh_purge(Network * network)

@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <libintl.h>
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -74,7 +74,7 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	lock->pr_command = NULL;
 	lock->widget = gtk_button_new();
 	image = gtk_image_new_from_icon_name("gnome-lockscreen",
-			helper->icon_size);
+			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(lock->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(lock->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

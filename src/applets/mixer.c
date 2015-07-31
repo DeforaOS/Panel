@@ -33,7 +33,7 @@
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
-#include "Panel.h"
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -130,7 +130,8 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 	gtk_button_set_relief(GTK_BUTTON(mixer->widget), GTK_RELIEF_NONE);
 	g_signal_connect(mixer->widget, "toggled", G_CALLBACK(
 				_mixer_on_toggled), mixer);
-	image = gtk_image_new_from_icon_name(applet.icon, helper->icon_size);
+	image = gtk_image_new_from_icon_name(applet.icon,
+			panel_window_get_icon_size(helper->window));
 	gtk_container_add(GTK_CONTAINER(mixer->widget), image);
 	gtk_widget_show_all(mixer->widget);
 	mixer->source = g_idle_add(_init_idle, mixer);

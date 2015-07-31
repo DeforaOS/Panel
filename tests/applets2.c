@@ -20,7 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
-#include "Panel.h"
+#include "../src/window.h"
+#include "Panel/applet.h"
 
 
 /* private */
@@ -53,6 +54,7 @@ static gboolean _applets2(gpointer data)
 	size_t len;
 	char * s;
 	void * p;
+	GdkRectangle root;
 	PanelAppletHelper helper;
 	PanelAppletDefinition * pad;
 	PanelApplet * pa;
@@ -68,8 +70,18 @@ static gboolean _applets2(gpointer data)
 	}
 	*ret = 0;
 	memset(&helper, 0, sizeof(helper));
-	helper.type = PANEL_APPLET_TYPE_NORMAL;
-	helper.icon_size = GTK_ICON_SIZE_LARGE_TOOLBAR;
+	root.x = 0;
+	root.y = 0;
+	root.height = 768;
+	root.width = 1024;
+	if((helper.window = panel_window_new(&helper, PANEL_WINDOW_TYPE_NORMAL,
+					PANEL_WINDOW_POSITION_TOP,
+					GTK_ICON_SIZE_SMALL_TOOLBAR, &root))
+			== NULL)
+	{
+		closedir(dir);
+		return FALSE;
+	}
 	helper.config_get = _applets2_helper_config_get;
 	helper.error = _applets2_helper_error;
 	while((de = readdir(dir)) != NULL)

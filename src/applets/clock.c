@@ -23,7 +23,8 @@
 #include <time.h>
 #include <errno.h>
 #include <libintl.h>
-#include "Panel.h"
+#include <System.h>
+#include "Panel/applet.h"
 #define _(string) gettext(string)
 
 
@@ -69,12 +70,14 @@ PanelAppletDefinition applet =
 static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Clock * clock;
+	GtkIconSize iconsize;
 #ifdef EMBEDDED
 	PangoFontDescription * desc;
 #endif
 
-	if((clock = malloc(sizeof(*clock))) == NULL)
+	if((clock = object_new(sizeof(*clock))) == NULL)
 		return NULL;
+	iconsize = panel_window_get_icon_size(helper->window);
 	clock->helper = helper;
 	clock->label = gtk_label_new(" \n ");
 	if((clock->format = helper->config_get(helper->panel, "clock",
@@ -88,7 +91,7 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	pango_font_description_free(desc);
 #else
 	{
-		if(helper->icon_size == GTK_ICON_SIZE_LARGE_TOOLBAR)
+		if(iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
 			clock->format = _("%H:%M:%S\n%d/%m/%Y");
 		else
 			clock->format = _("%H:%M");
@@ -111,7 +114,7 @@ static void _clock_destroy(Clock * clock)
 {
 	g_source_remove(clock->timeout);
 	gtk_widget_destroy(clock->widget);
-	free(clock);
+	object_delete(clock);
 }
 
 
@@ -133,7 +136,8 @@ static gboolean _on_timeout(gpointer data)
 	strftime(buf, sizeof(buf), clock->format, &tm);
 	gtk_label_set_text(GTK_LABEL(clock->label), buf);
 #ifndef EMBEDDED
-	if(helper->icon_size != GTK_ICON_SIZE_LARGE_TOOLBAR)
+	if(panel_window_get_icon_size(helper->window)
+			!= GTK_ICON_SIZE_LARGE_TOOLBAR)
 	{
 		strftime(buf, sizeof(buf), _("%H:%M:%S\n%d/%m/%Y"), &tm);
 		gtk_widget_set_tooltip_text(clock->label, buf);

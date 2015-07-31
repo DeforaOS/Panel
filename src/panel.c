@@ -137,11 +137,9 @@ static char * _config_get_filename(void);
 /* public */
 /* panel_new */
 static int _new_config(Panel * panel);
-static void _new_helper(Panel * panel, PanelPosition position,
-		GtkIconSize iconsize);
+static void _new_helper(Panel * panel, PanelPosition position);
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 		PanelPrefs const * user);
-static GtkIconSize _new_size(Panel * panel, PanelPosition position);
 /* callbacks */
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3);
@@ -152,7 +150,6 @@ static GdkFilterReturn _event_configure_notify(Panel * panel);
 Panel * panel_new(PanelPrefs const * prefs)
 {
 	Panel * panel;
-	GtkIconSize iconsize;
 	size_t i;
 
 	if((panel = object_new(sizeof(*panel))) == NULL)
@@ -160,14 +157,11 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->screen = gdk_screen_get_default();
 	if(_new_config(panel) == 0)
 		_new_prefs(panel->config, panel->screen, &panel->prefs, prefs);
-	iconsize = GTK_ICON_SIZE_INVALID;
-	if(panel->prefs.iconsize != NULL)
-		iconsize = gtk_icon_size_from_name(panel->prefs.iconsize);
 	/* helpers */
 	for(i = 0; i < PANEL_POSITION_COUNT; i++)
 	{
-		_new_helper(panel, i, iconsize);
 		panel->windows[i] = NULL;
+		_new_helper(panel, i);
 	}
 	panel->pr_window = NULL;
 	panel->ab_window = NULL;
@@ -216,15 +210,9 @@ static int _new_config(Panel * panel)
 	return 0;
 }
 
-static void _new_helper(Panel * panel, PanelPosition position,
-		GtkIconSize iconsize)
+static void _new_helper(Panel * panel, PanelPosition position)
 {
 	PanelAppletHelper * helper = &panel->helpers[position];
-	const GtkOrientation orientations[PANEL_POSITION_COUNT] =
-	{
-		GTK_ORIENTATION_HORIZONTAL, GTK_ORIENTATION_HORIZONTAL,
-		GTK_ORIENTATION_VERTICAL, GTK_ORIENTATION_VERTICAL
-	};
 	const PanelPositionMenuHelper positions[PANEL_POSITION_COUNT] =
 	{
 		_panel_helper_position_menu_bottom,
@@ -235,12 +223,7 @@ static void _new_helper(Panel * panel, PanelPosition position,
 	String const * p;
 
 	helper->panel = panel;
-	helper->type = PANEL_APPLET_TYPE_NORMAL;
-	if(iconsize == GTK_ICON_SIZE_INVALID)
-		helper->icon_size = _new_size(panel, position);
-	else
-		helper->icon_size = iconsize;
-	helper->orientation = orientations[position];
+	helper->window = panel->windows[position];
 	helper->config_get = _panel_helper_config_get;
 	helper->config_set = _panel_helper_config_set;
 	helper->error = _panel_helper_error;
@@ -299,30 +282,6 @@ static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 	if(prefs->monitor == -1)
 		prefs->monitor = gdk_screen_get_primary_monitor(screen);
 #endif
-}
-
-static GtkIconSize _new_size(Panel * panel, PanelPosition position)
-{
-	GtkIconSize ret = GTK_ICON_SIZE_INVALID;
-	String const * section;
-	String * s;
-	String const * p = NULL;
-
-	if((section = _panel_get_section(panel, position)) != NULL)
-	{
-		if((s = string_new_append("panel::", section, NULL)) == NULL)
-			panel_error(NULL, NULL, 1);
-		else
-			p = panel_get_config(panel, s, "size");
-		string_delete(s);
-	}
-	if(p == NULL)
-		p = panel_get_config(panel, NULL, "size");
-	if(p != NULL)
-		ret = gtk_icon_size_from_name(p);
-	if(ret == GTK_ICON_SIZE_INVALID)
-		ret = GTK_ICON_SIZE_SMALL_TOOLBAR;
-	return ret;
 }
 
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
@@ -393,7 +352,7 @@ static GdkFilterReturn _event_configure_notify(Panel * panel)
 	_panel_reset(panel, &rect);
 	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
 		if(panel->windows[i] != NULL)
-			panel_window_reset(panel->windows[i], i, &rect);
+			panel_window_reset(panel->windows[i], &rect);
 	return GDK_FILTER_CONTINUE;
 }
 
@@ -510,10 +469,11 @@ int panel_load(Panel * panel, PanelPosition position, char const * applet)
 
 
 /* panel_reset */
+static GtkIconSize _reset_iconsize(Panel * panel, String const * section);
 static void _reset_window_delete(Panel * panel, PanelPosition position);
-static int _reset_window_new(Panel * panel, PanelPosition position,
-		PanelAppletHelper * helper, GdkRectangle * rect,
-		gboolean focus, gboolean above);
+static int _reset_window_new(Panel * panel, PanelAppletHelper * helper,
+		PanelPosition position, GtkIconSize iconsize,
+		GdkRectangle * rect, gboolean focus, gboolean above);
 /* callbacks */
 static gboolean _reset_on_idle(gpointer data);
 static void _reset_on_idle_load(Panel * panel, PanelPosition position);
@@ -522,6 +482,7 @@ int panel_reset(Panel * panel)
 {
 	GdkRectangle rect;
 	PanelWindowPosition position;
+	GtkIconSize iconsize;
 	String const * section;
 	gboolean focus;
 	gboolean above;
@@ -541,10 +502,13 @@ int panel_reset(Panel * panel)
 				|| (s = string_new_append("panel::", section,
 						NULL)) == NULL)
 			return -1;
+		/* enabled */
 		enabled = ((p = panel_get_config(panel, s, "enabled"))
 				== NULL || strcmp(p, "1") == 0) ? TRUE : FALSE;
-		if((applets = panel_get_config(panel, s, "applets"))
-				!= NULL && string_length(applets) == 0)
+		iconsize = _reset_iconsize(panel, s);
+		/* applets */
+		if((applets = panel_get_config(panel, s, "applets")) != NULL
+				&& string_length(applets) == 0)
 			applets = NULL;
 		string_delete(s);
 		if(enabled == FALSE || applets == NULL)
@@ -552,8 +516,8 @@ int panel_reset(Panel * panel)
 			_reset_window_delete(panel, position);
 			continue;
 		}
-		if(_reset_window_new(panel, position, &panel->helpers[position],
-					&rect, focus, above) != 0)
+		if(_reset_window_new(panel, &panel->helpers[position], position,
+					iconsize, &rect, focus, above) != 0)
 			return -panel_error(NULL, NULL, 1);
 	}
 	/* create at least PANEL_POSITION_DEFAULT */
@@ -563,8 +527,9 @@ int panel_reset(Panel * panel)
 	if(position == PANEL_POSITION_COUNT)
 	{
 		position = PANEL_POSITION_DEFAULT;
-		if(_reset_window_new(panel, position, &panel->helpers[position],
-					&rect, focus, above) != 0)
+		iconsize = _reset_iconsize(panel, NULL);
+		if(_reset_window_new(panel, &panel->helpers[position], position,
+					iconsize, &rect, focus, above) != 0)
 			return -1;
 	}
 	/* load applets when idle */
@@ -574,14 +539,31 @@ int panel_reset(Panel * panel)
 	return 0;
 }
 
-static int _reset_window_new(Panel * panel, PanelPosition position,
-		PanelAppletHelper * helper, GdkRectangle * rect,
-		gboolean focus, gboolean above)
+static GtkIconSize _reset_iconsize(Panel * panel, String const * section)
+{
+	GtkIconSize ret = GTK_ICON_SIZE_INVALID;
+	String const * p = NULL;
+
+	p = panel_get_config(panel, section, "size");
+	if(p == NULL && section != NULL)
+		p = panel_get_config(panel, NULL, "size");
+	if(p != NULL)
+		ret = gtk_icon_size_from_name(p);
+	if(ret == GTK_ICON_SIZE_INVALID)
+		ret = GTK_ICON_SIZE_SMALL_TOOLBAR;
+	return ret;
+}
+
+static int _reset_window_new(Panel * panel, PanelAppletHelper * helper,
+		PanelPosition position, GtkIconSize iconsize,
+		GdkRectangle * rect, gboolean focus, gboolean above)
 {
 	if(panel->windows[position] == NULL
-			&& (panel->windows[position] = panel_window_new(
-					position, helper, rect)) == NULL)
+			&& (panel->windows[position] = panel_window_new(helper,
+					PANEL_WINDOW_TYPE_NORMAL, position,
+					iconsize, rect)) == NULL)
 		return -1;
+	panel->helpers[position].window = panel->windows[position];
 	panel_window_set_accept_focus(panel->windows[position], focus);
 	panel_window_set_keep_above(panel->windows[position], above);
 	return 0;
@@ -592,6 +574,7 @@ static void _reset_window_delete(Panel * panel, PanelPosition position)
 	if(panel->windows[position] != NULL)
 		panel_window_delete(panel->windows[position]);
 	panel->windows[position] = NULL;
+	panel->helpers[position].window = NULL;
 }
 
 static gboolean _reset_on_idle(gpointer data)
