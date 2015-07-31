@@ -23,6 +23,8 @@
 #include "../src/window.h"
 #include "Panel/applet.h"
 
+#define PROGNAME	"applets2"
+
 
 /* private */
 /* prototypes */
@@ -130,14 +132,13 @@ static gboolean _applets2(gpointer data)
 static char const * _applets2_helper_config_get(Panel * panel,
 		char const * section, char const * variable)
 {
-	printf("%s: config_get(\"%s\", \"%s\")\n", "applets2", section,
-			variable);
+	printf("%s: config_get(\"%s\", \"%s\")\n", PROGNAME, section, variable);
 	return NULL;
 }
 
 static int _applets2_helper_error(Panel * panel, char const * message, int ret)
 {
-	fprintf(stderr, "%s: %s\n", "applets2", message);
+	fprintf(stderr, "%s: %s\n", PROGNAME, message);
 	return ret;
 }
 
@@ -145,7 +146,7 @@ static int _applets2_helper_error(Panel * panel, char const * message, int ret)
 /* dlerror */
 static int _dlerror(char const * message, int ret)
 {
-	fputs("applets2: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	fprintf(stderr, "%s: %s\n", message, dlerror());
 	return ret;
 }
@@ -154,7 +155,7 @@ static int _dlerror(char const * message, int ret)
 /* error */
 static int _error(char const * message, char const * error, int ret)
 {
-	fputs("applets2: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	fprintf(stderr, "%s: %s\n", message, error);
 	return ret;
 }
@@ -163,7 +164,7 @@ static int _error(char const * message, char const * error, int ret)
 /* perror */
 static int _perror(char const * message, int ret)
 {
-	fputs("applets2: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	perror(message);
 	return ret;
 }
