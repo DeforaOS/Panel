@@ -1323,13 +1323,10 @@ static void _preferences_on_panel_down(gpointer data)
 static void _preferences_on_panel_remove(gpointer data)
 {
 	Panel * panel = data;
-	PanelPosition position;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	GtkTreeSelection * treesel;
 
-	position = gtk_combo_box_get_active(GTK_COMBO_BOX(
-				panel->pr_panels_panel));
 	treesel = gtk_tree_view_get_selection(GTK_TREE_VIEW(
 				panel->pr_panels_view));
 	if(gtk_tree_selection_get_selected(treesel, &model, &iter))
