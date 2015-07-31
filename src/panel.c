@@ -827,14 +827,12 @@ static GtkWidget * _preferences_window_panel(Panel * panel)
 
 static GtkWidget * _preferences_window_panels(Panel * panel)
 {
-	GtkSizeGroup * group;
 	GtkWidget * vbox;
 	GtkWidget * vbox2;
 	GtkWidget * hbox;
 	GtkWidget * frame;
 	GtkWidget * widget;
 
-	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 #else
