@@ -644,6 +644,20 @@ static void _reset_on_idle_load(Panel * panel, PanelPosition position)
 }
 
 
+/* panel_save */
+int panel_save(Panel * panel)
+{
+	int ret;
+	String * filename;
+
+	if((filename = _config_get_filename()) == NULL)
+		return -1;
+	ret = config_save(panel->config, filename);
+	string_delete(filename);
+	return ret;
+}
+
+
 /* panel_show_preferences */
 static void _show_preferences_window(Panel * panel);
 static GtkWidget * _preferences_window_general(Panel * panel);
@@ -1250,13 +1264,10 @@ static void _preferences_on_panel_toggled(gpointer data)
 static void _preferences_on_response_ok(gpointer data)
 {
 	Panel * panel = data;
-	char * filename;
 
 	gtk_widget_hide(panel->pr_window);
 	_preferences_on_response_apply(panel);
-	if((filename = _config_get_filename()) != NULL)
-		config_save(panel->config, filename);
-	free(filename);
+	panel_save(panel);
 }
 
 static void _preferences_on_panel_add(gpointer data)
@@ -1372,16 +1383,10 @@ static void _preferences_on_panel_up(gpointer data)
 static char * _config_get_filename(void)
 {
 	char const * homedir;
-	size_t len;
-	char * filename;
 
 	if((homedir = getenv("HOME")) == NULL)
 		homedir = g_get_home_dir();
-	len = strlen(homedir) + 1 + sizeof(PANEL_CONFIG_FILE);
-	if((filename = malloc(len)) == NULL)
-		return NULL;
-	snprintf(filename, len, "%s/%s", homedir, PANEL_CONFIG_FILE);
-	return filename;
+	return string_new_format("%s/%s", homedir, PANEL_CONFIG_FILE);
 }
 
 

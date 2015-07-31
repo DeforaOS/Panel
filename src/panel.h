@@ -66,6 +66,7 @@ char const * panel_get_config(Panel * panel, char const * section,
 int panel_error(Panel * panel, char const * message, int ret);
 int panel_load(Panel * panel, PanelPosition position, char const * applet);
 int panel_reset(Panel * panel);
+int panel_save(Panel * panel);
 
 void panel_show_preferences(Panel * panel, gboolean show);
 
