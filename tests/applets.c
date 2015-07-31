@@ -22,6 +22,8 @@
 #include <dlfcn.h>
 #include "Panel/applet.h"
 
+#define PROGNAME	"applets"
+
 
 /* private */
 /* prototypes */
@@ -90,7 +92,7 @@ static int _applets(void)
 /* dlerror */
 static int _dlerror(char const * message, int ret)
 {
-	fputs("applets: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	fprintf(stderr, "%s: %s\n", message, dlerror());
 	return ret;
 }
@@ -99,7 +101,7 @@ static int _dlerror(char const * message, int ret)
 /* error */
 static int _error(char const * message, char const * error, int ret)
 {
-	fputs("applets: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	fprintf(stderr, "%s: %s\n", message, error);
 	return ret;
 }
@@ -108,7 +110,7 @@ static int _error(char const * message, char const * error, int ret)
 /* perror */
 static int _perror(char const * message, int ret)
 {
-	fputs("applets: ", stderr);
+	fputs(PROGNAME ": ", stderr);
 	perror(message);
 	return ret;
 }
