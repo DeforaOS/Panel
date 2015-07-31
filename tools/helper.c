@@ -129,7 +129,6 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 {
 	char * filename;
 	GdkScreen * screen;
-	GdkWindow * root;
 	GdkRectangle rect;
 
 	if((panel->config = config_new()) == NULL)
@@ -140,7 +139,6 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	free(filename);
 	/* root window */
 	screen = gdk_screen_get_default();
-	root = gdk_screen_get_root_window(screen);
 	gdk_screen_get_monitor_geometry(screen, 0, &rect);
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
