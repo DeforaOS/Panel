@@ -8,3 +8,4 @@ Description: DeforaOS Desktop Panel plug-ins
 Version: @VERSION@
 Requires: gtk+-2.0
 Cflags: -I${includedir}
+Libs: -Wl,-rpath-link,${libdir} -Wl,-rpath,${libdir} -L${libdir} -lPanel
