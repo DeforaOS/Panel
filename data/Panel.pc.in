@@ -4,7 +4,7 @@ exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 
 Name: Panel
-Description: DeforaOS Desktop Panel plug-ins
+Description: DeforaOS Desktop Panel applets
 Version: @VERSION@
 Requires: gtk+-2.0
 Cflags: -I${includedir}
