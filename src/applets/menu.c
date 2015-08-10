@@ -481,7 +481,6 @@ static void _xdg_dirs_home(Menu * menu, void (*callback)(Menu * menu,
 static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath),
 		char const * path);
-static void _xdg_dirs_rtrim(String * string, char c);
 
 static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath))
