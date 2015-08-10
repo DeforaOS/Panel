@@ -26,24 +26,12 @@ DATE="date"
 #fail
 _fail()
 {
-	test="$1"
-
-	shift
-	echo -n "$test:" 1>&2
-	(echo
-	echo "Testing: $OBJDIR$test" "$@"
-	LD_LIBRARY_PATH="$OBJDIR../src" "$OBJDIR$test" "$@") >> "$target" 2>&1
-	res=$?
-	if [ $res -ne 0 ]; then
-		echo " FAILED (error $res)" 1>&2
-	else
-		echo " PASS" 1>&2
-	fi
+	_run "$@"
 }
 
 
-#test
-_test()
+#run
+_run()
 {
 	test="$1"
 
@@ -54,13 +42,24 @@ _test()
 	LD_LIBRARY_PATH="$OBJDIR../src" "$OBJDIR$test" "$@") >> "$target" 2>&1
 	res=$?
 	if [ $res -ne 0 ]; then
-		echo " FAILED" 1>&2
-		FAILED="$FAILED $test(error $res)"
-		return 2
+		echo "Test: $test$sep$@: FAIL (error $res)"
+		echo " FAIL"
 	else
-		echo " PASS" 1>&2
-		return 0
+		echo "Test: $test$sep$@: PASS"
+		echo " PASS"
 	fi
+	return $res
+}
+
+
+#test
+_test()
+{
+	test="$1"
+
+	_run "$@"
+	res=$?
+	[ $res -eq 0 ] || FAILED="$FAILED $test(error $res)"
 }
 
 
