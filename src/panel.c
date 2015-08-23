@@ -1403,6 +1403,7 @@ static char const * _panel_get_applets(Panel * panel, PanelPosition position)
 	char const * applets = "menu,desktop,lock,logout,pager,tasks"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock";
 #else /* EMBEDDED */
+	/* XXX the "keyboard" applet is in a separate repository now */
 	char const * applets = "menu,desktop,keyboard,tasks,spacer"
 		",gsm,gps,bluetooth,battery,cpufreq,volume,embed,systray,clock"
 		",close";
