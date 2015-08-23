@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2011-2014 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2011-2015 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,7 @@ PREFIX="/usr/local"
 [ -f "../config.sh" ] && . "../config.sh"
 DEBUG="_debug"
 DEVNULL="/dev/null"
+PROGNAME="pkgconfig.sh"
 #executables
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
@@ -48,7 +49,7 @@ _debug()
 #error
 _error()
 {
-	echo "pkgconfig.sh: $@" 1>&2
+	echo "$PROGNAME: $@" 1>&2
 	return 2
 }
 
@@ -56,7 +57,7 @@ _error()
 #usage
 _usage()
 {
-	echo "Usage: pkgconfig.sh [-c|-i|-u][-P prefix] target..." 1>&2
+	echo "Usage: $PROGNAME [-c|-i|-u][-P prefix] target..." 1>&2
 	return 1
 }
 
