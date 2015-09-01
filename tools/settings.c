@@ -23,8 +23,9 @@
 #include <errno.h>
 #include <locale.h>
 #include <libintl.h>
-#include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <System.h>
+#include <Desktop.h>
 #include "../config.h"
 #define _(string) gettext(string)
 
@@ -81,6 +82,17 @@ static int _settings_browse(Settings * settings);
 static int _settings_error(char const * message, int ret);
 static int _settings_usage(void);
 
+/* callbacks */
+static void _settings_on_close(gpointer data);
+
+
+/* constants */
+static const DesktopAccel _settings_accel[] =
+{
+	{ G_CALLBACK(_settings_on_close), GDK_CONTROL_MASK, GDK_KEY_W },
+	{ NULL, 0, 0 }
+};
+
 
 /* functions */
 /* settings */
@@ -97,11 +109,16 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 static int _settings(void)
 {
 	Settings settings;
+	GtkAccelGroup * accel;
 	GtkWidget * widget;
 	GtkListStore * store;
 	GtkTreeModel * model;
 
+	accel = gtk_accel_group_new();
 	settings.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_add_accel_group(GTK_WINDOW(settings.window), accel);
+	desktop_accel_create(_settings_accel, &settings, accel);
+	g_object_unref(accel);
 	gtk_window_set_default_size(GTK_WINDOW(settings.window), 400, 300);
 	gtk_window_set_icon_name(GTK_WINDOW(settings.window),
 			GTK_STOCK_PREFERENCES);
@@ -143,7 +160,9 @@ static int _settings(void)
 
 static gboolean _settings_on_closex(gpointer data)
 {
-	gtk_main_quit();
+	Settings * settings = data;
+
+	_settings_on_close(settings);
 	return FALSE;
 }
 
@@ -476,6 +495,16 @@ static int _settings_usage(void)
 {
 	fputs("Usage: " PROGNAME "\n", stderr);
 	return 1;
+}
+
+
+/* callbacks */
+static void _settings_on_close(gpointer data)
+{
+	Settings * settings = data;
+
+	gtk_widget_hide(settings->window);
+	gtk_main_quit();
 }
 
 
