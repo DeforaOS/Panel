@@ -285,7 +285,8 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	_wpa_start(wpa);
 	gtk_widget_show_all(hbox);
 	pango_font_description_free(bold);
-	if(panel_window_get_type(helper->window)
+	if(helper->window == NULL
+			|| panel_window_get_type(helper->window)
 			== PANEL_WINDOW_TYPE_NOTIFICATION)
 		wpa->widget = hbox;
 	else
@@ -397,7 +398,9 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	fprintf(stderr, "DEBUG: %s(%u, %u, \"%s\")\n", __func__, connected,
 			associated, network);
 #endif
-	iconsize = panel_window_get_icon_size(wpa->helper->window);
+	iconsize = (wpa->helper->window != NULL)
+		? panel_window_get_icon_size(wpa->helper->window)
+		: GTK_ICON_SIZE_SMALL_TOOLBAR;
 	gtk_icon_size_lookup(iconsize, &size, &size);
 	if(connected == FALSE && network == NULL)
 	{
