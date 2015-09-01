@@ -122,6 +122,7 @@ static Run * _run_new(void)
 	g_signal_connect_swapped(run->entry, "activate", G_CALLBACK(
 				_on_run_path_activate), run);
 	gtk_box_pack_start(GTK_BOX(hbox), run->entry, TRUE, TRUE, 4);
+	/* file chooser */
 	widget = gtk_file_chooser_dialog_new(_("Run program..."), window,
 			GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL,
 			GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN,
