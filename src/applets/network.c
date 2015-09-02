@@ -385,7 +385,14 @@ static void _networkinterface_update(NetworkInterface * ni, char const * icon,
 		gboolean updated, char const * tooltip)
 {
 	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), icon, iconsize);
+#ifdef EMBEDDED
+	if(active)
+		gtk_widget_show(ni->widget);
+	else
+		gtk_widget_hide(ni->widget);
+#else
 	gtk_widget_set_sensitive(ni->widget, active);
+#endif
 #if GTK_CHECK_VERSION(2, 12, 0)
 	if(tooltip != NULL)
 		gtk_widget_set_tooltip_text(ni->widget, tooltip);
