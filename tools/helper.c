@@ -146,6 +146,7 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	_helper_init(&panel->helper, panel, type, iconsize);
 	panel->top = panel_window_new(&panel->helper, PANEL_WINDOW_TYPE_NORMAL,
 			position, iconsize, &rect);
+	panel->helper.window = panel->top;
 	panel->timeout = 0;
 	panel->source = 0;
 	panel->ab_window = NULL;
