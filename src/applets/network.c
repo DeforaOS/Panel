@@ -74,8 +74,8 @@ static int _networkinterface_init(NetworkInterface * ni, char const * name,
 		unsigned int flags);
 static void _networkinterface_destroy(NetworkInterface * ni);
 static void _networkinterface_update(NetworkInterface * ni, char const * icon,
-		GtkIconSize iconsize, unsigned int flags, gboolean updated,
-		char const * tooltip);
+		GtkIconSize iconsize, gboolean active, unsigned int flags,
+		gboolean updated, char const * tooltip);
 
 
 /* public */
@@ -254,7 +254,8 @@ static void _refresh_interface_delete(Network * network, size_t i)
 static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		unsigned int flags)
 {
-	char const * icon = "network-idle";
+	gboolean active = TRUE;
+	char const * icon = "network-offline";
 #ifdef SIOCGIFDATA
 	struct ifdatareq ifdr;
 # if GTK_CHECK_VERSION(2, 12, 0)
@@ -266,12 +267,11 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 
 #ifdef IFF_UP
 	if((flags & IFF_UP) != IFF_UP)
-		icon = "network-offline";
+		active = FALSE;
 	else
 #endif
 	{
 #ifdef SIOCGIFDATA
-		icon = "network-idle";
 		/* XXX ignore errors */
 		memset(&ifdr, 0, sizeof(ifdr));
 		strncpy(ifdr.ifdr_name, ni->name, sizeof(ifdr.ifdr_name));
@@ -279,6 +279,12 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 			network->helper->error(NULL, "SIOCGIFDATA", 1);
 		else
 		{
+#ifdef LINK_STATE_UP
+			icon = (ifdr.ifdr_data.ifi_link_state == LINK_STATE_UP)
+				? "network-idle" : "network-offline";
+#else
+			icon = "network-idle";
+#endif
 			if(ifdr.ifdr_data.ifi_ipackets > ni->ipackets)
 				icon = (ifdr.ifdr_data.ifi_opackets
 						> ni->opackets)
@@ -308,7 +314,8 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 	}
 	_networkinterface_update(ni, icon,
 			panel_window_get_icon_size(network->helper->window),
-			flags, TRUE, (tooltip[0] != '\0') ? tooltip : NULL);
+			active, flags, TRUE,
+			(tooltip[0] != '\0') ? tooltip : NULL);
 }
 
 static void _refresh_purge(Network * network)
@@ -374,10 +381,11 @@ static void _networkinterface_destroy(NetworkInterface * ni)
 
 /* networkinterface_update */
 static void _networkinterface_update(NetworkInterface * ni, char const * icon,
-		GtkIconSize iconsize, unsigned int flags, gboolean updated,
-		char const * tooltip)
+		GtkIconSize iconsize, gboolean active, unsigned int flags,
+		gboolean updated, char const * tooltip)
 {
 	gtk_image_set_from_icon_name(GTK_IMAGE(ni->widget), icon, iconsize);
+	gtk_widget_set_sensitive(ni->widget, active);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	if(tooltip != NULL)
 		gtk_widget_set_tooltip_text(ni->widget, tooltip);
