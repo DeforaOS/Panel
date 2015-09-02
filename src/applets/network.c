@@ -343,9 +343,10 @@ static void _refresh_reset(Network * network)
 static gboolean _network_on_timeout(gpointer data)
 {
 	Network * network = data;
+	const unsigned int timeout = 500;
 
 	_network_refresh(network);
-	network->source = g_timeout_add(500, _network_on_timeout, network);
+	network->source = g_timeout_add(timeout, _network_on_timeout, network);
 	return FALSE;
 }
 
