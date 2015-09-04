@@ -256,6 +256,7 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 {
 	gboolean active = TRUE;
 	char const * icon = "network-offline";
+	GtkIconSize iconsize;
 #ifdef SIOCGIFDATA
 	struct ifdatareq ifdr;
 # if GTK_CHECK_VERSION(2, 12, 0)
@@ -312,9 +313,8 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		}
 #endif
 	}
-	_networkinterface_update(ni, icon,
-			panel_window_get_icon_size(network->helper->window),
-			active, flags, TRUE,
+	iconsize = panel_window_get_icon_size(network->helper->window);
+	_networkinterface_update(ni, icon, iconsize, active, flags, TRUE,
 			(tooltip[0] != '\0') ? tooltip : NULL);
 }
 
