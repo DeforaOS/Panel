@@ -51,17 +51,24 @@ typedef struct _NetworkInterface
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
-	GtkWidget * widget;
 	guint source;
 	int fd;
 	NetworkInterface * interfaces;
 	size_t interfaces_cnt;
+
+	/* widgets */
+	GtkWidget * widget;
+	GtkWidget * pr_loopback;
 } Network;
 
 
 /* prototypes */
+/* plug-in */
 static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _network_destroy(Network * network);
+
+static GtkWidget * _network_settings(Network * network, gboolean apply,
+		gboolean reset);
 
 /* useful */
 static void _network_refresh(Network * network);
@@ -87,7 +94,7 @@ PanelAppletDefinition applet =
 	NULL,
 	_network_init,
 	_network_destroy,
-	NULL,
+	_network_settings,
 	FALSE,
 	TRUE
 };
@@ -115,6 +122,7 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	network->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
+	network->pr_box = NULL;
 	gtk_widget_show(network->widget);
 	network->source = g_timeout_add(timeout, _network_on_timeout, network);
 	if((network->fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
@@ -337,6 +345,57 @@ static void _refresh_reset(Network * network)
 
 	for(i = 0; i < network->interfaces_cnt; i++)
 		network->interfaces[i].updated = FALSE;
+}
+
+
+/* network_settings */
+static void _settings_apply(Network * network, PanelAppletHelper * helper);
+static void _settings_reset(Network * network, PanelAppletHelper * helper);
+
+static GtkWidget * _network_settings(Network * network, gboolean apply,
+		gboolean reset)
+{
+	PanelAppletHelper * helper = network->helper;
+
+	if(network->pr_loopback == NULL)
+	{
+		network->pr_loopback = gtk_check_button_new_with_label(
+				_("Show local interfaces"));
+		gtk_widget_show(network->pr_loopback);
+		reset = TRUE;
+	}
+	if(reset == TRUE)
+		_settings_reset(network, helper);
+	if(apply == TRUE)
+		_settings_apply(network, helper);
+	return network->pr_loopback;
+}
+
+static void _settings_apply(Network * network, PanelAppletHelper * helper)
+{
+	gboolean active;
+
+	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+				network->pr_loopback));
+	helper->config_set(helper->panel, "network", "loopback",
+			active ? "1" : "0");
+	_network_refresh(network);
+}
+
+static void _settings_reset(Network * network, PanelAppletHelper * helper)
+{
+#ifndef EMBEDDED
+	gboolean loopback = TRUE;
+#else
+	gboolean loopback = FALSE;
+#endif
+	char const * p;
+
+	if((p = helper->config_get(helper->panel, "network", "loopback"))
+			!= NULL)
+		loopback = strtol(p, NULL, 10) ? TRUE : FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(network->pr_loopback),
+			loopback);
 }
 
 
