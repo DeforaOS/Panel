@@ -59,8 +59,12 @@ typedef struct _PanelApplet
 	/* widgets */
 	GtkWidget * widget;
 	GtkWidget * pr_box;
+#ifdef IFF_LOOPBACK
 	GtkWidget * pr_loopback;
+#endif
+#ifdef IFF_UP
 	GtkWidget * pr_showdown;
+#endif
 } Network;
 
 
@@ -224,9 +228,11 @@ static int _refresh_interface_add(Network * network, char const * name,
 		unsigned int flags)
 {
 	NetworkInterface * p;
-#ifdef IFF_LOOPBACK
+#if defined(IFF_LOOPBACK) || defined(IFF_UP)
 	char const * q;
+#endif
 
+#ifdef IFF_LOOPBACK
 	if(flags & IFF_LOOPBACK)
 	{
 		q = network->helper->config_get(network->helper->panel,
@@ -236,6 +242,7 @@ static int _refresh_interface_add(Network * network, char const * name,
 			return 1;
 	}
 #endif
+#ifdef IFF_UP
 	if((flags & IFF_UP) == 0)
 	{
 		q = network->helper->config_get(network->helper->panel,
@@ -244,6 +251,7 @@ static int _refresh_interface_add(Network * network, char const * name,
 			/* ignore the interface */
 			return 1;
 	}
+#endif
 	if((p = realloc(network->interfaces, sizeof(*p)
 					* (network->interfaces_cnt + 1)))
 			== NULL)
@@ -374,14 +382,18 @@ static GtkWidget * _network_settings(Network * network, gboolean apply,
 #else
 		network->pr_box = gtk_vbox_new(TRUE, 4);
 #endif
+#ifdef IFF_LOOPBACK
 		network->pr_loopback = gtk_check_button_new_with_label(
 				_("Show local interfaces"));
 		gtk_box_pack_start(GTK_BOX(network->pr_box),
 				network->pr_loopback, FALSE, TRUE, 0);
+#endif
+#ifdef IFF_UP
 		network->pr_showdown = gtk_check_button_new_with_label(
 				_("Show the interfaces disabled"));
 		gtk_box_pack_start(GTK_BOX(network->pr_box),
 				network->pr_showdown, FALSE, TRUE, 0);
+#endif
 		gtk_widget_show_all(network->pr_box);
 		reset = TRUE;
 	}
@@ -394,40 +406,60 @@ static GtkWidget * _network_settings(Network * network, gboolean apply,
 
 static void _settings_apply(Network * network, PanelAppletHelper * helper)
 {
+#if defined(IFF_LOOPBACK) || defined(IFF_UP)
 	gboolean active;
+#endif
 
+#ifdef IFF_LOOPBACK
 	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 				network->pr_loopback));
 	helper->config_set(helper->panel, "network", "loopback",
 			active ? "1" : "0");
+#endif
+#ifdef IFF_UP
 	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
 				network->pr_showdown));
 	helper->config_set(helper->panel, "network", "showdown",
 			active ? "1" : "0");
+#endif
 	_network_refresh(network);
 }
 
 static void _settings_reset(Network * network, PanelAppletHelper * helper)
 {
 #ifndef EMBEDDED
+# ifdef IFF_LOOPBACK
 	gboolean loopback = TRUE;
+# endif
+# ifdef IFF_UP
 	gboolean showdown = TRUE;
+# endif
 #else
+# ifdef IFF_LOOPBACK
 	gboolean loopback = FALSE;
+# endif
+# ifdef IFF_UP
 	gboolean showdown = FALSE;
+# endif
 #endif
+#if defined(IFF_LOOPBACK) || defined(IFF_UP)
 	char const * p;
+#endif
 
+#ifdef IFF_LOOPBACK
 	if((p = helper->config_get(helper->panel, "network", "loopback"))
 			!= NULL)
 		loopback = strtol(p, NULL, 10) ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(network->pr_loopback),
 			loopback);
+#endif
+#ifdef IFF_UP
 	if((p = helper->config_get(helper->panel, "network", "showdown"))
 			!= NULL)
 		showdown = strtol(p, NULL, 10) ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(network->pr_showdown),
 			showdown);
+#endif
 }
 
 
