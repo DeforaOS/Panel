@@ -280,12 +280,6 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 			network->helper->error(NULL, "SIOCGIFDATA", 1);
 		else
 		{
-#ifdef LINK_STATE_UP
-			icon = (ifdr.ifdr_data.ifi_link_state == LINK_STATE_UP)
-				? "network-idle" : "network-offline";
-#else
-			icon = "network-idle";
-#endif
 			if(ifdr.ifdr_data.ifi_ipackets > ni->ipackets)
 				icon = (ifdr.ifdr_data.ifi_opackets
 						> ni->opackets)
@@ -293,6 +287,13 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 					: "network-receive";
 			else if(ifdr.ifdr_data.ifi_opackets > ni->opackets)
 				icon = "network-transmit";
+# ifdef LINK_STATE_DOWN
+			else if(ifdr.ifdr_data.ifi_link_state
+					== LINK_STATE_DOWN)
+				icon = "network-offline";
+# endif
+			else
+				icon = "network-idle";
 # if GTK_CHECK_VERSION(2, 12, 0)
 			ibytes = (ifdr.ifdr_data.ifi_ibytes >= ni->ibytes)
 				? ifdr.ifdr_data.ifi_ibytes - ni->ibytes
