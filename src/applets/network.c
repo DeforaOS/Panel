@@ -235,6 +235,14 @@ static int _refresh_interface_add(Network * network, char const * name,
 			return 1;
 	}
 #endif
+	if((flags & IFF_UP) == 0)
+	{
+		q = network->helper->config_get(network->helper->panel,
+				"network", "showdown");
+		if(q != NULL && strtol(q, NULL, 10) == 0)
+			/* ignore the interface */
+			return 1;
+	}
 	if((p = realloc(network->interfaces, sizeof(*p)
 					* (network->interfaces_cnt + 1)))
 			== NULL)
