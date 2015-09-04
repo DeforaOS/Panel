@@ -58,6 +58,7 @@ typedef struct _PanelApplet
 
 	/* widgets */
 	GtkWidget * widget;
+	GtkWidget * pr_box;
 	GtkWidget * pr_loopback;
 } Network;
 
@@ -357,18 +358,25 @@ static GtkWidget * _network_settings(Network * network, gboolean apply,
 {
 	PanelAppletHelper * helper = network->helper;
 
-	if(network->pr_loopback == NULL)
+	if(network->pr_box == NULL)
 	{
+#if GTK_CHECK_VERSION(3, 0, 0)
+		network->pr_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+#else
+		network->pr_box = gtk_vbox_new(TRUE, 4);
+#endif
 		network->pr_loopback = gtk_check_button_new_with_label(
 				_("Show local interfaces"));
-		gtk_widget_show(network->pr_loopback);
+		gtk_box_pack_start(GTK_BOX(network->pr_box),
+				network->pr_loopback, FALSE, TRUE, 0);
+		gtk_widget_show_all(network->pr_box);
 		reset = TRUE;
 	}
 	if(reset == TRUE)
 		_settings_reset(network, helper);
 	if(apply == TRUE)
 		_settings_apply(network, helper);
-	return network->pr_loopback;
+	return network->pr_box;
 }
 
 static void _settings_apply(Network * network, PanelAppletHelper * helper)
