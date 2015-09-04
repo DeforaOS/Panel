@@ -60,6 +60,7 @@ typedef struct _PanelApplet
 	GtkWidget * widget;
 	GtkWidget * pr_box;
 	GtkWidget * pr_loopback;
+	GtkWidget * pr_showdown;
 } Network;
 
 
@@ -377,6 +378,10 @@ static GtkWidget * _network_settings(Network * network, gboolean apply,
 				_("Show local interfaces"));
 		gtk_box_pack_start(GTK_BOX(network->pr_box),
 				network->pr_loopback, FALSE, TRUE, 0);
+		network->pr_showdown = gtk_check_button_new_with_label(
+				_("Show the interfaces disabled"));
+		gtk_box_pack_start(GTK_BOX(network->pr_box),
+				network->pr_showdown, FALSE, TRUE, 0);
 		gtk_widget_show_all(network->pr_box);
 		reset = TRUE;
 	}
@@ -395,6 +400,10 @@ static void _settings_apply(Network * network, PanelAppletHelper * helper)
 				network->pr_loopback));
 	helper->config_set(helper->panel, "network", "loopback",
 			active ? "1" : "0");
+	active = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+				network->pr_showdown));
+	helper->config_set(helper->panel, "network", "showdown",
+			active ? "1" : "0");
 	_network_refresh(network);
 }
 
@@ -402,8 +411,10 @@ static void _settings_reset(Network * network, PanelAppletHelper * helper)
 {
 #ifndef EMBEDDED
 	gboolean loopback = TRUE;
+	gboolean showdown = TRUE;
 #else
 	gboolean loopback = FALSE;
+	gboolean showdown = FALSE;
 #endif
 	char const * p;
 
@@ -412,6 +423,11 @@ static void _settings_reset(Network * network, PanelAppletHelper * helper)
 		loopback = strtol(p, NULL, 10) ? TRUE : FALSE;
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(network->pr_loopback),
 			loopback);
+	if((p = helper->config_get(helper->panel, "network", "showdown"))
+			!= NULL)
+		showdown = strtol(p, NULL, 10) ? TRUE : FALSE;
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(network->pr_showdown),
+			showdown);
 }
 
 
