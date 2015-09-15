@@ -454,7 +454,7 @@ int main(int argc, char * argv[])
 	int o;
 	Run * run;
 
-	if(setlocale(LC_ALL, "") != 0)
+	if(setlocale(LC_ALL, "") == NULL)
 		fprintf(stderr, PROGNAME ": %s: %s\n", "setlocale",
 				strerror(errno));
 	bindtextdomain(PACKAGE, LOCALEDIR);
