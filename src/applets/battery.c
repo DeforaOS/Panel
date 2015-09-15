@@ -110,6 +110,7 @@ PanelAppletDefinition applet =
 /* battery_init */
 static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const int timeout = 5000;
 	Battery * battery;
 	GtkIconSize iconsize;
 	GtkWidget * vbox;
@@ -165,7 +166,7 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 		battery->box = hbox;
 	}
-	battery->timeout = g_timeout_add(5000, _on_timeout, battery);
+	battery->timeout = g_timeout_add(timeout, _on_timeout, battery);
 	_on_timeout(battery);
 	gtk_widget_show(battery->image);
 	*widget = battery->box;
