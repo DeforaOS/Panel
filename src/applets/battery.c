@@ -252,7 +252,7 @@ static void _battery_set(Battery * battery, gdouble value, gboolean charging)
 {
 	char buf[256];
 
-	snprintf(buf, sizeof(buf), "%.0lf%% ", value);
+	snprintf(buf, sizeof(buf), "%.0f%% ", value);
 	/* XXX only show when necessary? */
 	if(value >= 0.0 && value <= 100.0)
 	{
@@ -295,7 +295,7 @@ static void _battery_set(Battery * battery, gdouble value, gboolean charging)
 		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(battery->progress),
 				buf);
 #if GTK_CHECK_VERSION(2, 12, 0)
-	snprintf(buf, sizeof(buf), _("Battery level: %.0lf%%%s"), value,
+	snprintf(buf, sizeof(buf), _("Battery level: %.0f%%%s"), value,
 			charging ? _(" (charging)") : "");
 	gtk_widget_set_tooltip_text(battery->box, buf);
 #endif
