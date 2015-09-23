@@ -387,8 +387,6 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		char const * network)
 {
 	GtkIconSize iconsize;
-	char const * stock = connected
-		? GTK_STOCK_CONNECT : GTK_STOCK_DISCONNECT;
 	char const * icon;
 	gint size = 16;
 	GdkPixbuf * pixbuf = NULL;
@@ -405,7 +403,6 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 	if(connected == FALSE && network == NULL)
 	{
 		/* an error occurred */
-		stock = GTK_STOCK_DIALOG_ERROR;
 		icon = "network-error";
 		network = _("Error");
 	}
