@@ -400,6 +400,14 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		? panel_window_get_icon_size(wpa->helper->window)
 		: GTK_ICON_SIZE_SMALL_TOOLBAR;
 	gtk_icon_size_lookup(iconsize, &size, &size);
+#ifndef EMBEDDED
+	gtk_widget_set_sensitive(wpa->widget, connected);
+#else
+	if(connected)
+		gtk_widget_show(wpa->widget);
+	else
+		gtk_widget_hide(wpa->widget);
+#endif
 	if(connected == FALSE && network == NULL)
 	{
 		/* an error occurred */
@@ -1023,10 +1031,11 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu);
 static void _clicked_network_view(WPA * wpa, GtkWidget * menu);
 static void _clicked_position_menu(GtkMenu * menu, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
-static void _clicked_unavailable(GtkWidget * menu);
+static void _clicked_preferences(WPA * wpa, GtkWidget * menu);
 /* callbacks */
 static void _clicked_on_disconnect(gpointer data);
 static void _clicked_on_network_activated(GtkWidget * widget, gpointer data);
+static void _clicked_on_preferences(gpointer data);
 static void _clicked_on_reassociate(gpointer data);
 static void _clicked_on_rescan(gpointer data);
 
@@ -1036,9 +1045,8 @@ static void _on_clicked(gpointer data)
 	GtkWidget * menu;
 
 	menu = gtk_menu_new();
-	if(wpa->channel[0].fd < 0)
-		_clicked_unavailable(menu);
-	else
+	_clicked_preferences(wpa, menu);
+	if(wpa->channel[0].fd >= 0)
 		_clicked_available(wpa, menu);
 	gtk_widget_show_all(menu);
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, _clicked_position_menu,
@@ -1050,6 +1058,8 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 	GtkWidget * menuitem;
 	GtkWidget * image;
 
+	menuitem = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	if(wpa->networks_cur >= 0)
 	{
 		/* reassociate */
@@ -1134,13 +1144,14 @@ static void _clicked_network_view(WPA * wpa, GtkWidget * menu)
 	}
 }
 
-static void _clicked_unavailable(GtkWidget * menu)
+static void _clicked_preferences(WPA * wpa, GtkWidget * menu)
 {
 	GtkWidget * menuitem;
 
-	menuitem = gtk_image_menu_item_new_with_label(
-			_("Wireless is disabled"));
-	gtk_widget_set_sensitive(menuitem, FALSE);
+	menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES,
+			NULL);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_clicked_on_preferences), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 }
 
@@ -1180,6 +1191,21 @@ static void _clicked_on_network_activated(GtkWidget * widget, gpointer data)
 #if 1 /* XXX partly remediate memory leak (see above) */
 	gtk_tree_row_reference_free(row);
 #endif
+}
+
+static void _clicked_on_preferences(gpointer data)
+{
+	WPA * wpa = data;
+	char * argv[] = { BINDIR "/wifibrowser", NULL };
+	const unsigned int flags = 0;
+	GError * error = NULL;
+
+	if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
+			== FALSE)
+	{
+		wpa->helper->error(NULL, error->message, 1);
+		g_error_free(error);
+	}
 }
 
 static void _clicked_on_reassociate(gpointer data)
