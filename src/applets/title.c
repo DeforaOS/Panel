@@ -22,6 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 #define N_(string) (string)
@@ -60,9 +61,9 @@ static int _title_get_text_property(Title * title, Window window, Atom property,
 static void _title_do(Title * title);
 
 /* callbacks */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static GdkFilterReturn _title_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
 
@@ -90,7 +91,10 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	PangoFontDescription * bold;
 
 	if((title = malloc(sizeof(*title))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	title->helper = helper;
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
@@ -98,7 +102,7 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(title->widget, bold);
 	pango_font_description_free(bold);
 	title->source = g_signal_connect(title->widget, "screen-changed",
-			G_CALLBACK(_on_screen_changed), title);
+			G_CALLBACK(_title_on_screen_changed), title);
 	title->display = NULL;
 	title->screen = NULL;
 	title->root = NULL;
@@ -118,7 +122,7 @@ static void _title_destroy(Title * title)
 		g_signal_handler_disconnect(title->widget, title->source);
 	title->source = 0;
 	if(title->root != NULL)
-		gdk_window_remove_filter(title->root, _on_filter, title);
+		gdk_window_remove_filter(title->root, _title_on_filter, title);
 	gtk_widget_destroy(title->widget);
 	free(title);
 }
@@ -267,8 +271,8 @@ static char * _do_name_utf8(Title * title, Window window, Atom property)
 
 
 /* callbacks */
-/* on_filter */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+/* title_on_filter */
+static GdkFilterReturn _title_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
 	Title * title = data;
@@ -283,8 +287,8 @@ static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+/* title_on_screen_changed */
+static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
 	Title * title = data;
@@ -299,7 +303,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	events = gdk_window_get_events(title->root);
 	gdk_window_set_events(title->root, events
 			| GDK_PROPERTY_CHANGE_MASK);
-	gdk_window_add_filter(title->root, _on_filter, title);
+	gdk_window_add_filter(title->root, _title_on_filter, title);
 	title->atom_active = gdk_x11_get_xatom_by_name_for_display(
 			title->display, "_NET_ACTIVE_WINDOW");
 	title->atom_name = gdk_x11_get_xatom_by_name_for_display(

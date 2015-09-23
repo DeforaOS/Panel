@@ -59,10 +59,7 @@ static Template * _template_init(PanelAppletHelper * helper,
 	Template * template;
 
 	if((template = object_new(sizeof(*template))) == NULL)
-	{
-		helper->error(NULL, error_get(), 1);
 		return NULL;
-	}
 	template->helper = helper;
 	template->widget = gtk_label_new("Template");
 	gtk_widget_show(template->widget);

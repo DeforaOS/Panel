@@ -16,6 +16,9 @@
 
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <System.h>
 #include "Panel/applet.h"
 
 
@@ -57,7 +60,10 @@ static Spacer * _spacer_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	Spacer * spacer;
 
 	if((spacer = malloc(sizeof(*spacer))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	spacer->helper = helper;
 	spacer->widget = gtk_label_new(NULL);
 	gtk_widget_show(spacer->widget);

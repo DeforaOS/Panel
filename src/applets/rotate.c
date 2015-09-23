@@ -36,7 +36,7 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _rotate_destroy(Rotate * rotate);
 
 /* callbacks */
-static void _on_clicked(gpointer data);
+static void _rotate_on_clicked(gpointer data);
 
 
 /* public */
@@ -74,7 +74,7 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_set_tooltip_text(rotate->widget, _("Rotate the screen"));
 #endif
 	g_signal_connect_swapped(rotate->widget, "clicked", G_CALLBACK(
-				_on_clicked), rotate);
+				_rotate_on_clicked), rotate);
 	gtk_widget_show_all(rotate->widget);
 	*widget = rotate->widget;
 	return rotate;
@@ -90,8 +90,8 @@ static void _rotate_destroy(Rotate * rotate)
 
 
 /* callbacks */
-/* on_clicked */
-static void _on_clicked(gpointer data)
+/* rotate_on_clicked */
+static void _rotate_on_clicked(gpointer data)
 {
 	Rotate * rotate = data;
 

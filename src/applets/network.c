@@ -23,6 +23,7 @@
 # include <stdio.h>
 #endif
 #include <string.h>
+#include <errno.h>
 #ifdef __NetBSD__
 # include <ifaddrs.h>
 #endif
@@ -38,7 +39,7 @@
 /* types */
 typedef struct _NetworkInterface
 {
-	char * name;
+	String * name;
 	unsigned int flags;
 	unsigned long ipackets;
 	unsigned long opackets;
@@ -116,10 +117,7 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkOrientation orientation;
 
 	if((network = object_new(sizeof(*network))) == NULL)
-	{
-		helper->error(NULL, error_get(), 1);
 		return NULL;
-	}
 	network->helper = helper;
 	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -132,7 +130,10 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show(network->widget);
 	network->source = g_timeout_add(timeout, _network_on_timeout, network);
 	if((network->fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-		network->helper->error(NULL, "socket", 1);
+	{
+		error_set("%s: %s: %s", applet.name, "socket", strerror(errno));
+		network->helper->error(NULL, error_get(), 1);
+	}
 	network->interfaces = NULL;
 	network->interfaces_cnt = 0;
 	*widget = network->widget;
@@ -209,6 +210,7 @@ static void _refresh_interface(Network * network, char const * name,
 		unsigned int flags)
 {
 	size_t i;
+	int res;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, name);
@@ -219,8 +221,12 @@ static void _refresh_interface(Network * network, char const * name,
 	/* FIXME really implement */
 	if(i == network->interfaces_cnt)
 		/* XXX assumes network->interfaces[i] will be correct */
-		if(_refresh_interface_add(network, name, flags) != 0)
+		if((res = _refresh_interface_add(network, name, flags)) != 0)
+		{
+			if(res < 0)
+				network->helper->error(NULL, error_get(), 1);
 			return;
+		}
 	_refresh_interface_flags(network, &network->interfaces[i], flags);
 }
 
@@ -255,7 +261,8 @@ static int _refresh_interface_add(Network * network, char const * name,
 	if((p = realloc(network->interfaces, sizeof(*p)
 					* (network->interfaces_cnt + 1)))
 			== NULL)
-		return -1;
+		return -error_set_code(1, "%s: %s", applet.name,
+				strerror(errno));
 	network->interfaces = p;
 	p = &network->interfaces[network->interfaces_cnt];
 	if(_networkinterface_init(p, name, flags) != 0)
@@ -467,8 +474,8 @@ static void _settings_reset(Network * network, PanelAppletHelper * helper)
 /* network_on_timeout */
 static gboolean _network_on_timeout(gpointer data)
 {
-	Network * network = data;
 	const unsigned int timeout = 500;
+	Network * network = data;
 
 	_network_refresh(network);
 	network->source = g_timeout_add(timeout, _network_on_timeout, network);
@@ -481,7 +488,7 @@ static gboolean _network_on_timeout(gpointer data)
 static int _networkinterface_init(NetworkInterface * ni, char const * name,
 		unsigned int flags)
 {
-	if((ni->name = strdup(name)) == NULL)
+	if((ni->name = string_new(name)) == NULL)
 		return -1;
 	ni->flags = flags;
 	ni->ipackets = 0;
@@ -500,7 +507,7 @@ static int _networkinterface_init(NetworkInterface * ni, char const * name,
 /* networkinterface_destroy */
 static void _networkinterface_destroy(NetworkInterface * ni)
 {
-	free(ni->name);
+	string_delete(ni->name);
 	gtk_widget_destroy(ni->widget);
 }
 

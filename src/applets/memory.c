@@ -30,6 +30,7 @@
 # include <sys/vmmeter.h>
 #endif
 #include <libintl.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
@@ -52,7 +53,7 @@ static void _memory_destroy(Memory * memory);
 
 /* callbacks */
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data);
+static gboolean _memory_on_timeout(gpointer data);
 #endif
 
 
@@ -77,13 +78,14 @@ PanelAppletDefinition applet =
 static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
+	const int timeout = 5000;
 	Memory * memory;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
 	if((memory = malloc(sizeof(*memory))) == NULL)
 	{
-		helper->error(NULL, "malloc", 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	memory->helper = helper;
@@ -108,14 +110,14 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_scale_set_value_pos(GTK_SCALE(memory->scale), GTK_POS_RIGHT);
 	gtk_box_pack_start(GTK_BOX(memory->widget), memory->scale, FALSE, FALSE,
 			0);
-	memory->timeout = g_timeout_add(5000, _on_timeout, memory);
-	_on_timeout(memory);
+	memory->timeout = g_timeout_add(timeout, _memory_on_timeout, memory);
+	_memory_on_timeout(memory);
 	pango_font_description_free(desc);
 	gtk_widget_show_all(memory->widget);
 	*widget = memory->widget;
 	return memory;
 #else
-	helper->error(NULL, _("memory: Unsupported platform"), 1);
+	error_set("%s: %s", applet.name, _("Unsupported platform"));
 	return NULL;
 #endif
 }
@@ -131,24 +133,27 @@ static void _memory_destroy(Memory * memory)
 
 
 /* callbacks */
-/* on_timeout */
+/* memory_on_timeout */
 #if defined(__linux__)
-static gboolean _on_timeout(gpointer data)
+static gboolean _memory_on_timeout(gpointer data)
 {
 	Memory * memory = data;
 	struct sysinfo sy;
 	gdouble value;
 
 	if(sysinfo(&sy) != 0)
-		return memory->helper->error(memory->helper->panel, "sysinfo",
-				TRUE);
+	{
+		error_set("%s: %s: %s", applet.name, "sysinfo",
+				strerror(errno));
+		return memory->helper->error(NULL, error_get(), TRUE);
+	}
 	value = sy.sharedram;
 	value /= sy.totalram;
 	gtk_range_set_value(GTK_RANGE(memory->scale), value);
 	return TRUE;
 }
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data)
+static gboolean _memory_on_timeout(gpointer data)
 {
 	Memory * memory = data;
 	int mib[] = { CTL_VM, VM_METER };
@@ -157,7 +162,11 @@ static gboolean _on_timeout(gpointer data)
 	gdouble value;
 
 	if(sysctl(mib, 2, &vm, &size, NULL, 0) < 0)
+	{
+		error_set("%s: %s: %s", applet.name, "sysctl",
+				strerror(errno));
 		return TRUE;
+	}
 	value = vm.t_arm * 100;
 	value /= (vm.t_rm + vm.t_free);
 	gtk_range_set_value(GTK_RANGE(memory->scale), value);

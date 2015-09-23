@@ -34,8 +34,7 @@ typedef struct _PanelApplet
 
 
 /* prototypes */
-static User * _user_init(PanelAppletHelper * helper,
-		GtkWidget ** widget);
+static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _user_destroy(User * user);
 
 
@@ -57,8 +56,7 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* user_init */
-static User * _user_init(PanelAppletHelper * helper,
-		GtkWidget ** widget)
+static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	User * user;
 	struct passwd * pw;
@@ -66,14 +64,11 @@ static User * _user_init(PanelAppletHelper * helper,
 
 	if((pw = getpwuid(getuid())) == NULL)
 	{
-		helper->error(NULL, strerror(errno), 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	if((user = object_new(sizeof(*user))) == NULL)
-	{
-		helper->error(NULL, error_get(), 1);
 		return NULL;
-	}
 	user->helper = helper;
 	user->widget = gtk_label_new(pw->pw_name);
 	desc = pango_font_description_new();

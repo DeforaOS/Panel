@@ -18,10 +18,10 @@
 #if defined(__linux__)
 # include <fcntl.h>
 # include <unistd.h>
-# include <string.h>
-# include <errno.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <System.h>
 #include "Panel/applet.h"
@@ -46,11 +46,12 @@ typedef struct _PanelApplet
 static GPS * _gps_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _gps_destroy(GPS * gps);
 
-static gboolean _gps_get(GPS * gps);
-static void _gps_set(GPS * gps, gboolean on);
+/* accessors */
+static gboolean _gps_get(GPS * gps, gboolean * active);
+static void _gps_set(GPS * gps, gboolean active);
 
 /* callbacks */
-static gboolean _on_timeout(gpointer data);
+static gboolean _gps_on_timeout(gpointer data);
 
 
 /* public */
@@ -73,12 +74,15 @@ PanelAppletDefinition applet =
 /* gps_init */
 static GPS * _gps_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const int timeout = 1000;
 	GPS * gps;
 
 	if((gps = malloc(sizeof(*gps))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	gps->helper = helper;
-	gps->timeout = 0;
 #if defined(__linux__)
 	gps->fd = -1;
 #endif
@@ -88,8 +92,9 @@ static GPS * _gps_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(gps->image, _("GPS is enabled"));
 #endif
-	gps->timeout = g_timeout_add(1000, _on_timeout, gps);
-	_on_timeout(gps);
+	gps->timeout = (_gps_on_timeout(gps) == TRUE)
+		? g_timeout_add(timeout, _gps_on_timeout, gps) : 0;
+	gtk_widget_set_no_show_all(gps->image, TRUE);
 	*widget = gps->image;
 	return gps;
 }
@@ -109,21 +114,11 @@ static void _gps_destroy(GPS * gps)
 }
 
 
-/* gps_set */
-static void _gps_set(GPS * gps, gboolean on)
+/* accessors */
+/* gps_get */
+static gboolean _gps_get(GPS * gps, gboolean * active)
 {
-	if(on == TRUE)
-		gtk_widget_show(gps->image);
-	else
-		gtk_widget_hide(gps->image);
-}
-
-
-/* callbacks */
-/* on_timeout */
 #if defined(__linux__)
-static gboolean _gps_get(GPS * gps)
-{
 	/* XXX currently hard-coded for the Openmoko Freerunner */
 	char const p1[] = "/sys/bus/platform/devices/gta02-pm-gps.0/power_on";
 	char const p2[] = "/sys/bus/platform/devices/neo1973-pm-gps.0/power_on";
@@ -135,35 +130,55 @@ static gboolean _gps_get(GPS * gps)
 			&& (gps->fd = open(p2, O_RDONLY)) < 0
 			&& (gps->fd = open(p3, O_RDONLY)) < 0)
 	{
-		error_set("%s: %s", p1, strerror(errno));
-		return FALSE;
+		error_set("%s: %s: %s", applet.name, p1, strerror(errno));
+		*active = FALSE;
+		return TRUE;
 	}
 	errno = ENODATA; /* in case the pseudo-file is empty */
 	if(lseek(gps->fd, 0, SEEK_SET) != 0
 			|| read(gps->fd, &on, sizeof(on)) != 1)
 	{
-		error_set("%s: %s", p1, strerror(errno));
+		error_set("%s: %s: %s", applet.name, p1, strerror(errno));
 		close(gps->fd);
 		gps->fd = -1;
-		return FALSE;
+		*active = FALSE;
+		return TRUE;
 	}
-	return (on == '1') ? TRUE : FALSE;
-}
+	*active = (on == '1') ? TRUE : FALSE;
+	return TRUE;
 #else
-static gboolean _gps_get(GPS * gps)
-{
 	/* FIXME not supported */
+	*active = FALSE;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
 	return FALSE;
-}
 #endif
+}
+
+
+/* gps_set */
+static void _gps_set(GPS * gps, gboolean active)
+{
+	if(active == TRUE)
+		gtk_widget_show(gps->image);
+	else
+		gtk_widget_hide(gps->image);
+}
 
 
 /* callbacks */
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
+/* gps_on_timeout */
+static gboolean _gps_on_timeout(gpointer data)
 {
 	GPS * gps = data;
+	gboolean active;
 
-	_gps_set(gps, _gps_get(gps));
+	if(_gps_get(gps, &active) == FALSE)
+	{
+		gps->helper->error(NULL, error_get(), 1);
+		_gps_set(gps, FALSE);
+		gps->timeout = 0;
+		return FALSE;
+	}
+	_gps_set(gps, active);
 	return TRUE;
 }

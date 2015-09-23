@@ -18,10 +18,10 @@
 #if defined(__linux__)
 # include <fcntl.h>
 # include <unistd.h>
-# include <string.h>
-# include <errno.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <System.h>
 #include "Panel/applet.h"
@@ -47,11 +47,15 @@ typedef struct _PanelApplet
 static GSM * _gsm_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _gsm_destroy(GSM * gsm);
 
-static gboolean _gsm_get(GSM * gsm);
-static void _gsm_set(GSM * gsm, gboolean on);
+/* accessors */
+static gboolean _gsm_get(GSM * gsm, gboolean * active);
+static void _gsm_set(GSM * gsm, gboolean active);
+#if 0
+static void _gsm_set_operator(GSM * gsm, char const * operator);
+#endif
 
 /* callbacks */
-static gboolean _on_timeout(gpointer data);
+static gboolean _gsm_on_timeout(gpointer data);
 
 
 /* public */
@@ -74,12 +78,15 @@ PanelAppletDefinition applet =
 /* gsm_init */
 static GSM * _gsm_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const int timeout = 1000;
 	GSM * gsm;
 
 	if((gsm = malloc(sizeof(*gsm))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	gsm->helper = helper;
-	gsm->timeout = 0;
 #if defined(__linux__)
 	gsm->fd = -1;
 #endif
@@ -96,8 +103,9 @@ static GSM * _gsm_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	gtk_widget_show(gsm->image);
 	gtk_box_pack_start(GTK_BOX(gsm->hbox), gsm->image, FALSE, TRUE, 0);
-	gsm->timeout = g_timeout_add(1000, _on_timeout, gsm);
-	_on_timeout(gsm);
+	gsm->timeout = (_gsm_on_timeout(gsm) == TRUE)
+		? g_timeout_add(timeout, _gsm_on_timeout, gsm) : 0;
+	gtk_widget_set_no_show_all(gsm->hbox, TRUE);
 	*widget = gsm->hbox;
 	return gsm;
 }
@@ -117,30 +125,11 @@ static void _gsm_destroy(GSM * gsm)
 }
 
 
-/* gsm_set */
-static void _gsm_set(GSM * gsm, gboolean on)
+/* accessors */
+/* gsm_get */
+static gboolean _gsm_get(GSM * gsm, gboolean * active)
 {
-	if(on == TRUE)
-		gtk_widget_show(gsm->hbox);
-	else
-		gtk_widget_hide(gsm->hbox);
-}
-
-
-#if 0
-/* gsm_set_operator */
-static void _gsm_set_operator(GSM * gsm, char const * operator)
-{
-	gtk_label_set_text(GTK_LABEL(gsm->operator), operator);
-}
-#endif
-
-
-/* callbacks */
-/* on_timeout */
 #if defined(__linux__)
-static gboolean _gsm_get(GSM * gsm)
-{
 	/* XXX currently hard-coded for the Openmoko Freerunner */
 	char const dv1[] = "/sys/bus/platform/devices/gta02-pm-gsm.0/"
 		"power_on";
@@ -158,36 +147,66 @@ static gboolean _gsm_get(GSM * gsm)
 		}
 		if(gsm->fd < 0)
 		{
-			error_set_code(1, "%s: %s", dev, strerror(errno));
-			return FALSE;
+			error_set("%s: %s: %s", applet.name, dev,
+					strerror(errno));
+			*active = FALSE;
+			return TRUE;
 		}
 	}
 	errno = ENODATA; /* in case the pseudo-file is empty */
 	if(lseek(gsm->fd, 0, SEEK_SET) != 0
 			|| read(gsm->fd, &on, sizeof(on)) != 1)
 	{
-		error_set_code(1, "%s: %s", dev, strerror(errno));
+		error_set("%s: %s: %s", applet.name, dev, strerror(errno));
 		close(gsm->fd);
 		gsm->fd = -1;
-		return FALSE;
+		*active = FALSE;
+		return TRUE;
 	}
-	return (on == '1') ? TRUE : FALSE;
-}
+	*active = (on == '1') ? TRUE : FALSE;
+	return TRUE;
 #else
-static gboolean _gsm_get(GSM * gsm)
-{
 	/* FIXME not supported */
+	*active = FALSE;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
 	return FALSE;
+#endif
+}
+
+
+/* gsm_set */
+static void _gsm_set(GSM * gsm, gboolean active)
+{
+	if(active == TRUE)
+		gtk_widget_show(gsm->hbox);
+	else
+		gtk_widget_hide(gsm->hbox);
+}
+
+
+#if 0
+/* gsm_set_operator */
+static void _gsm_set_operator(GSM * gsm, char const * operator)
+{
+	gtk_label_set_text(GTK_LABEL(gsm->operator), operator);
 }
 #endif
 
 
 /* callbacks */
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
+/* gsm_on_timeout */
+static gboolean _gsm_on_timeout(gpointer data)
 {
 	GSM * gsm = data;
+	gboolean active;
 
-	_gsm_set(gsm, _gsm_get(gsm));
+	if(_gsm_get(gsm, &active) == FALSE)
+	{
+		gsm->helper->error(NULL, error_get(), 1);
+		_gsm_set(gsm, FALSE);
+		gsm->timeout = 0;
+		return FALSE;
+	}
+	_gsm_set(gsm, active);
 	return TRUE;
 }

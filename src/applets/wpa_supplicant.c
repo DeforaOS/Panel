@@ -485,8 +485,9 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 /* wpa_error */
 static int _wpa_error(WPA * wpa, char const * message, int ret)
 {
+	error_set("%s: %s", applet.name, message);
 	_wpa_set_status(wpa, FALSE, FALSE, NULL);
-	return wpa->helper->error(NULL, message, ret);
+	return wpa->helper->error(NULL, error_get(), ret);
 }
 
 
@@ -876,7 +877,7 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	}
 	lu.sun_family = AF_LOCAL;
 	if((channel->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
-		return -_wpa_error(wpa, "socket", 1);
+		return -_wpa_error(wpa, strerror(errno), 1);
 	if(bind(channel->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
 	{
 		close(channel->fd);

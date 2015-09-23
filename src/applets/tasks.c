@@ -22,6 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 #define N_(string) (string)
@@ -112,24 +113,24 @@ static int _tasks_get_window_property(Tasks * tasks, Window window,
 static void _tasks_do(Tasks * tasks);
 
 /* callbacks */
-static gboolean _on_button_press(GtkWidget * widget, GdkEventButton * event,
+static gboolean _task_on_button_press(GtkWidget * widget, GdkEventButton * event,
 		gpointer data);
-static void _on_clicked(gpointer data);
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static void _task_on_clicked(gpointer data);
+static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
-static gboolean _on_popup(gpointer data);
-static void _on_popup_change_desktop(gpointer data);
-static void _on_popup_close(gpointer data);
-static void _on_popup_fullscreen(gpointer data);
-static void _on_popup_maximize(gpointer data);
-static void _on_popup_maximize_horz(gpointer data);
-static void _on_popup_maximize_vert(gpointer data);
-static void _on_popup_minimize(gpointer data);
-static void _on_popup_move(gpointer data);
-static void _on_popup_resize(gpointer data);
-static void _on_popup_shade(gpointer data);
-static void _on_popup_stick(gpointer data);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+static gboolean _task_on_popup(gpointer data);
+static void _task_on_popup_change_desktop(gpointer data);
+static void _task_on_popup_close(gpointer data);
+static void _task_on_popup_fullscreen(gpointer data);
+static void _task_on_popup_maximize(gpointer data);
+static void _task_on_popup_maximize_horz(gpointer data);
+static void _task_on_popup_maximize_vert(gpointer data);
+static void _task_on_popup_minimize(gpointer data);
+static void _task_on_popup_move(gpointer data);
+static void _task_on_popup_resize(gpointer data);
+static void _task_on_popup_shade(gpointer data);
+static void _task_on_popup_stick(gpointer data);
+static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
 
@@ -164,18 +165,18 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 
 	if((task = malloc(sizeof(*task))) == NULL)
 	{
-		tasks->helper->error(tasks->helper->panel, "malloc", 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	task->tasks = tasks;
 	task->window = window;
 	task->widget = gtk_button_new();
 	g_signal_connect(task->widget, "button-press-event", G_CALLBACK(
-				_on_button_press), task);
+				_task_on_button_press), task);
 	g_signal_connect_swapped(task->widget, "popup-menu", G_CALLBACK(
-				_on_popup), task);
+				_task_on_popup), task);
 	g_signal_connect_swapped(task->widget, "clicked", G_CALLBACK(
-				_on_clicked), task);
+				_task_on_clicked), task);
 	task->image = gtk_image_new();
 	task->delete = FALSE;
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -283,7 +284,7 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tasks->hbox = gtk_hbox_new(TRUE, 0);
 #endif
 	tasks->source = g_signal_connect(tasks->hbox, "screen-changed",
-			G_CALLBACK(_on_screen_changed), tasks);
+			G_CALLBACK(_task_on_screen_changed), tasks);
 	tasks->iconsize = panel_window_get_icon_size(helper->window);
 	tasks->icon_width = 48;
 	tasks->icon_height = 48;
@@ -320,7 +321,7 @@ static void _tasks_destroy(Tasks * tasks)
 		g_signal_handler_disconnect(tasks->widget, tasks->source);
 	tasks->source = 0;
 	if(tasks->root != NULL)
-		gdk_window_remove_filter(tasks->root, _on_filter, tasks);
+		gdk_window_remove_filter(tasks->root, _task_on_filter, tasks);
 	for(i = 0; i < tasks->tasks_cnt; i++)
 		_task_delete(tasks->tasks[i]);
 	free(tasks->tasks);
@@ -665,21 +666,21 @@ static int _do_typehint_normal(Tasks * tasks, Window window)
 
 
 /* callbacks */
-/* on_button_press */
-static gboolean _on_button_press(GtkWidget * widget, GdkEventButton * event,
+/* task_on_button_press */
+static gboolean _task_on_button_press(GtkWidget * widget, GdkEventButton * event,
 		gpointer data)
 {
 	if(event->button != 3 || event->type != GDK_BUTTON_PRESS)
 		return FALSE;
-	_on_popup(data);
+	_task_on_popup(data);
 	return TRUE;
 }
 
 
-/* on_clicked */
+/* task_on_clicked */
 static void _clicked_activate(Task * task);
 
-static void _on_clicked(gpointer data)
+static void _task_on_clicked(gpointer data)
 {
 	Task * task = data;
 
@@ -719,8 +720,8 @@ static void _clicked_activate(Task * task)
 }
 
 
-/* on_filter */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+/* task_on_filter */
+static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
 	Tasks * tasks = data;
@@ -740,8 +741,8 @@ static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 }
 
 
-/* on_popup */
-static gboolean _on_popup(gpointer data)
+/* task_on_popup */
+static gboolean _task_on_popup(gpointer data)
 {
 	Task * task = data;
 	unsigned long cnt = 0;
@@ -752,24 +753,24 @@ static gboolean _on_popup(gpointer data)
 		void (*callback)(gpointer data);
 		char const * stock;
 	} items[] = {
-		{ TASKS_ATOM__NET_WM_ACTION_MOVE, _on_popup_move, N_("Move") },
-		{ TASKS_ATOM__NET_WM_ACTION_RESIZE, _on_popup_resize,
+		{ TASKS_ATOM__NET_WM_ACTION_MOVE, _task_on_popup_move, N_("Move") },
+		{ TASKS_ATOM__NET_WM_ACTION_RESIZE, _task_on_popup_resize,
 			N_("Resize") },
-		{ TASKS_ATOM__NET_WM_ACTION_MINIMIZE, _on_popup_minimize,
+		{ TASKS_ATOM__NET_WM_ACTION_MINIMIZE, _task_on_popup_minimize,
 			N_("Minimize") },
-		{ TASKS_ATOM__NET_WM_ACTION_SHADE, _on_popup_shade,
+		{ TASKS_ATOM__NET_WM_ACTION_SHADE, _task_on_popup_shade,
 			N_("Shade") },
-		{ TASKS_ATOM__NET_WM_ACTION_STICK, _on_popup_stick,
+		{ TASKS_ATOM__NET_WM_ACTION_STICK, _task_on_popup_stick,
 			N_("Stick") },
 		{ TASKS_ATOM__NET_WM_ACTION_MAXIMIZE_HORZ,
-			_on_popup_maximize_horz, N_("Maximize horizontally") },
+			_task_on_popup_maximize_horz, N_("Maximize horizontally") },
 		{ TASKS_ATOM__NET_WM_ACTION_MAXIMIZE_VERT,
-			_on_popup_maximize_vert, N_("Maximize vertically") },
-		{ TASKS_ATOM__NET_WM_ACTION_FULLSCREEN, _on_popup_fullscreen,
+			_task_on_popup_maximize_vert, N_("Maximize vertically") },
+		{ TASKS_ATOM__NET_WM_ACTION_FULLSCREEN, _task_on_popup_fullscreen,
 			GTK_STOCK_FULLSCREEN },
 		{ TASKS_ATOM__NET_WM_ACTION_CHANGE_DESKTOP,
-			_on_popup_change_desktop, N_("Change desktop") },
-		{ TASKS_ATOM__NET_WM_ACTION_CLOSE, _on_popup_close,
+			_task_on_popup_change_desktop, N_("Change desktop") },
+		{ TASKS_ATOM__NET_WM_ACTION_CLOSE, _task_on_popup_close,
 			GTK_STOCK_CLOSE }
 	};
 	const size_t items_cnt = sizeof(items) / sizeof(*items);
@@ -812,7 +813,7 @@ static gboolean _on_popup(gpointer data)
 		menuitem = gtk_image_menu_item_new_from_stock(_("Maximize"),
 				NULL);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_popup_maximize), task);
+					_task_on_popup_maximize), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	XFree(buf);
@@ -825,15 +826,15 @@ static gboolean _on_popup(gpointer data)
 }
 
 
-/* on_popup_change_desktop */
-static void _on_popup_change_desktop(gpointer data)
+/* task_on_popup_change_desktop */
+static void _task_on_popup_change_desktop(gpointer data)
 {
 	/* FIXME implement */
 }
 
 
-/* on_popup_close */
-static void _on_popup_close(gpointer data)
+/* task_on_popup_close */
+static void _task_on_popup_close(gpointer data)
 {
 	Task * task = data;
 	GdkDisplay * display;
@@ -857,8 +858,8 @@ static void _on_popup_close(gpointer data)
 }
 
 
-/* on_popup_fullscreen */
-static void _on_popup_fullscreen(gpointer data)
+/* task_on_popup_fullscreen */
+static void _task_on_popup_fullscreen(gpointer data)
 {
 	Task * task = data;
 
@@ -866,8 +867,8 @@ static void _on_popup_fullscreen(gpointer data)
 }
 
 
-/* on_popup_maximize */
-static void _on_popup_maximize(gpointer data)
+/* task_on_popup_maximize */
+static void _task_on_popup_maximize(gpointer data)
 {
 	Task * task = data;
 
@@ -876,8 +877,8 @@ static void _on_popup_maximize(gpointer data)
 }
 
 
-/* on_popup_maximize_hort */
-static void _on_popup_maximize_horz(gpointer data)
+/* task_on_popup_maximize_hort */
+static void _task_on_popup_maximize_horz(gpointer data)
 {
 	Task * task = data;
 
@@ -885,8 +886,8 @@ static void _on_popup_maximize_horz(gpointer data)
 }
 
 
-/* on_popup_maximize_vert */
-static void _on_popup_maximize_vert(gpointer data)
+/* task_on_popup_maximize_vert */
+static void _task_on_popup_maximize_vert(gpointer data)
 {
 	Task * task = data;
 
@@ -894,8 +895,8 @@ static void _on_popup_maximize_vert(gpointer data)
 }
 
 
-/* on_popup_minimize */
-static void _on_popup_minimize(gpointer data)
+/* task_on_popup_minimize */
+static void _task_on_popup_minimize(gpointer data)
 {
 	Task * task = data;
 
@@ -906,8 +907,8 @@ static void _on_popup_minimize(gpointer data)
 }
 
 
-/* on_popup_move */
-static void _on_popup_move(gpointer data)
+/* task_on_popup_move */
+static void _task_on_popup_move(gpointer data)
 {
 	Task * task = data;
 	Tasks * tasks = task->tasks;
@@ -933,8 +934,8 @@ static void _on_popup_move(gpointer data)
 }
 
 
-/* on_popup_resize */
-static void _on_popup_resize(gpointer data)
+/* task_on_popup_resize */
+static void _task_on_popup_resize(gpointer data)
 {
 	Task * task = data;
 	Tasks * tasks = task->tasks;
@@ -960,8 +961,8 @@ static void _on_popup_resize(gpointer data)
 }
 
 
-/* on_popup_shade */
-static void _on_popup_shade(gpointer data)
+/* task_on_popup_shade */
+static void _task_on_popup_shade(gpointer data)
 {
 	Task * task = data;
 
@@ -969,8 +970,8 @@ static void _on_popup_shade(gpointer data)
 }
 
 
-/* on_popup_stick */
-static void _on_popup_stick(gpointer data)
+/* task_on_popup_stick */
+static void _task_on_popup_stick(gpointer data)
 {
 	Task * task = data;
 
@@ -978,8 +979,8 @@ static void _on_popup_stick(gpointer data)
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+/* task_on_screen_changed */
+static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
 	Tasks * tasks = data;
@@ -990,13 +991,13 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
 	if(tasks->root != NULL)
-		gdk_window_remove_filter(tasks->root, _on_filter, tasks);
+		gdk_window_remove_filter(tasks->root, _task_on_filter, tasks);
 	tasks->screen = gtk_widget_get_screen(widget);
 	tasks->display = gdk_screen_get_display(tasks->screen);
 	tasks->root = gdk_screen_get_root_window(tasks->screen);
 	events = gdk_window_get_events(tasks->root);
 	gdk_window_set_events(tasks->root, events | GDK_PROPERTY_CHANGE_MASK);
-	gdk_window_add_filter(tasks->root, _on_filter, tasks);
+	gdk_window_add_filter(tasks->root, _task_on_filter, tasks);
 	/* atoms */
 	for(i = 0; i < TASKS_ATOM_COUNT; i++)
 		tasks->atom[i] = gdk_x11_get_xatom_by_name_for_display(

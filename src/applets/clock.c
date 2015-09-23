@@ -46,7 +46,7 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _clock_destroy(Clock * clock);
 
 /* callbacks */
-static gboolean _on_timeout(gpointer data);
+static gboolean _clock_on_timeout(gpointer data);
 
 
 /* public */
@@ -69,6 +69,7 @@ PanelAppletDefinition applet =
 /* clock_init */
 static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const int timeout = 1000;
 	Clock * clock;
 	GtkIconSize iconsize;
 #ifdef EMBEDDED
@@ -101,8 +102,8 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_container_add(GTK_CONTAINER(clock->widget), clock->label);
 #endif
 	gtk_label_set_justify(GTK_LABEL(clock->label), GTK_JUSTIFY_CENTER);
-	clock->timeout = g_timeout_add(1000, _on_timeout, clock);
-	_on_timeout(clock);
+	clock->timeout = g_timeout_add(timeout, _clock_on_timeout, clock);
+	_clock_on_timeout(clock);
 	gtk_widget_show_all(clock->widget);
 	*widget = clock->widget;
 	return clock;
@@ -119,8 +120,8 @@ static void _clock_destroy(Clock * clock)
 
 
 /* callbacks */
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
+/* clock_on_timeout */
+static gboolean _clock_on_timeout(gpointer data)
 {
 	Clock * clock = data;
 	PanelAppletHelper * helper = clock->helper;
@@ -130,7 +131,12 @@ static gboolean _on_timeout(gpointer data)
 	char buf[32];
 
 	if(gettimeofday(&tv, NULL) != 0)
-		return helper->error(helper->panel, "gettimeofday", TRUE);
+	{
+		error_set("%s: %s: %s", applet.name, "gettimeofday",
+				strerror(errno));
+		helper->error(NULL, error_get(), 1);
+		return TRUE;
+	}
 	t = tv.tv_sec;
 	localtime_r(&t, &tm);
 	strftime(buf, sizeof(buf), clock->format, &tm);

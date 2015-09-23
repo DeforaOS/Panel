@@ -33,6 +33,7 @@
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
@@ -114,7 +115,10 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 	GtkWidget * image;
 
 	if((mixer = malloc(sizeof(*mixer))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	mixer->helper = helper;
 	mixer->source = 0;
 	mixer->pid = -1;
@@ -369,8 +373,8 @@ static void _settings_on_height_value_changed(gpointer data)
 static int _mixer_spawn(Mixer * mixer, unsigned long * xid)
 {
 	PanelAppletHelper * helper = mixer->helper;
-	char * argv[] = { "sh", "-c", PANEL_MIXER_COMMAND_DEFAULT, NULL };
-	GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
+	char * argv[] = { "/bin/sh", "-c", PANEL_MIXER_COMMAND_DEFAULT, NULL };
+	const unsigned int flags = G_SPAWN_DO_NOT_REAP_CHILD;
 	char const * p;
 	char * q = NULL;
 	gboolean res;
@@ -394,11 +398,16 @@ static int _mixer_spawn(Mixer * mixer, unsigned long * xid)
 	g_child_watch_add(mixer->pid, _mixer_on_child, mixer);
 	/* FIXME no longer use blocking I/O */
 	if((size = read(out, buf, sizeof(buf) - 1)) <= 0) /* XXX may block */
-		/* XXX not very explicit... */
-		return -helper->error(helper->panel, "read", 1);
+	{
+		error_set("%s: %s: %s", applet.name, "read", strerror(errno));
+		return -helper->error(helper->panel, error_get(), 1);
+	}
 	buf[size] = '\0';
 	if(sscanf(buf, "%lu", xid) != 1)
-		return -1; /* XXX warn the user */
+	{
+		error_set("%s: %s", applet.name, _("Could not start mixer"));
+		return -helper->error(helper->panel, error_get(), 1);
+	}
 	return 0;
 }
 
@@ -409,6 +418,7 @@ static gboolean _on_child_timeout(gpointer data);
 
 static void _mixer_on_child(GPid pid, gint status, gpointer data)
 {
+	const int timeout = 1000;
 	Mixer * mixer = data;
 
 #ifdef DEBUG
@@ -419,7 +429,7 @@ static void _mixer_on_child(GPid pid, gint status, gpointer data)
 	if(WIFEXITED(status) || WIFSIGNALED(status))
 	{
 		g_spawn_close_pid(mixer->pid);
-		mixer->source = g_timeout_add(1000, _on_child_timeout,
+		mixer->source = g_timeout_add(timeout, _on_child_timeout,
 				mixer);
 	}
 }

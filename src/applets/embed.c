@@ -100,10 +100,7 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 	GtkWidget * image;
 
 	if((embed = object_new(sizeof(*embed))) == NULL)
-	{
-		helper->error(NULL, error_get(), 1);
 		return NULL;
-	}
 	embed->helper = helper;
 	embed->source = 0;
 	embed->window = NULL;

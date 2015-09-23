@@ -99,18 +99,18 @@ static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 			char const * path, char const * apppath));
 
 /* callbacks */
-static void _on_about(gpointer data);
-static void _on_clicked(gpointer data);
-static gboolean _on_idle(gpointer data);
-static void _on_lock(gpointer data);
-static void _on_logout(gpointer data);
+static void _menu_on_about(gpointer data);
+static void _menu_on_clicked(gpointer data);
+static gboolean _menu_on_idle(gpointer data);
+static void _menu_on_lock(gpointer data);
+static void _menu_on_logout(gpointer data);
 #ifdef EMBEDDED
-static void _on_rotate(gpointer data);
+static void _menu_on_rotate(gpointer data);
 #endif
-static void _on_run(gpointer data);
-static void _on_shutdown(gpointer data);
-static void _on_suspend(gpointer data);
-static gboolean _on_timeout(gpointer data);
+static void _menu_on_run(gpointer data);
+static void _menu_on_shutdown(gpointer data);
+static void _menu_on_suspend(gpointer data);
+static gboolean _menu_on_timeout(gpointer data);
 
 
 /* public */
@@ -141,10 +141,13 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkWidget * label;
 
 	if((menu = malloc(sizeof(*menu))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	menu->helper = helper;
 	menu->apps = NULL;
-	menu->idle = g_idle_add(_on_idle, menu);
+	menu->idle = g_idle_add(_menu_on_idle, menu);
 	menu->refresh_mti = 0;
 	menu->widget = gtk_button_new();
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -171,7 +174,7 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_set_tooltip_text(menu->widget, _("Main menu"));
 #endif
 	g_signal_connect_swapped(menu->widget, "clicked", G_CALLBACK(
-				_on_clicked), menu);
+				_menu_on_clicked), menu);
 	gtk_container_add(GTK_CONTAINER(menu->widget), hbox);
 	gtk_widget_show_all(menu->widget);
 	*widget = menu->widget;
@@ -217,7 +220,7 @@ static GtkWidget * _menu_applications(Menu * menu)
 	size_t i;
 
 	if(menu->apps == NULL)
-		_on_idle(menu);
+		_menu_on_idle(menu);
 	memset(&menus, 0, sizeof(menus));
 	menushell = gtk_menu_new();
 	for(p = menu->apps; p != NULL; p = p->next)
@@ -346,7 +349,7 @@ static void _applications_on_activate_directory(Config * config)
 	char const * directory;
 	/* XXX open with the default file manager instead */
 	char * argv[] = { "browser", "--", NULL, NULL };
-	GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
+	const unsigned int flags = G_SPAWN_SEARCH_PATH;
 	GError * error = NULL;
 
 	/* XXX this may not might the correct key */
@@ -563,8 +566,8 @@ static void _xdg_dirs_path(Menu * menu, void (*callback)(Menu * menu,
 
 
 /* callbacks */
-/* on_about */
-static void _on_about(gpointer data)
+/* menu_on_about */
+static void _menu_on_about(gpointer data)
 {
 	Menu * menu = data;
 
@@ -572,11 +575,11 @@ static void _on_about(gpointer data)
 }
 
 
-/* on_clicked */
+/* menu_on_clicked */
 static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 		gboolean * push_in, gpointer data);
 
-static void _on_clicked(gpointer data)
+static void _menu_on_clicked(gpointer data)
 {
 	Menu * menu = data;
 	PanelAppletHelper * helper = menu->helper;
@@ -603,7 +606,7 @@ static void _on_clicked(gpointer data)
 		menuitem = _menu_menuitem_stock(GTK_STOCK_EXECUTE, _("_Run..."),
 				TRUE);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_run), menu);
+					_menu_on_run), menu);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 		menuitem = gtk_separator_menu_item_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
@@ -614,7 +617,7 @@ static void _on_clicked(gpointer data)
 		menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT,
 				NULL);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_about), menu);
+					_menu_on_about), menu);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 		menuitem = gtk_separator_menu_item_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
@@ -622,15 +625,15 @@ static void _on_clicked(gpointer data)
 	/* lock screen */
 	menuitem = _menu_menuitem_stock("gnome-lockscreen", _("_Lock screen"),
 			TRUE);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_lock),
-			menu);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_menu_on_lock), menu);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 #ifdef EMBEDDED
 	/* rotate screen */
 	/* XXX find a more appropriate icon */
 	menuitem = _menu_menuitem_stock(GTK_STOCK_REFRESH, _("R_otate"), TRUE);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(_on_rotate),
-			data);
+	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+				_menu_on_rotate), data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 #endif
 	/* logout */
@@ -639,7 +642,7 @@ static void _on_clicked(gpointer data)
 		menuitem = _menu_menuitem_stock("gnome-logout", _("Lo_gout..."),
 				TRUE);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_logout), data);
+					_menu_on_logout), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* suspend */
@@ -648,14 +651,14 @@ static void _on_clicked(gpointer data)
 		menuitem = _menu_menuitem_stock("gtk-media-pause",
 				_("S_uspend"), TRUE);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-					_on_suspend), data);
+					_menu_on_suspend), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* shutdown */
 	menuitem = _menu_menuitem_stock("gnome-shutdown", _("_Shutdown..."),
 			TRUE);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_on_shutdown), data);
+				_menu_on_shutdown), data);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	gtk_widget_show_all(menushell);
 	gtk_menu_popup(GTK_MENU(menushell), NULL, NULL, _clicked_position_menu,
@@ -679,15 +682,16 @@ static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 }
 
 
-/* on_idle */
+/* menu_on_idle */
 static int _idle_access(Menu * menu, char const * path, int mode);
 static int _idle_access_path(Menu * menu, char const * path,
 		char const * filename, int mode);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
 static void _idle_path(Menu * menu, char const * path, char const * apppath);
 
-static gboolean _on_idle(gpointer data)
+static gboolean _menu_on_idle(gpointer data)
 {
+	const int timeout = 10000;
 	Menu * menu = data;
 
 	if(menu->apps != NULL)
@@ -696,7 +700,7 @@ static gboolean _on_idle(gpointer data)
 		return FALSE;
 	}
 	_menu_xdg_dirs(menu, _idle_path);
-	menu->idle = g_timeout_add(10000, _on_timeout, menu);
+	menu->idle = g_timeout_add(timeout, _menu_on_timeout, menu);
 	return FALSE;
 }
 
@@ -826,7 +830,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 			config_reset(config);
 		if(config == NULL || config_load(config, name) != 0)
 		{
-			menu->helper->error(NULL, NULL, 0); /* XXX */
+			menu->helper->error(NULL, error_get(), 1);
 			continue;
 		}
 		/* skip this entry if it is deleted */
@@ -865,8 +869,8 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 }
 
 
-/* on_lock */
-static void _on_lock(gpointer data)
+/* menu_on_lock */
+static void _menu_on_lock(gpointer data)
 {
 	Menu * menu = data;
 
@@ -874,8 +878,8 @@ static void _on_lock(gpointer data)
 }
 
 
-/* on_logout */
-static void _on_logout(gpointer data)
+/* menu_on_logout */
+static void _menu_on_logout(gpointer data)
 {
 	Menu * menu = data;
 
@@ -884,8 +888,8 @@ static void _on_logout(gpointer data)
 
 
 #ifdef EMBEDDED
-/* on_rotate */
-static void _on_rotate(gpointer data)
+/* menu_on_rotate */
+static void _menu_on_rotate(gpointer data)
 {
 	Menu * menu = data;
 
@@ -894,12 +898,12 @@ static void _on_rotate(gpointer data)
 #endif
 
 
-/* on_run */
-static void _on_run(gpointer data)
+/* menu_on_run */
+static void _menu_on_run(gpointer data)
 {
 	Menu * menu = data;
 	char * argv[] = { BINDIR "/run", NULL };
-	GSpawnFlags flags = G_SPAWN_STDOUT_TO_DEV_NULL
+	const unsigned int flags = G_SPAWN_STDOUT_TO_DEV_NULL
 		| G_SPAWN_STDERR_TO_DEV_NULL;
 	GError * error = NULL;
 
@@ -912,8 +916,8 @@ static void _on_run(gpointer data)
 }
 
 
-/* on_shutdown */
-static void _on_shutdown(gpointer data)
+/* menu_on_shutdown */
+static void _menu_on_shutdown(gpointer data)
 {
 	Menu * menu = data;
 
@@ -921,8 +925,8 @@ static void _on_shutdown(gpointer data)
 }
 
 
-/* on_suspend */
-static void _on_suspend(gpointer data)
+/* menu_on_suspend */
+static void _menu_on_suspend(gpointer data)
 {
 	Menu * menu = data;
 
@@ -930,10 +934,10 @@ static void _on_suspend(gpointer data)
 }
 
 
-/* on_timeout */
+/* menu_on_timeout */
 static void _timeout_path(Menu * menu, char const * path, char const * apppath);
 
-static gboolean _on_timeout(gpointer data)
+static gboolean _menu_on_timeout(gpointer data)
 {
 	Menu * menu = data;
 
@@ -947,7 +951,7 @@ static gboolean _on_timeout(gpointer data)
 	g_slist_foreach(menu->apps, (GFunc)config_delete, NULL);
 	g_slist_free(menu->apps);
 	menu->apps = NULL;
-	menu->idle = g_idle_add(_on_idle, menu);
+	menu->idle = g_idle_add(_menu_on_idle, menu);
 	return FALSE;
 }
 

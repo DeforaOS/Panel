@@ -18,12 +18,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <gtk/gtk.h>
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <System.h>
 #include "Panel/applet.h"
 
 
@@ -50,10 +52,10 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _systray_destroy(Systray * systray);
 
 /* callbacks */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static GdkFilterReturn _systray_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
-static void _on_owner_destroy(gpointer data);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+static void _systray_on_owner_destroy(gpointer data);
+static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
 
@@ -82,7 +84,7 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 
 	if((systray = malloc(sizeof(*systray))) == NULL)
 	{
-		helper->error(NULL, "malloc", 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	systray->helper = helper;
@@ -96,7 +98,7 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_set_size_request(systray->hbox, -1, height);
 	systray->owner = NULL;
 	systray->source = g_signal_connect(systray->hbox, "screen-changed",
-			G_CALLBACK(_on_screen_changed), systray);
+			G_CALLBACK(_systray_on_screen_changed), systray);
 	gtk_widget_show(systray->hbox);
 	*widget = systray->hbox;
 	return systray;
@@ -117,11 +119,11 @@ static void _systray_destroy(Systray * systray)
 
 
 /* callbacks */
-/* on_filter */
+/* systray_on_filter */
 static GdkFilterReturn _filter_clientmessage(Systray * systray,
 		XClientMessageEvent * xev);
 
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static GdkFilterReturn _systray_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
 	Systray * systray = data;
@@ -160,20 +162,20 @@ static GdkFilterReturn _filter_clientmessage(Systray * systray,
 }
 
 
-/* on_owner_destroy */
-static void _on_owner_destroy(gpointer data)
+/* systray_on_owner_destroy */
+static void _systray_on_owner_destroy(gpointer data)
 {
 	Systray * systray = data;
 	GdkWindow * window;
 
 	window = gtk_widget_get_window(systray->owner);
-	gdk_window_remove_filter(window, _on_filter, systray);
+	gdk_window_remove_filter(window, _systray_on_filter, systray);
 	systray->owner = NULL;
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+/* systray_on_screen_changed */
+static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
 	Systray * systray = data;
@@ -193,7 +195,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	atom = gdk_atom_intern(buf, FALSE);
 	systray->owner = gtk_invisible_new();
 	g_signal_connect_swapped(systray->owner, "destroy", G_CALLBACK(
-				_on_owner_destroy), systray);
+				_systray_on_owner_destroy), systray);
 	gtk_widget_realize(systray->owner);
 	window = gtk_widget_get_window(systray->owner);
 	if(gdk_selection_owner_set(window, atom, gtk_get_current_event_time(),
@@ -210,9 +212,11 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	xev.xclient.data.l[0] = gtk_get_current_event_time();
 	xev.xclient.data.l[1] = gdk_x11_atom_to_xatom(atom);
 	xev.xclient.data.l[2] = GDK_WINDOW_XID(window);
+	gdk_error_trap_push();
 	XSendEvent(GDK_DISPLAY_XDISPLAY(display), GDK_WINDOW_XID(root), False,
 			StructureNotifyMask, &xev);
+	gdk_error_trap_pop();
 	gtk_widget_add_events(systray->owner, GDK_PROPERTY_CHANGE_MASK
 			| GDK_STRUCTURE_MASK);
-	gdk_window_add_filter(window, _on_filter, systray);
+	gdk_window_add_filter(window, _systray_on_filter, systray);
 }

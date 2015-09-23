@@ -26,6 +26,7 @@
 # include <uvm/uvm_extern.h>
 #endif
 #include <libintl.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
@@ -47,9 +48,7 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _swap_destroy(Swap * swap);
 
 /* callbacks */
-#if defined(__linux__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data);
-#endif
+static gboolean _swap_on_timeout(gpointer data);
 
 
 /* public */
@@ -72,14 +71,14 @@ PanelAppletDefinition applet =
 /* swap_init */
 static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-#if defined(__linux__) || defined(__NetBSD__)
+	const int timeout = 5000;
 	Swap * swap;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
 	if((swap = malloc(sizeof(*swap))) == NULL)
 	{
-		helper->error(NULL, "malloc", 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	swap->helper = helper;
@@ -103,16 +102,12 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_range_set_inverted(GTK_RANGE(swap->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(swap->scale), GTK_POS_RIGHT);
 	gtk_box_pack_start(GTK_BOX(swap->widget), swap->scale, FALSE, FALSE, 0);
-	swap->timeout = g_timeout_add(5000, _on_timeout, swap);
-	_on_timeout(swap);
+	if(_swap_on_timeout(swap) == TRUE)
+		swap->timeout = g_timeout_add(timeout, _swap_on_timeout, swap);
 	pango_font_description_free(desc);
 	gtk_widget_show_all(swap->widget);
 	*widget = swap->widget;
 	return swap;
-#else
-	helper->error(NULL, _("swap: Unsupported platform"), 1);
-	return NULL;
-#endif
 }
 
 
@@ -126,10 +121,10 @@ static void _swap_destroy(Swap * swap)
 
 
 /* callbacks */
-/* on_timeout */
-#if defined(__linux__)
-static gboolean _on_timeout(gpointer data)
+/* swap_on_timeout */
+static gboolean _swap_on_timeout(gpointer data)
 {
+#if defined(__linux__)
 	Swap * swap = data;
 	struct sysinfo sy;
 	gdouble value;
@@ -141,10 +136,7 @@ static gboolean _on_timeout(gpointer data)
 		value /= sy.totalswap;
 	gtk_range_set_value(GTK_RANGE(swap->scale), value);
 	return TRUE;
-}
 #elif defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data)
-{
 	Swap * swap = data;
 	int mib[] = { CTL_VM, VM_UVMEXP };
 	struct uvmexp ue;
@@ -157,5 +149,11 @@ static gboolean _on_timeout(gpointer data)
 		value /= ue.swpages;
 	gtk_range_set_value(GTK_RANGE(swap->scale), value);
 	return TRUE;
-}
+#else
+	Swap * swap = data;
+
+	/* FIXME not supported */
+	swap->source = 0;
+	return FALSE;
 #endif
+}

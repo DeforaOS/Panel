@@ -52,10 +52,12 @@ typedef struct _PanelApplet
 static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _cpu_destroy(CPU * cpu);
 
+/* accessors */
+static gboolean _cpu_get(CPU * cpu, gdouble * level);
+static void _cpu_set(CPU * cpu, gdouble level);
+
 /* callbacks */
-#if defined(__FreeBSD__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data);
-#endif
+static gboolean _cpu_on_timeout(gpointer data);
 
 
 /* public */
@@ -78,14 +80,14 @@ PanelAppletDefinition applet =
 /* cpu_init */
 static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+	const int timeout = 500;
 	CPU * cpu;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
 	if((cpu = malloc(sizeof(*cpu))) == NULL)
 	{
-		helper->error(helper->panel, "malloc", 0);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	cpu->helper = helper;
@@ -109,36 +111,32 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
 	gtk_box_pack_start(GTK_BOX(cpu->widget), cpu->scale, FALSE, FALSE, 0);
-	cpu->timeout = g_timeout_add(500, _on_timeout, cpu);
+	cpu->timeout = g_timeout_add(timeout, _cpu_on_timeout, cpu);
 	cpu->used = 0;
 	cpu->total = 0;
-	_on_timeout(cpu);
+	_cpu_on_timeout(cpu);
 	pango_font_description_free(desc);
 	gtk_widget_show_all(cpu->widget);
 	*widget = cpu->widget;
 	return cpu;
-#else
-	error_set("%s: %s", "cpu", _("Unsupported platform"));
-	return NULL;
-#endif
 }
 
 
 /* cpu_destroy */
 static void _cpu_destroy(CPU * cpu)
 {
-	g_source_remove(cpu->timeout);
+	if(cpu->timeout > 0)
+		g_source_remove(cpu->timeout);
 	gtk_widget_destroy(cpu->widget);
 	free(cpu);
 }
 
 
-/* callbacks */
-/* on_timeout */
-#if defined(__FreeBSD__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data)
+/* accessors */
+/* cpu_get */
+static gboolean _cpu_get(CPU * cpu, gdouble * level)
 {
-	CPU * cpu = data;
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 # if defined(__FreeBSD__)
 	char const name[] = "kern.cp_time";
 # elif defined(__NetBSD__)
@@ -148,24 +146,56 @@ static gboolean _on_timeout(gpointer data)
 	size_t size = sizeof(cpu_time);
 	int used;
 	int total;
-	gdouble value;
 
 # if defined(__FreeBSD__)
 	if(sysctlbyname(name, &cpu_time, &size, NULL, 0) < 0)
 # elif defined(__NetBSD__)
 	if(sysctl(mib, 2, &cpu_time, &size, NULL, 0) < 0)
 # endif
-		return cpu->helper->error(cpu->helper->panel, "sysctl", TRUE);
+	{
+		*level = 0.0 / 0.0;
+		error_set("%s: %s: %s", applet.name, "sysctl", strerror(errno));
+		return TRUE;
+	}
 	used = cpu_time[CP_USER] + cpu_time[CP_SYS] + cpu_time[CP_NICE]
 		+ cpu_time[CP_INTR];
 	total = used + cpu_time[CP_IDLE];
 	if(cpu->used == 0 || total == cpu->total)
-		value = 0;
+		*level = 0.0;
 	else
-		value = 100 * (used - cpu->used) / (total - cpu->total);
+		*level = 100.0 * (used - cpu->used) / (total - cpu->total);
 	cpu->used = used;
 	cpu->total = total;
-	gtk_range_set_value(GTK_RANGE(cpu->scale), value);
+	return TRUE;
+#else
+	*level = 0.0 / 0.0;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
+	return FALSE;
+#endif
+}
+
+
+/* cpu_set */
+static void _cpu_set(CPU * cpu, gdouble level)
+{
+	gtk_range_set_value(GTK_RANGE(cpu->scale), level);
+}
+
+
+/* callbacks */
+/* cpu_on_timeout */
+static gboolean _cpu_on_timeout(gpointer data)
+{
+	CPU * cpu = data;
+	PanelAppletHelper * helper = cpu->helper;
+	gdouble level;
+
+	if(_cpu_get(cpu, &level) == FALSE)
+	{
+		cpu->timeout = 0;
+		helper->error(NULL, error_get(), 1);
+		return FALSE;
+	}
+	_cpu_set(cpu, level);
 	return TRUE;
 }
-#endif

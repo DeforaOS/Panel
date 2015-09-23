@@ -16,7 +16,10 @@
 
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <libintl.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
@@ -41,7 +44,7 @@ static void _lock_destroy(Lock * lock);
 static GtkWidget * _lock_settings(Lock * lock, gboolean apply, gboolean reset);
 
 /* callbacks */
-static void _on_clicked(gpointer data);
+static void _lock_on_clicked(gpointer data);
 
 
 /* public */
@@ -68,7 +71,10 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkWidget * image;
 
 	if((lock = malloc(sizeof(*lock))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	lock->helper = helper;
 	lock->pr_box = NULL;
 	lock->pr_command = NULL;
@@ -81,7 +87,7 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_set_tooltip_text(lock->widget, _("Lock screen"));
 #endif
 	g_signal_connect_swapped(lock->widget, "clicked", G_CALLBACK(
-				_on_clicked), helper);
+				_lock_on_clicked), helper);
 	gtk_widget_show_all(lock->widget);
 	*widget = lock->widget;
 	return lock;
@@ -143,8 +149,8 @@ static GtkWidget * _lock_settings(Lock * lock, gboolean apply, gboolean reset)
 
 
 /* callbacks */
-/* on_clicked */
-static void _on_clicked(gpointer data)
+/* lock_on_clicked */
+static void _lock_on_clicked(gpointer data)
 {
 	PanelAppletHelper * helper = data;
 

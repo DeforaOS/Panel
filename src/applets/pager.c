@@ -17,9 +17,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
@@ -79,10 +81,10 @@ static int _pager_get_window_property(Pager * pager, Window window,
 static void _pager_do(Pager * pager);
 
 /* callbacks */
-static void _on_clicked(GtkWidget * widget, gpointer data);
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static void _pager_on_clicked(GtkWidget * widget, gpointer data);
+static GdkFilterReturn _pager_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
 
@@ -111,7 +113,7 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 
 	if((pager = malloc(sizeof(*pager))) == NULL)
 	{
-		helper->error(NULL, "malloc", 1);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	pager->helper = helper;
@@ -124,7 +126,7 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
 	pager->source = g_signal_connect(pager->box, "screen-changed",
-			G_CALLBACK(_on_screen_changed), pager);
+			G_CALLBACK(_pager_on_screen_changed), pager);
 	pager->widgets = NULL;
 	pager->widgets_cnt = 0;
 	pager->screen = NULL;
@@ -142,7 +144,7 @@ static void _pager_destroy(Pager * pager)
 		g_signal_handler_disconnect(pager->box, pager->source);
 	pager->source = 0;
 	if(pager->root != NULL)
-		gdk_window_remove_filter(pager->root, _on_filter, pager);
+		gdk_window_remove_filter(pager->root, _pager_on_filter, pager);
 	gtk_widget_destroy(pager->box);
 	free(pager);
 }
@@ -280,10 +282,10 @@ static void _pager_do(Pager * pager)
 			snprintf(buf, sizeof(buf), "%s %lu\n", _("Desk"),
 					i + 1);
 		pager->widgets[i] = gtk_button_new_with_label(buf);
-		if(i == cur)
+		if(cur >= 0 && i == (unsigned int)cur)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
 		g_signal_connect(pager->widgets[i], "clicked", G_CALLBACK(
-					_on_clicked), pager);
+					_pager_on_clicked), pager);
 		gtk_box_pack_start(GTK_BOX(pager->box), pager->widgets[i],
 				FALSE, TRUE, 0);
 	}
@@ -296,8 +298,8 @@ static void _pager_do(Pager * pager)
 
 
 /* callbacks */
-/* on_clicked */
-static void _on_clicked(GtkWidget * widget, gpointer data)
+/* pager_on_clicked */
+static void _pager_on_clicked(GtkWidget * widget, gpointer data)
 {
 	Pager * pager = data;
 	size_t i;
@@ -322,15 +324,17 @@ static void _on_clicked(GtkWidget * widget, gpointer data)
 	memset(&xev.xclient.data, 0, sizeof(xev.xclient.data));
 	xev.xclient.data.l[0] = i;
 	xev.xclient.data.l[1] = gdk_x11_display_get_user_time(display);
+	gdk_error_trap_push();
 	XSendEvent(GDK_DISPLAY_XDISPLAY(display), GDK_WINDOW_XID(root),
 			False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
+	gdk_error_trap_pop();
 }
 
 
-/* on_filter */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+/* pager_on_filter */
+static GdkFilterReturn _pager_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
 	Pager * pager = data;
@@ -345,8 +349,8 @@ static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 		if((cur = _pager_get_current_desktop(pager)) < 0)
 			return GDK_FILTER_CONTINUE;
 		for(i = 0; i < pager->widgets_cnt; i++)
-			gtk_widget_set_sensitive(pager->widgets[i], (i == cur)
-					? FALSE : TRUE);
+			gtk_widget_set_sensitive(pager->widgets[i],
+					(i == (size_t)cur) ? FALSE : TRUE);
 		return GDK_FILTER_CONTINUE;
 	}
 	if(xev->xproperty.atom == pager->atoms[
@@ -358,8 +362,8 @@ static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+/* pager_on_screen_changed */
+static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
 	Pager * pager = data;
@@ -371,7 +375,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	pager->root = gdk_screen_get_root_window(pager->screen);
 	events = gdk_window_get_events(pager->root);
 	gdk_window_set_events(pager->root, events | GDK_PROPERTY_CHANGE_MASK);
-	gdk_window_add_filter(pager->root, _on_filter, pager);
+	gdk_window_add_filter(pager->root, _pager_on_filter, pager);
 	/* atoms */
 	for(i = 0; i < PAGER_ATOM_COUNT; i++)
 		pager->atoms[i] = gdk_x11_get_xatom_by_name_for_display(

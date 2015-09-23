@@ -16,6 +16,8 @@
 
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <System.h>
 #include "Panel/applet.h"
@@ -37,7 +39,7 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _logout_destroy(Logout * logout);
 
 /* callbacks */
-static void _on_clicked(gpointer data);
+static void _logout_on_clicked(gpointer data);
 
 
 /* public */
@@ -64,11 +66,14 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkWidget * image;
 
 	if((logout = malloc(sizeof(*logout))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	logout->helper = helper;
 	if(helper->logout_dialog == NULL)
 	{
-		helper->error(NULL, _("logout: Logging out is disabled"), 1);
+		error_set("%s: %s", applet.name, _("Logging out is disabled"));
 		return NULL;
 	}
 	logout->widget = gtk_button_new();
@@ -80,7 +85,7 @@ static Logout * _logout_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_set_tooltip_text(logout->widget, _("Logout"));
 #endif
 	g_signal_connect_swapped(logout->widget, "clicked", G_CALLBACK(
-				_on_clicked), logout);
+				_logout_on_clicked), logout);
 	gtk_widget_show_all(logout->widget);
 	*widget = logout->widget;
 	return logout;
@@ -96,8 +101,8 @@ static void _logout_destroy(Logout * logout)
 
 
 /* callbacks */
-/* on_clicked */
-static void _on_clicked(gpointer data)
+/* logout_on_clicked */
+static void _logout_on_clicked(gpointer data)
 {
 	Logout * logout = data;
 

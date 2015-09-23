@@ -50,7 +50,7 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 		GtkWidget ** widget);
 static void _brightness_destroy(Brightness * brightness);
 
-static int _brightness_get(Brightness * brightness);
+static gboolean _brightness_get(Brightness * brightness, int * level);
 static void _brightness_set(Brightness * brightness, int level);
 
 /* callbacks */
@@ -78,6 +78,7 @@ PanelAppletDefinition applet =
 static Brightness * _brightness_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
+	const int timeout = 1000;
 	Brightness * brightness;
 	GtkIconSize iconsize;
 	GtkWidget * vbox;
@@ -85,7 +86,10 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 	PangoFontDescription * bold;
 
 	if((brightness = malloc(sizeof(*brightness))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	brightness->helper = helper;
 	brightness->timeout = 0;
 	iconsize = panel_window_get_icon_size(helper->window);
@@ -127,7 +131,7 @@ static Brightness * _brightness_init(PanelAppletHelper * helper,
 #endif
 		brightness->box = hbox;
 	}
-	brightness->timeout = g_timeout_add(1000, _brightness_on_timeout,
+	brightness->timeout = g_timeout_add(timeout, _brightness_on_timeout,
 			brightness);
 	_brightness_on_timeout(brightness);
 	gtk_widget_show(brightness->image);
@@ -195,40 +199,49 @@ static void _brightness_set(Brightness * brightness, int level)
 
 /* callbacks */
 /* brightness_on_timeout */
-#if defined(__NetBSD__)
-static int _brightness_get(Brightness * brightness)
+static gboolean _brightness_get(Brightness * brightness, int * level)
 {
+#if defined(__NetBSD__)
 	PanelAppletHelper * helper = brightness->helper;
 	char const sysctl[] = "hw.acpi.acpiout0.brightness";
-	int level = -1;
 	size_t s;
 
-	if(sysctlbyname(sysctl, &level, &s, NULL, 0) != 0)
-		return -helper->error(helper->panel, strerror(errno), 1);
-	return level;
-}
+	*level = -1;
+	if(sysctlbyname(sysctl, level, &s, NULL, 0) != 0)
+	{
+		error_set("%s: %s: %s", applet.name, "sysctl", strerror(errno));
+		helper->error(NULL, strerror(errno), 1);
+	}
+	return TRUE;
 #else
-static int _brightness_get(Brightness * brightness)
-{
+	PanelAppletHelper * helper = brightness->helper;
+
 	/* FIXME not supported */
-	error_set("%s", strerror(ENOSYS));
-	return -1;
-}
+	*level = -1;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
+	helper->error(NULL, error_get(), 1);
+	return FALSE;
 #endif
+}
 
 
 /* callbacks */
-/* on_timeout */
+/* brightness_on_timeout */
 static gboolean _brightness_on_timeout(gpointer data)
 {
 	Brightness * brightness = data;
-	int level;
+	int level = -1;
 	int timeout;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
-	if((level = _brightness_get(brightness)) >= 0)
+	if(_brightness_get(brightness, &level) == FALSE)
+	{
+		brightness->timeout = 0;
+		return FALSE;
+	}
+	if(level >= 0)
 	{
 		_brightness_set(brightness, level);
 		timeout = 1000;

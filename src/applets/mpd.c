@@ -100,10 +100,7 @@ static MPD * _mpd_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkIconSize iconsize;
 
 	if((mpd = object_new(sizeof(*mpd))) == NULL)
-	{
-		helper->error(NULL, error_get(), 1);
 		return NULL;
-	}
 	mpd->helper = helper;
 	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)

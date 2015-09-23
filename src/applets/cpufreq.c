@@ -55,7 +55,7 @@ static void _cpufreq_destroy(Cpufreq * cpufreq);
 
 /* callbacks */
 #if defined(__FreeBSD__) || defined(__NetBSD__)
-static gboolean _on_timeout(gpointer data);
+static gboolean _cpufreq_on_timeout(gpointer data);
 #endif
 
 
@@ -79,6 +79,7 @@ PanelAppletDefinition applet =
 /* cpufreq_init */
 static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const int timeout = 1000;
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	Cpufreq * cpufreq;
 	PangoFontDescription * desc;
@@ -102,12 +103,12 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		p = "machdep.frequency.current";
 	else
 	{
-		error_set("%s: %s", "cpufreq", _("No support detected"));
+		error_set("%s: %s", applet.name, _("No support detected"));
 		return NULL;
 	}
 	if((cpufreq = malloc(sizeof(*cpufreq))) == NULL)
 	{
-		helper->error(helper->panel, "malloc", 0);
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
 	}
 	cpufreq->helper = helper;
@@ -135,14 +136,15 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			0);
 	label = gtk_label_new(_("MHz"));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), label, FALSE, TRUE, 0);
-	if(_on_timeout(cpufreq) == TRUE)
-		cpufreq->timeout = g_timeout_add(1000, _on_timeout, cpufreq);
+	if(_cpufreq_on_timeout(cpufreq) == TRUE)
+		cpufreq->timeout = g_timeout_add(timeout, _cpufreq_on_timeout,
+				cpufreq);
 	pango_font_description_free(desc);
 	gtk_widget_show_all(cpufreq->hbox);
 	*widget = cpufreq->hbox;
 	return cpufreq;
 #else
-	error_set("%s: %s", "cpufreq", _("Unsupported platform"));
+	error_set("%s: %s", applet.name, _("Unsupported platform"));
 	return NULL;
 #endif
 }
@@ -159,8 +161,8 @@ static void _cpufreq_destroy(Cpufreq * cpufreq)
 
 /* callbacks */
 #if defined(__FreeBSD__) || defined(__NetBSD__)
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
+/* cpufreq_on_timeout */
+static gboolean _cpufreq_on_timeout(gpointer data)
 {
 	Cpufreq * cpufreq = data;
 	PanelAppletHelper * helper = cpufreq->helper;
@@ -169,7 +171,12 @@ static gboolean _on_timeout(gpointer data)
 	char buf[256];
 
 	if(sysctlbyname(cpufreq->name, &freq, &freqsize, NULL, 0) < 0)
-		return helper->error(NULL, cpufreq->name, TRUE);
+	{
+		error_set("%s: %s: %s", applet.name, cpufreq->name,
+				strerror(errno));
+		helper->error(NULL, error_get(), 1);
+		return TRUE;
+	}
 	snprintf(buf, sizeof(buf), "%4u", (unsigned int)freq);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
 # if GTK_CHECK_VERSION(2, 12, 0)

@@ -16,6 +16,9 @@
 
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <System.h>
 #include <Desktop.h>
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
@@ -46,11 +49,11 @@ static void _phone_destroy(Phone * phone);
 static void _phone_embed(GtkWidget * widget, unsigned long window);
 
 /* callbacks */
-static int _on_message(void * data, uint32_t value1, uint32_t value2,
+static int _phone_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3);
-static void _on_plug_added(GtkWidget * widget);
-static gboolean _on_plug_removed(GtkWidget * widget);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous);
+static void _phone_on_plug_added(GtkWidget * widget);
+static gboolean _phone_on_plug_removed(GtkWidget * widget);
+static void _phone_on_screen_changed(GtkWidget * widget, GdkScreen * previous);
 
 
 /* public */
@@ -77,15 +80,18 @@ static Phone * _phone_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	Phone * phone;
 
 	if((phone = malloc(sizeof(*phone))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	phone->helper = helper;
 	phone->widget = gtk_socket_new();
 	g_signal_connect(phone->widget, "plug-added", G_CALLBACK(
-				_on_plug_added), NULL);
+				_phone_on_plug_added), NULL);
 	g_signal_connect(phone->widget, "plug-removed", G_CALLBACK(
-				_on_plug_removed), NULL);
+				_phone_on_plug_removed), NULL);
 	phone->source = g_signal_connect(phone->widget, "screen-changed",
-			G_CALLBACK(_on_screen_changed), NULL);
+			G_CALLBACK(_phone_on_screen_changed), NULL);
 	*widget = phone->widget;
 	return phone;
 }
@@ -97,7 +103,7 @@ static void _phone_destroy(Phone * phone)
 	if(phone->source != 0)
 		g_signal_handler_disconnect(phone->widget, phone->source);
 	phone->source = 0;
-	desktop_message_unregister(NULL, _on_message, phone->widget);
+	desktop_message_unregister(NULL, _phone_on_message, phone->widget);
 	gtk_widget_destroy(phone->widget);
 	free(phone);
 }
@@ -111,8 +117,8 @@ static void _phone_embed(GtkWidget * widget, unsigned long window)
 
 
 /* callbacks */
-/* on_message */
-static int _on_message(void * data, uint32_t value1, uint32_t value2,
+/* phone_on_message */
+static int _phone_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3)
 {
 	GtkWidget * widget = data;
@@ -122,27 +128,27 @@ static int _on_message(void * data, uint32_t value1, uint32_t value2,
 }
 
 
-/* on_plug_added */
-static void _on_plug_added(GtkWidget * widget)
+/* phone_on_plug_added */
+static void _phone_on_plug_added(GtkWidget * widget)
 {
 	gtk_widget_show(widget);
 }
 
 
-/* on_plug_removed */
-static gboolean _on_plug_removed(GtkWidget * widget)
+/* phone_on_plug_removed */
+static gboolean _phone_on_plug_removed(GtkWidget * widget)
 {
 	gtk_widget_hide(widget);
 	return TRUE;
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous)
+/* phone_on_screen_changed */
+static void _phone_on_screen_changed(GtkWidget * widget, GdkScreen * previous)
 {
 	if(previous != NULL)
 		return;
-	desktop_message_unregister(NULL, _on_message, widget);
-	desktop_message_register(NULL, PHONE_EMBED_MESSAGE, _on_message,
+	desktop_message_unregister(NULL, _phone_on_message, widget);
+	desktop_message_register(NULL, PHONE_EMBED_MESSAGE, _phone_on_message,
 			widget);
 }

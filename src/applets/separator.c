@@ -16,6 +16,9 @@
 
 
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <System.h>
 #include "Panel/applet.h"
 
 
@@ -60,7 +63,10 @@ static Separator * _separator_init(PanelAppletHelper * helper,
 	GtkOrientation orientation;
 
 	if((separator = malloc(sizeof(*separator))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	separator->helper = helper;
 	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)

@@ -34,7 +34,7 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _desktop_destroy(Desktop * desktop);
 
 /* callbacks */
-static void _on_clicked(GtkWidget * widget);
+static void _desktop_on_clicked(GtkWidget * widget);
 
 
 /* public */
@@ -68,7 +68,7 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(ret, _("Show desktop"));
 #endif
-	g_signal_connect(ret, "clicked", G_CALLBACK(_on_clicked), NULL);
+	g_signal_connect(ret, "clicked", G_CALLBACK(_desktop_on_clicked), NULL);
 	gtk_widget_show_all(ret);
 	*widget = ret;
 	/* XXX ugly workaround */
@@ -86,7 +86,7 @@ static void _desktop_destroy(Desktop * desktop)
 
 /* callbacks */
 /* on_clicked */
-static void _on_clicked(GtkWidget * widget)
+static void _desktop_on_clicked(GtkWidget * widget)
 {
 	GdkScreen * screen;
 	GdkDisplay * display;

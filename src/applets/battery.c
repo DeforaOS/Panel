@@ -83,11 +83,13 @@ static void _battery_destroy(Battery * battery);
 static GtkWidget * _battery_settings(Battery * battery, gboolean apply,
 		gboolean reset);
 
-static gdouble _battery_get(Battery * battery, gboolean * charging);
+/* accessors */
+static gboolean _battery_get(Battery * battery, gdouble * level,
+		gboolean * charging);
 static void _battery_set(Battery * battery, gdouble value, gboolean charging);
 
 /* callbacks */
-static gboolean _on_timeout(gpointer data);
+static gboolean _battery_on_timeout(gpointer data);
 
 
 /* public */
@@ -166,8 +168,8 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 		battery->box = hbox;
 	}
-	battery->timeout = g_timeout_add(timeout, _on_timeout, battery);
-	_on_timeout(battery);
+	battery->timeout = g_timeout_add(timeout, _battery_on_timeout, battery);
+	_battery_on_timeout(battery);
 	gtk_widget_show(battery->image);
 	*widget = battery->box;
 	return battery;
@@ -242,6 +244,153 @@ static void _settings_reset(Battery * battery, PanelAppletHelper * helper)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(battery->pr_level),
 			active);
 }
+
+
+/* accessors */
+/* battery_get */
+#if defined(__NetBSD__)
+static int _get_tre(int fd, int sensor, envsys_tre_data_t * tre);
+
+static gboolean _battery_get(Battery * battery, gdouble * level,
+		gboolean * charging)
+{
+	int i;
+	envsys_basic_info_t info;
+	envsys_tre_data_t tre;
+	unsigned int rate = 0;
+	unsigned int charge = 0;
+	unsigned int maxcharge = 0;
+
+	*charging = FALSE;
+	if(battery->fd < 0 && (battery->fd = open(_PATH_SYSMON, O_RDONLY)) < 0)
+	{
+		error_set("%s: %s: %s", applet.name, _PATH_SYSMON,
+				strerror(errno));
+		*level = -1.0;
+		return TRUE;
+	}
+	for(i = 0; i >= 0; i++)
+	{
+		memset(&info, 0, sizeof(info));
+		info.sensor = i;
+		if(ioctl(battery->fd, ENVSYS_GTREINFO, &info) == -1)
+		{
+			close(battery->fd);
+			battery->fd = -1;
+			error_set("%s: %s: %s", applet.name, "ENVSYS_GTREINFO",
+					strerror(errno));
+			*level = -1.0;
+			return TRUE;
+		}
+		if(!(info.validflags & ENVSYS_FVALID))
+			break;
+#ifdef DEBUG
+		fprintf(stderr, "DEBUG: %s() %d \"%s\"\n", __func__, i,
+				info.desc);
+#endif
+		if(strcmp("acpiacad0 connected", info.desc) == 0
+				&& _get_tre(battery->fd, i, &tre) == 0
+				&& tre.validflags & ENVSYS_FCURVALID)
+			/* FIXME implement */
+			continue;
+		if(strncmp("acpibat", info.desc, 7) != 0
+				|| info.desc[7] == '\0'
+				|| info.desc[8] != ' ')
+			continue;
+		if(strcmp("charge", &info.desc[9]) == 0
+				&& _get_tre(battery->fd, i, &tre) == 0
+				&& tre.validflags & ENVSYS_FCURVALID
+				&& tre.validflags & ENVSYS_FMAXVALID)
+		{
+			charge += tre.cur.data_us;
+			maxcharge += tre.max.data_us;
+		}
+		else if(strcmp("charge rate", &info.desc[9]) == 0
+				&& _get_tre(battery->fd, i, &tre) == 0
+				&& tre.validflags & ENVSYS_FCURVALID)
+			rate += tre.cur.data_us;
+		else if(strcmp("charging", &info.desc[9]) == 0
+				&& _get_tre(battery->fd, i, &tre) == 0
+				&& tre.validflags & ENVSYS_FCURVALID
+				&& tre.cur.data_us > 0)
+		{
+			*charging = TRUE;
+			continue;
+		}
+		else if(strcmp("discharge rate", &info.desc[9]) == 0
+				&& _get_tre(battery->fd, i, &tre) == 0
+				&& tre.validflags & ENVSYS_FCURVALID)
+			rate += tre.cur.data_us;
+	}
+	*level = (charge * 100.0) / maxcharge;
+	return TRUE;
+}
+
+static int _get_tre(int fd, int sensor, envsys_tre_data_t * tre)
+{
+	memset(tre, 0, sizeof(*tre));
+	tre->sensor = sensor;
+	if(ioctl(fd, ENVSYS_GTREDATA, tre) == -1)
+		return 1;
+	return !(tre->validflags & ENVSYS_FVALID);
+}
+#elif defined(__linux__)
+static gboolean _battery_get(Battery * battery, gdouble * level,
+		gboolean * charging)
+{
+	const char apm[] = "/proc/apm";
+	char buf[80];
+	ssize_t buf_cnt;
+	double d;
+	unsigned int u;
+	unsigned int x = 0;
+	int i;
+	int b;
+
+	*charging = FALSE;
+	if(battery->fd < 0 && (battery->fd = open(apm, O_RDONLY)) < 0)
+	{
+		error_set("%s: %s: %s", applet.name, apm, strerror(errno));
+		*level = 0.0 / 0.0;
+		return TRUE;
+	}
+	errno = ENODATA;
+	if((buf_cnt = read(battery->fd, buf, sizeof(buf))) <= 0)
+	{
+		error_set("%s: %s: %s", applet.name, apm, strerror(errno));
+		close(battery->fd);
+		battery->fd = -1;
+		*level = 0.0 / 0.0;
+		return TRUE;
+	}
+	buf[--buf_cnt] = '\0';
+	if(sscanf(buf, "%f %f %x %x %x %x %d%% %d min", &d, &d, &u, &x, &u,
+				&u, &b, &i) != 8)
+	{
+		error_set("%s: %s: %s", applet.name, apm, strerror(errno));
+		*level = 0.0 / 0.0;
+	}
+	else
+		*level = b;
+	*charging = (x != 0) ? TRUE : FALSE;
+	close(battery->fd);
+	battery->fd = -1;
+	return TRUE;
+}
+#else
+# warning Unsupported platform: battery is not available
+static gboolean _battery_get(Battery * battery, gdouble * level,
+		gboolean * charging)
+{
+	const gdouble error = 0.0 / 0.0;
+	PanelAppletHelper * helper = battery->helper;
+
+	*level = error;
+	*charging = FALSE;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
+	return 0.0 / 0.0;
+}
+#endif
 
 
 /* battery_set */
@@ -325,147 +474,30 @@ static void _set_image(Battery * battery, BatteryLevel level, gboolean charging)
 
 
 /* callbacks */
-/* on_timeout */
-#if defined(__NetBSD__)
-static int _get_tre(int fd, int sensor, envsys_tre_data_t * tre);
-
-static gdouble _battery_get(Battery * battery, gboolean * charging)
+/* battery_on_timeout */
+static gboolean _battery_on_timeout(gpointer data)
 {
-	int i;
-	envsys_basic_info_t info;
-	envsys_tre_data_t tre;
-	unsigned int rate = 0;
-	unsigned int charge = 0;
-	unsigned int maxcharge = 0;
+	const gdouble error = 0.0 / 0.0;
+	Battery * battery = data;
+	PanelAppletHelper * helper = battery->helper;
+	gdouble level;
+	gboolean charging;
+	int timeout;
 
-	*charging = FALSE;
-	if(battery->fd < 0 && (battery->fd = open(_PATH_SYSMON, O_RDONLY)) < 0)
+	if(_battery_get(battery, &level, &charging) == FALSE)
 	{
-		error_set("%s: %s", _PATH_SYSMON, strerror(errno));
-		return -1.0;
+		helper->error(NULL, error_get(), 1);
+		timeout = 0;
 	}
-	for(i = 0; i >= 0; i++)
+	else if(level == error || level < 0.0)
 	{
-		memset(&info, 0, sizeof(info));
-		info.sensor = i;
-		if(ioctl(battery->fd, ENVSYS_GTREINFO, &info) == -1)
-		{
-			close(battery->fd);
-			battery->fd = -1;
-			error_set("%s: %s", "ENVSYS_GTREINFO", strerror(errno));
-			return -1.0;
-		}
-		if(!(info.validflags & ENVSYS_FVALID))
-			break;
-#ifdef DEBUG
-		fprintf(stderr, "DEBUG: %s() %d \"%s\"\n", __func__, i,
-				info.desc);
-#endif
-		if(strcmp("acpiacad0 connected", info.desc) == 0
-				&& _get_tre(battery->fd, i, &tre) == 0
-				&& tre.validflags & ENVSYS_FCURVALID)
-			/* FIXME implement */
-			continue;
-		if(strncmp("acpibat ", info.desc, 7) != 0
-				|| info.desc[7] == '\0'
-				|| info.desc[8] != ' ')
-			continue;
-		if(strcmp("charge", &info.desc[9]) == 0
-				&& _get_tre(battery->fd, i, &tre) == 0
-				&& tre.validflags & ENVSYS_FCURVALID
-				&& tre.validflags & ENVSYS_FMAXVALID)
-		{
-			charge += tre.cur.data_us;
-			maxcharge += tre.max.data_us;
-		}
-		else if(strcmp("charge rate", &info.desc[9]) == 0
-				&& _get_tre(battery->fd, i, &tre) == 0
-				&& tre.validflags & ENVSYS_FCURVALID)
-			rate += tre.cur.data_us;
-		else if(strcmp("charging", &info.desc[9]) == 0
-				&& _get_tre(battery->fd, i, &tre) == 0
-				&& tre.validflags & ENVSYS_FCURVALID
-				&& tre.cur.data_us > 0)
-		{
-			*charging = TRUE;
-			continue;
-		}
-		else if(strcmp("discharge rate", &info.desc[9]) == 0
-				&& _get_tre(battery->fd, i, &tre) == 0
-				&& tre.validflags & ENVSYS_FCURVALID)
-			rate += tre.cur.data_us;
-	}
-	return (charge * 100.0) / maxcharge;
-}
-
-static int _get_tre(int fd, int sensor, envsys_tre_data_t * tre)
-{
-	memset(tre, 0, sizeof(*tre));
-	tre->sensor = sensor;
-	if(ioctl(fd, ENVSYS_GTREDATA, tre) == -1)
-		return 1;
-	return !(tre->validflags & ENVSYS_FVALID);
-}
-#elif defined(__linux__)
-static gdouble _battery_get(Battery * battery, gboolean * charging)
-{
-	const char apm[] = "/proc/apm";
-	char buf[80];
-	ssize_t buf_cnt;
-	double d;
-	unsigned int u;
-	unsigned int x = 0;
-	int i;
-	int b;
-
-	*charging = FALSE;
-	if(battery->fd < 0 && (battery->fd = open(apm, O_RDONLY)) < 0)
-	{
-		error_set("%s: %s", apm, strerror(errno));
-		return 0.0 / 0.0;
-	}
-	errno = ENODATA;
-	if((buf_cnt = read(battery->fd, buf, sizeof(buf))) <= 0)
-	{
-		error_set("%s: %s", apm, strerror(errno));
-		close(battery->fd);
-		battery->fd = -1;
-		return 0.0 / 0.0;
-	}
-	buf[--buf_cnt] = '\0';
-	if(sscanf(buf, "%lf %lf %x %x %x %x %d%% %d min", &d, &d, &u, &x, &u,
-				&u, &b, &i) != 8)
-	{
-		error_set("%s: %s", apm, strerror(errno));
-		d = 0.0 / 0.0;
+		helper->error(NULL, error_get(), 1);
+		timeout = 30000;
 	}
 	else
-		d = b;
-	*charging = (x != 0) ? TRUE : FALSE;
-	close(battery->fd);
-	battery->fd = -1;
-	return d;
-}
-#else
-static gdouble _battery_get(Battery * battery, gboolean * charging)
-{
-	*charging = FALSE;
-	/* FIXME not supported */
-	error_set("%s", strerror(ENOSYS));
-	return 0.0 / 0.0;
-}
-#endif
-
-
-/* callbacks */
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
-{
-	Battery * battery = data;
-	gboolean charging = FALSE;
-	gdouble value;
-
-	value = _battery_get(battery, &charging);
-	_battery_set(battery, value, charging);
-	return TRUE;
+		timeout = 5000;
+	_battery_set(battery, level, charging);
+	battery->timeout = (timeout > 0)
+		? g_timeout_add(timeout, _battery_on_timeout, battery) : 0;
+	return FALSE;
 }

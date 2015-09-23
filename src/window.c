@@ -321,7 +321,7 @@ int panel_window_append(PanelWindow * panel, char const * applet)
 	}
 	gtk_box_pack_start(GTK_BOX(panel->box), pa->widget, pa->pad->expand,
 			pa->pad->fill, 0);
-	gtk_widget_show(pa->widget);
+	gtk_widget_show_all(pa->widget);
 	panel->applets_cnt++;
 	return 0;
 }

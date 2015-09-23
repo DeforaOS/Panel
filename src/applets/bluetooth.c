@@ -55,11 +55,12 @@ static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 		GtkWidget ** widget);
 static void _bluetooth_destroy(Bluetooth * bluetooth);
 
-static gboolean _bluetooth_get(Bluetooth * bluetooth);
-static void _bluetooth_set(Bluetooth * bluetooth, gboolean on);
+/* accessors */
+static gboolean _bluetooth_get(Bluetooth * bluetooth, gboolean * active);
+static void _bluetooth_set(Bluetooth * bluetooth, gboolean active);
 
 /* callbacks */
-static gboolean _on_timeout(gpointer data);
+static gboolean _bluetooth_on_timeout(gpointer data);
 
 
 /* public */
@@ -83,13 +84,13 @@ PanelAppletDefinition applet =
 static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
+	const int timeout = 1000;
 	Bluetooth * bluetooth;
 	GtkIconSize iconsize;
 
 	if((bluetooth = object_new(sizeof(*bluetooth))) == NULL)
 		return NULL;
 	bluetooth->helper = helper;
-	bluetooth->timeout = 0;
 #if defined(__NetBSD__) || defined(__linux__)
 	bluetooth->fd = -1;
 #endif
@@ -106,8 +107,9 @@ static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 			_("Bluetooth is enabled"));
 #endif
 	gtk_box_pack_start(GTK_BOX(*widget), bluetooth->image, TRUE, TRUE, 0);
-	bluetooth->timeout = g_timeout_add(1000, _on_timeout, bluetooth);
-	_on_timeout(bluetooth);
+	gtk_widget_set_no_show_all(*widget, TRUE);
+	bluetooth->timeout = (_bluetooth_on_timeout(bluetooth) == TRUE)
+		? g_timeout_add(timeout, _bluetooth_on_timeout, bluetooth) : 0;
 	return bluetooth;
 }
 
@@ -126,47 +128,39 @@ static void _bluetooth_destroy(Bluetooth * bluetooth)
 }
 
 
-/* bluetooth_set */
-static void _bluetooth_set(Bluetooth * bluetooth, gboolean on)
+/* accessors */
+/* bluetooth_get */
+static gboolean _bluetooth_get(Bluetooth * bluetooth, gboolean * active)
 {
-	if(on == TRUE)
-		gtk_widget_show(bluetooth->image);
-	else
-		gtk_widget_hide(bluetooth->image);
-}
-
-
-/* callbacks */
-/* on_timeout */
 #if defined(__NetBSD__)
-static gboolean _bluetooth_get(Bluetooth * bluetooth)
-{
 	struct btreq btr;
 	const char name[] = "ubt0";
 
 	if(bluetooth->fd < 0 && (bluetooth->fd = socket(AF_BLUETOOTH,
 					SOCK_RAW, BTPROTO_HCI)) < 0)
 	{
-		error_set("%s: %s", "socket", strerror(errno));
-		return FALSE;
+		*active = FALSE;
+		error_set("%s: %s: %s", applet.name, "socket", strerror(errno));
+		return TRUE;
 	}
 	memset(&btr, 0, sizeof(btr));
 	strncpy(btr.btr_name, name, sizeof(name));
 	if(ioctl(bluetooth->fd, SIOCGBTINFO, &btr) == -1)
 	{
-		error_set("%s: %s", name, strerror(errno));
+		*active = FALSE;
+		error_set("%s: %s: %s", applet.name, name, strerror(errno));
 		close(bluetooth->fd);
 		bluetooth->fd = -1;
-		return FALSE;
 	}
-	/* XXX should not be necessary but EBADF happens once otherwise */
-	close(bluetooth->fd);
-	bluetooth->fd = -1;
+	else
+	{
+		*active = TRUE;
+		/* XXX should not be needed but EBADF happens once otherwise */
+		close(bluetooth->fd);
+		bluetooth->fd = -1;
+	}
 	return TRUE;
-}
 #elif defined(__linux__)
-static gboolean _bluetooth_get(Bluetooth * bluetooth)
-{
 	/* XXX currently hard-coded for the Openmoko Freerunner */
 	char const dv1[] = "/sys/bus/platform/devices/gta02-pm-bt.0/power_on";
 	char const dv2[] = "/sys/bus/platform/devices/neo1973-pm-bt.0/power_on";
@@ -182,36 +176,57 @@ static gboolean _bluetooth_get(Bluetooth * bluetooth)
 		}
 		if(bluetooth->fd < 0)
 		{
-			error_set("%s: %s", dev, strerror(errno));
-			return FALSE;
+			*active = FALSE;
+			error_set("%s: %s: %s", applet.name, dev,
+					strerror(errno));
+			return TRUE;
 		}
 	}
 	errno = ENODATA; /* in case the pseudo-file is empty */
 	if(lseek(bluetooth->fd, 0, SEEK_SET) != 0
-			|| read(bluetooth->fd, &on, sizeof(on)) != 1)
+			|| read(bluetooth->fd, &on, sizeof(on)) != sizeof(on))
 	{
-		error_set("%s: %s", dev, strerror(errno));
+		*active = FALSE;
+		error_set("%s: %s: %s", applet.name, dev, strerror(errno));
 		close(bluetooth->fd);
 		bluetooth->fd = -1;
-		return FALSE;
+		return TRUE;
 	}
-	return (on == '1') ? TRUE : FALSE;
-}
+	*active = (on == '1') ? TRUE : FALSE;
+	return TRUE;
 #else
-static gboolean _bluetooth_get(Bluetooth * bluetooth)
-{
 	/* FIXME not supported */
+	*active = FALSE;
+	error_set("%s: %s", applet.name, strerror(ENOSYS));
 	return FALSE;
-}
 #endif
+}
+
+
+/* bluetooth_set */
+static void _bluetooth_set(Bluetooth * bluetooth, gboolean active)
+{
+	if(active == TRUE)
+		gtk_widget_show(bluetooth->image);
+	else
+		gtk_widget_hide(bluetooth->image);
+}
 
 
 /* callbacks */
-/* on_timeout */
-static gboolean _on_timeout(gpointer data)
+/* bluetooth_on_timeout */
+static gboolean _bluetooth_on_timeout(gpointer data)
 {
 	Bluetooth * bluetooth = data;
+	gboolean active;
 
-	_bluetooth_set(bluetooth, _bluetooth_get(bluetooth));
+	if(_bluetooth_get(bluetooth, &active) == FALSE)
+	{
+		bluetooth->helper->error(NULL, error_get(), 1);
+		_bluetooth_set(bluetooth, FALSE);
+		bluetooth->timeout = 0;
+		return FALSE;
+	}
+	_bluetooth_set(bluetooth, active);
 	return TRUE;
 }
