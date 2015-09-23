@@ -175,6 +175,7 @@ static void _network_refresh(Network * network)
 	char const * p;
 #ifdef __NetBSD__
 	struct ifaddrs * ifa;
+	struct ifaddrs * ifp;
 #endif
 
 	if((p = network->helper->config_get(network->helper->panel, "network",
@@ -192,13 +193,13 @@ static void _network_refresh(Network * network)
 	if(getifaddrs(&ifa) != 0)
 		return;
 	_refresh_reset(network);
-	for(; ifa != NULL; ifa = ifa->ifa_next)
+	for(ifp = ifa; ifp != NULL; ifp = ifp->ifa_next)
 	{
-		_refresh_interface(network, ifa->ifa_name, ifa->ifa_flags);
+		_refresh_interface(network, ifp->ifa_name, ifp->ifa_flags);
 		/* XXX avoid repeated entries */
-		for(; ifa->ifa_next != NULL && strcmp(ifa->ifa_name,
-					ifa->ifa_next->ifa_name) == 0;
-				ifa = ifa->ifa_next);
+		for(; ifp->ifa_next != NULL && strcmp(ifp->ifa_name,
+					ifp->ifa_next->ifa_name) == 0;
+				ifp = ifp->ifa_next);
 	}
 	/* FIXME also remove/disable the interfaces not listed */
 	freeifaddrs(ifa);
