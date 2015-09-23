@@ -171,7 +171,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->sh_window = NULL;
 	if(panel->config == NULL)
 	{
-		panel_error(NULL, error_get(), 0); /* XXX put up a dialog box */
+		panel_error(NULL, NULL, 0); /* XXX put up a dialog box */
 		panel_delete(panel);
 		return NULL;
 	}
@@ -181,7 +181,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	/* panel windows */
 	if(panel_reset(panel) != 0)
 	{
-		panel_error(NULL, error_get(), 0); /* XXX as above */
+		panel_error(NULL, NULL, 0); /* XXX as above */
 		panel_delete(panel);
 		return NULL;
 	}
@@ -205,7 +205,7 @@ static int _new_config(Panel * panel)
 		return -1;
 	if(config_load(panel->config, filename) != 0)
 		/* we can ignore this error */
-		panel_error(NULL, "Could not load configuration", 1);
+		panel_error(NULL, _("Could not load configuration"), 1);
 	free(filename);
 	return 0;
 }
@@ -401,7 +401,7 @@ int panel_error(Panel * panel, char const * message, int ret)
 			"%s", _("Error"));
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
 #endif
-			"%s: %s", message, strerror(errno));
+			"%s", (message != NULL) ? message : error_get());
 	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Error"));
 	g_signal_connect(dialog, "delete-event", G_CALLBACK(_error_on_closex),
@@ -417,10 +417,7 @@ static int _error_text(char const * message, int ret)
 	if(message == NULL)
 		error_print(PROGNAME);
 	else
-	{
-		fputs(PROGNAME ": ", stderr);
-		perror(message);
-	}
+		fprintf(stderr, "%s: %s\n", PROGNAME, message);
 	return ret;
 }
 
@@ -604,7 +601,7 @@ static void _reset_on_idle_load(Panel * panel, PanelPosition position)
 		return;
 	if((p = string_new(applets)) == NULL)
 	{
-		panel_error(panel, error_get(), FALSE);
+		panel_error(panel, NULL, FALSE);
 		return;
 	}
 	for(q = p, i = 0;;)
