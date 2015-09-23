@@ -822,6 +822,7 @@ static int _wpa_start(WPA * wpa)
 
 static gboolean _start_timeout(gpointer data)
 {
+	const int timeout = 5000;
 	WPA * wpa = data;
 
 #ifdef DEBUG
@@ -831,11 +832,11 @@ static gboolean _start_timeout(gpointer data)
 			|| _timeout_channel(wpa, &wpa->channel[1]) != 0)
 	{
 		_wpa_stop(wpa);
-		wpa->source = g_timeout_add(5000, _start_timeout, wpa);
+		wpa->source = g_timeout_add(timeout, _start_timeout, wpa);
 		return FALSE;
 	}
 	_on_timeout(wpa);
-	wpa->source = g_timeout_add(5000, _on_timeout, wpa);
+	wpa->source = g_timeout_add(timeout, _on_timeout, wpa);
 	_wpa_queue(wpa, &wpa->channel[1], WC_ATTACH);
 	return FALSE;
 }
