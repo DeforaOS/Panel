@@ -1341,6 +1341,8 @@ static gboolean _on_watch_can_read(GIOChannel * source, GIOCondition condition,
 			break;
 		case G_IO_STATUS_ERROR:
 			_wpa_error(wpa, error->message, 1);
+			g_error_free(error);
+			/* fallback */
 		case G_IO_STATUS_EOF:
 		default: /* should not happen */
 			_wpa_reset(wpa);
