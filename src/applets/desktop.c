@@ -101,7 +101,7 @@ static void _desktop_on_clicked(GtkWidget * widget)
 	xev.xclient.message_type = gdk_x11_get_xatom_by_name_for_display(
 			display, "_NET_SHOWING_DESKTOP");
 	xev.xclient.format = 32;
-	memset(&xev.xclient.data, sizeof(xev.xclient.data), 0);
+	memset(&xev.xclient.data, 0, sizeof(xev.xclient.data));
 	xev.xclient.data.l[0] = 1;
 	gdk_error_trap_push();
 	XSendEvent(GDK_DISPLAY_XDISPLAY(display), GDK_WINDOW_XID(root),
