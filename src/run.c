@@ -303,7 +303,7 @@ static gboolean _execute_timeout(gpointer data);
 static void _on_run_execute(gpointer data)
 {
 	Run * run = data;
-	const GSpawnFlags flags = G_SPAWN_FILE_AND_ARGV_ZERO
+	const unsigned int flags = G_SPAWN_FILE_AND_ARGV_ZERO
 		| G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
 	char const * path;
 	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };

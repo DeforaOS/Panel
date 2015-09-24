@@ -190,8 +190,7 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 		gpointer data)
 {
 	Settings * settings = data;
-	const GSpawnFlags flags = G_SPAWN_FILE_AND_ARGV_ZERO
-		| G_SPAWN_SEARCH_PATH;
+	const unsigned int flags = G_SPAWN_FILE_AND_ARGV_ZERO;
 	GtkTreeModel * model;
 	GtkTreeIter iter;
 	gchar * exec;

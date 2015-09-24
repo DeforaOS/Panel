@@ -58,8 +58,8 @@ static int _usage(void);
 /* embed */
 static int _embed(int argc, char * argv[])
 {
-	GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN
-		| G_SPAWN_DO_NOT_REAP_CHILD;
+	const unsigned int flags = G_SPAWN_SEARCH_PATH
+		| G_SPAWN_CHILD_INHERITS_STDIN | G_SPAWN_DO_NOT_REAP_CHILD;
 	GPid pid;
 	int fd;
 	GError * error = NULL;

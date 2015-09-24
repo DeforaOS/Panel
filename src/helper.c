@@ -483,7 +483,7 @@ static int _panel_helper_suspend(Panel * panel)
 	int fd;
 	char * suspend[] = { "/usr/bin/sudo", "sudo", "/usr/bin/apm", "-s",
 		NULL };
-	GSpawnFlags flags = G_SPAWN_FILE_AND_ARGV_ZERO;
+	const unsigned int flags = G_SPAWN_FILE_AND_ARGV_ZERO;
 	GError * error = NULL;
 #endif
 
