@@ -107,8 +107,8 @@ char const * panel_get_config(Panel * panel, char const * section,
 /* panel_error */
 int panel_error(Panel * panel, char const * message, int ret)
 {
-	fputs(PROGNAME ": ", stderr);
-	perror(message);
+	fprintf(stderr, "%s: %s\n", PROGNAME, (message != NULL) ? message
+			: error_get());
 	return ret;
 }
 
