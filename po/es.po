@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-03 00:52+0200\n"
+"POT-Creation-Date: 2015-09-24 03:35+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -17,38 +17,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/applets/battery.c:202
+#: ../src/applets/battery.c:205
 msgid "Show the battery level"
 msgstr "Mostrar nivel de batería"
 
-#: ../src/applets/battery.c:273
+#: ../src/applets/battery.c:423
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: ../src/applets/battery.c:289 ../src/applets/wpa_supplicant.c:410
+#: ../src/applets/battery.c:439 ../src/applets/wpa_supplicant.c:415
 #: ../src/panel.c:401 ../src/panel.c:406 ../src/run.c:238 ../src/run.c:244
 #: ../tools/message.c:172
 msgid "Error"
 msgstr "Error"
 
-#: ../src/applets/battery.c:297
+#: ../src/applets/battery.c:447
 #, c-format
-msgid "Battery level: %.0lf%%%s"
-msgstr "Carga de Batería: %.0lf%%%s"
+msgid "Battery level: %.0f%%%s"
+msgstr "Carga de Batería: %.0f%%%s"
 
-#: ../src/applets/battery.c:298
+#: ../src/applets/battery.c:448
 msgid " (charging)"
 msgstr " (cargando)"
 
-#: ../src/applets/bluetooth.c:106
+#: ../src/applets/bluetooth.c:107
 msgid "Bluetooth is enabled"
 msgstr "Bluetooth está habilitado"
 
-#: ../src/applets/clock.c:86 ../src/applets/clock.c:97
+#: ../src/applets/clock.c:87 ../src/applets/clock.c:98
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: ../src/applets/clock.c:95 ../src/applets/clock.c:142
+#: ../src/applets/clock.c:96 ../src/applets/clock.c:148
 msgid ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
@@ -60,23 +60,23 @@ msgstr ""
 msgid "Close"
 msgstr "Cerrar"
 
-#: ../src/applets/cpu.c:99
+#: ../src/applets/cpu.c:101
 msgid "CPU:"
 msgstr "CPU:"
 
-#: ../src/applets/cpu.c:121 ../src/applets/cpufreq.c:145
-msgid "Unsupported platform"
-msgstr "Plataforma no admitida"
-
-#: ../src/applets/cpufreq.c:105
+#: ../src/applets/cpufreq.c:106
 msgid "No support detected"
 msgstr "No se ha encontrado soporte"
 
-#: ../src/applets/cpufreq.c:136 ../src/applets/cpufreq.c:177
+#: ../src/applets/cpufreq.c:137 ../src/applets/cpufreq.c:184
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:176
+#: ../src/applets/cpufreq.c:147 ../src/applets/memory.c:120
+msgid "Unsupported platform"
+msgstr "Plataforma no admitida"
+
+#: ../src/applets/cpufreq.c:183
 msgid "CPU frequency: "
 msgstr "Frecuancia de CPU: "
 
@@ -84,124 +84,124 @@ msgstr "Frecuancia de CPU: "
 msgid "Show desktop"
 msgstr "Mostrar escritorio"
 
-#: ../src/applets/embed.c:115
+#: ../src/applets/embed.c:112
 msgid "Desktop notifications"
 msgstr "Notificaciones de escritorio"
 
-#: ../src/applets/gps.c:89
+#: ../src/applets/gps.c:93
 msgid "GPS is enabled"
 msgstr "GPS habilitado"
 
-#: ../src/applets/gsm.c:95
+#: ../src/applets/gsm.c:102
 msgid "GSM is enabled"
 msgstr "GSM habilitado"
 
-#: ../src/applets/lock.c:81
+#: ../src/applets/lock.c:87
 msgid "Lock screen"
 msgstr "Bloquear pantalla"
 
-#: ../src/applets/lock.c:119 ../src/applets/mixer.c:290 ../src/run.c:119
+#: ../src/applets/lock.c:125 ../src/applets/mixer.c:294 ../src/run.c:119
 msgid "Command:"
 msgstr "Comando:"
 
-#: ../src/applets/logout.c:71
-msgid "logout: Logging out is disabled"
-msgstr "cerrar sesión: está deshabilitado el cierre de sesión "
+#: ../src/applets/logout.c:76
+msgid "Logging out is disabled"
+msgstr "Está deshabilitado el cierre de sesión "
 
-#: ../src/applets/logout.c:80 ../src/helper.c:228 ../src/helper.c:240
+#: ../src/applets/logout.c:85 ../src/helper.c:228 ../src/helper.c:240
 #: ../src/helper.c:249
 msgid "Logout"
 msgstr "Cerrar sesión"
 
-#: ../src/applets/menu.c:171
+#: ../src/applets/menu.c:174
 msgid "Main menu"
 msgstr "Menú principal"
 
-#: ../src/applets/menu.c:593
+#: ../src/applets/menu.c:596
 msgid "A_pplications"
 msgstr "A_plicaciones"
 
-#: ../src/applets/menu.c:603
+#: ../src/applets/menu.c:606
 msgid "_Run..."
 msgstr "_Ejecutar..."
 
-#: ../src/applets/menu.c:623
+#: ../src/applets/menu.c:626
 msgid "_Lock screen"
 msgstr "_Bloquear pantalla"
 
-#: ../src/applets/menu.c:631
+#: ../src/applets/menu.c:634
 msgid "R_otate"
 msgstr "R_otar"
 
-#: ../src/applets/menu.c:639
+#: ../src/applets/menu.c:642
 msgid "Lo_gout..."
 msgstr "_Cerrar sesión"
 
-#: ../src/applets/menu.c:649
+#: ../src/applets/menu.c:652
 msgid "S_uspend"
 msgstr "S_uspender"
 
-#: ../src/applets/menu.c:655
+#: ../src/applets/menu.c:658
 msgid "_Shutdown..."
 msgstr "_Apagar..."
 
-#: ../src/applets/memory.c:97
+#: ../src/applets/memory.c:99
 msgid "RAM:"
 msgstr "RAM:"
 
-#: ../src/applets/memory.c:118
-msgid "memory: Unsupported platform"
-msgstr "memoria: Plataforma inadmitida"
-
-#: ../src/applets/mixer.c:128
+#: ../src/applets/mixer.c:132
 msgid "Show mixer"
 msgstr "Mostrar mezclador de volumen"
 
-#: ../src/applets/mixer.c:296
+#: ../src/applets/mixer.c:300
 msgid "Size:"
 msgstr "Tamaño:"
 
-#: ../src/applets/mixer.c:309
+#: ../src/applets/mixer.c:313
 msgid "Width:"
 msgstr "Ancho:"
 
-#: ../src/applets/mixer.c:324
+#: ../src/applets/mixer.c:328
 msgid "Height:"
 msgstr "Alto:"
 
-#: ../src/applets/mixer.c:335
+#: ../src/applets/mixer.c:339
 msgid "Keep ratio"
 msgstr "Mantener proporciones"
 
-#: ../src/applets/mpd.c:116
+#: ../src/applets/mixer.c:408
+msgid "Could not start mixer"
+msgstr ""
+
+#: ../src/applets/mpd.c:113
 msgid "Previous"
 msgstr "Anterior"
 
-#: ../src/applets/mpd.c:118
+#: ../src/applets/mpd.c:115
 msgid "Rewind"
 msgstr "Retroceder"
 
-#: ../src/applets/mpd.c:120
+#: ../src/applets/mpd.c:117
 msgid "Play"
 msgstr "Play"
 
-#: ../src/applets/mpd.c:122
+#: ../src/applets/mpd.c:119
 msgid "Pause"
 msgstr "Pausa"
 
-#: ../src/applets/mpd.c:124
+#: ../src/applets/mpd.c:121
 msgid "Stop"
 msgstr "Stop"
 
-#: ../src/applets/mpd.c:126
+#: ../src/applets/mpd.c:123
 msgid "Forward"
 msgstr "Adelantar"
 
-#: ../src/applets/mpd.c:128
+#: ../src/applets/mpd.c:125
 msgid "Next"
 msgstr "Siguiente"
 
-#: ../src/applets/network.c:305
+#: ../src/applets/network.c:342
 #, c-format
 msgid ""
 "%s\n"
@@ -212,7 +212,15 @@ msgstr ""
 "In: %lu kB/s\n"
 "Out: %lu kB/s"
 
-#: ../src/applets/pager.c:280
+#: ../src/applets/network.c:395
+msgid "Show local interfaces"
+msgstr ""
+
+#: ../src/applets/network.c:401
+msgid "Show the interfaces disabled"
+msgstr ""
+
+#: ../src/applets/pager.c:282
 msgid "Desk"
 msgstr "Escritorio"
 
@@ -220,55 +228,51 @@ msgstr "Escritorio"
 msgid "Rotate the screen"
 msgstr "Rotar pantalla"
 
-#: ../src/applets/swap.c:93
+#: ../src/applets/swap.c:92
 msgid "Swap:"
 msgstr "Swap:"
 
-#: ../src/applets/swap.c:113
-msgid "swap: Unsupported platform"
-msgstr "swap: Plataforma no admitida"
-
-#: ../src/applets/tasks.c:482 ../src/applets/title.c:240
+#: ../src/applets/tasks.c:483 ../src/applets/title.c:244
 msgid "(Untitled)"
 msgstr "(Sin Título)"
 
-#: ../src/applets/tasks.c:755
+#: ../src/applets/tasks.c:756
 msgid "Move"
 msgstr "Mover"
 
-#: ../src/applets/tasks.c:757
+#: ../src/applets/tasks.c:758
 msgid "Resize"
 msgstr "Ajustar tamaño"
 
-#: ../src/applets/tasks.c:759
+#: ../src/applets/tasks.c:760
 msgid "Minimize"
 msgstr "Minimizar"
 
-#: ../src/applets/tasks.c:761
+#: ../src/applets/tasks.c:762
 msgid "Shade"
 msgstr "Shade"
 
-#: ../src/applets/tasks.c:763
+#: ../src/applets/tasks.c:764
 msgid "Stick"
 msgstr "Stick"
 
-#: ../src/applets/tasks.c:765
+#: ../src/applets/tasks.c:766
 msgid "Maximize horizontally"
 msgstr "Maximizar horizontalmente"
 
-#: ../src/applets/tasks.c:767
+#: ../src/applets/tasks.c:768
 msgid "Maximize vertically"
 msgstr "Maximizar verticalemnte"
 
-#: ../src/applets/tasks.c:771
+#: ../src/applets/tasks.c:772
 msgid "Change desktop"
 msgstr "Cambiar escritorio"
 
-#: ../src/applets/tasks.c:812
+#: ../src/applets/tasks.c:813
 msgid "Maximize"
 msgstr "Maximizar"
 
-#: ../src/applets/usb.c:90
+#: ../src/applets/usb.c:94
 msgid "USB networking device connected"
 msgstr "Dispositivo USB networking conectado"
 
@@ -276,46 +280,46 @@ msgstr "Dispositivo USB networking conectado"
 msgid "Wireless networking"
 msgstr "Conexión inalámbica"
 
-#: ../src/applets/wpa_supplicant.c:306 ../src/applets/wpa_supplicant.c:969
+#: ../src/applets/wpa_supplicant.c:306 ../src/applets/wpa_supplicant.c:976
 msgid "Unavailable"
 msgstr "No disponible"
 
-#: ../src/applets/wpa_supplicant.c:422
+#: ../src/applets/wpa_supplicant.c:427
 #, c-format
 msgid "Connected to interface %s"
 msgstr "Conectado a la interface %s"
 
-#: ../src/applets/wpa_supplicant.c:426
+#: ../src/applets/wpa_supplicant.c:431
 msgid "Connecting..."
 msgstr "Conectando..."
 
-#: ../src/applets/wpa_supplicant.c:434
+#: ../src/applets/wpa_supplicant.c:439
 msgid "Scanning..."
 msgstr "Escaneando..."
 
-#: ../src/applets/wpa_supplicant.c:444
+#: ../src/applets/wpa_supplicant.c:449
 #, c-format
 msgid "Connected to network %s"
 msgstr "Conectado a la red %s"
 
-#: ../src/applets/wpa_supplicant.c:506
+#: ../src/applets/wpa_supplicant.c:512
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr "La red \"%s\" está protegida por una clave."
 
-#: ../src/applets/wpa_supplicant.c:523
+#: ../src/applets/wpa_supplicant.c:529
 msgid "Password required"
 msgstr "Clave requerida"
 
-#: ../src/applets/wpa_supplicant.c:537
+#: ../src/applets/wpa_supplicant.c:543
 msgid "Wireless key"
 msgstr "Clave inaámbrica"
 
-#: ../src/applets/wpa_supplicant.c:548
+#: ../src/applets/wpa_supplicant.c:554
 msgid "Key: "
 msgstr "Clave: "
 
-#: ../src/applets/wpa_supplicant.c:1017
+#: ../src/applets/wpa_supplicant.c:1024
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -324,7 +328,7 @@ msgstr ""
 "Frecuencia: %u\n"
 "Nivel: %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:1018
+#: ../src/applets/wpa_supplicant.c:1025
 msgid ""
 "\n"
 "Security: "
@@ -332,31 +336,27 @@ msgstr ""
 "\n"
 "Seguridad: "
 
-#: ../src/applets/wpa_supplicant.c:1059 ../tools/wifibrowser.c:119
+#: ../src/applets/wpa_supplicant.c:1068 ../tools/wifibrowser.c:119
 msgid "Reassociate"
 msgstr "Reasociar"
 
-#: ../src/applets/wpa_supplicant.c:1077 ../tools/wifibrowser.c:120
+#: ../src/applets/wpa_supplicant.c:1086 ../tools/wifibrowser.c:120
 msgid "Rescan"
 msgstr "Reescanear"
 
-#: ../src/applets/wpa_supplicant.c:1145
-msgid "Wireless is disabled"
-msgstr "Wireless está desconectado"
-
-#: ../src/applets/wpa_supplicant.c:1299
+#: ../src/applets/wpa_supplicant.c:1324
 msgid "Unknown error"
 msgstr "Error desconocido"
 
-#: ../src/applets/wpa_supplicant.c:1301
+#: ../src/applets/wpa_supplicant.c:1326
 msgid "Could not save the configuration"
 msgstr "La configuración no ha podido ser guardada"
 
-#: ../src/applets/wpa_supplicant.c:1391
+#: ../src/applets/wpa_supplicant.c:1418
 msgid "Password changed"
 msgstr "Se ha cambiado la contraseña"
 
-#: ../src/applets/wpa_supplicant.c:1558
+#: ../src/applets/wpa_supplicant.c:1585
 #, c-format
 msgid "Hidden (%s)"
 msgstr "Escondido (%s)"
@@ -434,51 +434,55 @@ msgstr "Pequeño"
 msgid "Smaller"
 msgstr "Más quequeño"
 
-#: ../src/panel.c:688
+#: ../src/panel.c:208
+msgid "Could not load configuration"
+msgstr ""
+
+#: ../src/panel.c:685
 msgid "Panel preferences"
 msgstr "Preferencias del panel"
 
-#: ../src/panel.c:705
+#: ../src/panel.c:702
 msgid "General"
 msgstr "General"
 
-#: ../src/panel.c:709
+#: ../src/panel.c:706
 msgid "Panels"
 msgstr "Paneles"
 
-#: ../src/panel.c:731
+#: ../src/panel.c:728
 msgid "Accept focus"
 msgstr "Aceptar enfoque"
 
-#: ../src/panel.c:735
+#: ../src/panel.c:732
 msgid "Keep above other windows"
 msgstr "Mantener encima de otras ventanas"
 
-#: ../src/panel.c:743
+#: ../src/panel.c:740
 msgid "Bottom panel:"
 msgstr "Panel inferior:"
 
-#: ../src/panel.c:743
+#: ../src/panel.c:740
 msgid "Top panel:"
 msgstr "Panel superior:"
 
-#: ../src/panel.c:744
+#: ../src/panel.c:741
 msgid "Left panel:"
 msgstr "Panel izquierdo"
 
-#: ../src/panel.c:744
+#: ../src/panel.c:741
 msgid "Right panel:"
 msgstr "Panel derecho"
 
-#: ../src/panel.c:776
+#: ../src/panel.c:773
 msgid "_Enabled"
 msgstr "_Habilitado"
 
-#: ../src/panel.c:788 ../src/panel.c:793
+#: ../src/panel.c:785 ../src/panel.c:790
 msgid "Default"
 msgstr "Por Defecto"
 
-#: ../src/panel.c:848
+#: ../src/panel.c:845
 msgid "Applets:"
 msgstr "Applets:"
 
