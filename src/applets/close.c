@@ -22,6 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
+#include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
