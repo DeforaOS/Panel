@@ -150,7 +150,8 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 # if defined(__FreeBSD__)
 	if(sysctlbyname(name, &cpu_time, &size, NULL, 0) < 0)
 # elif defined(__NetBSD__)
-	if(sysctl(mib, 2, &cpu_time, &size, NULL, 0) < 0)
+	if(sysctl(mib, sizeof(mib) / sizeof(*mib), &cpu_time, &size, NULL, 0)
+			< 0)
 # endif
 	{
 		*level = 0.0 / 0.0;
