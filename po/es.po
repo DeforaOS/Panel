@@ -171,7 +171,7 @@ msgstr "Mantener proporciones"
 
 #: ../src/applets/mixer.c:408
 msgid "Could not start mixer"
-msgstr ""
+msgstr "No se pudo iniciar el control de volumen"
 
 #: ../src/applets/mpd.c:113
 msgid "Previous"
@@ -214,11 +214,11 @@ msgstr ""
 
 #: ../src/applets/network.c:395
 msgid "Show local interfaces"
-msgstr ""
+msgstr "Mostrar interfaces locales"
 
 #: ../src/applets/network.c:401
 msgid "Show the interfaces disabled"
-msgstr ""
+msgstr "Mostrar las interfaces desabilitadas"
 
 #: ../src/applets/pager.c:282
 msgid "Desk"
@@ -436,7 +436,7 @@ msgstr "Más quequeño"
 
 #: ../src/panel.c:208
 msgid "Could not load configuration"
-msgstr ""
+msgstr "No se pudo cargar configuración"
 
 #: ../src/panel.c:685
 msgid "Panel preferences"
