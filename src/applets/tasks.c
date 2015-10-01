@@ -50,6 +50,7 @@ typedef struct _Task
 	GtkWidget * image;
 	GtkWidget * label;
 	gboolean delete;
+	gboolean reorder;
 } Task;
 
 struct _PanelApplet
@@ -58,6 +59,7 @@ struct _PanelApplet
 	Task ** tasks;
 	size_t tasks_cnt;
 	gboolean label;
+	gboolean reorder;
 
 	GtkWidget * widget;
 	GtkWidget * hbox;
@@ -88,8 +90,8 @@ static const char * _tasks_atom[TASKS_ATOM_COUNT] =
 
 /* prototypes */
 /* task */
-static Task * _task_new(Tasks * tasks, gboolean label, Window window,
-		char const * name, GdkPixbuf * pixbuf);
+static Task * _task_new(Tasks * tasks, gboolean label, gboolean reorder,
+		Window window, char const * name, GdkPixbuf * pixbuf);
 static void _task_delete(Task * Task);
 static void _task_set(Task * task, char const * name, GdkPixbuf * pixbuf);
 static void _task_toggle_state(Task * task, TasksAtom state);
@@ -157,8 +159,8 @@ PanelAppletDefinition applet =
 /* functions */
 /* Task */
 /* task_new */
-static Task * _task_new(Tasks * tasks, gboolean label, Window window,
-		char const * name, GdkPixbuf * pixbuf)
+static Task * _task_new(Tasks * tasks, gboolean label, gboolean reorder,
+		Window window, char const * name, GdkPixbuf * pixbuf)
 {
 	Task * task;
 	GtkWidget * hbox;
@@ -181,6 +183,7 @@ static Task * _task_new(Tasks * tasks, gboolean label, Window window,
 				_task_on_clicked), task);
 	task->image = gtk_image_new();
 	task->delete = FALSE;
+	task->reorder = reorder;
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 #else
@@ -284,6 +287,7 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	tasks->helper = helper;
 	tasks->tasks = NULL;
 	tasks->tasks_cnt = 0;
+	/* config: label */
 	if((p = helper->config_get(helper->panel, "tasks", "label")) != NULL)
 		tasks->label = strtol(p, NULL, 0) ? TRUE : FALSE;
 	else
@@ -291,6 +295,15 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		tasks->label = FALSE;
 #else
 		tasks->label = TRUE;
+#endif
+	/* config: reorder */
+	if((p = helper->config_get(helper->panel, "tasks", "reorder")) != NULL)
+		tasks->reorder = strtol(p, NULL, 0) ? TRUE : FALSE;
+	else
+#ifdef EMBEDDED
+		tasks->reorder = TRUE;
+#else
+		tasks->reorder = FALSE;
 #endif
 #if GTK_CHECK_VERSION(3, 0, 0)
 	tasks->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
@@ -624,14 +637,14 @@ static int _do_tasks_add(Tasks * tasks, int desktop, Window window,
 			== NULL)
 		return 1;
 	tasks->tasks = q;
-	if((p = _task_new(tasks, tasks->label, window, name, pixbuf)) == NULL)
+	if((p = _task_new(tasks, tasks->label, tasks->reorder, window, name,
+					pixbuf)) == NULL)
 		return 1;
 	tasks->tasks[tasks->tasks_cnt++] = p;
 	gtk_widget_show_all(p->widget);
 	gtk_box_pack_start(GTK_BOX(tasks->hbox), p->widget, FALSE, TRUE, 0);
-#ifdef EMBEDDED
-	gtk_box_reorder_child(GTK_BOX(tasks->hbox), p->widget, 0);
-#endif
+	if(tasks->reorder)
+		gtk_box_reorder_child(GTK_BOX(tasks->hbox), p->widget, 0);
 	return 0;
 }
 
@@ -700,9 +713,9 @@ static void _task_on_clicked(gpointer data)
 	Task * task = data;
 
 	_clicked_activate(task);
-#ifdef EMBEDDED
-	gtk_box_reorder_child(GTK_BOX(task->tasks->hbox), task->widget, 0);
-#endif
+	if(task->reorder)
+		gtk_box_reorder_child(GTK_BOX(task->tasks->hbox), task->widget,
+				0);
 }
 
 static void _clicked_activate(Task * task)
