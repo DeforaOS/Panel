@@ -45,6 +45,8 @@
 /* private */
 /* prototypes */
 static int _panelctl(PanelMessageShow what, gboolean show);
+
+static int _error(char const * message, int ret);
 static int _usage(void);
 
 
@@ -54,6 +56,15 @@ static int _panelctl(PanelMessageShow what, gboolean show)
 	desktop_message_send(PANEL_CLIENT_MESSAGE, PANEL_MESSAGE_SHOW, what,
 			show);
 	return 0;
+}
+
+
+/* error */
+static int _error(char const * message, int ret)
+{
+	fputs(PROGNAME ": ", stderr);
+	perror(message);
+	return ret;
 }
 
 
@@ -83,7 +94,8 @@ int main(int argc, char * argv[])
 	int what = -1;
 	gboolean show = TRUE;
 
-	setlocale(LC_ALL, "");
+	if(setlocale(LC_ALL, "") == NULL)
+		_error("setlocale", 1);
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	gtk_init(&argc, &argv);
