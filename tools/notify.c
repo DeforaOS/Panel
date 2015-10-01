@@ -196,6 +196,7 @@ int main(int argc, char * argv[])
 		}
 	if(optind == argc)
 		return _usage();
-	_notify(embed, iconsize, timeout, &argv[optind]);
+	if(_notify(embed, iconsize, timeout, &argv[optind]) != 0)
+		return 2;
 	return 0;
 }
