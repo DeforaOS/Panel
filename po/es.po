@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-27 22:07+0200\n"
+"POT-Creation-Date: 2015-10-01 22:24+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -232,43 +232,43 @@ msgstr "Rotar pantalla"
 msgid "Swap:"
 msgstr "Swap:"
 
-#: ../src/applets/tasks.c:483 ../src/applets/title.c:244
+#: ../src/applets/tasks.c:511 ../src/applets/title.c:244
 msgid "(Untitled)"
 msgstr "(Sin Título)"
 
-#: ../src/applets/tasks.c:756
+#: ../src/applets/tasks.c:794
 msgid "Move"
 msgstr "Mover"
 
-#: ../src/applets/tasks.c:758
+#: ../src/applets/tasks.c:796
 msgid "Resize"
 msgstr "Ajustar tamaño"
 
-#: ../src/applets/tasks.c:760
+#: ../src/applets/tasks.c:798
 msgid "Minimize"
 msgstr "Minimizar"
 
-#: ../src/applets/tasks.c:762
+#: ../src/applets/tasks.c:800
 msgid "Shade"
 msgstr "Shade"
 
-#: ../src/applets/tasks.c:764
+#: ../src/applets/tasks.c:802
 msgid "Stick"
 msgstr "Stick"
 
-#: ../src/applets/tasks.c:766
+#: ../src/applets/tasks.c:804
 msgid "Maximize horizontally"
 msgstr "Maximizar horizontalmente"
 
-#: ../src/applets/tasks.c:768
+#: ../src/applets/tasks.c:806
 msgid "Maximize vertically"
 msgstr "Maximizar verticalemnte"
 
-#: ../src/applets/tasks.c:772
+#: ../src/applets/tasks.c:810
 msgid "Change desktop"
 msgstr "Cambiar escritorio"
 
-#: ../src/applets/tasks.c:813
+#: ../src/applets/tasks.c:851
 msgid "Maximize"
 msgstr "Maximizar"
 
@@ -486,7 +486,7 @@ msgstr "Por Defecto"
 msgid "Applets:"
 msgstr "Applets:"
 
-#: ../src/panelctl.c:63
+#: ../src/panelctl.c:74
 #, c-format
 msgid ""
 "Usage: %s [-B|-L|-R|-S|-T|-b|-l|-r|-t]\n"
