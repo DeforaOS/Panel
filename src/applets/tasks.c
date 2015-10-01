@@ -48,9 +48,7 @@ typedef struct _Task
 	Window window;
 	GtkWidget * widget;
 	GtkWidget * image;
-#ifndef EMBEDDED
 	GtkWidget * label;
-#endif
 	gboolean delete;
 } Task;
 
@@ -190,18 +188,20 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 	gtk_box_pack_start(GTK_BOX(hbox), task->image, FALSE, TRUE, 0);
 #ifndef EMBEDDED
 	task->label = gtk_label_new(name);
-#if 0 /* FIXME doesn't seem to work properly */
+# if 0 /* FIXME doesn't seem to work properly */
 	gtk_label_set_ellipsize(GTK_LABEL(task->label), PANGO_ELLIPSIZE_END);
-#endif
+# endif
 	if(task->tasks->iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
 		gtk_label_set_line_wrap(GTK_LABEL(task->label), TRUE);
-#if GTK_CHECK_VERSION(2, 10, 0)
+# if GTK_CHECK_VERSION(2, 10, 0)
 	gtk_label_set_line_wrap_mode(GTK_LABEL(task->label),
 			PANGO_WRAP_WORD_CHAR);
-#endif
+# endif
 	gtk_box_pack_start(GTK_BOX(hbox), task->label, FALSE, TRUE, 4);
 	gtk_widget_set_size_request(task->widget, tasks->icon_width,
 			tasks->icon_height);
+#else
+	task->label = NULL;
 #endif
 	gtk_container_add(GTK_CONTAINER(task->widget), hbox);
 	_task_set(task, name, pixbuf);
@@ -221,9 +221,8 @@ static void _task_delete(Task * task)
 /* task_set */
 static void _task_set(Task * task, char const * name, GdkPixbuf * pixbuf)
 {
-#ifndef EMBEDDED
-	gtk_label_set_text(GTK_LABEL(task->label), name);
-#endif
+	if(task->label != NULL)
+		gtk_label_set_text(GTK_LABEL(task->label), name);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(task->widget, name);
 #endif
