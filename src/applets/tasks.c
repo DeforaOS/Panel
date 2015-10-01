@@ -116,6 +116,7 @@ static void _tasks_do(Tasks * tasks);
 static gboolean _task_on_button_press(GtkWidget * widget, GdkEventButton * event,
 		gpointer data);
 static void _task_on_clicked(gpointer data);
+static gboolean _task_on_delete_event(gpointer data);
 static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
 static gboolean _task_on_popup(gpointer data);
@@ -173,6 +174,8 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 	task->widget = gtk_button_new();
 	g_signal_connect(task->widget, "button-press-event", G_CALLBACK(
 				_task_on_button_press), task);
+	g_signal_connect_swapped(task->widget, "delete-event", G_CALLBACK(
+				_task_on_delete_event), task);
 	g_signal_connect_swapped(task->widget, "popup-menu", G_CALLBACK(
 				_task_on_popup), task);
 	g_signal_connect_swapped(task->widget, "clicked", G_CALLBACK(
@@ -209,7 +212,8 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 /* task_delete */
 static void _task_delete(Task * task)
 {
-	gtk_container_remove(GTK_CONTAINER(task->tasks->hbox), task->widget);
+	if(task->widget != NULL)
+		gtk_widget_destroy(task->widget);
 	free(task);
 }
 
@@ -717,6 +721,16 @@ static void _clicked_activate(Task * task)
 #else
 	gdk_error_trap_pop();
 #endif
+}
+
+
+/* task_on_delete_event */
+static gboolean _task_on_delete_event(gpointer data)
+{
+	Task * task = data;
+
+	task->widget = NULL;
+	return FALSE;
 }
 
 
