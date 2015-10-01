@@ -57,6 +57,7 @@ struct _PanelApplet
 	PanelAppletHelper * helper;
 	Task ** tasks;
 	size_t tasks_cnt;
+	gboolean label;
 
 	GtkWidget * widget;
 	GtkWidget * hbox;
@@ -87,8 +88,8 @@ static const char * _tasks_atom[TASKS_ATOM_COUNT] =
 
 /* prototypes */
 /* task */
-static Task * _task_new(Tasks * tasks, Window window, char const * name,
-		GdkPixbuf * pixbuf);
+static Task * _task_new(Tasks * tasks, gboolean label, Window window,
+		char const * name, GdkPixbuf * pixbuf);
 static void _task_delete(Task * Task);
 static void _task_set(Task * task, char const * name, GdkPixbuf * pixbuf);
 static void _task_toggle_state(Task * task, TasksAtom state);
@@ -156,8 +157,8 @@ PanelAppletDefinition applet =
 /* functions */
 /* Task */
 /* task_new */
-static Task * _task_new(Tasks * tasks, Window window, char const * name,
-		GdkPixbuf * pixbuf)
+static Task * _task_new(Tasks * tasks, gboolean label, Window window,
+		char const * name, GdkPixbuf * pixbuf)
 {
 	Task * task;
 	GtkWidget * hbox;
@@ -186,23 +187,25 @@ static Task * _task_new(Tasks * tasks, Window window, char const * name,
 	hbox = gtk_hbox_new(FALSE, 0);
 #endif
 	gtk_box_pack_start(GTK_BOX(hbox), task->image, FALSE, TRUE, 0);
-#ifndef EMBEDDED
-	task->label = gtk_label_new(name);
+	if(label)
+	{
+		task->label = gtk_label_new(name);
 # if 0 /* FIXME doesn't seem to work properly */
-	gtk_label_set_ellipsize(GTK_LABEL(task->label), PANGO_ELLIPSIZE_END);
+		gtk_label_set_ellipsize(GTK_LABEL(task->label),
+				PANGO_ELLIPSIZE_END);
 # endif
-	if(task->tasks->iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
-		gtk_label_set_line_wrap(GTK_LABEL(task->label), TRUE);
+		if(tasks->iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
+			gtk_label_set_line_wrap(GTK_LABEL(task->label), TRUE);
 # if GTK_CHECK_VERSION(2, 10, 0)
-	gtk_label_set_line_wrap_mode(GTK_LABEL(task->label),
-			PANGO_WRAP_WORD_CHAR);
+		gtk_label_set_line_wrap_mode(GTK_LABEL(task->label),
+				PANGO_WRAP_WORD_CHAR);
 # endif
-	gtk_box_pack_start(GTK_BOX(hbox), task->label, FALSE, TRUE, 4);
-	gtk_widget_set_size_request(task->widget, tasks->icon_width,
-			tasks->icon_height);
-#else
-	task->label = NULL;
-#endif
+		gtk_box_pack_start(GTK_BOX(hbox), task->label, FALSE, TRUE, 4);
+		gtk_widget_set_size_request(task->widget, tasks->icon_width,
+				tasks->icon_height);
+	}
+	else
+		task->label = NULL;
 	gtk_container_add(GTK_CONTAINER(task->widget), hbox);
 	_task_set(task, name, pixbuf);
 	return task;
@@ -274,12 +277,21 @@ static void _task_toggle_state2(Task * task, TasksAtom state1,
 static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Tasks * tasks;
+	char const * p;
 
 	if((tasks = malloc(sizeof(*tasks))) == NULL)
 		return NULL;
 	tasks->helper = helper;
 	tasks->tasks = NULL;
 	tasks->tasks_cnt = 0;
+	if((p = helper->config_get(helper->panel, "tasks", "label")) != NULL)
+		tasks->label = strtol(p, NULL, 0) ? TRUE : FALSE;
+	else
+#ifdef EMBEDDED
+		tasks->label = FALSE;
+#else
+		tasks->label = TRUE;
+#endif
 #if GTK_CHECK_VERSION(3, 0, 0)
 	tasks->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
@@ -612,7 +624,7 @@ static int _do_tasks_add(Tasks * tasks, int desktop, Window window,
 			== NULL)
 		return 1;
 	tasks->tasks = q;
-	if((p = _task_new(tasks, window, name, pixbuf)) == NULL)
+	if((p = _task_new(tasks, tasks->label, window, name, pixbuf)) == NULL)
 		return 1;
 	tasks->tasks[tasks->tasks_cnt++] = p;
 	gtk_widget_show_all(p->widget);
