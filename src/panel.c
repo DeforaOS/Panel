@@ -710,7 +710,6 @@ static void _show_preferences_window(Panel * panel)
 	vbox = GTK_DIALOG(panel->pr_window)->vbox;
 #endif
 	gtk_box_pack_start(GTK_BOX(vbox), panel->pr_notebook, TRUE, TRUE, 0);
-	/* FIXME implement a way to enable applets per panel (and in order) */
 	_preferences_on_response_cancel(panel);
 	gtk_widget_show_all(vbox);
 }
