@@ -758,16 +758,18 @@ static int _idle_access_path(Menu * menu, char const * path,
 
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
 {
+	const char section[] = "Desktop Entry";
+	const char generic[] = "GenericName";
+	const char name[] = "Name";
 	Config * ca = (Config *)a;
 	Config * cb = (Config *)b;
 	char const * cap;
 	char const * cbp;
-	const char section[] = "Desktop Entry";
-	const char variable[] = "Name";
 
-	/* these should not fail */
-	cap = config_get(ca, section, variable);
-	cbp = config_get(cb, section, variable);
+	if((cap = config_get(ca, section, generic)) == NULL)
+		cap = config_get(ca, section, name);
+	if((cbp = config_get(cb, section, generic)) == NULL)
+		cbp = config_get(cb, section, name);
 	return string_compare(cap, cbp);
 }
 
