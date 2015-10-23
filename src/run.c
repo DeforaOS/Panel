@@ -162,12 +162,24 @@ static Run * _run_new(void)
 #else
 	hbox = gtk_hbox_new(FALSE, 0);
 #endif
+#if GTK_CHECK_VERSION(3, 10, 0)
+	widget = gtk_button_new_from_icon_name(GTK_STOCK_EXECUTE,
+			GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_label(GTK_BUTTON(widget), _("Run"));
+#else
 	widget = gtk_button_new_from_stock(GTK_STOCK_EXECUTE);
+#endif
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_on_run_execute), run);
 	gtk_size_group_add_widget(group, widget);
 	gtk_box_pack_end(GTK_BOX(hbox), widget, FALSE, TRUE, 4);
+#if GTK_CHECK_VERSION(3, 10, 0)
+	widget = gtk_button_new_from_icon_name(GTK_STOCK_CANCEL,
+			GTK_ICON_SIZE_BUTTON);
+	gtk_button_set_label(GTK_BUTTON(widget), _("Cancel"));
+#else
 	widget = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+#endif
 	gtk_size_group_add_widget(group, widget);
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(_on_run_cancel),
 			run);
