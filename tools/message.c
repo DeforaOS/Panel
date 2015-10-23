@@ -94,7 +94,11 @@ static int _message(unsigned int timeout, char const * stock,
 #endif
 	widget = gtk_label_new(title);
 	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.0);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(widget, bold);
+#else
 	gtk_widget_modify_font(widget, bold);
+#endif
 	gtk_box_pack_start(GTK_BOX(vbox), widget, FALSE, TRUE, 0);
 	/* label */
 	widget = gtk_label_new(message);

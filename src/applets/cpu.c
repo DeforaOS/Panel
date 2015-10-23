@@ -99,7 +99,11 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("CPU:"));
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(label, desc);
+#else
 	gtk_widget_modify_font(label, desc);
+#endif
 	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	cpu->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100,

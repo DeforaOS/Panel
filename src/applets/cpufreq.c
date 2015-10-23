@@ -131,7 +131,11 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoi(p)
 		: cpufreq->max;
 	cpufreq->label = gtk_label_new(" ");
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(cpufreq->label, desc);
+#else
 	gtk_widget_modify_font(cpufreq->label, desc);
+#endif
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), cpufreq->label, FALSE, TRUE,
 			0);
 	label = gtk_label_new(_("MHz"));

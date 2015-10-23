@@ -165,7 +165,11 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		bold = pango_font_description_new();
 		pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
 		label = gtk_label_new(p);
+#if GTK_CHECK_VERSION(3, 0, 0)
+		gtk_widget_override_font(label, bold);
+#else
 		gtk_widget_modify_font(label, bold);
+#endif
 		pango_font_description_free(bold);
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	}

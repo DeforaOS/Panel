@@ -99,7 +99,11 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
 	title->widget = gtk_label_new("");
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(title->widget, bold);
+#else
 	gtk_widget_modify_font(title->widget, bold);
+#endif
 	pango_font_description_free(bold);
 	title->source = g_signal_connect(title->widget, "screen-changed",
 			G_CALLBACK(_title_on_screen_changed), title);

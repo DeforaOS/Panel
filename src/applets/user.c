@@ -73,7 +73,11 @@ static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	user->widget = gtk_label_new(pw->pw_name);
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(user->widget, desc);
+#else
 	gtk_widget_modify_font(user->widget, desc);
+#endif
 	pango_font_description_free(desc);
 	gtk_widget_show(user->widget);
 	*widget = user->widget;

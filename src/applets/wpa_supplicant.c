@@ -275,7 +275,11 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->image, FALSE, TRUE, 0);
 #ifndef EMBEDDED
 	wpa->label = gtk_label_new(" ");
+# if GTK_CHECK_VERSION(3, 0, 0)
+	gtk_widget_override_font(wpa->label, bold);
+# else
 	gtk_widget_modify_font(wpa->label, bold);
+#endif
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->label, FALSE, TRUE, 0);
 #endif
 	wpa->store = gtk_tree_store_new(WSR_COUNT, G_TYPE_BOOLEAN,
