@@ -483,13 +483,23 @@ static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 			panel->height);
 #endif
 	/* move to the proper position again if necessary */
-	if((panel->position == PANEL_WINDOW_POSITION_TOP
-				&& cevent->y != panel->root.y)
-			|| (panel->position == PANEL_WINDOW_POSITION_BOTTOM
-				&& cevent->y + cevent->height
-				!= panel->root.height))
-		_panel_window_reset(panel);
-	else
-		_panel_window_reset_strut(panel);
+	switch(panel->position)
+	{
+		case PANEL_WINDOW_POSITION_TOP:
+			if(cevent->y != panel->root.y)
+				_panel_window_reset(panel);
+			else
+				_panel_window_reset_strut(panel);
+			break;
+		case PANEL_WINDOW_POSITION_BOTTOM:
+			if(cevent->y + cevent->height != panel->root.height)
+				_panel_window_reset(panel);
+			else
+				_panel_window_reset_strut(panel);
+			break;
+		default:
+			_panel_window_reset_strut(panel);
+			break;
+	}
 	return FALSE;
 }
