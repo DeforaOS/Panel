@@ -194,7 +194,7 @@ static Task * _task_new(Tasks * tasks, gboolean label, gboolean reorder,
 	if(label)
 	{
 		task->label = gtk_label_new(name);
-# if 0 /* FIXME doesn't seem to work properly */
+# if GTK_CHECK_VERSION(3, 0, 0) /* XXX should work with Gtk+ 2 too */
 		gtk_label_set_ellipsize(GTK_LABEL(task->label),
 				PANGO_ELLIPSIZE_END);
 # endif
