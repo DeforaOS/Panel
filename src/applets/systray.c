@@ -108,11 +108,17 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* systray_destroy */
 static void _systray_destroy(Systray * systray)
 {
+	GdkWindow * window;
+
 	if(systray->source != 0)
 		g_signal_handler_disconnect(systray->hbox, systray->source);
 	systray->source = 0;
 	if(systray->owner != NULL)
+	{
+		window = gtk_widget_get_window(systray->owner);
+		gdk_window_remove_filter(window, _systray_on_filter, systray);
 		gtk_widget_destroy(systray->owner);
+	}
 	gtk_widget_destroy(systray->hbox);
 	free(systray);
 }
