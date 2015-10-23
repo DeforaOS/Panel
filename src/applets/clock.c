@@ -35,6 +35,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
+	GtkIconSize iconsize;
 	char const * format;
 	GtkWidget * label;
 	guint timeout;
@@ -71,14 +72,13 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	const int timeout = 1000;
 	Clock * clock;
-	GtkIconSize iconsize;
 #ifdef EMBEDDED
 	PangoFontDescription * desc;
 #endif
 
 	if((clock = object_new(sizeof(*clock))) == NULL)
 		return NULL;
-	iconsize = panel_window_get_icon_size(helper->window);
+	clock->iconsize = panel_window_get_icon_size(helper->window);
 	clock->helper = helper;
 	clock->label = gtk_label_new(" \n ");
 	if((clock->format = helper->config_get(helper->panel, "clock",
@@ -92,7 +92,7 @@ static Clock * _clock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	pango_font_description_free(desc);
 #else
 	{
-		if(iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
+		if(clock->iconsize == GTK_ICON_SIZE_LARGE_TOOLBAR)
 			clock->format = _("%H:%M:%S\n%d/%m/%Y");
 		else
 			clock->format = _("%H:%M");
@@ -142,8 +142,7 @@ static gboolean _clock_on_timeout(gpointer data)
 	strftime(buf, sizeof(buf), clock->format, &tm);
 	gtk_label_set_text(GTK_LABEL(clock->label), buf);
 #ifndef EMBEDDED
-	if(panel_window_get_icon_size(helper->window)
-			!= GTK_ICON_SIZE_LARGE_TOOLBAR)
+	if(clock->iconsize != GTK_ICON_SIZE_LARGE_TOOLBAR)
 	{
 		strftime(buf, sizeof(buf), _("%H:%M:%S\n%d/%m/%Y"), &tm);
 		gtk_widget_set_tooltip_text(clock->label, buf);
