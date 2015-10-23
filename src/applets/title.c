@@ -297,6 +297,8 @@ static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	if(title->root != NULL)
+		gdk_window_remove_filter(title->root, _title_on_filter, title);
 	title->screen = gtk_widget_get_screen(widget);
 	title->display = gdk_screen_get_display(title->screen);
 	title->root = gdk_screen_get_root_window(title->screen);
