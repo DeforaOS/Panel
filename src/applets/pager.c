@@ -370,6 +370,8 @@ static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	GdkEventMask events;
 	size_t i;
 
+	if(pager->root != NULL)
+		gdk_window_remove_filter(pager->root, _pager_on_filter, pager);
 	pager->screen = gtk_widget_get_screen(widget);
 	pager->display = gdk_screen_get_display(pager->screen);
 	pager->root = gdk_screen_get_root_window(pager->screen);
