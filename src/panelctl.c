@@ -91,7 +91,7 @@ static int _usage(void)
 int main(int argc, char * argv[])
 {
 	int o;
-	int what = -1;
+	unsigned int what = 0;
 	gboolean show = TRUE;
 
 	if(setlocale(LC_ALL, "") == NULL)
@@ -103,45 +103,59 @@ int main(int argc, char * argv[])
 		switch(o)
 		{
 			case 'B':
-				what = PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
+				what = show
+					? what | PANEL_MESSAGE_SHOW_PANEL_BOTTOM
+					: PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
 				show = TRUE;
 				break;
 			case 'L':
-				what = PANEL_MESSAGE_SHOW_PANEL_LEFT;
+				what = show
+					? what | PANEL_MESSAGE_SHOW_PANEL_LEFT
+					: PANEL_MESSAGE_SHOW_PANEL_LEFT;
 				show = TRUE;
 				break;
 			case 'R':
-				what = PANEL_MESSAGE_SHOW_PANEL_RIGHT;
+				what = show
+					? what | PANEL_MESSAGE_SHOW_PANEL_RIGHT
+					: PANEL_MESSAGE_SHOW_PANEL_RIGHT;
 				show = TRUE;
 				break;
 			case 'S':
-				what = PANEL_MESSAGE_SHOW_SETTINGS;
+				what = show
+					? what | PANEL_MESSAGE_SHOW_SETTINGS
+					: PANEL_MESSAGE_SHOW_SETTINGS;
 				show = TRUE;
 				break;
 			case 'T':
-				what = PANEL_MESSAGE_SHOW_PANEL_TOP;
+				what = show
+					? what | PANEL_MESSAGE_SHOW_PANEL_TOP
+					: PANEL_MESSAGE_SHOW_PANEL_TOP;
 				show = TRUE;
 				break;
 			case 'b':
-				what = PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
+				what = show ? PANEL_MESSAGE_SHOW_PANEL_BOTTOM
+					: what | PANEL_MESSAGE_SHOW_PANEL_BOTTOM;
 				show = FALSE;
 				break;
 			case 'l':
-				what = PANEL_MESSAGE_SHOW_PANEL_LEFT;
+				what = show ? PANEL_MESSAGE_SHOW_PANEL_LEFT
+					: what | PANEL_MESSAGE_SHOW_PANEL_LEFT;
 				show = FALSE;
 				break;
 			case 'r':
-				what = PANEL_MESSAGE_SHOW_PANEL_RIGHT;
+				what = show ? PANEL_MESSAGE_SHOW_PANEL_RIGHT
+					: what | PANEL_MESSAGE_SHOW_PANEL_RIGHT;
 				show = FALSE;
 				break;
 			case 't':
-				what = PANEL_MESSAGE_SHOW_PANEL_TOP;
+				what = show ? PANEL_MESSAGE_SHOW_PANEL_TOP
+					: what | PANEL_MESSAGE_SHOW_PANEL_TOP;
 				show = FALSE;
 				break;
 			default:
 				return _usage();
 		}
-	if(argc != optind || what < 0)
+	if(argc != optind || what == 0)
 		return _usage();
 	return (_panelctl(what, show) == 0) ? 0 : 2;
 }
