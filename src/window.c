@@ -119,7 +119,7 @@ PanelWindow * panel_window_new(PanelAppletHelper * helper,
 		panel->window = gtk_plug_new(0);
 		gtk_widget_show(panel->window);
 	}
-	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 4);
+	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 2);
 	panel->height = icon_height + (PANEL_BORDER_WIDTH * 4);
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %u height=%d\n", __func__, position,
