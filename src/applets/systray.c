@@ -168,8 +168,10 @@ static void _systray_on_owner_destroy(gpointer data)
 	Systray * systray = data;
 	GdkWindow * window;
 
-	window = gtk_widget_get_window(systray->owner);
-	gdk_window_remove_filter(window, _systray_on_filter, systray);
+	if(systray->owner != NULL
+			&& (window = gtk_widget_get_window(systray->owner))
+			!= NULL)
+		gdk_window_remove_filter(window, _systray_on_filter, systray);
 	systray->owner = NULL;
 }
 
