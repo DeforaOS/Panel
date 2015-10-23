@@ -40,14 +40,18 @@
 struct _Panel
 {
 	Config * config;
-	PanelAppletHelper helper;
 
-	PanelWindow * top;
+	PanelPrefs prefs;
 
-	guint timeout;
+	PanelAppletHelper helper[PANEL_POSITION_COUNT];
+	PanelWindow * windows[PANEL_POSITION_COUNT];
+
+	GdkScreen * screen;
+	GdkWindow * root;
 	gint root_width;		/* width of the root window	*/
 	gint root_height;		/* height of the root window	*/
 	guint source;
+	guint timeout;
 
 	/* dialogs */
 	GtkWidget * ab_window;
@@ -128,8 +132,8 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 		PanelWindowType type, GtkIconSize iconsize)
 {
 	char * filename;
-	GdkScreen * screen;
 	GdkRectangle rect;
+	size_t i;
 
 	if((panel->config = config_new()) == NULL)
 		return -1;
@@ -137,18 +141,26 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 			&& config_load(panel->config, filename) != 0)
 		error_print(PROGNAME);
 	free(filename);
+	panel->prefs.iconsize = NULL;
+	panel->prefs.monitor = -1;
 	/* root window */
-	screen = gdk_screen_get_default();
-	gdk_screen_get_monitor_geometry(screen, 0, &rect);
+	panel->screen = gdk_screen_get_default();
+	panel->root = gdk_screen_get_root_window(panel->screen);
+	gdk_screen_get_monitor_geometry(panel->screen, 0, &rect);
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
 	/* panel window */
-	_helper_init(&panel->helper, panel, type, iconsize);
-	panel->top = panel_window_new(&panel->helper, PANEL_WINDOW_TYPE_NORMAL,
-			position, iconsize, &rect);
-	panel->helper.window = panel->top;
-	panel->timeout = 0;
+	_helper_init(&panel->helper[PANEL_POSITION_TOP], panel, type, iconsize);
+	panel->windows[PANEL_POSITION_TOP] = panel_window_new(
+			&panel->helper[PANEL_POSITION_TOP],
+			PANEL_WINDOW_TYPE_NORMAL, position, iconsize, &rect);
+	panel->helper[PANEL_POSITION_TOP].window
+		= panel->windows[PANEL_POSITION_TOP];
+	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
+		if(i != PANEL_POSITION_TOP)
+			panel->windows[i] = NULL;
 	panel->source = 0;
+	panel->timeout = 0;
 	panel->ab_window = NULL;
 	panel->lo_window = NULL;
 	panel->sh_window = NULL;
@@ -159,11 +171,15 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 /* panel_destroy */
 static void _panel_destroy(Panel * panel)
 {
+	size_t i;
+
 	if(panel->timeout != 0)
 		g_source_remove(panel->timeout);
 	if(panel->source != 0)
 		g_source_remove(panel->source);
-	panel_window_delete(panel->top);
+	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
+		if(panel->windows[i] != NULL)
+			panel_window_delete(panel->windows[i]);
 	if(panel->ab_window != NULL)
 		gtk_widget_destroy(panel->ab_window);
 	if(panel->lo_window != NULL)
@@ -177,14 +193,14 @@ static void _panel_destroy(Panel * panel)
 /* panel_get_xid */
 static uint32_t _panel_get_xid(Panel * panel)
 {
-	return panel_window_get_xid(panel->top);
+	return panel_window_get_xid(panel->windows[PANEL_POSITION_TOP]);
 }
 
 
 /* panel_set_title */
 static void _panel_set_title(Panel * panel, char const * title)
 {
-	panel_window_set_title(panel->top, title);
+	panel_window_set_title(panel->windows[PANEL_POSITION_TOP], title);
 }
 
 
@@ -194,7 +210,8 @@ static int _panel_append(Panel * panel, PanelPosition position,
 		char const * applet)
 {
 	if(position == PANEL_POSITION_TOP)
-		return panel_window_append(panel->top, applet);
+		return panel_window_append(panel->windows[PANEL_POSITION_TOP],
+				applet);
 	return -error_set_code(1, "%s", _("Invalid panel position"));
 }
 
@@ -202,7 +219,7 @@ static int _panel_append(Panel * panel, PanelPosition position,
 /* panel_show */
 static void _panel_show(Panel * panel, gboolean show)
 {
-	panel_window_show(panel->top, show);
+	panel_window_show(panel->windows[PANEL_POSITION_TOP], show);
 }
 
 

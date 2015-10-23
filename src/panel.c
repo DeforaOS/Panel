@@ -69,7 +69,10 @@ struct _Panel
 	GdkWindow * root;
 	gint root_width;		/* width of the root window	*/
 	gint root_height;		/* height of the root window	*/
-	gint source;
+	guint source;
+#if 1 /* XXX for tests */
+	guint timeout;
+#endif
 
 	/* preferences */
 	GtkWidget * pr_window;
@@ -178,6 +181,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	/* root window */
 	panel->root = gdk_screen_get_root_window(panel->screen);
 	panel->source = 0;
+	panel->timeout = 0;
 	/* panel windows */
 	if(panel_reset(panel) != 0)
 	{
@@ -362,6 +366,8 @@ void panel_delete(Panel * panel)
 {
 	size_t i;
 
+	if(panel->timeout != 0)
+		g_source_remove(panel->timeout);
 	if(panel->source != 0)
 		g_source_remove(panel->source);
 	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
