@@ -59,6 +59,7 @@ typedef struct _PanelApplet
 
 	/* widgets */
 	GtkWidget * widget;
+	GtkIconSize iconsize;
 	GtkWidget * pr_box;
 #ifdef IFF_LOOPBACK
 	GtkWidget * pr_loopback;
@@ -126,6 +127,7 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	network->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
 		? gtk_hbox_new(TRUE, 0) : gtk_vbox_new(TRUE, 0);
 #endif
+	network->iconsize = panel_window_get_icon_size(helper->window);
 	network->pr_box = NULL;
 	gtk_widget_show(network->widget);
 	network->source = g_timeout_add(timeout, _network_on_timeout, network);
@@ -291,7 +293,6 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 {
 	gboolean active = TRUE;
 	char const * icon = "network-offline";
-	GtkIconSize iconsize;
 #ifdef SIOCGIFDATA
 	struct ifdatareq ifdr;
 # if GTK_CHECK_VERSION(2, 12, 0)
@@ -349,9 +350,8 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 		}
 #endif
 	}
-	iconsize = panel_window_get_icon_size(network->helper->window);
-	_networkinterface_update(ni, icon, iconsize, active, flags, TRUE,
-			(tooltip[0] != '\0') ? tooltip : NULL);
+	_networkinterface_update(ni, icon, network->iconsize, active, flags,
+			TRUE, (tooltip[0] != '\0') ? tooltip : NULL);
 }
 
 static void _refresh_purge(Network * network)
