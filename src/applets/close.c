@@ -56,10 +56,10 @@ static void _close_destroy(Close * close);
 static void _close_do(Close * close);
 
 /* callbacks */
-static void _on_close(gpointer data);
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+static void _close_on_close(gpointer data);
+static GdkFilterReturn _close_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 
 
@@ -99,9 +99,9 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, iconsize);
 	gtk_button_set_image(GTK_BUTTON(close->widget), image);
 	g_signal_connect_swapped(close->widget, "clicked", G_CALLBACK(
-				_on_close), close);
+				_close_on_close), close);
 	close->source = g_signal_connect(close->widget, "screen-changed",
-			G_CALLBACK(_on_screen_changed), close);
+			G_CALLBACK(_close_on_screen_changed), close);
 	close->display = NULL;
 	close->screen = NULL;
 	close->root = NULL;
@@ -120,6 +120,8 @@ static void _close_destroy(Close * close)
 {
 	if(close->source != 0)
 		g_signal_handler_disconnect(close->widget, close->source);
+	if(close->root != NULL)
+		gdk_window_remove_filter(close->root, _close_on_filter, close);
 	close->source = 0;
 	gtk_widget_destroy(close->widget);
 	object_delete(close);
@@ -182,7 +184,7 @@ static void _close_do(Close * close)
 
 /* callbacks */
 /* on_close */
-static void _on_close(gpointer data)
+static void _close_on_close(gpointer data)
 {
 	Close * close = data;
 	GdkDisplay * display;
@@ -210,8 +212,8 @@ static void _on_close(gpointer data)
 }
 
 
-/* on_filter */
-static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
+/* close_on_filter */
+static GdkFilterReturn _close_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
 	Close * close = data;
@@ -226,8 +228,8 @@ static GdkFilterReturn _on_filter(GdkXEvent * xevent, GdkEvent * event,
 }
 
 
-/* on_screen_changed */
-static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
+/* close_on_screen_changed */
+static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
 	Close * close = data;
@@ -237,6 +239,8 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	if(close->root != NULL)
+		gdk_window_remove_filter(close->root, _close_on_filter, close);
 	close->screen = gtk_widget_get_screen(widget);
 	close->display = gdk_screen_get_display(close->screen);
 	close->root = gdk_screen_get_root_window(close->screen);
@@ -245,7 +249,7 @@ static void _on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	events = gdk_window_get_events(close->root);
 	gdk_window_set_events(close->root, events
 			| GDK_PROPERTY_CHANGE_MASK);
-	gdk_window_add_filter(close->root, _on_filter, close);
+	gdk_window_add_filter(close->root, _close_on_filter, close);
 	close->atom_active = gdk_x11_get_xatom_by_name_for_display(
 			close->display, "_NET_ACTIVE_WINDOW");
 	close->atom_close = gdk_x11_get_xatom_by_name_for_display(
