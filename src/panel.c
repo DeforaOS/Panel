@@ -870,7 +870,12 @@ static GtkWidget * _preferences_window_panels(Panel * panel)
 #endif
 	/* remove */
 	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
+	gtk_button_set_image(GTK_BUTTON(widget),
+#if GTK_CHECK_VERSION(3, 10, 0)
+			gtk_image_new_from_icon_name(
+#else
+			gtk_image_new_from_stock(
+#endif
 				GTK_STOCK_DELETE, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_preferences_on_panel_remove), panel);
@@ -878,14 +883,24 @@ static GtkWidget * _preferences_window_panels(Panel * panel)
 #ifndef EMBEDDED
 	/* bottom */
 	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
+	gtk_button_set_image(GTK_BUTTON(widget),
+#if GTK_CHECK_VERSION(3, 10, 0)
+			gtk_image_new_from_icon_name(
+#else
+			gtk_image_new_from_stock(
+#endif
 				GTK_STOCK_GO_DOWN, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_preferences_on_panel_down), panel);
 	gtk_box_pack_end(GTK_BOX(vbox2), widget, FALSE, TRUE, 0);
 	/* top */
 	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
+	gtk_button_set_image(GTK_BUTTON(widget),
+#if GTK_CHECK_VERSION(3, 10, 0)
+			gtk_image_new_from_icon_name(
+#else
+			gtk_image_new_from_stock(
+#endif
 				GTK_STOCK_GO_UP, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_preferences_on_panel_up), panel);
@@ -893,7 +908,12 @@ static GtkWidget * _preferences_window_panels(Panel * panel)
 #endif
 	/* add */
 	widget = gtk_button_new();
-	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_stock(
+	gtk_button_set_image(GTK_BUTTON(widget),
+#if GTK_CHECK_VERSION(3, 10, 0)
+			gtk_image_new_from_icon_name(
+#else
+			gtk_image_new_from_stock(
+#endif
 				GTK_STOCK_GO_FORWARD, GTK_ICON_SIZE_BUTTON));
 	g_signal_connect_swapped(widget, "clicked", G_CALLBACK(
 				_preferences_on_panel_add), panel);
