@@ -60,6 +60,7 @@ struct _PanelApplet
 	size_t tasks_cnt;
 	gboolean label;
 	gboolean reorder;
+	gboolean embedded;
 
 	GtkWidget * widget;
 	GtkWidget * hbox;
@@ -305,6 +306,11 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 		tasks->reorder = FALSE;
 #endif
+#ifdef EMBEDDED
+	tasks->embedded = TRUE;
+#else
+	tasks->embedded = FALSE;
+#endif
 #if GTK_CHECK_VERSION(3, 0, 0)
 	tasks->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
@@ -364,10 +370,12 @@ static void _tasks_destroy(Tasks * tasks)
 /* tasks_get_current_desktop */
 static int _tasks_get_current_desktop(Tasks * tasks)
 {
-#ifndef EMBEDDED
 	unsigned long cnt;
 	unsigned long *p;
 
+	if(tasks->embedded)
+		/* ignore the current desktop */
+		return -1;
 	if(_tasks_get_window_property(tasks, GDK_WINDOW_XID(tasks->root),
 				TASKS_ATOM__NET_CURRENT_DESKTOP, XA_CARDINAL,
 				&cnt, (void *)&p) != 0)
@@ -375,9 +383,6 @@ static int _tasks_get_current_desktop(Tasks * tasks)
 	cnt = *p;
 	XFree(p);
 	return cnt;
-#else
-	return -1;
-#endif
 }
 
 
