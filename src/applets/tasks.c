@@ -335,8 +335,12 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			GTK_POLICY_NEVER, GTK_POLICY_NEVER);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(tasks->widget),
 			GTK_SHADOW_NONE);
+# if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_container_add(GTK_CONTAINER(tasks->widget), tasks->hbox);
+# else
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(
 				tasks->widget), tasks->hbox);
+# endif
 #else
 	tasks->widget = tasks->hbox;
 #endif
@@ -795,26 +799,31 @@ static gboolean _task_on_popup(gpointer data)
 		TasksAtom atom;
 		void (*callback)(gpointer data);
 		char const * stock;
+		char const * label;
 	} items[] = {
-		{ TASKS_ATOM__NET_WM_ACTION_MOVE, _task_on_popup_move, N_("Move") },
-		{ TASKS_ATOM__NET_WM_ACTION_RESIZE, _task_on_popup_resize,
+		{ TASKS_ATOM__NET_WM_ACTION_MOVE, _task_on_popup_move, NULL,
+			N_("Move") },
+		{ TASKS_ATOM__NET_WM_ACTION_RESIZE, _task_on_popup_resize, NULL,
 			N_("Resize") },
 		{ TASKS_ATOM__NET_WM_ACTION_MINIMIZE, _task_on_popup_minimize,
-			N_("Minimize") },
-		{ TASKS_ATOM__NET_WM_ACTION_SHADE, _task_on_popup_shade,
+			NULL, N_("Minimize") },
+		{ TASKS_ATOM__NET_WM_ACTION_SHADE, _task_on_popup_shade, NULL,
 			N_("Shade") },
-		{ TASKS_ATOM__NET_WM_ACTION_STICK, _task_on_popup_stick,
+		{ TASKS_ATOM__NET_WM_ACTION_STICK, _task_on_popup_stick, NULL,
 			N_("Stick") },
 		{ TASKS_ATOM__NET_WM_ACTION_MAXIMIZE_HORZ,
-			_task_on_popup_maximize_horz, N_("Maximize horizontally") },
+			_task_on_popup_maximize_horz, NULL,
+			N_("Maximize horizontally") },
 		{ TASKS_ATOM__NET_WM_ACTION_MAXIMIZE_VERT,
-			_task_on_popup_maximize_vert, N_("Maximize vertically") },
+			_task_on_popup_maximize_vert, NULL,
+			N_("Maximize vertically") },
 		{ TASKS_ATOM__NET_WM_ACTION_FULLSCREEN, _task_on_popup_fullscreen,
-			GTK_STOCK_FULLSCREEN },
+			GTK_STOCK_FULLSCREEN, N_("Fullscreen") },
 		{ TASKS_ATOM__NET_WM_ACTION_CHANGE_DESKTOP,
-			_task_on_popup_change_desktop, N_("Change desktop") },
+			_task_on_popup_change_desktop, NULL,
+			N_("Change desktop") },
 		{ TASKS_ATOM__NET_WM_ACTION_CLOSE, _task_on_popup_close,
-			GTK_STOCK_CLOSE }
+			GTK_STOCK_CLOSE, N_("Close") }
 	};
 	const size_t items_cnt = sizeof(items) / sizeof(*items);
 	size_t j;
@@ -837,12 +846,24 @@ static gboolean _task_on_popup(gpointer data)
 			continue; /* FIXME implement as a special case */
 		if(menu == NULL)
 			menu = gtk_menu_new();
-		if(strncmp(items[j].stock, "gtk-", 4) == 0)
+		if(items[j].stock != NULL)
+#if GTK_CHECK_VERSION(3, 10, 0)
+		{
+			menuitem = gtk_image_menu_item_new_with_label(
+					items[j].label);
+			gtk_image_menu_item_set_image(
+					GTK_IMAGE_MENU_ITEM(menuitem),
+					gtk_image_new_from_icon_name(
+						items[j].stock,
+						GTK_ICON_SIZE_MENU));
+		}
+#else
 			menuitem = gtk_image_menu_item_new_from_stock(
 					items[j].stock, NULL);
+#endif
 		else
 			menuitem = gtk_menu_item_new_with_label(
-					_(items[j].stock));
+					_(items[j].label));
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					items[j].callback), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
@@ -853,8 +874,7 @@ static gboolean _task_on_popup(gpointer data)
 			continue;
 		if(max++ != 1)
 			continue;
-		menuitem = gtk_image_menu_item_new_from_stock(_("Maximize"),
-				NULL);
+		menuitem = gtk_menu_item_new_with_label(_("Maximize"));
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_task_on_popup_maximize), task);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);

@@ -295,13 +295,27 @@ static gboolean _wifibrowser_on_view_button_press(GtkWidget * widget,
 		return FALSE;
 	gtk_tree_model_get(model, &iter, WSR_SSID, &ssid, -1);
 	menu = gtk_menu_new();
+#if GTK_CHECK_VERSION(3, 10, 0)
+	widget = gtk_image_menu_item_new_with_label(_("Connect"));
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget),
+			gtk_image_new_from_icon_name(GTK_STOCK_CONNECT,
+				GTK_ICON_SIZE_MENU));
+#else
 	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_CONNECT, NULL);
+#endif
 	if(ssid != NULL)
 		g_object_set_data(G_OBJECT(widget), "ssid", ssid);
 	g_signal_connect(widget, "activate", G_CALLBACK(
 				_clicked_on_network_activated), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);
+#if GTK_CHECK_VERSION(3, 10, 0)
+	widget = gtk_image_menu_item_new_with_label(_("Disconnect"));
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget),
+			gtk_image_new_from_icon_name(GTK_STOCK_DISCONNECT,
+				GTK_ICON_SIZE_MENU));
+#else
 	widget = gtk_image_menu_item_new_from_stock(GTK_STOCK_DISCONNECT, NULL);
+#endif
 	g_signal_connect_swapped(widget, "activate", G_CALLBACK(
 				_clicked_on_disconnect), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), widget);

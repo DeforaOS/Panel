@@ -136,7 +136,11 @@ static void _init_add(MPD * mpd, char const * stock, GtkIconSize iconsize,
 	GtkWidget * image;
 
 	button = gtk_button_new();
+#if GTK_CHECK_VERSION(3, 10, 0)
+	image = gtk_image_new_from_icon_name(stock, iconsize);
+#else
 	image = gtk_image_new_from_stock(stock, iconsize);
+#endif
 	gtk_button_set_image(GTK_BUTTON(button), image);
 	gtk_button_set_relief(GTK_BUTTON(button), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

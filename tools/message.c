@@ -80,9 +80,11 @@ static int _message(unsigned int timeout, char const * stock,
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	/* icon */
+#if !GTK_CHECK_VERSION(3, 10, 0)
 	if(strncmp(stock, "stock_", 6) == 0)
 		widget = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_DIALOG);
 	else
+#endif
 		widget = gtk_image_new_from_icon_name(stock,
 				GTK_ICON_SIZE_DIALOG);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
@@ -93,7 +95,11 @@ static int _message(unsigned int timeout, char const * stock,
 	vbox = gtk_vbox_new(FALSE, 4);
 #endif
 	widget = gtk_label_new(title);
-	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.0);
+#if GTK_CHECK_VERSION(3, 14, 0)
+	g_object_set(widget, "halign", 0.0, NULL);
+#else
+	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.5);
+#endif
 #if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_override_font(widget, bold);
 #else
@@ -102,14 +108,22 @@ static int _message(unsigned int timeout, char const * stock,
 	gtk_box_pack_start(GTK_BOX(vbox), widget, FALSE, TRUE, 0);
 	/* label */
 	widget = gtk_label_new(message);
-	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.0);
+#if GTK_CHECK_VERSION(3, 14, 0)
+	g_object_set(widget, "halign", 0.0, NULL);
+#else
+	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.5);
+#endif
 	gtk_box_pack_start(GTK_BOX(vbox), widget, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(hbox), vbox, TRUE, TRUE, 0);
 	/* button */
 	widget = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
-	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE,
-			GTK_ICON_SIZE_BUTTON);
+#if GTK_CHECK_VERSION(3, 10, 0)
+	image = gtk_image_new_from_icon_name(
+#else
+	image = gtk_image_new_from_stock(
+#endif
+			GTK_STOCK_CLOSE, GTK_ICON_SIZE_BUTTON);
 	gtk_button_set_image(GTK_BUTTON(widget), image);
 	g_signal_connect(widget, "clicked", G_CALLBACK(gtk_main_quit), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);

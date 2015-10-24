@@ -1071,8 +1071,13 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 		/* reassociate */
 		menuitem = gtk_image_menu_item_new_with_label(_("Reassociate"));
 #if GTK_CHECK_VERSION(2, 12, 0)
+# if GTK_CHECK_VERSION(3, 10, 0)
+		image = gtk_image_new_from_icon_name(GTK_STOCK_DISCARD,
+				GTK_ICON_SIZE_MENU);
+# else
 		image = gtk_image_new_from_stock(GTK_STOCK_DISCARD,
 				GTK_ICON_SIZE_MENU);
+# endif
 		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
 				image);
 #endif
@@ -1080,15 +1085,25 @@ static void _clicked_available(WPA * wpa, GtkWidget * menu)
 					_clicked_on_reassociate), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 		/* disconnect */
-		menuitem = gtk_image_menu_item_new_from_stock(
-				GTK_STOCK_DISCONNECT, NULL);
+		menuitem = gtk_image_menu_item_new_with_label(_("Disconnect"));
+#if GTK_CHECK_VERSION(3, 10, 0)
+		image = gtk_image_new_from_icon_name(
+#else
+		image = gtk_image_new_from_stock(
+#endif
+				GTK_STOCK_DISCONNECT, GTK_ICON_SIZE_MENU);
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_clicked_on_disconnect), wpa);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	}
 	/* rescan */
 	menuitem = gtk_image_menu_item_new_with_label(_("Rescan"));
-	image = gtk_image_new_from_stock(GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
+#if GTK_CHECK_VERSION(3, 10, 0)
+	image = gtk_image_new_from_icon_name(
+#else
+	image = gtk_image_new_from_stock(
+#endif
+			GTK_STOCK_REFRESH, GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem), image);
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_rescan), wpa);
@@ -1154,8 +1169,15 @@ static void _clicked_preferences(WPA * wpa, GtkWidget * menu)
 {
 	GtkWidget * menuitem;
 
+#if GTK_CHECK_VERSION(3, 10, 0)
+	menuitem = gtk_image_menu_item_new_with_label(_("Preferences"));
+	gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
+			gtk_image_new_from_icon_name(GTK_STOCK_PREFERENCES,
+				GTK_ICON_SIZE_MENU));
+#else
 	menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_PREFERENCES,
 			NULL);
+#endif
 	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 				_clicked_on_preferences), wpa);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);

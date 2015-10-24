@@ -66,7 +66,11 @@ static Rotate * _rotate_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	rotate->helper = helper;
 	rotate->widget = gtk_button_new();
+#if GTK_CHECK_VERSION(3, 10, 0)
+	image = gtk_image_new_from_icon_name(applet.icon,
+#else
 	image = gtk_image_new_from_stock(applet.icon,
+#endif
 			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(rotate->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(rotate->widget), GTK_RELIEF_NONE);

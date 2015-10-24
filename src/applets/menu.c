@@ -618,8 +618,15 @@ static void _menu_on_clicked(gpointer data)
 	if((p = helper->config_get(helper->panel, "menu", "about")) == NULL
 			|| strtol(p, NULL, 0) != 0)
 	{
+#if GTK_CHECK_VERSION(3, 10, 0)
+		menuitem = gtk_image_menu_item_new_with_label(_("About"));
+		gtk_image_menu_item_set_image(GTK_MENU_ITEM(menuitem),
+				gtk_image_new_from_icon_name(GTK_STOCK_ABOUT,
+					GTK_ICON_SIZE_MENU));
+#else
 		menuitem = gtk_image_menu_item_new_from_stock(GTK_STOCK_ABOUT,
 				NULL);
+#endif
 		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
 					_menu_on_about), menu);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
