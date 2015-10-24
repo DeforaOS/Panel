@@ -127,7 +127,7 @@ msgstr "_Exécuter..."
 
 #: ../src/applets/menu.c:622
 msgid "About"
-msgstr ""
+msgstr "À propos"
 
 #: ../src/applets/menu.c:637
 msgid "_Lock screen"
@@ -270,7 +270,7 @@ msgstr "Maximiser verticalement"
 
 #: ../src/applets/tasks.c:821
 msgid "Fullscreen"
-msgstr ""
+msgstr "Plein écran"
 
 #: ../src/applets/tasks.c:824
 msgid "Change desktop"
@@ -350,7 +350,7 @@ msgstr "Réassocier"
 
 #: ../src/applets/wpa_supplicant.c:1088 ../tools/wifibrowser.c:312
 msgid "Disconnect"
-msgstr ""
+msgstr "Déconnecter"
 
 #: ../src/applets/wpa_supplicant.c:1100 ../tools/wifibrowser.c:120
 msgid "Rescan"
