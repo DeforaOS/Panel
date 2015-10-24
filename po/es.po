@@ -127,7 +127,7 @@ msgstr "_Ejecutar..."
 
 #: ../src/applets/menu.c:622
 msgid "About"
-msgstr ""
+msgstr "Acerca de"
 
 #: ../src/applets/menu.c:637
 msgid "_Lock screen"
@@ -350,7 +350,7 @@ msgstr "Reasociar"
 
 #: ../src/applets/wpa_supplicant.c:1088 ../tools/wifibrowser.c:312
 msgid "Disconnect"
-msgstr ""
+msgstr "Desconectar"
 
 #: ../src/applets/wpa_supplicant.c:1100 ../tools/wifibrowser.c:120
 msgid "Rescan"
@@ -561,7 +561,7 @@ msgstr "Ejecutar"
 
 #: ../src/run.c:179
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #: ../src/run.c:364
 msgid "Command not found"
