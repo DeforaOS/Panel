@@ -101,7 +101,7 @@ FAILED=
 echo "Performing tests:" 1>&2
 echo "Expected failures:" 1>&2
 _fail "applets"
-_fail "applets2"
+[ -z "$DISPLAY" ] || _fail "applets2"
 if [ -n "$FAILED" ]; then
 	echo "Failed tests:$FAILED" 1>&2
 	exit 2
