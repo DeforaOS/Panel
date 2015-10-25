@@ -619,7 +619,7 @@ static void _menu_on_clicked(gpointer data)
 			|| strtol(p, NULL, 0) != 0)
 	{
 #if GTK_CHECK_VERSION(3, 10, 0)
-		menuitem = gtk_image_menu_item_new_with_label(_("About"));
+		menuitem = gtk_image_menu_item_new_with_label(_("_About"));
 		gtk_image_menu_item_set_image(GTK_MENU_ITEM(menuitem),
 				gtk_image_new_from_icon_name(GTK_STOCK_ABOUT,
 					GTK_ICON_SIZE_MENU));
