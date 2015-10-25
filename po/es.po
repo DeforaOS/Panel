@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-24 14:08+0200\n"
+"POT-Creation-Date: 2015-10-25 02:07+0100\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -126,8 +126,8 @@ msgid "_Run..."
 msgstr "_Ejecutar..."
 
 #: ../src/applets/menu.c:622
-msgid "About"
-msgstr "Acerca de"
+msgid "_About"
+msgstr "_Acerca de"
 
 #: ../src/applets/menu.c:637
 msgid "_Lock screen"
