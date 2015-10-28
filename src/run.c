@@ -231,6 +231,8 @@ static GtkWidget * _new_entry(Config * config)
 /* run_delete */
 static void _run_delete(Run * run)
 {
+	if(run->pid >= 0)
+		g_spawn_close_pid(run->pid);
 	if(run->config != NULL)
 		config_delete(run->config);
 	object_delete(run);
