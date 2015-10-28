@@ -223,7 +223,7 @@ static GtkWidget * _new_entry(Config * config)
 	for(i = 0; i < 100; i++)
 	{
 		snprintf(buf, sizeof(buf), "%s%d", "command", i);
-		if((q = config_get(config, "", buf)) == NULL)
+		if((q = config_get(config, "commands", buf)) == NULL)
 			continue;
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter, 0, q, -1);
@@ -391,7 +391,7 @@ static void _execute_save_config(Run * run)
 	for(i = 0; i < 100; i++)
 	{
 		snprintf(buf, sizeof(buf), "%s%d", "command", i);
-		q = config_get(run->config, NULL, buf);
+		q = config_get(run->config, "commands", buf);
 		if(q == NULL || strcmp(p, q) != 0)
 			continue;
 		free(filename); /* the command is already known */
@@ -400,13 +400,13 @@ static void _execute_save_config(Run * run)
 	for(i = 0; i < 100; i++)
 	{
 		snprintf(buf, sizeof(buf), "%s%d", "command", i);
-		q = config_get(run->config, NULL, buf);
+		q = config_get(run->config, "commands", buf);
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() config_set(config, %s, %s, %s)\n",
 				__func__, "\"\"", buf, p);
 #endif
 		/* FIXME this invalidates q and then p in the next iteration */
-		config_set(run->config, NULL, buf, p);
+		config_set(run->config, "commands", buf, p);
 		if((p = q) == NULL)
 			break;
 	}
