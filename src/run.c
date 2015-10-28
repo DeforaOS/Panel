@@ -314,9 +314,10 @@ static void _on_run_choose_activate(GtkWidget * widget, gint arg1,
 
 
 /* on_run_execute */
-static void _execute_watch(GPid pid, gint status, gpointer data);
 static void _execute_save_config(Run * run);
 static gboolean _execute_timeout(gpointer data);
+static void _execute_watch(GPid pid, gint status, gpointer data);
+static void _execute_watch_cleanup(Run * run);
 
 static void _on_run_execute(gpointer data)
 {
@@ -376,26 +377,39 @@ static void _execute_watch(GPid pid, gint status, gpointer data)
 
 	if(run->pid != pid)
 		return; /* should not happen */
-	if(!WIFEXITED(status))
-		return;
-	switch(WEXITSTATUS(status))
+	if(WIFEXITED(status))
+		switch(WEXITSTATUS(status))
+		{
+			case 127:
+				error = _("Command not found");
+				break;
+			case 126:
+				error = _("Permission denied");
+				break;
+			default:
+				_execute_watch_cleanup(run);
+				return;
+		}
+	else if(WIFSIGNALED(status))
 	{
-		case 127:
-			error = _("Command not found");
-			break;
-		case 126:
-			error = _("Permission denied");
-			break;
-		default:
-			_execute_save_config(run);
-			gtk_main_quit();
-			return;
+		_execute_watch_cleanup(run);
+		return;
 	}
+	else
+		return;
 	if(run->source != 0)
 		g_source_remove(run->source);
 	run->source = 0;
 	gtk_widget_show(run->window);
 	_run_error(run, error, 0);
+}
+
+static void _execute_watch_cleanup(Run * run)
+{
+	g_spawn_close_pid(run->pid);
+	run->pid = -1;
+	_execute_save_config(run);
+	gtk_main_quit();
 }
 
 static void _execute_save_config(Run * run)
