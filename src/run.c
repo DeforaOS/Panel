@@ -314,9 +314,10 @@ static gboolean _execute_timeout(gpointer data);
 
 static void _on_run_execute(gpointer data)
 {
-	Run * run = data;
 	const unsigned int flags = G_SPAWN_FILE_AND_ARGV_ZERO
 		| G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
+	const unsigned int timeout = 30000;
+	Run * run = data;
 	char const * path;
 	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };
 	char * argv_xterm[] = { "xterm", "xterm", "-e", "sh", "-c", NULL,
@@ -346,7 +347,7 @@ static void _on_run_execute(gpointer data)
 	free(argv_shell[3]);
 	gtk_widget_hide(run->window);
 	g_child_watch_add(run->pid, _execute_watch, run);
-	run->source = g_timeout_add(30000, _execute_timeout, run);
+	run->source = g_timeout_add(timeout, _execute_timeout, run);
 }
 
 static void _execute_watch(GPid pid, gint status, gpointer data)
