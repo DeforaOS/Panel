@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <libgen.h>
 #include <errno.h>
 #include <locale.h>
 #include <libintl.h>
@@ -323,21 +324,32 @@ static void _on_run_execute(gpointer data)
 		| G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
 	const unsigned int timeout = 30000;
 	Run * run = data;
-	char const * path;
 	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };
 	char * argv_xterm[] = { PROGNAME_XTERM, PROGNAME_XTERM, "-e", "sh",
 		"-c", NULL, NULL };
+	char * xterm = NULL;
 	char ** argv = argv_shell;
+	char const * p;
 	GError * error = NULL;
 
-	path = gtk_entry_get_text(GTK_ENTRY(run->entry));
-	if((argv_shell[3] = strdup(path)) == NULL)
+	p = gtk_entry_get_text(GTK_ENTRY(run->entry));
+	if((argv_shell[3] = strdup(p)) == NULL)
 	{
 		_run_error(run, strerror(errno), 1);
 		return;
 	}
 	if(run->terminal)
 	{
+		if((p = config_get(run->config, NULL, "xterm")) != NULL)
+		{
+			if((xterm = strdup(p)) == NULL)
+			{
+				_run_error(run, strerror(errno), 1);
+				return;
+			}
+			argv_xterm[0] = xterm;
+			argv_xterm[1] = basename(xterm);
+		}
 		argv_xterm[5] = argv_shell[3];
 		argv = argv_xterm;
 	}
@@ -347,9 +359,11 @@ static void _on_run_execute(gpointer data)
 		_run_error(run, error->message, 1);
 		g_error_free(error);
 		free(argv_shell[3]);
+		free(xterm);
 		return;
 	}
 	free(argv_shell[3]);
+	free(xterm);
 	gtk_widget_hide(run->window);
 	g_child_watch_add(run->pid, _execute_watch, run);
 	run->source = g_timeout_add(timeout, _execute_timeout, run);
