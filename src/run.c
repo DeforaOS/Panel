@@ -31,6 +31,9 @@
 #ifndef PROGNAME
 # define PROGNAME	"run"
 #endif
+#ifndef PROGNAME_XTERM
+# define PROGNAME_XTERM	"xterm"
+#endif
 
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
@@ -322,8 +325,8 @@ static void _on_run_execute(gpointer data)
 	Run * run = data;
 	char const * path;
 	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };
-	char * argv_xterm[] = { "xterm", "xterm", "-e", "sh", "-c", NULL,
-		NULL };
+	char * argv_xterm[] = { PROGNAME_XTERM, PROGNAME_XTERM, "-e", "sh",
+		"-c", NULL, NULL };
 	char ** argv = argv_shell;
 	GError * error = NULL;
 
