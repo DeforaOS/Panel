@@ -96,7 +96,7 @@ static int _message(unsigned int timeout, char const * stock,
 #endif
 	widget = gtk_label_new(title);
 #if GTK_CHECK_VERSION(3, 14, 0)
-	g_object_set(widget, "halign", 0.0, NULL);
+	g_object_set(widget, "halign", GTK_ALIGN_START, NULL);
 #else
 	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.5);
 #endif
@@ -109,7 +109,7 @@ static int _message(unsigned int timeout, char const * stock,
 	/* label */
 	widget = gtk_label_new(message);
 #if GTK_CHECK_VERSION(3, 14, 0)
-	g_object_set(widget, "halign", 0.0, NULL);
+	g_object_set(widget, "halign", GTK_ALIGN_START, NULL);
 #else
 	gtk_misc_set_alignment(GTK_MISC(widget), 0.0, 0.5);
 #endif
