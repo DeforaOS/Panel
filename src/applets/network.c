@@ -134,7 +134,7 @@ static Network * _network_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	if((network->fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		error_set("%s: %s: %s", applet.name, "socket", strerror(errno));
-		network->helper->error(NULL, error_get(), 1);
+		network->helper->error(NULL, error_get(NULL), 1);
 	}
 	network->interfaces = NULL;
 	network->interfaces_cnt = 0;
@@ -227,7 +227,8 @@ static void _refresh_interface(Network * network, char const * name,
 		if((res = _refresh_interface_add(network, name, flags)) != 0)
 		{
 			if(res < 0)
-				network->helper->error(NULL, error_get(), 1);
+				network->helper->error(NULL, error_get(NULL),
+						1);
 			return;
 		}
 	_refresh_interface_flags(network, &network->interfaces[i], flags);

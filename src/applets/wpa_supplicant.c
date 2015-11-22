@@ -491,7 +491,7 @@ static int _wpa_error(WPA * wpa, char const * message, int ret)
 {
 	error_set("%s: %s", applet.name, message);
 	_wpa_set_status(wpa, FALSE, FALSE, NULL);
-	return wpa->helper->error(NULL, error_get(), ret);
+	return wpa->helper->error(NULL, error_get(NULL), ret);
 }
 
 

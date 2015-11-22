@@ -112,7 +112,7 @@ char const * panel_get_config(Panel * panel, char const * section,
 int panel_error(Panel * panel, char const * message, int ret)
 {
 	fprintf(stderr, "%s: %s\n", PROGNAME, (message != NULL) ? message
-			: error_get());
+			: error_get(NULL));
 	return ret;
 }
 

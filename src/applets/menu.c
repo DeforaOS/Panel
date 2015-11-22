@@ -843,7 +843,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 			config_reset(config);
 		if(config == NULL || config_load(config, name) != 0)
 		{
-			menu->helper->error(NULL, error_get(), 1);
+			menu->helper->error(NULL, error_get(NULL), 1);
 			continue;
 		}
 		/* skip this entry if it is deleted */

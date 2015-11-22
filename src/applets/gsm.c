@@ -202,7 +202,7 @@ static gboolean _gsm_on_timeout(gpointer data)
 
 	if(_gsm_get(gsm, &active) == FALSE)
 	{
-		gsm->helper->error(NULL, error_get(), 1);
+		gsm->helper->error(NULL, error_get(NULL), 1);
 		_gsm_set(gsm, FALSE);
 		gsm->timeout = 0;
 		return FALSE;

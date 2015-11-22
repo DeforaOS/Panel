@@ -201,7 +201,7 @@ static Volume * _volume_new(PanelAppletHelper * helper)
 	{
 		error_set("%s: %s: %s", applet.name, volume->device,
 				strerror(errno));
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		return volume;
 	}
 	for(i = 0; volume->outputs == -1 || volume->mix == -1; i++)
@@ -252,7 +252,7 @@ static Volume * _volume_new(PanelAppletHelper * helper)
 	{
 		error_set("%s: %s: %s", applet.name, volume->device,
 				strerror(errno));
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 	}
 	else
 		volume->source = g_timeout_add(timeout,
@@ -272,7 +272,7 @@ static void _volume_delete(Volume * volume)
 	{
 		error_set("%s: %s: %s", applet.name, volume->device,
 				strerror(errno));
-		volume->helper->error(NULL, error_get(), 1);
+		volume->helper->error(NULL, error_get(NULL), 1);
 	}
 #elif defined(SND_LIB_MAJOR)
 	if(volume->mixer != NULL)
@@ -282,7 +282,7 @@ static void _volume_delete(Volume * volume)
 	{
 		error_set("%s: %s: %s", applet.name, volume->device,
 				strerror(errno));
-		volume->helper->error(NULL, error_get(), 1);
+		volume->helper->error(NULL, error_get(NULL), 1);
 	}
 #endif
 	free(volume);
@@ -311,7 +311,7 @@ static gdouble _volume_get(Volume * volume)
 		{
 			error_set("%s: %s: %s", applet.name,
 					"AUDIO_MIXER_DEVINFO", strerror(errno));
-			helper->error(NULL, error_get(), 1);
+			helper->error(NULL, error_get(NULL), 1);
 			close(volume->fd);
 			volume->fd = -1;
 			break;
@@ -325,7 +325,7 @@ static gdouble _volume_get(Volume * volume)
 		{
 			error_set("%s: %s: %s", applet.name, "AUDIO_MIXER_READ",
 					strerror(errno));
-			helper->error(NULL, error_get(), 1);
+			helper->error(NULL, error_get(NULL), 1);
 		}
 		else
 			ret = mc.un.value.level[0] / 255.0;
@@ -350,7 +350,7 @@ static gdouble _volume_get(Volume * volume)
 	{
 		error_set("%s: %s: %s", applet.name, "MIXER_READ",
 				strerror(errno));
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		close(volume->fd);
 		volume->fd = -1;
 	}
@@ -400,7 +400,7 @@ int _volume_set(Volume * volume, gdouble value)
 		{
 			error_set("%s: %s: %s", applet.name,
 					"AUDIO_MIXER_WRITE", strerror(errno));
-			ret |= helper->error(NULL, error_get(), 1);
+			ret |= helper->error(NULL, error_get(NULL), 1);
 		}
 		break;
 	}
@@ -423,7 +423,7 @@ int _volume_set(Volume * volume, gdouble value)
 	{
 		error_set("%s: %s: %s", applet.name, "MIXER_WRITE",
 				strerror(errno));
-		ret |= helper->error(NULL, error_get(), 1);
+		ret |= helper->error(NULL, error_get(NULL), 1);
 	}
 #endif
 	return ret;

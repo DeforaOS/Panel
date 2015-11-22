@@ -486,12 +486,12 @@ static gboolean _battery_on_timeout(gpointer data)
 
 	if(_battery_get(battery, &level, &charging) == FALSE)
 	{
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		timeout = 0;
 	}
 	else if(level == error || level < 0.0)
 	{
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		timeout = 30000;
 	}
 	else

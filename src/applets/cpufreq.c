@@ -178,7 +178,7 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 	{
 		error_set("%s: %s: %s", applet.name, cpufreq->name,
 				strerror(errno));
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
 	snprintf(buf, sizeof(buf), "%4u", (unsigned int)freq);

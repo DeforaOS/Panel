@@ -198,7 +198,7 @@ static gboolean _cpu_on_timeout(gpointer data)
 	if(_cpu_get(cpu, &level) == FALSE)
 	{
 		cpu->timeout = 0;
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		return FALSE;
 	}
 	_cpu_set(cpu, level);

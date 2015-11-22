@@ -407,7 +407,7 @@ int panel_error(Panel * panel, char const * message, int ret)
 			"%s", _("Error"));
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(dialog),
 #endif
-			"%s", (message != NULL) ? message : error_get());
+			"%s", (message != NULL) ? message : error_get(NULL));
 	gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 	gtk_window_set_title(GTK_WINDOW(dialog), _("Error"));
 	g_signal_connect(dialog, "delete-event", G_CALLBACK(_error_on_closex),

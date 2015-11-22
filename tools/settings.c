@@ -265,7 +265,7 @@ static int _settings_browse(Settings * settings)
 	int datadir = 1;
 
 	if((config = config_new()) == NULL)
-		return -_settings_error(error_get(), 1);
+		return -_settings_error(error_get(NULL), 1);
 	model = _settings_get_model(settings);
 	gtk_list_store_clear(GTK_LIST_STORE(model));
 	/* read through every XDG application folder */
@@ -275,7 +275,7 @@ static int _settings_browse(Settings * settings)
 		datadir = 0;
 	}
 	if((p = strdup(path)) == NULL)
-		_settings_error(error_get(), 1);
+		_settings_error(error_get(NULL), 1);
 	else
 		for(i = 0, j = 0;; i++)
 			if(p[i] == '\0')
@@ -331,7 +331,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	fprintf(stderr, "DEBUG: %s(\"%s\")\n", __func__, folder);
 #endif
 	if((path = string_new_append(folder, "/applications", NULL)) == NULL)
-		return -_settings_error(error_get(), 1);
+		return -_settings_error(error_get(NULL), 1);
 	dir = opendir(path);
 	string_delete(path);
 	if(dir == NULL)
@@ -349,7 +349,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		if((path = string_new_append(folder, "/applications/",
 						de->d_name, NULL)) == NULL)
 		{
-			_settings_error(error_get(), 1);
+			_settings_error(error_get(NULL), 1);
 			continue;
 		}
 #ifdef DEBUG
@@ -360,7 +360,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		string_delete(path);
 		if(res != 0)
 		{
-			_settings_error(error_get(), 1);
+			_settings_error(error_get(NULL), 1);
 			continue;
 		}
 		p = config_get(config, section, "Type");
@@ -474,7 +474,7 @@ static int _settings_browse_home(Settings * settings, Config * config)
 	if((homedir = getenv("HOME")) == NULL)
 		homedir = g_get_home_dir();
 	if((p = string_new_append(homedir, "/", fallback, NULL)) == NULL)
-		return -_settings_error(error_get(), 1);
+		return -_settings_error(error_get(NULL), 1);
 	ret = _settings_browse_folder(settings, config, p);
 	free(p);
 	return ret;

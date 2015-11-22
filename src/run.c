@@ -515,7 +515,7 @@ int main(int argc, char * argv[])
 	if(optind != argc)
 		return _usage();
 	if((run = _run_new()) == NULL)
-		return _run_error(NULL, error_get(), 2);
+		return _run_error(NULL, error_get(NULL), 2);
 	gtk_main();
 	_run_delete(run);
 	return 0;

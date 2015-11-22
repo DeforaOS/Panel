@@ -149,7 +149,7 @@ static gboolean _memory_on_timeout(gpointer data)
 	{
 		error_set("%s: %s: %s", applet.name, "sysinfo",
 				strerror(errno));
-		return memory->helper->error(NULL, error_get(), TRUE);
+		return memory->helper->error(NULL, error_get(NULL), TRUE);
 	}
 	value = sy.sharedram;
 	value /= sy.totalram;

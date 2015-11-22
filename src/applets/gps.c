@@ -174,7 +174,7 @@ static gboolean _gps_on_timeout(gpointer data)
 
 	if(_gps_get(gps, &active) == FALSE)
 	{
-		gps->helper->error(NULL, error_get(), 1);
+		gps->helper->error(NULL, error_get(NULL), 1);
 		_gps_set(gps, FALSE);
 		gps->timeout = 0;
 		return FALSE;

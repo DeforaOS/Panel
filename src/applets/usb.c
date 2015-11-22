@@ -181,7 +181,7 @@ static gboolean _usb_on_timeout(gpointer data)
 
 	if(_usb_get(usb, &active) == FALSE)
 	{
-		usb->helper->error(NULL, error_get(), 1);
+		usb->helper->error(NULL, error_get(NULL), 1);
 		_usb_set(usb, FALSE);
 		usb->timeout = 0;
 		return FALSE;

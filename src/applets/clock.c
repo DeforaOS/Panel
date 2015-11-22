@@ -134,7 +134,7 @@ static gboolean _clock_on_timeout(gpointer data)
 	{
 		error_set("%s: %s: %s", applet.name, "gettimeofday",
 				strerror(errno));
-		helper->error(NULL, error_get(), 1);
+		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
 	t = tv.tv_sec;

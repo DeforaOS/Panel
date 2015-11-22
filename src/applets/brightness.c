@@ -219,7 +219,7 @@ static gboolean _brightness_get(Brightness * brightness, int * level)
 	/* FIXME not supported */
 	*level = -1;
 	error_set("%s: %s", applet.name, strerror(ENOSYS));
-	helper->error(NULL, error_get(), 1);
+	helper->error(NULL, error_get(NULL), 1);
 	return FALSE;
 #endif
 }

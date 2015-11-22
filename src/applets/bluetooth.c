@@ -222,7 +222,7 @@ static gboolean _bluetooth_on_timeout(gpointer data)
 
 	if(_bluetooth_get(bluetooth, &active) == FALSE)
 	{
-		bluetooth->helper->error(NULL, error_get(), 1);
+		bluetooth->helper->error(NULL, error_get(NULL), 1);
 		_bluetooth_set(bluetooth, FALSE);
 		bluetooth->timeout = 0;
 		return FALSE;
