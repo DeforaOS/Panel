@@ -56,21 +56,22 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* user_init */
+static String * _init_user(void);
+
 static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	User * user;
-	struct passwd * pw;
 	PangoFontDescription * desc;
+	String * name;
 
-	if((pw = getpwuid(getuid())) == NULL)
-	{
-		error_set("%s: %s", applet.name, strerror(errno));
-		return NULL;
-	}
 	if((user = object_new(sizeof(*user))) == NULL)
 		return NULL;
 	user->helper = helper;
-	user->widget = gtk_label_new(pw->pw_name);
+	if((name = _init_user()) != NULL)
+		user->widget = gtk_label_new(name);
+	else
+		user->widget = gtk_label_new("Unknown user");
+	string_delete(name);
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -82,6 +83,26 @@ static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show(user->widget);
 	*widget = user->widget;
 	return user;
+}
+
+static String * _init_user(void)
+{
+	struct passwd * pw;
+	ssize_t len;
+
+	if((pw = getpwuid(getuid())) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
+		return NULL;
+	}
+	if(pw->pw_gecos != NULL && strlen(pw->pw_gecos) > 0)
+	{
+		if((len = string_index(pw->pw_gecos, ",")) > 0)
+			return string_new_length(pw->pw_gecos, len);
+		else if(len != 0)
+			return string_new(pw->pw_gecos);
+	}
+	return string_new(pw->pw_name);
 }
 
 
