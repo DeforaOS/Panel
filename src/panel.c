@@ -1397,13 +1397,19 @@ static char * _config_get_filename(void)
 static gboolean _panel_can_suspend(void)
 {
 #ifdef __NetBSD__
+	char const * names[] = { "machdep.sleep_state", "hw.acpi.sleep.state" };
 	int sleep_state = -1;
 	size_t size = sizeof(sleep_state);
 
 	/* FIXME check that this works properly */
-	if(sysctlbyname("machdep.sleep_state", &sleep_state, &size, NULL, 0)
-			== 0 && sleep_state == 0
-			&& sysctlbyname("machdep.sleep_state", &sleep_state,
+	if(sysctlbyname(names[0], &sleep_state, &size, NULL, 0) == 0
+			&& sleep_state == 0
+			&& sysctlbyname(names[0], &sleep_state, &size,
+				&sleep_state, size) == 0)
+		return TRUE;
+	if(sysctlbyname(names[1], &sleep_state, &size, NULL, 0) == 0
+			&& sleep_state == 0
+			&& sysctlbyname(names[1], &sleep_state,
 				&size, &sleep_state, size) == 0)
 		return TRUE;
 #else
