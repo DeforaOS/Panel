@@ -401,7 +401,7 @@ static int _tasks_get_text_property(Tasks * tasks, Window window,
 	res = XGetTextProperty(GDK_DISPLAY_XDISPLAY(tasks->display), window,
 			&text, property);
 	if(gdk_error_trap_pop() != 0 || res == 0)
-		return 1;
+		return -1;
 	atom = gdk_x11_xatom_to_atom(text.encoding);
 #if GTK_CHECK_VERSION(2, 24, 0)
 	cnt = gdk_x11_display_text_property_to_text_list(tasks->display,
@@ -444,7 +444,7 @@ static int _tasks_get_window_property(Tasks * tasks, Window window,
 			tasks->atom[property], 0, G_MAXLONG, False, atom,
 			&type, &format, cnt, &bytes, ret);
 	if(gdk_error_trap_pop() != 0 || res != Success)
-		return 1;
+		return -1;
 	if(type != atom)
 	{
 		if(*ret != NULL)
