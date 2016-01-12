@@ -116,8 +116,8 @@ static int _tasks_get_window_property(Tasks * tasks, Window window,
 static void _tasks_do(Tasks * tasks);
 
 /* callbacks */
-static gboolean _task_on_button_press(GtkWidget * widget, GdkEventButton * event,
-		gpointer data);
+static gboolean _task_on_button_press(GtkWidget * widget,
+		GdkEventButton * event, gpointer data);
 static void _task_on_clicked(gpointer data);
 static gboolean _task_on_delete_event(gpointer data);
 static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
@@ -697,8 +697,8 @@ static int _do_typehint_normal(Tasks * tasks, Window window)
 
 /* callbacks */
 /* task_on_button_press */
-static gboolean _task_on_button_press(GtkWidget * widget, GdkEventButton * event,
-		gpointer data)
+static gboolean _task_on_button_press(GtkWidget * widget,
+		GdkEventButton * event, gpointer data)
 {
 	if(event->button != 3 || event->type != GDK_BUTTON_PRESS)
 		return FALSE;
