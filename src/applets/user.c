@@ -56,22 +56,43 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* user_init */
-static String * _init_user(void);
+static struct passwd * _init_pw(void);
+#if GTK_CHECK_VERSION(2, 12, 0)
+static String * _init_tooltip(struct passwd * pw);
+#endif
+static String * _init_user(struct passwd * pw);
 
 static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	User * user;
 	PangoFontDescription * desc;
-	String * name;
+	struct passwd * pw;
+	String const * name = "Unknown user";
+	String * p = NULL;
+#if GTK_CHECK_VERSION(2, 12, 0)
+	String const * tooltip = NULL;
+	String * q = NULL;
+#endif
 
 	if((user = object_new(sizeof(*user))) == NULL)
 		return NULL;
 	user->helper = helper;
-	if((name = _init_user()) != NULL)
-		user->widget = gtk_label_new(name);
-	else
-		user->widget = gtk_label_new("Unknown user");
-	string_delete(name);
+	if((pw = _init_pw()) != NULL)
+	{
+		if((p = _init_user(pw)) != NULL)
+			name = p;
+#if GTK_CHECK_VERSION(2, 12, 0)
+		if((q = _init_tooltip(pw)) != NULL)
+			tooltip = q;
+#endif
+	}
+	user->widget = gtk_label_new(name);
+	string_delete(p);
+#if GTK_CHECK_VERSION(2, 12, 0)
+	if(tooltip != NULL)
+		gtk_widget_set_tooltip_text(user->widget, tooltip);
+	string_delete(q);
+#endif
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -85,16 +106,36 @@ static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	return user;
 }
 
-static String * _init_user(void)
+static struct passwd * _init_pw(void)
 {
 	struct passwd * pw;
-	ssize_t len;
 
 	if((pw = getpwuid(getuid())) == NULL)
-	{
 		error_set("%s: %s", applet.name, strerror(errno));
+	return pw;
+}
+
+#if GTK_CHECK_VERSION(2, 12, 0)
+static String * _init_tooltip(struct passwd * pw)
+{
+	ssize_t len;
+
+	if(pw->pw_gecos == NULL || strlen(pw->pw_gecos) == 0)
 		return NULL;
-	}
+	if((len = string_index(pw->pw_gecos, ",")) < 0)
+		/* would be redundant */
+		return NULL;
+	/* FIXME:
+	 * - ignore empty fields
+	 * - return NULL if identical to _init_user() */
+	return string_new_replace(pw->pw_gecos, ",", "\n");
+}
+#endif
+
+static String * _init_user(struct passwd * pw)
+{
+	ssize_t len;
+
 	if(pw->pw_gecos != NULL && strlen(pw->pw_gecos) > 0)
 	{
 		if((len = string_index(pw->pw_gecos, ",")) > 0)
