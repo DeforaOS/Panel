@@ -700,6 +700,8 @@ static int _do_typehint_normal(Tasks * tasks, Window window)
 static gboolean _task_on_button_press(GtkWidget * widget,
 		GdkEventButton * event, gpointer data)
 {
+	(void) widget;
+
 	if(event->button != 3 || event->type != GDK_BUTTON_PRESS)
 		return FALSE;
 	_task_on_popup(data);
@@ -724,7 +726,9 @@ static void _clicked_activate(Task * task)
 {
 	GdkDisplay * display;
 	XEvent xev;
+#ifdef DEBUG
 	int res;
+#endif
 
 	display = task->tasks->display;
 	memset(&xev, 0, sizeof(xev));
@@ -737,7 +741,10 @@ static void _clicked_activate(Task * task)
 	xev.xclient.data.l[1] = gdk_x11_display_get_user_time(display);
 	xev.xclient.data.l[2] = 0;
 	gdk_error_trap_push();
-	res = XSendEvent(GDK_DISPLAY_XDISPLAY(display),
+#ifdef DEBUG
+	res =
+#endif
+		XSendEvent(GDK_DISPLAY_XDISPLAY(display),
 			GDK_WINDOW_XID(task->tasks->root), False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
@@ -766,6 +773,7 @@ static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
 {
 	Tasks * tasks = data;
 	XEvent * xev = xevent;
+	(void) event;
 
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
@@ -1042,6 +1050,7 @@ static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	Tasks * tasks = data;
 	GdkEventMask events;
 	size_t i;
+	(void) previous;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
