@@ -119,8 +119,13 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	}
 	pager->helper = helper;
 	orientation = panel_window_get_orientation(helper->window);
+#if GTK_CHECK_VERSION(3, 0, 0)
 	pager->box = gtk_box_new(orientation, 0);
 	gtk_box_set_homogeneous(GTK_BOX(pager->box), TRUE);
+#else
+	pager->box = (orientation == GTK_ORIENTATION_VERTICAL)
+		? gtk_vbox_new(TRUE, 0) : gtk_hbox_new(TRUE, 0);
+#endif
 	pager->source = g_signal_connect(pager->box, "screen-changed",
 			G_CALLBACK(_pager_on_screen_changed), pager);
 	pager->widgets = NULL;
