@@ -28,6 +28,10 @@
 #define _(string) gettext(string)
 #define N_(string) (string)
 
+#if !GTK_CHECK_VERSION(3, 0, 0)
+# define gdk_error_trap_pop_ignored() gdk_error_trap_pop()
+#endif
+
 
 /* Tasks */
 /* private */
@@ -269,7 +273,7 @@ static void _task_toggle_state2(Task * task, TasksAtom state1,
 			False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
@@ -752,7 +756,7 @@ static void _clicked_activate(Task * task)
 	if(gdk_error_trap_pop() != 0 || res != Success)
 		fprintf(stderr, "DEBUG: %s() error\n", __func__);
 #else
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 #endif
 }
 
@@ -918,7 +922,7 @@ static void _task_on_popup_close(gpointer data)
 			GDK_WINDOW_XID(task->tasks->root), False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
@@ -967,7 +971,7 @@ static void _task_on_popup_minimize(gpointer data)
 	gdk_error_trap_push();
 	XIconifyWindow(GDK_DISPLAY_XDISPLAY(task->tasks->display), task->window,
 			gdk_x11_screen_get_screen_number(task->tasks->screen));
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
@@ -994,7 +998,7 @@ static void _task_on_popup_move(gpointer data)
 			GDK_WINDOW_XID(tasks->root), False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
@@ -1021,7 +1025,7 @@ static void _task_on_popup_resize(gpointer data)
 			GDK_WINDOW_XID(tasks->root), False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
