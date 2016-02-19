@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-25 02:07+0100\n"
+"POT-Creation-Date: 2016-02-19 01:47+0100\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -26,7 +26,7 @@ msgid "Unknown"
 msgstr "Desconocido"
 
 #: ../src/applets/battery.c:439 ../src/applets/wpa_supplicant.c:419
-#: ../src/panel.c:407 ../src/panel.c:412 ../src/run.c:250 ../src/run.c:256
+#: ../src/panel.c:407 ../src/panel.c:412 ../src/run.c:256 ../src/run.c:262
 #: ../tools/message.c:190
 msgid "Error"
 msgstr "Error"
@@ -56,7 +56,7 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:96 ../src/applets/tasks.c:826
+#: ../src/applets/close.c:96 ../src/applets/tasks.c:842
 msgid "Close"
 msgstr "Cerrar"
 
@@ -100,7 +100,7 @@ msgstr "GSM habilitado"
 msgid "Lock screen"
 msgstr "Bloquear pantalla"
 
-#: ../src/applets/lock.c:126 ../src/applets/mixer.c:294 ../src/run.c:119
+#: ../src/applets/lock.c:126 ../src/applets/mixer.c:294 ../src/run.c:123
 msgid "Command:"
 msgstr "Comando:"
 
@@ -205,7 +205,7 @@ msgstr "Adelantar"
 msgid "Next"
 msgstr "Siguiente"
 
-#: ../src/applets/network.c:343
+#: ../src/applets/network.c:344
 #, c-format
 msgid ""
 "%s\n"
@@ -216,15 +216,15 @@ msgstr ""
 "In: %lu kB/s\n"
 "Out: %lu kB/s"
 
-#: ../src/applets/network.c:395
+#: ../src/applets/network.c:396
 msgid "Show local interfaces"
 msgstr "Mostrar interfaces locales"
 
-#: ../src/applets/network.c:401
+#: ../src/applets/network.c:402
 msgid "Show the interfaces disabled"
 msgstr "Mostrar las interfaces desabilitadas"
 
-#: ../src/applets/pager.c:282
+#: ../src/applets/pager.c:283
 msgid "Desk"
 msgstr "Escritorio"
 
@@ -236,47 +236,47 @@ msgstr "Rotar pantalla"
 msgid "Swap:"
 msgstr "Swap:"
 
-#: ../src/applets/tasks.c:520 ../src/applets/title.c:248
+#: ../src/applets/tasks.c:528 ../src/applets/title.c:248
 msgid "(Untitled)"
 msgstr "(Sin Título)"
 
-#: ../src/applets/tasks.c:805
+#: ../src/applets/tasks.c:821
 msgid "Move"
 msgstr "Mover"
 
-#: ../src/applets/tasks.c:807
+#: ../src/applets/tasks.c:823
 msgid "Resize"
 msgstr "Ajustar tamaño"
 
-#: ../src/applets/tasks.c:809
+#: ../src/applets/tasks.c:825
 msgid "Minimize"
 msgstr "Minimizar"
 
-#: ../src/applets/tasks.c:811
+#: ../src/applets/tasks.c:827
 msgid "Shade"
 msgstr "Shade"
 
-#: ../src/applets/tasks.c:813
+#: ../src/applets/tasks.c:829
 msgid "Stick"
 msgstr "Stick"
 
-#: ../src/applets/tasks.c:816
+#: ../src/applets/tasks.c:832
 msgid "Maximize horizontally"
 msgstr "Maximizar horizontalmente"
 
-#: ../src/applets/tasks.c:819
+#: ../src/applets/tasks.c:835
 msgid "Maximize vertically"
 msgstr "Maximizar verticalemnte"
 
-#: ../src/applets/tasks.c:821
+#: ../src/applets/tasks.c:837
 msgid "Fullscreen"
-msgstr ""
+msgstr "Pantalla completa"
 
-#: ../src/applets/tasks.c:824
+#: ../src/applets/tasks.c:840
 msgid "Change desktop"
 msgstr "Cambiar escritorio"
 
-#: ../src/applets/tasks.c:877
+#: ../src/applets/tasks.c:893
 msgid "Maximize"
 msgstr "Maximizar"
 
@@ -527,51 +527,51 @@ msgstr ""
 "  -r\tEsconder panel derecho\n"
 "  -t\tEsconder panel superior\n"
 
-#: ../src/run.c:108 ../src/run.c:126
+#: ../src/run.c:112 ../src/run.c:130
 msgid "Run program..."
 msgstr "Ejecutar programa..."
 
-#: ../src/run.c:131
+#: ../src/run.c:135
 msgid "Executable files"
 msgstr "Ejecutar archivos"
 
-#: ../src/run.c:136
+#: ../src/run.c:140
 msgid "Perl scripts"
 msgstr "Perl scripts"
 
-#: ../src/run.c:140
+#: ../src/run.c:144
 msgid "Python scripts"
 msgstr "Python scripts"
 
-#: ../src/run.c:144
+#: ../src/run.c:148
 msgid "Shell scripts"
 msgstr "Shell scripts"
 
-#: ../src/run.c:148
+#: ../src/run.c:152
 msgid "All files"
 msgstr "Todos los archivos"
 
-#: ../src/run.c:156
+#: ../src/run.c:160
 msgid "Run in a terminal"
 msgstr "Ejecutar en la terminal"
 
-#: ../src/run.c:168
+#: ../src/run.c:172
 msgid "Run"
 msgstr "Ejecutar"
 
-#: ../src/run.c:179
+#: ../src/run.c:183
 msgid "Cancel"
 msgstr "Cancelar"
 
-#: ../src/run.c:364
+#: ../src/run.c:439
 msgid "Command not found"
 msgstr "Comando no encontrado"
 
-#: ../src/run.c:367
+#: ../src/run.c:442
 msgid "Permission denied"
 msgstr "Permiso denegado"
 
-#: ../src/run.c:456
+#: ../src/run.c:490
 msgid "Usage: run\n"
 msgstr "Uso: run\n"
 
@@ -588,11 +588,11 @@ msgstr "No se pudo obtener el XID"
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s command [arguments...]\n"
 
-#: ../tools/helper.c:215
+#: ../tools/helper.c:214
 msgid "Invalid panel position"
 msgstr "Posición de panel inválida"
 
-#: ../tools/helper.c:240
+#: ../tools/helper.c:239
 msgid "Applets available:"
 msgstr "Applets disponibles:"
 
