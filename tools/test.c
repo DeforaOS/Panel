@@ -52,19 +52,21 @@
 
 /* private */
 /* prototypes */
-static int _test(PanelWindowType type, GtkIconSize iconsize, char * applets[]);
+static int _test(PanelWindowType type, PanelWindowPosition position,
+		GtkIconSize iconsize, char * applets[]);
 
 static int _usage(void);
 
 
 /* functions */
 /* test */
-static int _test(PanelWindowType type, GtkIconSize iconsize, char * applets[])
+static int _test(PanelWindowType type, PanelWindowPosition position,
+		GtkIconSize iconsize, char * applets[])
 {
 	Panel panel;
 	size_t i;
 
-	_panel_init(&panel, PANEL_WINDOW_POSITION_MANAGED, type, iconsize);
+	_panel_init(&panel, position, type, iconsize);
 	_panel_set_title(&panel, "Applet tester");
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
@@ -79,7 +81,7 @@ static int _test(PanelWindowType type, GtkIconSize iconsize, char * applets[])
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: " PROGNAME " [-L|-S|-X|-x][-n] applet...\n"
+	fputs("Usage: " PROGNAME " [-C|-F|-M][-L|-S|-X|-x][-n] applet...\n"
 "       " PROGNAME " -l\n"
 "  -l	Lists the plug-ins available\n", stderr);
 	return 1;
@@ -92,6 +94,7 @@ static int _usage(void)
 int main(int argc, char * argv[])
 {
 	PanelWindowType type = PANEL_WINDOW_TYPE_NORMAL;
+	PanelWindowPosition position = PANEL_WINDOW_POSITION_MANAGED;
 	GtkIconSize iconsize = GTK_ICON_SIZE_LARGE_TOOLBAR;
 	GtkIconSize huge;
 	int o;
@@ -104,14 +107,23 @@ int main(int argc, char * argv[])
 	if((huge = gtk_icon_size_from_name("panel-huge"))
 			== GTK_ICON_SIZE_INVALID)
 		huge = gtk_icon_size_register("panel-huge", 64, 64);
-	while((o = getopt(argc, argv, "LlnSXx")) != -1)
+	while((o = getopt(argc, argv, "CFLlMnSXx")) != -1)
 		switch(o)
 		{
+			case 'C':
+				position = PANEL_WINDOW_POSITION_CENTER;
+				break;
+			case 'F':
+				position = PANEL_WINDOW_POSITION_FLOATING;
+				break;
 			case 'L':
 				iconsize = GTK_ICON_SIZE_LARGE_TOOLBAR;
 				break;
 			case 'l':
 				return _applet_list();
+			case 'M':
+				position = PANEL_WINDOW_POSITION_MANAGED;
+				break;
 			case 'n':
 				type = PANEL_WINDOW_TYPE_NOTIFICATION;
 				break;
@@ -129,6 +141,6 @@ int main(int argc, char * argv[])
 		}
 	if(optind == argc)
 		return _usage();
-	_test(type, iconsize, &argv[optind]);
+	_test(type, position, iconsize, &argv[optind]);
 	return 0;
 }
