@@ -41,7 +41,7 @@ SED="sed"
 #debug
 _debug()
 {
-	echo "$@" 1>&2
+	echo "$@" 1>&3
 	"$@"
 }
 
@@ -105,6 +105,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 PKGCONFIG="$PREFIX/lib/pkgconfig"
+exec 3>&1
 while [ $# -gt 0 ]; do
 	target="$1"
 	shift
@@ -122,7 +123,11 @@ while [ $# -gt 0 ]; do
 	if [ "$install" -eq 1 ]; then
 		source="${target#$OBJDIR}"
 		$DEBUG $MKDIR -- "$PKGCONFIG"			|| exit 2
-		$DEBUG $INSTALL "$target" "$PKGCONFIG/$source"	|| exit 2
+		basename="$source"
+		if [ "${source##*/}" != "$source" ]; then
+			basename="${source##*/}"
+		fi
+		$DEBUG $INSTALL "$target" "$PKGCONFIG/$basename"|| exit 2
 		continue
 	fi
 
