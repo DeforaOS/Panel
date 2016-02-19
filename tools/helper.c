@@ -131,6 +131,7 @@ void panel_show_preferences(Panel * panel, gboolean show)
 static int _panel_init(Panel * panel, PanelWindowPosition position,
 		PanelWindowType type, GtkIconSize iconsize)
 {
+	const PanelPosition top = PANEL_POSITION_TOP;
 	char * filename;
 	GdkRectangle rect;
 	size_t i;
@@ -150,14 +151,12 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	panel->root_height = rect.height;
 	panel->root_width = rect.width;
 	/* panel window */
-	_helper_init(&panel->helper[PANEL_POSITION_TOP], panel, type, iconsize);
-	panel->windows[PANEL_POSITION_TOP] = panel_window_new(
-			&panel->helper[PANEL_POSITION_TOP],
+	_helper_init(&panel->helper[top], panel, type, iconsize);
+	panel->windows[top] = panel_window_new(&panel->helper[top],
 			PANEL_WINDOW_TYPE_NORMAL, position, iconsize, &rect);
-	panel->helper[PANEL_POSITION_TOP].window
-		= panel->windows[PANEL_POSITION_TOP];
+	panel->helper[top].window = panel->windows[top];
 	for(i = 0; i < sizeof(panel->windows) / sizeof(*panel->windows); i++)
-		if(i != PANEL_POSITION_TOP)
+		if(i != top)
 			panel->windows[i] = NULL;
 	panel->source = 0;
 	panel->timeout = 0;
