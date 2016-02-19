@@ -287,6 +287,7 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	Tasks * tasks;
 	char const * p;
+	GtkOrientation orientation;
 
 	if((tasks = malloc(sizeof(*tasks))) == NULL)
 		return NULL;
@@ -316,10 +317,12 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	tasks->embedded = FALSE;
 #endif
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	tasks->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	tasks->hbox = gtk_box_new(orientation, 0);
 #else
-	tasks->hbox = gtk_hbox_new(FALSE, 0);
+	tasks->hbox = (orientation == GTK_ORIENTATION_VERTICAL)
+		? gtk_vbox_new(FALSE, 0) : gtk_hbox_new(FALSE, 0);
 #endif
 	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
 	tasks->source = g_signal_connect(tasks->hbox, "screen-changed",
