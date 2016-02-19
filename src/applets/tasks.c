@@ -320,11 +320,11 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	tasks->hbox = gtk_box_new(orientation, 0);
+	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
 #else
 	tasks->hbox = (orientation == GTK_ORIENTATION_VERTICAL)
-		? gtk_vbox_new(FALSE, 0) : gtk_hbox_new(FALSE, 0);
+		? gtk_vbox_new(TRUE, 0) : gtk_hbox_new(TRUE, 0);
 #endif
-	gtk_box_set_homogeneous(GTK_BOX(tasks->hbox), TRUE);
 	tasks->source = g_signal_connect(tasks->hbox, "screen-changed",
 			G_CALLBACK(_task_on_screen_changed), tasks);
 	tasks->iconsize = panel_window_get_icon_size(helper->window);
