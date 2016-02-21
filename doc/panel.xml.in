@@ -9,12 +9,13 @@
 	<!ENTITY section   "1">
 	<!ENTITY title     "Panel User Manual">
 	<!ENTITY package   "DeforaOS Panel">
-	<!ENTITY name      "panel-message">
-	<!ENTITY purpose   "Notifier for the panel">
+	<!ENTITY name      "panel">
+	<!ENTITY purpose   "Desktop panel">
 ]>
 <refentry>
 	<refentryinfo>
 		<title>&title;</title>
+		<date>@DATE@</date>
 		<productname>&package;</productname>
 		<authorgroup>
 			<author>
@@ -51,67 +52,45 @@
 		<cmdsynopsis>
 			<command>&name;</command>
 			<group choice="opt">
-				<arg choice="plain"><option>-E</option></arg>
-				<arg choice="plain"><option>-I</option></arg>
-				<arg choice="plain"><option>-Q</option></arg>
-				<arg choice="plain"><option>-W</option></arg>
+				<arg choice="plain"><option>-L</option></arg>
+				<arg choice="plain"><option>-S</option></arg>
+				<arg choice="plain"><option>-x</option></arg>
 			</group>
-			<arg choice="opt"><option>-T</option>
-				<replaceable>title</replaceable></arg>
-			<arg choice="opt"><option>-t</option>
-				<replaceable>timeout</replaceable></arg>
+			<arg choice="opt"><option>-m</option>
+				<replaceable>monitor</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	<refsect1 id="description">
 		<title>Description</title>
-		<para><command>&name;</command> is a desktop notification program for the
-			desktop. It can popup a window, centered on the screen, containing different
-			applets of the panel. It can be set to disappear automatically after a
-			specific amount of time. It is particularly useful when implementing hotkeys
-			(system status...).</para>
+		<para><command>&name;</command> is a desktop panel. It can be positioned at
+			the top and/or bottom of any monitor available.</para>
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para><command>&name;</command> expects a text message to be specified as an
-					argument on the command line.</para>
 		<para>The following options are available:</para>
 		<variablelist>
 			<varlistentry>
-				<term><option>-E</option></term>
+				<term><option>-L</option></term>
 				<listitem>
-					<para>Display an error message.</para>
+					<para>Use icons the size of a large toolbar.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-I</option></term>
+				<term><option>-S</option></term>
 				<listitem>
-					<para>Display an information message.</para>
+					<para>Use icons the size of a small toolbar.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-Q</option></term>
+				<term><option>-x</option></term>
 				<listitem>
-					<para>Display a question message.</para>
+					<para>Use icons the size of menus.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-W</option></term>
+				<term><option>-m</option></term>
 				<listitem>
-					<para>Display a warning message.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>-T</option></term>
-				<listitem>
-					<para>The title to display with the message (default: according to the
-						message type).</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>-t</option></term>
-				<listitem>
-					<para>Time to wait before disappearing (in seconds; 0 means
-						unlimited).</para>
+					<para>Monitor where to display the panel.</para>
 				</listitem>
 			</varlistentry>
 		</variablelist>
@@ -125,15 +104,15 @@
 		<title>See also</title>
 		<para>
 			<citerefentry>
-				<refentrytitle>panel</refentrytitle>
-				<manvolnum>1</manvolnum>
-			</citerefentry>,
-			<citerefentry>
 				<refentrytitle>panelctl</refentrytitle>
 				<manvolnum>1</manvolnum>
 			</citerefentry>,
 			<citerefentry>
 				<refentrytitle>panel-embed</refentrytitle>
+				<manvolnum>1</manvolnum>
+			</citerefentry>,
+			<citerefentry>
+				<refentrytitle>panel-message</refentrytitle>
 				<manvolnum>1</manvolnum>
 			</citerefentry>,
 			<citerefentry>

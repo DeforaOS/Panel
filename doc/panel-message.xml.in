@@ -9,12 +9,13 @@
 	<!ENTITY section   "1">
 	<!ENTITY title     "Panel User Manual">
 	<!ENTITY package   "DeforaOS Panel">
-	<!ENTITY name      "panel-notify">
-	<!ENTITY purpose   "Notifier for the desktop">
+	<!ENTITY name      "panel-message">
+	<!ENTITY purpose   "Notifier for the panel">
 ]>
 <refentry>
 	<refentryinfo>
 		<title>&title;</title>
+		<date>@DATE@</date>
 		<productname>&package;</productname>
 		<authorgroup>
 			<author>
@@ -29,7 +30,6 @@
 		<copyright>
 			<year>2012</year>
 			<year>2013</year>
-			<year>2014</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
@@ -51,20 +51,16 @@
 	<refsynopsisdiv>
 		<cmdsynopsis>
 			<command>&name;</command>
-			<arg choice="opt"><option>-e</option></arg>
 			<group choice="opt">
-				<arg choice="plain"><option>-L</option></arg>
-				<arg choice="plain"><option>-S</option></arg>
-				<arg choice="plain"><option>-X</option></arg>
-				<arg choice="plain"><option>-x</option></arg>
+				<arg choice="plain"><option>-E</option></arg>
+				<arg choice="plain"><option>-I</option></arg>
+				<arg choice="plain"><option>-Q</option></arg>
+				<arg choice="plain"><option>-W</option></arg>
 			</group>
+			<arg choice="opt"><option>-T</option>
+				<replaceable>title</replaceable></arg>
 			<arg choice="opt"><option>-t</option>
 				<replaceable>timeout</replaceable></arg>
-			<arg choice="plain" rep="repeat"><replaceable>applet</replaceable></arg>
-		</cmdsynopsis>
-		<cmdsynopsis>
-			<command>&name;</command>
-			<arg choice="plain"><option>-l</option></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	<refsect1 id="description">
@@ -77,38 +73,39 @@
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para><command>&name;</command> expects an arbitrary number of panel applets
-			to be specified as arguments on the command line.</para>
+		<para><command>&name;</command> expects a text message to be specified as an
+					argument on the command line.</para>
 		<para>The following options are available:</para>
 		<variablelist>
 			<varlistentry>
-				<term><option>-e</option></term>
+				<term><option>-E</option></term>
 				<listitem>
-					<para>Embed the notification in the panel.</para>
+					<para>Display an error message.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-L</option></term>
+				<term><option>-I</option></term>
 				<listitem>
-					<para>Use icons the size of a large toolbar.</para>
+					<para>Display an information message.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-S</option></term>
+				<term><option>-Q</option></term>
 				<listitem>
-					<para>Use icons the size of a small toolbar.</para>
+					<para>Display a question message.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-X</option></term>
+				<term><option>-W</option></term>
 				<listitem>
-					<para>Use huge icons.</para>
+					<para>Display a warning message.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>-x</option></term>
+				<term><option>-T</option></term>
 				<listitem>
-					<para>Use icons the size of menus.</para>
+					<para>The title to display with the message (default: according to the
+						message type).</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -116,12 +113,6 @@
 				<listitem>
 					<para>Time to wait before disappearing (in seconds; 0 means
 						unlimited).</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>-l</option></term>
-				<listitem>
-					<para>Lists the plug-ins available.</para>
 				</listitem>
 			</varlistentry>
 		</variablelist>
@@ -147,7 +138,7 @@
 				<manvolnum>1</manvolnum>
 			</citerefentry>,
 			<citerefentry>
-				<refentrytitle>panel-message</refentrytitle>
+				<refentrytitle>panel-notify</refentrytitle>
 				<manvolnum>1</manvolnum>
 			</citerefentry>
 		</para>
