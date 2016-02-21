@@ -231,7 +231,20 @@ static gboolean _cpu_get(CPU * cpu, size_t index, gdouble * level)
 /* cpu_get_count */
 static size_t _cpu_get_count(void)
 {
+#if defined(__NetBSD__)
+	int mib[] = { CTL_HW, HW_NCPU };
+	int ncpu;
+	size_t size = sizeof(ncpu);
+
+	if(sysctl(mib, sizeof(mib) / sizeof(*mib), &ncpu, &size, NULL, 0) < 0)
+	{
+		error_set("%s: %s: %s", applet.name, "sysctl", strerror(errno));
+		return 1;
+	}
+	return ncpu;
+#else
 	return 1;
+#endif
 }
 
 
