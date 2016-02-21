@@ -137,8 +137,11 @@ static void _swap_destroy(Swap * swap)
 /* accessors */
 static void _swap_set(Swap * swap, gdouble level)
 {
-#if GTK_CHECK_VERSION(3, 6, 0)
+#if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_value(GTK_LEVEL_BAR(swap->scale), level);
+#elif GTK_CHECK_VERSION(3, 6, 0)
+	/* invert the value ourselves */
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(swap->scale), 100.0 - level);
 #else
 	gtk_range_set_value(GTK_RANGE(swap->scale), level);
 #endif

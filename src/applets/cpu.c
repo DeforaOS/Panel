@@ -194,8 +194,11 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 /* cpu_set */
 static void _cpu_set(CPU * cpu, gdouble level)
 {
-#if GTK_CHECK_VERSION(3, 6, 0)
+#if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scale), level);
+#elif GTK_CHECK_VERSION(3, 6, 0)
+	/* invert the value ourselves */
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scale), 100.0 - level);
 #else
 	gtk_range_set_value(GTK_RANGE(cpu->scale), level);
 #endif

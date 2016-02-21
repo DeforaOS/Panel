@@ -151,8 +151,11 @@ static void _memory_destroy(Memory * memory)
 /* memory_set */
 static void _memory_set(Memory * memory, gdouble level)
 {
-#if GTK_CHECK_VERSION(3, 6, 0)
+#if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_value(GTK_LEVEL_BAR(memory->scale), level);
+#elif GTK_CHECK_VERSION(3, 6, 0)
+	/* invert the value ourselves */
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(memory->scale), 100.0 - level);
 #else
 	gtk_range_set_value(GTK_RANGE(memory->scale), level);
 #endif
