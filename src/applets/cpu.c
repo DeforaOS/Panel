@@ -39,7 +39,8 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
-	GtkWidget * scale;
+	GtkWidget ** scales;
+	size_t scales_cnt;
 	guint timeout;
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	int used;
@@ -53,8 +54,9 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _cpu_destroy(CPU * cpu);
 
 /* accessors */
-static gboolean _cpu_get(CPU * cpu, gdouble * level);
-static void _cpu_set(CPU * cpu, gdouble level);
+static gboolean _cpu_get(CPU * cpu, size_t index, gdouble * level);
+static size_t _cpu_get_count(void);
+static void _cpu_set(CPU * cpu, size_t index, gdouble level);
 
 /* callbacks */
 static gboolean _cpu_on_timeout(gpointer data);
@@ -85,10 +87,18 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	CPU * cpu;
 	PangoFontDescription * desc;
 	GtkWidget * label;
+	size_t i;
 
 	if((cpu = malloc(sizeof(*cpu))) == NULL)
 	{
 		error_set("%s: %s", applet.name, strerror(errno));
+		return NULL;
+	}
+	cpu->scales_cnt = _cpu_get_count();
+	if((cpu->scales = malloc(sizeof(*cpu->scales) * cpu->scales_cnt))
+			== NULL)
+	{
+		_cpu_destroy(cpu);
 		return NULL;
 	}
 	cpu->helper = helper;
@@ -106,26 +116,35 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(label, desc);
 #endif
 	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
+	for(i = 0; i < cpu->scales_cnt; i++)
+	{
 #if GTK_CHECK_VERSION(3, 6, 0)
-	cpu->scale = gtk_level_bar_new_for_interval(0.0, 100.0);
+		cpu->scales[i] = gtk_level_bar_new_for_interval(0.0, 100.0);
 # if GTK_CHECK_VERSION(3, 8, 0)
-	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(cpu->scale), TRUE);
+		gtk_level_bar_set_inverted(GTK_LEVEL_BAR(cpu->scales[i]), TRUE);
 # endif
-	gtk_orientable_set_orientation(GTK_ORIENTABLE(cpu->scale), orientation);
+		gtk_orientable_set_orientation(GTK_ORIENTABLE(
+					cpu->scales[i]), orientation);
 #else
 # if GTK_CHECK_VERSION(3, 0, 0)
-	cpu->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);
+		cpu->scales[i] = gtk_scale_new_with_range(orientation, 0, 100,
+				1);
 # else
-	cpu->scale = gtk_vscale_new_with_range(0, 100, 1);
+		cpu->scales[i] = gtk_vscale_new_with_range(0, 100, 1);
 # endif
-	gtk_widget_set_sensitive(cpu->scale, FALSE);
-	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
-	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
-	gtk_widget_set_sensitive(cpu->scale, FALSE);
-	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
-	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
+		gtk_widget_set_sensitive(cpu->scales[i], FALSE);
+		gtk_range_set_inverted(GTK_RANGE(cpu->scales[i]),
+				TRUE);
+		gtk_scale_set_value_pos(GTK_SCALE(cpu->scales[i]),
+				GTK_POS_RIGHT);
+		gtk_widget_set_sensitive(cpu->scales[i], FALSE);
+		gtk_range_set_inverted(GTK_RANGE(cpu->scales[i]), TRUE);
+		gtk_scale_set_value_pos(GTK_SCALE(cpu->scales[i]),
+				GTK_POS_RIGHT);
 #endif
-	gtk_box_pack_start(GTK_BOX(cpu->widget), cpu->scale, FALSE, FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(cpu->widget), cpu->scales[i], FALSE,
+				FALSE, 0);
+	}
 	cpu->timeout = g_timeout_add(timeout, _cpu_on_timeout, cpu);
 	cpu->used = 0;
 	cpu->total = 0;
@@ -140,6 +159,7 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* cpu_destroy */
 static void _cpu_destroy(CPU * cpu)
 {
+	free(cpu->scales);
 	if(cpu->timeout > 0)
 		g_source_remove(cpu->timeout);
 	gtk_widget_destroy(cpu->widget);
@@ -149,7 +169,7 @@ static void _cpu_destroy(CPU * cpu)
 
 /* accessors */
 /* cpu_get */
-static gboolean _cpu_get(CPU * cpu, gdouble * level)
+static gboolean _cpu_get(CPU * cpu, size_t index, gdouble * level)
 {
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 # if defined(__FreeBSD__)
@@ -162,6 +182,11 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 	int used;
 	int total;
 
+	if(index >= cpu->scales_cnt)
+	{
+		error_set("%s %zu: %s", applet.name, index, strerror(ERANGE));
+		return FALSE;
+	}
 # if defined(__FreeBSD__)
 	if(sysctlbyname(name, &cpu_time, &size, NULL, 0) < 0)
 # elif defined(__NetBSD__)
@@ -184,6 +209,13 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 	cpu->total = total;
 	return TRUE;
 #else
+	(void) cpu;
+
+	if(index >= cpu->scales_cnt)
+	{
+		error_set("%s %zu: %s", applet.name, index, strerror(ERANGE));
+		return FALSE;
+	}
 	*level = 0.0 / 0.0;
 	error_set("%s: %s", applet.name, strerror(ENOSYS));
 	return FALSE;
@@ -191,16 +223,26 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 }
 
 
-/* cpu_set */
-static void _cpu_set(CPU * cpu, gdouble level)
+/* cpu_get_count */
+static size_t _cpu_get_count(void)
 {
+	return 1;
+}
+
+
+/* cpu_set */
+static void _cpu_set(CPU * cpu, size_t index, gdouble level)
+{
+	if(index >= cpu->scales_cnt)
+		return;
 #if GTK_CHECK_VERSION(3, 8, 0)
-	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scale), level);
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scales[index]), level);
 #elif GTK_CHECK_VERSION(3, 6, 0)
 	/* invert the value ourselves */
-	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scale), 100.0 - level);
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scales[index]),
+			100.0 - level);
 #else
-	gtk_range_set_value(GTK_RANGE(cpu->scale), level);
+	gtk_range_set_value(GTK_RANGE(cpu->scales[index]), level);
 #endif
 }
 
@@ -211,14 +253,17 @@ static gboolean _cpu_on_timeout(gpointer data)
 {
 	CPU * cpu = data;
 	PanelAppletHelper * helper = cpu->helper;
+	size_t i;
 	gdouble level;
 
-	if(_cpu_get(cpu, &level) == FALSE)
+	for(i = 0; i < cpu->scales_cnt; i++)
 	{
-		cpu->timeout = 0;
-		helper->error(NULL, error_get(NULL), 1);
-		return FALSE;
+		if(_cpu_get(cpu, i, &level) == FALSE)
+		{
+			helper->error(NULL, error_get(NULL), 1);
+			level = 0;
+		}
+		_cpu_set(cpu, i, level);
 	}
-	_cpu_set(cpu, level);
 	return TRUE;
 }
