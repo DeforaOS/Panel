@@ -80,10 +80,10 @@ PanelAppletDefinition applet =
 /* memory_init */
 static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
 	const int timeout = 5000;
 	Memory * memory;
+	GtkOrientation orientation;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -93,11 +93,16 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	memory->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	memory->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	memory->widget = gtk_box_new(orientation, 0);
 #else
-	memory->widget = gtk_hbox_new(FALSE, 0);
+	memory->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
 #endif
+	/* invert the orientation for the meter */
+	orientation = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL;
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("RAM:"));
@@ -112,7 +117,8 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 # if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(memory->scale), TRUE);
 # endif
-	gtk_orientable_set_orientation(GTK_ORIENTABLE(memory->scale), orientation);
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(memory->scale),
+			orientation);
 #else
 # if GTK_CHECK_VERSION(3, 0, 0)
 	memory->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);

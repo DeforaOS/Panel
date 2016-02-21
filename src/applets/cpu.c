@@ -82,9 +82,9 @@ PanelAppletDefinition applet =
 /* cpu_init */
 static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 	const int timeout = 500;
 	CPU * cpu;
+	GtkOrientation orientation;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 	size_t i;
@@ -102,11 +102,16 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	cpu->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	cpu->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	cpu->widget = gtk_box_new(orientation, 0);
 #else
-	cpu->widget = gtk_hbox_new(FALSE, 0);
+	cpu->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
 #endif
+	/* invert the orientation for meters */
+	orientation = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL;
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("CPU:"));

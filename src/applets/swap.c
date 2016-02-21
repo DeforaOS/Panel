@@ -74,9 +74,9 @@ PanelAppletDefinition applet =
 /* swap_init */
 static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
-	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 	const int timeout = 5000;
 	Swap * swap;
+	GtkOrientation orientation;
 	PangoFontDescription * desc;
 	GtkWidget * label;
 
@@ -86,11 +86,16 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	swap->helper = helper;
+	orientation = panel_window_get_orientation(helper->window);
 #if GTK_CHECK_VERSION(3, 0, 0)
-	swap->widget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	swap->widget = gtk_box_new(orientation, 0);
 #else
-	swap->widget = gtk_hbox_new(FALSE, 0);
+	swap->widget = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? gtk_hbox_new(FALSE, 0) : gtk_vbox_new(FALSE, 0);
 #endif
+	/* invert the orientation for the meter */
+	orientation = (orientation == GTK_ORIENTATION_HORIZONTAL)
+		? GTK_ORIENTATION_VERTICAL : GTK_ORIENTATION_HORIZONTAL;
 	desc = pango_font_description_new();
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
 	label = gtk_label_new(_("Swap:"));
@@ -105,7 +110,8 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 # if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(swap->scale), TRUE);
 # endif
-	gtk_orientable_set_orientation(GTK_ORIENTABLE(swap->scale), orientation);
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(swap->scale),
+			orientation);
 #else
 # if GTK_CHECK_VERSION(3, 0, 0)
 	swap->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);
