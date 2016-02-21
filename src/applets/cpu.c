@@ -80,6 +80,7 @@ PanelAppletDefinition applet =
 /* cpu_init */
 static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 	const int timeout = 500;
 	CPU * cpu;
 	PangoFontDescription * desc;
@@ -105,15 +106,22 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(label, desc);
 #endif
 	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION(3, 0, 0)
-	cpu->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100,
-			1);
+#if GTK_CHECK_VERSION(3, 6, 0)
+	cpu->scale = gtk_level_bar_new_for_interval(0.0, 100.0);
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(cpu->scale), orientation);
 #else
+# if GTK_CHECK_VERSION(3, 0, 0)
+	cpu->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);
+# else
 	cpu->scale = gtk_vscale_new_with_range(0, 100, 1);
-#endif
+# endif
 	gtk_widget_set_sensitive(cpu->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
+	gtk_widget_set_sensitive(cpu->scale, FALSE);
+	gtk_range_set_inverted(GTK_RANGE(cpu->scale), TRUE);
+	gtk_scale_set_value_pos(GTK_SCALE(cpu->scale), GTK_POS_RIGHT);
+#endif
 	gtk_box_pack_start(GTK_BOX(cpu->widget), cpu->scale, FALSE, FALSE, 0);
 	cpu->timeout = g_timeout_add(timeout, _cpu_on_timeout, cpu);
 	cpu->used = 0;
@@ -183,7 +191,11 @@ static gboolean _cpu_get(CPU * cpu, gdouble * level)
 /* cpu_set */
 static void _cpu_set(CPU * cpu, gdouble level)
 {
+#if GTK_CHECK_VERSION(3, 6, 0)
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(cpu->scale), level);
+#else
 	gtk_range_set_value(GTK_RANGE(cpu->scale), level);
+#endif
 }
 
 
