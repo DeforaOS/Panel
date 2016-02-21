@@ -47,6 +47,9 @@ typedef struct _PanelApplet
 static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _swap_destroy(Swap * swap);
 
+/* accessors */
+static void _swap_set(Swap * swap, gdouble level);
+
 /* callbacks */
 static gboolean _swap_on_timeout(gpointer data);
 
@@ -71,6 +74,7 @@ PanelAppletDefinition applet =
 /* swap_init */
 static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 	const int timeout = 5000;
 	Swap * swap;
 	PangoFontDescription * desc;
@@ -96,15 +100,22 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(label, desc);
 #endif
 	gtk_box_pack_start(GTK_BOX(swap->widget), label, FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION(3, 0, 0)
-	swap->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0, 100,
-			1);
+#if GTK_CHECK_VERSION(3, 6, 0)
+	swap->scale = gtk_level_bar_new_for_interval(0.0, 100.0);
+# if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(swap->scale), TRUE);
+# endif
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(swap->scale), orientation);
 #else
+# if GTK_CHECK_VERSION(3, 0, 0)
+	swap->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);
+# else
 	swap->scale = gtk_vscale_new_with_range(0, 100, 1);
-#endif
+# endif
 	gtk_widget_set_sensitive(swap->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(swap->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(swap->scale), GTK_POS_RIGHT);
+#endif
 	gtk_box_pack_start(GTK_BOX(swap->widget), swap->scale, FALSE, FALSE, 0);
 	if(_swap_on_timeout(swap) == TRUE)
 		swap->timeout = g_timeout_add(timeout, _swap_on_timeout, swap);
@@ -123,6 +134,16 @@ static void _swap_destroy(Swap * swap)
 	free(swap);
 }
 
+/* accessors */
+static void _swap_set(Swap * swap, gdouble level)
+{
+#if GTK_CHECK_VERSION(3, 6, 0)
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(swap->scale), level);
+#else
+	gtk_range_set_value(GTK_RANGE(swap->scale), level);
+#endif
+}
+
 
 /* callbacks */
 /* swap_on_timeout */
@@ -138,7 +159,7 @@ static gboolean _swap_on_timeout(gpointer data)
 				TRUE);
 	if((value = sy.totalswap - sy.freeswap) != 0.0 && sy.totalswap != 0)
 		value /= sy.totalswap;
-	gtk_range_set_value(GTK_RANGE(swap->scale), value);
+	_swap_set(swap, value);
 	return TRUE;
 #elif defined(__NetBSD__)
 	Swap * swap = data;
@@ -151,7 +172,7 @@ static gboolean _swap_on_timeout(gpointer data)
 		return TRUE;
 	if((value = ue.swpgonly) != 0.0 && ue.swpages != 0)
 		value /= ue.swpages;
-	gtk_range_set_value(GTK_RANGE(swap->scale), value);
+	_swap_set(swap, value);
 	return TRUE;
 #else
 	Swap * swap = data;

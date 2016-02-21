@@ -51,6 +51,9 @@ typedef struct _PanelApplet
 static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _memory_destroy(Memory * memory);
 
+/* accessors */
+static void _memory_set(Memory * memory, gdouble level);
+
 /* callbacks */
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
 static gboolean _memory_on_timeout(gpointer data);
@@ -77,6 +80,7 @@ PanelAppletDefinition applet =
 /* memory_init */
 static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+	const GtkOrientation orientation = GTK_ORIENTATION_VERTICAL;
 #if defined(__FreeBSD__) || defined(__linux__) || defined(__NetBSD__)
 	const int timeout = 5000;
 	Memory * memory;
@@ -103,15 +107,22 @@ static Memory * _memory_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_modify_font(label, desc);
 #endif
 	gtk_box_pack_start(GTK_BOX(memory->widget), label, FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION(3, 0, 0)
-	memory->scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, 0,
-			100, 1);
+#if GTK_CHECK_VERSION(3, 6, 0)
+	memory->scale = gtk_level_bar_new_for_interval(0.0, 100.0);
+# if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(memory->scale), TRUE);
+# endif
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(memory->scale), orientation);
 #else
+# if GTK_CHECK_VERSION(3, 0, 0)
+	memory->scale = gtk_scale_new_with_range(orientation, 0, 100, 1);
+# else
 	memory->scale = gtk_vscale_new_with_range(0, 100, 1);
-#endif
+# endif
 	gtk_widget_set_sensitive(memory->scale, FALSE);
 	gtk_range_set_inverted(GTK_RANGE(memory->scale), TRUE);
 	gtk_scale_set_value_pos(GTK_SCALE(memory->scale), GTK_POS_RIGHT);
+#endif
 	gtk_box_pack_start(GTK_BOX(memory->widget), memory->scale, FALSE, FALSE,
 			0);
 	memory->timeout = g_timeout_add(timeout, _memory_on_timeout, memory);
@@ -136,6 +147,18 @@ static void _memory_destroy(Memory * memory)
 }
 
 
+/* accessors */
+/* memory_set */
+static void _memory_set(Memory * memory, gdouble level)
+{
+#if GTK_CHECK_VERSION(3, 6, 0)
+	gtk_level_bar_set_value(GTK_LEVEL_BAR(memory->scale), level);
+#else
+	gtk_range_set_value(GTK_RANGE(memory->scale), level);
+#endif
+}
+
+
 /* callbacks */
 /* memory_on_timeout */
 #if defined(__linux__)
@@ -153,7 +176,7 @@ static gboolean _memory_on_timeout(gpointer data)
 	}
 	value = sy.sharedram;
 	value /= sy.totalram;
-	gtk_range_set_value(GTK_RANGE(memory->scale), value);
+	_memory_set(memory, value);
 	return TRUE;
 }
 #elif defined(__FreeBSD__) || defined(__NetBSD__)
@@ -173,7 +196,7 @@ static gboolean _memory_on_timeout(gpointer data)
 	}
 	value = vm.t_arm * 100;
 	value /= (vm.t_rm + vm.t_free);
-	gtk_range_set_value(GTK_RANGE(memory->scale), value);
+	_memory_set(memory, value);
 	return TRUE;
 }
 #endif
