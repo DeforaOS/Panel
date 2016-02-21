@@ -108,6 +108,9 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_box_pack_start(GTK_BOX(cpu->widget), label, FALSE, FALSE, 0);
 #if GTK_CHECK_VERSION(3, 6, 0)
 	cpu->scale = gtk_level_bar_new_for_interval(0.0, 100.0);
+# if GTK_CHECK_VERSION(3, 8, 0)
+	gtk_level_bar_set_inverted(GTK_LEVEL_BAR(cpu->scale), TRUE);
+# endif
 	gtk_orientable_set_orientation(GTK_ORIENTABLE(cpu->scale), orientation);
 #else
 # if GTK_CHECK_VERSION(3, 0, 0)
