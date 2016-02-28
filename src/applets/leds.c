@@ -36,8 +36,10 @@ typedef struct _PanelApplet
 	GtkWidget * widget;
 	GtkWidget * leds[XkbNumIndicators];
 	gulong source;
+	guint timeout;
 
 	GdkDisplay * display;
+	XkbDescPtr xkb;
 } LEDs;
 
 
@@ -49,6 +51,7 @@ static void _leds_destroy(LEDs * leds);
 /* callbacks */
 static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+static gboolean _leds_on_timeout(gpointer data);
 
 
 /* public */
@@ -83,9 +86,15 @@ static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	leds->widget = gtk_hbox_new(TRUE, 4);
 #endif
 	for(i = 0; i < XkbNumIndicators; i++)
-		leds->leds[i] = NULL;
+	{
+		leds->leds[i] = gtk_image_new();
+		gtk_widget_set_no_show_all(leds->leds[i], TRUE);
+		gtk_box_pack_start(GTK_BOX(leds->widget), leds->leds[i], FALSE,
+				TRUE, 0);
+	}
 	leds->source = g_signal_connect(leds->widget, "screen-changed",
 			G_CALLBACK(_leds_on_screen_changed), leds);
+	leds->timeout = 0;
 	leds->display = NULL;
 	gtk_widget_show(leds->widget);
 	*widget = leds->widget;
@@ -96,9 +105,11 @@ static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* leds_destroy */
 static void _leds_destroy(LEDs * leds)
 {
+	/* XXX free xkb? */
+	if(leds->timeout != 0)
+		g_source_remove(leds->timeout);
 	if(leds->source != 0)
 		g_signal_handler_disconnect(leds->widget, leds->source);
-	leds->source = 0;
 	gtk_widget_destroy(leds->widget);
 	object_delete(leds);
 }
@@ -109,6 +120,7 @@ static void _leds_destroy(LEDs * leds)
 static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data)
 {
+	const unsigned int timeout = 500;
 	LEDs * leds = data;
 	PanelAppletHelper * helper = leds->helper;
 	GdkScreen * screen;
@@ -118,16 +130,17 @@ static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	int opcode;
 	int event;
 	int error;
-	XkbDescPtr xkb;
-	unsigned int i;
-	unsigned int bit;
-	unsigned int n;
-	GtkIconSize iconsize;
 	(void) previous;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
 #endif
+	if(leds->xkb != NULL)
+		/* XXX free xkb? */
+		leds->xkb = NULL;
+	if(leds->timeout != 0)
+		g_source_remove(leds->timeout);
+	leds->timeout = 0;
 	screen = gtk_widget_get_screen(widget);
 	leds->display = gdk_screen_get_display(screen);
 	major = XkbMajorVersion;
@@ -146,16 +159,15 @@ static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		helper->error(NULL, buf, 1);
 		return;
 	}
-	if((xkb = XkbGetMap(GDK_DISPLAY_XDISPLAY(leds->display), 0,
+	if((leds->xkb = XkbGetMap(GDK_DISPLAY_XDISPLAY(leds->display), 0,
 					XkbUseCoreKbd)) == NULL)
 	{
 		snprintf(buf, sizeof(buf), "%s", _("Could not obtain XKB map"));
 		helper->error(NULL, buf, 1);
 		return;
 	}
-	/* XXX free xkb when returning? */
 	if(XkbGetIndicatorMap(GDK_DISPLAY_XDISPLAY(leds->display),
-				XkbAllIndicatorsMask, xkb) != Success)
+				XkbAllIndicatorsMask, leds->xkb) != Success)
 	{
 		snprintf(buf, sizeof(buf), "%s",
 				_("Could not obtain XKB indicator map"));
@@ -163,7 +175,7 @@ static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		return;
 	}
 	if(XkbGetNames(GDK_DISPLAY_XDISPLAY(leds->display), XkbAllNamesMask,
-				xkb) != Success)
+				leds->xkb) != Success)
 	{
 		snprintf(buf, sizeof(buf), "%s",
 				_("Could not obtain XKB names"));
@@ -173,29 +185,49 @@ static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	XkbSelectEvents(GDK_DISPLAY_XDISPLAY(leds->display), XkbUseCoreKbd,
 			XkbIndicatorStateNotifyMask,
 			XkbIndicatorStateNotifyMask);
+	/* FIXME react on XKB events instead */
+	if(_leds_on_timeout(leds) != FALSE)
+		leds->source = g_timeout_add(timeout, _leds_on_timeout, leds);
+}
+
+
+/* leds_on_timeout */
+static gboolean _leds_on_timeout(gpointer data)
+{
+	LEDs * leds = data;
+	PanelAppletHelper * helper = leds->helper;
+	GtkIconSize iconsize;
+	unsigned int n;
+	unsigned int i;
+	unsigned int bit;
+	char buf[16];
+
+	iconsize = panel_window_get_icon_size(helper->window);
 	XkbGetIndicatorState(GDK_DISPLAY_XDISPLAY(leds->display), XkbUseCoreKbd,
 			&n);
-	iconsize = panel_window_get_icon_size(helper->window);
 	for(i = 0, bit = 1; i < XkbNumIndicators; i++, bit <<= 1)
 	{
-		if(xkb->names->indicators[i] == None)
+		if(leds->xkb->names->indicators[i] == None
+				|| (leds->xkb->indicators->phys_indicators
+					& bit) == 0)
+		{
+			gtk_widget_hide(leds->leds[i]);
 			continue;
-		if((xkb->indicators->phys_indicators & bit) == 0)
-			continue;
+		}
 #if GTK_CHECK_VERSION(3, 10, 0)
-		widget = gtk_image_new_from_icon_name(GTK_STOCK_DIALOG_INFO,
-				iconsize);
+		gtk_image_set_from_icon_name(GTK_IMAGE(leds->leds[i]),
+				GTK_STOCK_DIALOG_INFO, iconsize);
 #else
-		widget = gtk_image_new_from_stock(GTK_STOCK_DIALOG_INFO,
-				iconsize);
+		gtk_image_set_from_stock(GTK_IMAGE(leds->leds[i]),
+				GTK_STOCK_DIALOG_INFO, iconsize);
 #endif
-		leds->leds[i] = widget;
 #if GTK_CHECK_VERSION(2, 12, 0)
 		snprintf(buf, sizeof(buf), _("LED %u"), i + 1);
-		gtk_widget_set_tooltip_text(widget, buf);
+		gtk_widget_set_tooltip_text(leds->leds[i], buf);
 #endif
-		gtk_widget_set_sensitive(widget, (n & bit) ? TRUE : FALSE);
-		gtk_box_pack_start(GTK_BOX(leds->widget), widget, FALSE, TRUE,
-				0);
+		gtk_widget_set_sensitive(leds->leds[i], (n & bit)
+				? TRUE : FALSE);
+		gtk_widget_show(leds->leds[i]);
 	}
+	return TRUE;
 }
