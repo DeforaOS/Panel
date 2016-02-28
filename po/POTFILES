@@ -8,6 +8,7 @@
 ../src/applets/embed.c
 ../src/applets/gps.c
 ../src/applets/gsm.c
+../src/applets/leds.c
 ../src/applets/lock.c
 ../src/applets/logout.c
 ../src/applets/menu.c
