@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-19 01:47+0100\n"
+"POT-Creation-Date: 2016-02-28 19:28+0100\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -60,7 +60,7 @@ msgstr ""
 msgid "Close"
 msgstr "Fermer"
 
-#: ../src/applets/cpu.c:101
+#: ../src/applets/cpu.c:117
 msgid "CPU:"
 msgstr "CPU :"
 
@@ -72,7 +72,7 @@ msgstr "Aucun support détecté"
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:151 ../src/applets/memory.c:124
+#: ../src/applets/cpufreq.c:151 ../src/applets/memory.c:141
 msgid "Unsupported platform"
 msgstr "Plate-forme non supportée"
 
@@ -95,6 +95,33 @@ msgstr "GPS actif"
 #: ../src/applets/gsm.c:102
 msgid "GSM is enabled"
 msgstr "GSM actif"
+
+#: ../src/applets/leds.c:150
+#, c-format
+msgid "XKB library mismatch (%d.%d)"
+msgstr ""
+
+#: ../src/applets/leds.c:157
+#, c-format
+msgid "XKB extension mismatch (%d.%d)"
+msgstr ""
+
+#: ../src/applets/leds.c:165
+msgid "Could not obtain XKB map"
+msgstr "Impossible d'obtenir la table XKB"
+
+#: ../src/applets/leds.c:173
+msgid "Could not obtain XKB indicator map"
+msgstr "Impossible d'obtenir les indicateurs XKB"
+
+#: ../src/applets/leds.c:181
+msgid "Could not obtain XKB names"
+msgstr "Impossible d'obtenir les noms XKB"
+
+#: ../src/applets/leds.c:225
+#, c-format
+msgid "LED %u"
+msgstr "DEL %u"
 
 #: ../src/applets/lock.c:88
 msgid "Lock screen"
@@ -149,7 +176,7 @@ msgstr "S_uspendre"
 msgid "_Shutdown..."
 msgstr "_Arrêter..."
 
-#: ../src/applets/memory.c:99
+#: ../src/applets/memory.c:108
 msgid "RAM:"
 msgstr "Mémoire :"
 
@@ -232,7 +259,7 @@ msgstr "Bureau"
 msgid "Rotate the screen"
 msgstr "Réorienter l'écran"
 
-#: ../src/applets/swap.c:92
+#: ../src/applets/swap.c:101
 msgid "Swap:"
 msgstr "Échange :"
 
