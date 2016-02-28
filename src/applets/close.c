@@ -126,7 +126,6 @@ static void _close_destroy(Close * close)
 		g_signal_handler_disconnect(close->widget, close->source);
 	if(close->root != NULL)
 		gdk_window_remove_filter(close->root, _close_on_filter, close);
-	close->source = 0;
 	gtk_widget_destroy(close->widget);
 	object_delete(close);
 }
