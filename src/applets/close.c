@@ -222,6 +222,7 @@ static GdkFilterReturn _close_on_filter(GdkXEvent * xevent, GdkEvent * event,
 {
 	Close * close = data;
 	XEvent * xev = xevent;
+	(void) event;
 
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
@@ -239,6 +240,7 @@ static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	Close * close = data;
 	GdkWindow * window;
 	GdkEventMask events;
+	(void) previous;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
