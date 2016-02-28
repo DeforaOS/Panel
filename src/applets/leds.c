@@ -34,6 +34,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 	GtkWidget * widget;
+	GtkWidget * leds[XkbNumIndicators];
 	gulong source;
 
 	GdkDisplay * display;
@@ -71,6 +72,7 @@ PanelAppletDefinition applet =
 static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	LEDs * leds;
+	size_t i;
 
 	if((leds = object_new(sizeof(*leds))) == NULL)
 		return NULL;
@@ -80,6 +82,8 @@ static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	leds->widget = gtk_hbox_new(TRUE, 4);
 #endif
+	for(i = 0; i < XkbNumIndicators; i++)
+		leds->leds[i] = NULL;
 	leds->source = g_signal_connect(leds->widget, "screen-changed",
 			G_CALLBACK(_leds_on_screen_changed), leds);
 	leds->display = NULL;
@@ -185,6 +189,7 @@ static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		widget = gtk_image_new_from_stock(GTK_STOCK_DIALOG_INFO,
 				iconsize);
 #endif
+		leds->leds[i] = widget;
 #if GTK_CHECK_VERSION(2, 12, 0)
 		snprintf(buf, sizeof(buf), _("LED %u"), i + 1);
 		gtk_widget_set_tooltip_text(widget, buf);
