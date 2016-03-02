@@ -21,15 +21,13 @@
 # include <bluetooth.h>
 # include <unistd.h>
 # include <stdio.h>
-# include <string.h>
-# include <errno.h>
 #elif defined(__linux__)
 # include <fcntl.h>
 # include <unistd.h>
-# include <string.h>
-# include <errno.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include <libintl.h>
 #include <System.h>
 #include "Panel/applet.h"
