@@ -123,8 +123,8 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_scale_set_value_pos(GTK_SCALE(swap->scale), GTK_POS_RIGHT);
 #endif
 	gtk_box_pack_start(GTK_BOX(swap->widget), swap->scale, FALSE, FALSE, 0);
-	if(_swap_on_timeout(swap) == TRUE)
-		swap->timeout = g_timeout_add(timeout, _swap_on_timeout, swap);
+	swap->timeout = (_swap_on_timeout(swap) == TRUE)
+		? g_timeout_add(timeout, _swap_on_timeout, swap) : 0;
 	pango_font_description_free(desc);
 	gtk_widget_show_all(swap->widget);
 	*widget = swap->widget;
@@ -135,7 +135,8 @@ static Swap * _swap_init(PanelAppletHelper * helper, GtkWidget ** widget)
 /* swap_destroy */
 static void _swap_destroy(Swap * swap)
 {
-	g_source_remove(swap->timeout);
+	if(swap->timeout != 0)
+		g_source_remove(swap->timeout);
 	gtk_widget_destroy(swap->widget);
 	free(swap);
 }
