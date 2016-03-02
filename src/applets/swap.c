@@ -19,9 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if defined(__linux__)
+#if defined(__FreeBSD__)
+# include <sys/types.h>
+# include <sys/sysctl.h>
+# include <sys/vmmeter.h>
+# include <vm/vm_param.h>
+#elif defined(__linux__)
 # include <sys/sysinfo.h>
 #elif defined(__NetBSD__)
+# include <sys/param.h>
 # include <sys/sysctl.h>
 # include <uvm/uvm_extern.h>
 #endif
@@ -159,7 +165,20 @@ static void _swap_set(Swap * swap, gdouble level)
 /* swap_on_timeout */
 static gboolean _swap_on_timeout(gpointer data)
 {
-#if defined(__linux__)
+#if defined(__FreeBSD__)
+	Swap * swap = data;
+	int mib[] = { CTL_VM, VM_TOTAL };
+	struct vmmeter t;
+	size_t size = sizeof(t);
+	gdouble value;
+
+	if(sysctl(mib, 2, &t, &size, NULL, 0) < 0)
+		return TRUE;
+	value = t.t_rm;
+	value /= t.t_vm;
+	_swap_set(swap, value);
+	return TRUE;
+#elif defined(__linux__)
 	Swap * swap = data;
 	struct sysinfo sy;
 	gdouble value;
