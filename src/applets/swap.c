@@ -188,7 +188,7 @@ static gboolean _swap_on_timeout(gpointer data)
 	Swap * swap = data;
 
 	/* FIXME not supported */
-	swap->source = 0;
+	swap->timeout = 0;
 	return FALSE;
 #endif
 }
