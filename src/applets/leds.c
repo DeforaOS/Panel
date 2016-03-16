@@ -22,6 +22,7 @@
 #include <libintl.h>
 #include <gdk/gdkx.h>
 #include <X11/XKBlib.h>
+#include <X11/extensions/XKBfile.h>
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
@@ -200,7 +201,10 @@ static gboolean _leds_on_timeout(gpointer data)
 	unsigned int n;
 	unsigned int i;
 	unsigned int bit;
+#if GTK_CHECK_VERSION(2, 12, 0)
 	char buf[16];
+	char const * text;
+#endif
 
 	iconsize = panel_window_get_icon_size(helper->window);
 	XkbGetIndicatorState(GDK_DISPLAY_XDISPLAY(leds->display), XkbUseCoreKbd,
@@ -222,8 +226,14 @@ static gboolean _leds_on_timeout(gpointer data)
 				GTK_STOCK_DIALOG_INFO, iconsize);
 #endif
 #if GTK_CHECK_VERSION(2, 12, 0)
-		snprintf(buf, sizeof(buf), _("LED %u"), i + 1);
-		gtk_widget_set_tooltip_text(leds->leds[i], buf);
+		if((text = XkbAtomText(GDK_DISPLAY_XDISPLAY(leds->display),
+						leds->xkb->names->indicators[i],
+						XkbMessage)) == NULL)
+		{
+			snprintf(buf, sizeof(buf), _("LED %u"), i + 1);
+			text = buf;
+		}
+		gtk_widget_set_tooltip_text(leds->leds[i], text);
 #endif
 		gtk_widget_set_sensitive(leds->leds[i], (n & bit)
 				? TRUE : FALSE);
