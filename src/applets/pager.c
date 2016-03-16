@@ -329,7 +329,7 @@ static void _pager_on_clicked(GtkWidget * widget, gpointer data)
 			False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-	gdk_error_trap_pop();
+	gdk_error_trap_pop_ignored();
 }
 
 
