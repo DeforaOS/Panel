@@ -248,7 +248,7 @@ static void _pager_do(Pager * pager)
 	GtkWidget ** q;
 	int cur;
 	char ** names;
-	char buf[16];
+	char buf[64];
 
 	if(_pager_get_window_property(pager, GDK_WINDOW_XID(pager->root),
 				PAGER_ATOM_NET_NUMBER_OF_DESKTOPS,
@@ -280,8 +280,7 @@ static void _pager_do(Pager * pager)
 			g_free(names[i]);
 		}
 		else
-			snprintf(buf, sizeof(buf), "%s %lu\n", _("Desk"),
-					i + 1);
+			snprintf(buf, sizeof(buf), _("Desk %lu"), i + 1);
 		pager->widgets[i] = gtk_button_new_with_label(buf);
 		if(cur >= 0 && i == (unsigned int)cur)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
