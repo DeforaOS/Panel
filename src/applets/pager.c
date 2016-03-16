@@ -284,6 +284,12 @@ static void _pager_do(Pager * pager)
 		pager->widgets[i] = gtk_button_new_with_label(buf);
 		if(cur >= 0 && i == (unsigned int)cur)
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+		snprintf(buf, sizeof(buf), _("Switch to %s"),
+				gtk_button_get_label(
+					GTK_BUTTON(pager->widgets[i])));
+		gtk_widget_set_tooltip_text(pager->widgets[i], buf);
+#endif
 		g_signal_connect(pager->widgets[i], "clicked", G_CALLBACK(
 					_pager_on_clicked), pager);
 		gtk_box_pack_start(GTK_BOX(pager->box), pager->widgets[i],
