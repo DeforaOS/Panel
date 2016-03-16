@@ -399,8 +399,8 @@ static int _tasks_get_current_desktop(Tasks * tasks)
 
 
 /* tasks_get_text_property */
-static int _tasks_get_text_property(Tasks * tasks, Window window,
-		Atom property, char ** ret)
+static int _tasks_get_text_property(Tasks * tasks, Window window, Atom property,
+		char ** ret)
 {
 	int res;
 	XTextProperty text;
