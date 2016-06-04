@@ -39,7 +39,7 @@
 #include "panel.h"
 #include "../config.h"
 #define _(string) gettext(string)
-#define N_(string) (string)
+#define N_(string) string
 
 /* constants */
 #ifndef PROGNAME

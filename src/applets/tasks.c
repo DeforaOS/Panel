@@ -26,7 +26,7 @@
 #include <Desktop.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
-#define N_(string) (string)
+#define N_(string) string
 
 #if !GTK_CHECK_VERSION(3, 0, 0)
 # define gdk_error_trap_pop_ignored() gdk_error_trap_pop()

@@ -211,8 +211,8 @@ static void _logout_dialog_on_response(GtkWidget * widget, gint response);
 
 static void _panel_helper_logout_dialog(Panel * panel)
 {
-	const char * message = _("This will log you out of the current session,"
-			" therefore closing any application currently opened"
+	const char message[] = N_("This will log you out of the current session"
+			", therefore closing any application currently opened"
 			" and losing any unsaved data.\n"
 			"Do you really want to proceed?");
 	GtkWidget * widget;
@@ -229,7 +229,7 @@ static void _panel_helper_logout_dialog(Panel * panel)
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(
 				panel->lo_window),
 #endif
-			"%s", message);
+			"%s", _(message));
 #if GTK_CHECK_VERSION(2, 10, 0)
 	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(panel->lo_window),
 			gtk_image_new_from_icon_name("gnome-logout",
@@ -386,12 +386,12 @@ enum { RES_CANCEL, RES_REBOOT, RES_SHUTDOWN };
 static void _panel_helper_shutdown_dialog(Panel * panel)
 {
 #ifdef EMBEDDED
-	const char * message = _("This will shutdown your device,"
+	const char message[] = N_("This will shutdown your device,"
 			" therefore closing any application currently opened"
 			" and losing any unsaved data.\n"
 			"Do you really want to proceed?");
 #else
-	const char * message = _("This will shutdown your computer,"
+	const char message[] = N_("This will shutdown your computer,"
 			" therefore closing any application currently opened"
 			" and losing any unsaved data.\n"
 			"Do you really want to proceed?");
@@ -410,7 +410,7 @@ static void _panel_helper_shutdown_dialog(Panel * panel)
 	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(
 				panel->sh_window),
 #endif
-			"%s", message);
+			"%s", _(message));
 #if GTK_CHECK_VERSION(2, 10, 0)
 	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(panel->sh_window),
 			gtk_image_new_from_icon_name("gnome-shutdown",

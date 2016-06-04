@@ -29,6 +29,7 @@
 #include "../src/panel.h"
 #include "../config.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 #ifndef PROGNAME
 # define PROGNAME	"panel-test"
