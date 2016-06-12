@@ -129,7 +129,7 @@ msgstr "Bloquear pantalla"
 
 #: ../src/applets/lock.c:126 ../src/applets/mixer.c:294 ../src/run.c:123
 msgid "Command:"
-msgstr "Comando:"
+msgstr "Commando:"
 
 #: ../src/applets/logout.c:76
 msgid "Logging out is disabled"
@@ -592,7 +592,7 @@ msgstr "Cancelar"
 
 #: ../src/run.c:439
 msgid "Command not found"
-msgstr "Comando no encontrado"
+msgstr "Commando no encontrado"
 
 #: ../src/run.c:442
 msgid "Permission denied"
