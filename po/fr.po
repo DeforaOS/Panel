@@ -140,39 +140,87 @@ msgstr "Se déconnecter est désactivé"
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: ../src/applets/menu.c:178
+#: ../src/applets/menu.c:70
+msgid "Audio"
+msgstr "Audio"
+
+#: ../src/applets/menu.c:71
+msgid "Development"
+msgstr "Développement"
+
+#: ../src/applets/menu.c:72
+msgid "Education"
+msgstr "Éducation"
+
+#: ../src/applets/menu.c:73
+msgid "Games"
+msgstr "Jeux"
+
+#: ../src/applets/menu.c:74
+msgid "Graphics"
+msgstr "Graphisme"
+
+#: ../src/applets/menu.c:75
+msgid "Multimedia"
+msgstr "Multimédia"
+
+#: ../src/applets/menu.c:76
+msgid "Network"
+msgstr "Réseau"
+
+#: ../src/applets/menu.c:77
+msgid "Office"
+msgstr "Bureautique"
+
+#: ../src/applets/menu.c:78
+msgid "Settings"
+msgstr "Préférences"
+
+#: ../src/applets/menu.c:79
+msgid "System"
+msgstr "Système"
+
+#: ../src/applets/menu.c:80
+msgid "Utilities"
+msgstr "Utilitaires"
+
+#: ../src/applets/menu.c:81
+msgid "Video"
+msgstr "Vidéo"
+
+#: ../src/applets/menu.c:179
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: ../src/applets/menu.c:600
+#: ../src/applets/menu.c:601
 msgid "A_pplications"
 msgstr "_Programmes"
 
-#: ../src/applets/menu.c:610
+#: ../src/applets/menu.c:611
 msgid "_Run..."
 msgstr "_Exécuter..."
 
-#: ../src/applets/menu.c:622
+#: ../src/applets/menu.c:623
 msgid "_About"
 msgstr "À _propos"
 
-#: ../src/applets/menu.c:637
+#: ../src/applets/menu.c:638
 msgid "_Lock screen"
 msgstr "_Verrouiller l'écran"
 
-#: ../src/applets/menu.c:645
+#: ../src/applets/menu.c:646
 msgid "R_otate"
 msgstr "Ré_orienter"
 
-#: ../src/applets/menu.c:653
+#: ../src/applets/menu.c:654
 msgid "Lo_gout..."
 msgstr "_Déconnecter..."
 
-#: ../src/applets/menu.c:663
+#: ../src/applets/menu.c:664
 msgid "S_uspend"
 msgstr "S_uspendre"
 
-#: ../src/applets/menu.c:669
+#: ../src/applets/menu.c:670
 msgid "_Shutdown..."
 msgstr "_Arrêter..."
 
