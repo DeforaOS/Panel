@@ -29,6 +29,7 @@
 #include "Panel/applet.h"
 #include "../../config.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 /* constants */
 #ifndef PREFIX
@@ -66,18 +67,18 @@ typedef struct _MenuMenu
 /* constants */
 static const MenuMenu _menu_menus[] =
 {
-	{ "Audio",	"Audio",	"gnome-mime-audio",		},
-	{ "Development","Development",	"applications-development",	},
-	{ "Education",	"Education",	"applications-science",		},
-	{ "Game",	"Games",	"applications-games",		},
-	{ "Graphics",	"Graphics",	"applications-graphics",	},
-	{ "AudioVideo",	"Multimedia",	"applications-multimedia",	},
-	{ "Network",	"Network",	"applications-internet",	},
-	{ "Office",	"Office",	"applications-office",		},
-	{ "Settings",	"Settings",	"gnome-settings",		},
-	{ "System",	"System",	"applications-system",		},
-	{ "Utility",	"Utilities",	"applications-utilities",	},
-	{ "Video",	"Video",	"video",			}
+	{ "Audio",	N_("Audio"),	"gnome-mime-audio",		},
+	{ "Development",N_("Development"),"applications-development",	},
+	{ "Education",	N_("Education"),"applications-science",		},
+	{ "Game",	N_("Games"),	"applications-games",		},
+	{ "Graphics",	N_("Graphics"),	"applications-graphics",	},
+	{ "AudioVideo",	N_("Multimedia"),"applications-multimedia",	},
+	{ "Network",	N_("Network"),	"applications-internet",	},
+	{ "Office",	N_("Office"),	"applications-office",		},
+	{ "Settings",	N_("Settings"),	"gnome-settings",		},
+	{ "System",	N_("System"),	"applications-system",		},
+	{ "Utility",	N_("Utilities"),"applications-utilities",	},
+	{ "Video",	N_("Video"),	"video",			}
 };
 #define MENU_MENUS_COUNT (sizeof(_menu_menus) / sizeof(*_menu_menus))
 
@@ -404,7 +405,7 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 		if(menus[i] == NULL)
 			continue;
 		m = &_menu_menus[i];
-		menuitem = _menu_menuitem_stock(m->stock, m->label, FALSE);
+		menuitem = _menu_menuitem_stock(m->stock, _(m->label), FALSE);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), menus[i]);
 		gtk_menu_shell_insert(GTK_MENU_SHELL(menu), menuitem, pos++);
 	}
