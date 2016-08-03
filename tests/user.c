@@ -27,11 +27,13 @@ int main(void)
 	int ret = 0;
 	struct passwd pw;
 	String * tooltip;
-	String const * expected = "Full name: Charlie Root\n"
+	String const * expected = "Username: root\n"
+"Full name: Charlie Root\n"
 "Office location: IT Department\n"
 "Work phone: +1-555-1234\n"
 "Home phone: +1-555-1337";
 
+	pw.pw_name = "root";
 	pw.pw_gecos = "Charlie Root,IT Department,+1-555-1234,+1-555-1337,,,";
 	if((tooltip = _init_tooltip(&pw)) == NULL)
 		return 2;
