@@ -23,6 +23,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* User */
@@ -122,17 +123,45 @@ static struct passwd * _init_pw(void)
 #if GTK_CHECK_VERSION(2, 12, 0)
 static String * _init_tooltip(struct passwd * pw)
 {
+	String * ret;
+	String * p;
 	ssize_t len;
+	size_t i;
+	size_t pos;
+	String const * fields[] = { N_("Full name"), N_("Office location"),
+		N_("Work phone"), N_("Home phone") };
 
 	if(pw->pw_gecos == NULL || strlen(pw->pw_gecos) == 0)
 		return NULL;
 	if((len = string_index(pw->pw_gecos, ",")) < 0)
-		/* would be redundant */
+		/* same as the user's name */
 		return NULL;
-	/* FIXME:
-	 * - ignore empty fields
-	 * - return NULL if identical to _init_user() */
-	return string_new_replace(pw->pw_gecos, ",", "\n");
+	if((ret = string_new("")) == NULL)
+		return NULL;
+	for(i = 0, pos = 0; len > 0;
+			len = string_index(&pw->pw_gecos[i], ","), pos++)
+	{
+		if(len > 0 && (p = string_new_length(&pw->pw_gecos[i], len))
+				!= NULL)
+		{
+			if(string_length(ret) > 0)
+				string_append(&ret, "\n");
+			if(pos < sizeof(fields) / sizeof(*fields))
+			{
+				string_append(&ret, _(fields[pos]));
+				string_append(&ret, _(": "));
+			}
+			string_append(&ret, p);
+			string_delete(p);
+		}
+		i += len + 1;
+	}
+	if(string_length(ret) == 0)
+	{
+		string_delete(ret);
+		return NULL;
+	}
+	return ret;
 }
 #endif
 
