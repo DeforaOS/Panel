@@ -128,17 +128,20 @@ static String * _init_tooltip(struct passwd * pw)
 	ssize_t len;
 	size_t i;
 	size_t pos;
-	String const * fields[] = { N_("Full name"), N_("Office location"),
-		N_("Work phone"), N_("Home phone") };
+	String const * fields[] = { N_("Username"), N_("Full name"),
+		N_("Office location"), N_("Work phone"), N_("Home phone") };
 
 	if(pw->pw_gecos == NULL || strlen(pw->pw_gecos) == 0)
 		return NULL;
-	if((len = string_index(pw->pw_gecos, ",")) < 0)
+	if((len = string_index(pw->pw_gecos, ",")) < 0
+			|| string_compare_length(pw->pw_gecos, pw->pw_name,
+				len) == 0)
 		/* same as the user's name */
 		return NULL;
-	if((ret = string_new("")) == NULL)
+	if((ret = string_new_append(_(fields[0]), _(": "), pw->pw_name, NULL))
+				== NULL)
 		return NULL;
-	for(i = 0, pos = 0; len > 0;
+	for(i = 0, pos = 1; len > 0;
 			len = string_index(&pw->pw_gecos[i], ","), pos++)
 	{
 		if(len > 0 && (p = string_new_length(&pw->pw_gecos[i], len))
