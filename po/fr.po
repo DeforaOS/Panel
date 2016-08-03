@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-28 19:28+0100\n"
+"POT-Creation-Date: 2016-08-03 17:15+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -40,7 +40,7 @@ msgstr "Batterie : %.0f%%%s"
 msgid " (charging)"
 msgstr " (en charge)"
 
-#: ../src/applets/bluetooth.c:107
+#: ../src/applets/bluetooth.c:105
 msgid "Bluetooth is enabled"
 msgstr "Bluetooth actif"
 
@@ -96,29 +96,29 @@ msgstr "GPS actif"
 msgid "GSM is enabled"
 msgstr "GSM actif"
 
-#: ../src/applets/leds.c:150
+#: ../src/applets/leds.c:151
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:157
+#: ../src/applets/leds.c:158
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:165
+#: ../src/applets/leds.c:166
 msgid "Could not obtain XKB map"
 msgstr "Impossible d'obtenir la table XKB"
 
-#: ../src/applets/leds.c:173
+#: ../src/applets/leds.c:174
 msgid "Could not obtain XKB indicator map"
 msgstr "Impossible d'obtenir les indicateurs XKB"
 
-#: ../src/applets/leds.c:181
+#: ../src/applets/leds.c:182
 msgid "Could not obtain XKB names"
 msgstr "Impossible d'obtenir les noms XKB"
 
-#: ../src/applets/leds.c:225
+#: ../src/applets/leds.c:233
 #, c-format
 msgid "LED %u"
 msgstr "DEL %u"
@@ -252,14 +252,20 @@ msgid "Show the interfaces disabled"
 msgstr "Afficher les interfaces inactives"
 
 #: ../src/applets/pager.c:283
-msgid "Desk"
-msgstr "Bureau"
+#, c-format
+msgid "Desk %lu"
+msgstr "Bureau %lu"
+
+#: ../src/applets/pager.c:288
+#, c-format
+msgid "Switch to %s"
+msgstr ""
 
 #: ../src/applets/rotate.c:78
 msgid "Rotate the screen"
 msgstr "Réorienter l'écran"
 
-#: ../src/applets/swap.c:101
+#: ../src/applets/swap.c:107
 msgid "Swap:"
 msgstr "Échange :"
 
@@ -310,6 +316,10 @@ msgstr "Maximiser"
 #: ../src/applets/usb.c:94
 msgid "USB networking device connected"
 msgstr "Périphérique réseau USB connecté"
+
+#: ../src/applets/user.c:92
+msgid "Unknown user"
+msgstr "Utilisateur inconnu"
 
 #: ../src/applets/wpa_supplicant.c:302
 msgid "Wireless networking"
@@ -647,11 +657,11 @@ msgstr "Question"
 msgid "Warning"
 msgstr "Attention"
 
-#: ../tools/notify.c:104
+#: ../tools/notify.c:105
 msgid "Notification"
 msgstr "Notification"
 
-#: ../tools/notify.c:134
+#: ../tools/notify.c:135
 #, c-format
 msgid ""
 "Usage: %s [-e][-L|-S|-X|-x][-t timeout] applet...\n"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-28 19:28+0100\n"
+"POT-Creation-Date: 2016-08-03 17:15+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -40,7 +40,7 @@ msgstr "Carga de Batería: %.0f%%%s"
 msgid " (charging)"
 msgstr " (cargando)"
 
-#: ../src/applets/bluetooth.c:107
+#: ../src/applets/bluetooth.c:105
 msgid "Bluetooth is enabled"
 msgstr "Bluetooth está habilitado"
 
@@ -96,29 +96,29 @@ msgstr "GPS habilitado"
 msgid "GSM is enabled"
 msgstr "GSM habilitado"
 
-#: ../src/applets/leds.c:150
+#: ../src/applets/leds.c:151
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:157
+#: ../src/applets/leds.c:158
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:165
+#: ../src/applets/leds.c:166
 msgid "Could not obtain XKB map"
 msgstr "No se pudo obtener el map de XKB"
 
-#: ../src/applets/leds.c:173
+#: ../src/applets/leds.c:174
 msgid "Could not obtain XKB indicator map"
 msgstr "No se pudo obtener el map de indicadores de XKB"
 
-#: ../src/applets/leds.c:181
+#: ../src/applets/leds.c:182
 msgid "Could not obtain XKB names"
 msgstr "No se pudo obtener los nombres de XKB"
 
-#: ../src/applets/leds.c:225
+#: ../src/applets/leds.c:233
 #, c-format
 msgid "LED %u"
 msgstr ""
@@ -252,14 +252,20 @@ msgid "Show the interfaces disabled"
 msgstr "Mostrar las interfaces desabilitadas"
 
 #: ../src/applets/pager.c:283
-msgid "Desk"
-msgstr "Escritorio"
+#, c-format
+msgid "Desk %lu"
+msgstr "Escritorio %lu"
+
+#: ../src/applets/pager.c:288
+#, c-format
+msgid "Switch to %s"
+msgstr ""
 
 #: ../src/applets/rotate.c:78
 msgid "Rotate the screen"
 msgstr "Rotar pantalla"
 
-#: ../src/applets/swap.c:101
+#: ../src/applets/swap.c:107
 msgid "Swap:"
 msgstr "Swap:"
 
@@ -310,6 +316,10 @@ msgstr "Maximizar"
 #: ../src/applets/usb.c:94
 msgid "USB networking device connected"
 msgstr "Dispositivo USB networking conectado"
+
+#: ../src/applets/user.c:92
+msgid "Unknown user"
+msgstr ""
 
 #: ../src/applets/wpa_supplicant.c:302
 msgid "Wireless networking"
@@ -644,11 +654,11 @@ msgstr "Pregunta"
 msgid "Warning"
 msgstr "Advertencia"
 
-#: ../tools/notify.c:104
+#: ../tools/notify.c:105
 msgid "Notification"
 msgstr "Notificación"
 
-#: ../tools/notify.c:134
+#: ../tools/notify.c:135
 #, c-format
 msgid ""
 "Usage: %s [-e][-L|-S|-X|-x][-t timeout] applet...\n"
