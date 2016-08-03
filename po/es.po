@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-03 17:15+0200\n"
+"POT-Creation-Date: 2016-08-03 18:21+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Ana Carolina Rocha <carolina@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -317,8 +317,32 @@ msgstr "Maximizar"
 msgid "USB networking device connected"
 msgstr "Dispositivo USB networking conectado"
 
-#: ../src/applets/user.c:92
+#: ../src/applets/user.c:93
 msgid "Unknown user"
+msgstr ""
+
+#: ../src/applets/user.c:131
+msgid "Username"
+msgstr ""
+
+#: ../src/applets/user.c:131
+msgid "Full name"
+msgstr ""
+
+#: ../src/applets/user.c:132
+msgid "Office location"
+msgstr ""
+
+#: ../src/applets/user.c:132
+msgid "Work phone"
+msgstr ""
+
+#: ../src/applets/user.c:132
+msgid "Home phone"
+msgstr ""
+
+#: ../src/applets/user.c:141 ../src/applets/user.c:155
+msgid ": "
 msgstr ""
 
 #: ../src/applets/wpa_supplicant.c:302
