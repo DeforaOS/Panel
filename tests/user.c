@@ -27,19 +27,17 @@ int main(void)
 	int ret = 0;
 	struct passwd pw;
 	String * tooltip;
-	String const * expected = "Charlie Root\n"
-"IT Department\n"
-"+1-555-1234\n"
-"+1-555-1337\n"
-"\n"
-"\n";
+	String const * expected = "Full name: Charlie Root\n"
+"Office location: IT Department\n"
+"Work phone: +1-555-1234\n"
+"Home phone: +1-555-1337";
 
 	pw.pw_gecos = "Charlie Root,IT Department,+1-555-1234,+1-555-1337,,,";
 	if((tooltip = _init_tooltip(&pw)) == NULL)
 		return 2;
 	if(string_compare(expected, tooltip) != 0)
 	{
-		printf("Obtained: %s\n", tooltip);
+		printf("Obtained:\n%s\n", tooltip);
 		ret = 3;
 	}
 	string_delete(tooltip);
