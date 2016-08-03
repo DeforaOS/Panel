@@ -99,6 +99,7 @@ target="$1"
 $DATE > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
+_test "user"
 echo "Expected failures:" 1>&2
 _fail "applets"
 [ -z "$DISPLAY" ] || _fail "applets2"
