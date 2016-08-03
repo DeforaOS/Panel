@@ -19,8 +19,10 @@
 #include <string.h>
 #include <pwd.h>
 #include <errno.h>
+#include <libintl.h>
 #include <System.h>
 #include "Panel/applet.h"
+#define _(string) gettext(string)
 
 
 /* User */
@@ -67,7 +69,7 @@ static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	User * user;
 	PangoFontDescription * desc;
 	struct passwd * pw;
-	String const * name = "Unknown user";
+	String const * name = NULL;
 	String * p = NULL;
 #if GTK_CHECK_VERSION(2, 12, 0)
 	String const * tooltip = NULL;
@@ -86,6 +88,8 @@ static User * _user_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			tooltip = q;
 #endif
 	}
+	if(name == NULL)
+		name = _("Unknown user");
 	user->widget = gtk_label_new(name);
 	string_delete(p);
 #if GTK_CHECK_VERSION(2, 12, 0)
