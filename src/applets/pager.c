@@ -26,6 +26,10 @@
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 
+#if !GTK_CHECK_VERSION(3, 0, 0)
+# define gdk_error_trap_pop_ignored() gdk_error_trap_pop()
+#endif
+
 
 /* Pager */
 /* private */
@@ -221,11 +225,12 @@ static int _pager_get_window_property(Pager * pager, Window window,
 	fprintf(stderr, "DEBUG: %s(pager, window, %s, %lu)\n", __func__,
 			_pager_atom[property], atom);
 #endif
+	gdk_error_trap_push();
 	res = XGetWindowProperty(GDK_DISPLAY_XDISPLAY(pager->display), window,
 			pager->atoms[property], 0, G_MAXLONG, False, atom,
 			&type, &format, cnt, &bytes, ret);
-	if(res != Success)
-		return 1;
+	if(gdk_error_trap_pop() != 0 || res != Success)
+		return -1;
 	if(type != atom)
 	{
 		if(*ret != NULL)
