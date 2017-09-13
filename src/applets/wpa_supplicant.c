@@ -206,9 +206,6 @@ static int _wpa_reset(WPA * wpa);
 static int _wpa_start(WPA * wpa);
 static void _wpa_stop(WPA * wpa);
 
-static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
-		unsigned int level, uint32_t flags);
-
 /* callbacks */
 static void _on_clicked(gpointer data);
 static gboolean _on_timeout(gpointer data);
@@ -1017,21 +1014,6 @@ static void _stop_channel(WPA * wpa, WPAChannel * channel)
 }
 
 
-/* wpa_tooltip */
-static void _wpa_tooltip(char * buf, size_t buf_cnt, unsigned int frequency,
-		unsigned int level, uint32_t flags)
-{
-	char const * security = (flags & WSRF_WPA2) ? "WPA2"
-		: ((flags & WSRF_WPA) ? "WPA"
-				: ((flags & WSRF_WEP) ? "WEP" : NULL));
-
-	/* FIXME mention the channel instead of the frequency */
-	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u%s%s"), frequency,
-			level, (security != NULL) ? _("\nSecurity: ") : "",
-			(security != NULL) ? security : "");
-}
-
-
 /* callbacks */
 /* on_clicked */
 static void _clicked_available(WPA * wpa, GtkWidget * menu);
@@ -1308,6 +1290,8 @@ static void _read_scan_results_iter_ssid(WPA * wpa, GtkTreeIter * iter,
 		unsigned int frequency, unsigned int flags, GdkPixbuf * pixbuf,
 		char const * tooltip);
 static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model);
+static void _read_scan_results_tooltip(char * buf, size_t buf_cnt,
+		unsigned int frequency, unsigned int level, uint32_t flags);
 static void _read_status(WPA * wpa, char const * buf, size_t cnt);
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt);
 
@@ -1589,8 +1573,8 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 #endif
 			f = _read_scan_results_flags(wpa, flags);
 			pixbuf = _wpa_get_icon(wpa, size, level, f);
-			_wpa_tooltip(tooltip, sizeof(tooltip), frequency, level,
-					f);
+			_read_scan_results_tooltip(tooltip, sizeof(tooltip),
+					frequency, level, f);
 			if(res == 5)
 				_read_scan_results_iter_ssid(wpa, &iter, bssid,
 						ssid, level, frequency, f,
@@ -1848,6 +1832,19 @@ static void _read_scan_results_reset(WPA * wpa, GtkTreeModel * model)
 			gtk_tree_store_set(wpa->store, &child,
 					WSR_UPDATED, FALSE, -1);
 	}
+}
+
+static void _read_scan_results_tooltip(char * buf, size_t buf_cnt,
+		unsigned int frequency, unsigned int level, uint32_t flags)
+{
+	char const * security = (flags & WSRF_WPA2) ? "WPA2"
+		: ((flags & WSRF_WPA) ? "WPA"
+				: ((flags & WSRF_WEP) ? "WEP" : NULL));
+
+	/* FIXME mention the channel instead of the frequency */
+	snprintf(buf, buf_cnt, _("Frequency: %u\nLevel: %u%s%s"), frequency,
+			level, (security != NULL) ? _("\nSecurity: ") : "",
+			(security != NULL) ? security : "");
 }
 
 static void _read_status(WPA * wpa, char const * buf, size_t cnt)
