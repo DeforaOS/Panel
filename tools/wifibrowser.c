@@ -188,6 +188,8 @@ static int _wifibrowser(char const * configfile, char const * interface)
 /* error */
 static int _error(Panel * panel, char const * message, int ret)
 {
+	(void) panel;
+
 	fputs(PROGNAME ": ", stderr);
 	perror(message);
 	return ret;
@@ -236,6 +238,7 @@ static void _wifibrowser_on_enabled_toggled(GtkCellRenderer * renderer,
 	GtkTreePath * p;
 	GtkTreeIter iter;
 	gboolean enabled;
+	(void) renderer;
 
 	if((p = gtk_tree_path_new_from_string(path)) == NULL)
 		return;

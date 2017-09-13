@@ -584,6 +584,7 @@ static void _ask_password_on_response(GtkWidget * widget, gint response,
 	char const * password;
 	size_t i;
 	WPAChannel * channel = &wpa->channel[0];
+	(void) widget;
 
 	if(response != GTK_RESPONSE_OK
 			|| (password = gtk_entry_get_text(GTK_ENTRY(
@@ -1679,6 +1680,7 @@ static char const * _read_scan_results_flag(WPA * wpa, char const * p,
 	char const preauth[] = "preauth";
 	char const ess[] = "ESS";
 	char const ibss[] = "IBSS";
+	(void) wpa;
 
 	/* FIXME parse more consistently */
 	if(strncmp(wep, p, sizeof(wep) - 1) == 0)
