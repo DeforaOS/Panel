@@ -12,6 +12,9 @@ A number of additional utilities is also available, allowing tighter integration
 of external applications, as well as when responding to system events
 (notifications...).
 
+Documentation
+-------------
+
 Each of these tools, as well as Panel itself, are documented in a series of
 manual pages. They are also available in the HTML format.
 
