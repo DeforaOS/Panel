@@ -100,6 +100,7 @@ $DATE > "$target"
 FAILED=
 echo "Performing tests:" 1>&2
 _test "user"
+_test "wpa_supplicant"
 echo "Expected failures:" 1>&2
 _fail "applets"
 [ -z "$DISPLAY" ] || _fail "applets2"
