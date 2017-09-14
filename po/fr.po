@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-03 18:21+0200\n"
+"POT-Creation-Date: 2017-09-14 02:17+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -25,7 +25,7 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:439 ../src/applets/wpa_supplicant.c:419
+#: ../src/applets/battery.c:439 ../src/applets/wpa_supplicant.c:416
 #: ../src/panel.c:407 ../src/panel.c:412 ../src/run.c:256 ../src/run.c:262
 #: ../tools/message.c:190
 msgid "Error"
@@ -56,7 +56,7 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:96 ../src/applets/tasks.c:842
+#: ../src/applets/close.c:100 ../src/applets/tasks.c:842
 msgid "Close"
 msgstr "Fermer"
 
@@ -299,15 +299,15 @@ msgstr "Lister les interfaces locales"
 msgid "Show the interfaces disabled"
 msgstr "Afficher les interfaces inactives"
 
-#: ../src/applets/pager.c:283
+#: ../src/applets/pager.c:288
 #, c-format
 msgid "Desk %lu"
 msgstr "Bureau %lu"
 
-#: ../src/applets/pager.c:288
+#: ../src/applets/pager.c:293
 #, c-format
 msgid "Switch to %s"
-msgstr ""
+msgstr "Basculer vers %s"
 
 #: ../src/applets/rotate.c:78
 msgid "Rotate the screen"
@@ -393,50 +393,87 @@ msgstr "Téléphone personel"
 msgid ": "
 msgstr " : "
 
-#: ../src/applets/wpa_supplicant.c:302
+#: ../src/applets/wpa_supplicant.c:299
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:310 ../src/applets/wpa_supplicant.c:980
+#: ../src/applets/wpa_supplicant.c:307 ../src/applets/wpa_supplicant.c:1000
 msgid "Unavailable"
 msgstr "Indisponible"
 
-#: ../src/applets/wpa_supplicant.c:431
+#: ../src/applets/wpa_supplicant.c:428
 #, c-format
 msgid "Connected to interface %s"
 msgstr "Connecté à l'interface %s"
 
-#: ../src/applets/wpa_supplicant.c:435
+#: ../src/applets/wpa_supplicant.c:432
 msgid "Connecting..."
 msgstr "Connexion..."
 
-#: ../src/applets/wpa_supplicant.c:443
+#: ../src/applets/wpa_supplicant.c:440
 msgid "Scanning..."
 msgstr "Recherche..."
 
-#: ../src/applets/wpa_supplicant.c:453
+#: ../src/applets/wpa_supplicant.c:450
 #, c-format
 msgid "Connected to network %s"
 msgstr "Connecté au réseau %s"
 
-#: ../src/applets/wpa_supplicant.c:516
+#: ../src/applets/wpa_supplicant.c:514
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr "Le réseau \"%s\" est protégé par une clé."
 
-#: ../src/applets/wpa_supplicant.c:533
+#: ../src/applets/wpa_supplicant.c:531
 msgid "Password required"
 msgstr "Mot de passe requis"
 
-#: ../src/applets/wpa_supplicant.c:547
+#: ../src/applets/wpa_supplicant.c:545
 msgid "Wireless key"
 msgstr "Clé du réseau"
 
-#: ../src/applets/wpa_supplicant.c:558
+#: ../src/applets/wpa_supplicant.c:557
 msgid "Key: "
 msgstr "Clé : "
 
-#: ../src/applets/wpa_supplicant.c:1028
+#: ../src/applets/wpa_supplicant.c:569
+msgid "_Show password"
+msgstr "_Afficher le mot de passe"
+
+#: ../src/applets/wpa_supplicant.c:1077 ../tools/wifibrowser.c:119
+msgid "Reassociate"
+msgstr "Réassocier"
+
+#: ../src/applets/wpa_supplicant.c:1093 ../tools/wifibrowser.c:315
+msgid "Disconnect"
+msgstr "Déconnecter"
+
+#: ../src/applets/wpa_supplicant.c:1105 ../tools/wifibrowser.c:120
+msgid "Rescan"
+msgstr "Rechercher"
+
+#: ../src/applets/wpa_supplicant.c:1178
+msgid "Preferences"
+msgstr "Préférences"
+
+#: ../src/applets/wpa_supplicant.c:1357
+msgid "Unknown error"
+msgstr "Erreur inconnue"
+
+#: ../src/applets/wpa_supplicant.c:1359
+msgid "Could not save the configuration"
+msgstr "Impossible de sauvegarder la configuration"
+
+#: ../src/applets/wpa_supplicant.c:1451
+msgid "Password changed"
+msgstr "Mot de passe changé"
+
+#: ../src/applets/wpa_supplicant.c:1618
+#, c-format
+msgid "Hidden (%s)"
+msgstr "Masqué (%s)"
+
+#: ../src/applets/wpa_supplicant.c:1867
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -445,46 +482,13 @@ msgstr ""
 "Fréquence : %u\n"
 "Niveau : %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:1029
+#: ../src/applets/wpa_supplicant.c:1868
 msgid ""
 "\n"
 "Security: "
 msgstr ""
 "\n"
 "Sécurité : "
-
-#: ../src/applets/wpa_supplicant.c:1072 ../tools/wifibrowser.c:119
-msgid "Reassociate"
-msgstr "Réassocier"
-
-#: ../src/applets/wpa_supplicant.c:1088 ../tools/wifibrowser.c:312
-msgid "Disconnect"
-msgstr "Déconnecter"
-
-#: ../src/applets/wpa_supplicant.c:1100 ../tools/wifibrowser.c:120
-msgid "Rescan"
-msgstr "Rechercher"
-
-#: ../src/applets/wpa_supplicant.c:1173
-msgid "Preferences"
-msgstr "Préférences"
-
-#: ../src/applets/wpa_supplicant.c:1350
-msgid "Unknown error"
-msgstr "Erreur inconnue"
-
-#: ../src/applets/wpa_supplicant.c:1352
-msgid "Could not save the configuration"
-msgstr "Impossible de sauvegarder la configuration"
-
-#: ../src/applets/wpa_supplicant.c:1444
-msgid "Password changed"
-msgstr "Mot de passe changé"
-
-#: ../src/applets/wpa_supplicant.c:1611
-#, c-format
-msgid "Hidden (%s)"
-msgstr "Masqué (%s)"
 
 #: ../src/helper.c:140
 msgid "Panel for the DeforaOS desktop"
@@ -772,7 +776,7 @@ msgstr "SSID"
 msgid "BSSID"
 msgstr "BSSID"
 
-#: ../tools/wifibrowser.c:200
+#: ../tools/wifibrowser.c:202
 #, c-format
 msgid ""
 "Usage: %s [-c filename][-i interface]\n"
@@ -783,6 +787,6 @@ msgstr ""
 "  -c\tFichier de configuration\n"
 "  -i\tInterface réseau à connecter\n"
 
-#: ../tools/wifibrowser.c:299
+#: ../tools/wifibrowser.c:302
 msgid "Connect"
 msgstr "Connecter"
