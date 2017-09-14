@@ -548,6 +548,7 @@ static void _ask_password_window(WPA * wpa)
 #else
 	vbox = GTK_DIALOG(dialog)->vbox;
 #endif
+	gtk_container_set_border_width(GTK_CONTAINER(vbox), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 #else
