@@ -40,11 +40,16 @@ static int _flags(char const * flags, uint32_t expected)
 int main(void)
 {
 	int ret = 0;
+	WPAChannel channel;
 
+	/* flags */
 	ret |= _flags("[WPA-PSK-CCMP]", (WSRF_WPA | WSRF_PSK | WSRF_CCMP));
 	ret |= _flags("[WPA2-PSK-TKIP]", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP));
 	ret |= _flags("[WPA2-PSK-TKIP+CCMP]", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP
 				| WSRF_CCMP));
 	ret |= _flags("[WPA--WEP104][]", (WSRF_WEP));
+	/* channels */
+	memset(&channel, 0, sizeof(channel));
+	_stop_channel(NULL, &channel);
 	return ret;
 }
