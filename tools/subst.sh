@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2012-2016 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2017 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -70,7 +70,7 @@ _subst()
 				LDSO="/libexec/ld-elf.so.1"
 			;;
 			Linux)
-				LDSO="/lib/ld-linux-$(uname -p).so.2"
+				LDSO="/lib/ld-linux-$(uname -m | tr _ -).so.2"
 				;;
 			*)
 				LDSO="/libexec/ld.elf_so"
@@ -112,6 +112,8 @@ _subst()
 		#create
 		source="${target#$OBJDIR}"
 		source="${source}.in"
+		([ -z "$OBJDIR" ] || $DEBUG $MKDIR -- "${target%/*}") \
+								|| return 2
 		$DEBUG $SED -e "s;@PACKAGE@;$PACKAGE;g" \
 			-e "s;@VERSION@;$VERSION;g" \
 			-e "s;@PREFIX@;$PREFIX;g" \
@@ -190,7 +192,7 @@ while getopts "ciuO:P:" name; do
 	esac
 done
 shift $(($OPTIND - 1))
-if [ $# -eq 0 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
