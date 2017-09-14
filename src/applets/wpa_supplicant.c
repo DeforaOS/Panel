@@ -1676,6 +1676,7 @@ static char const * _read_scan_results_flag(WPA * wpa, char const * p,
 		uint32_t * ret)
 {
 	char const wep[] = "WEP";
+	char const wep104[] = "WEP104";
 	char const wpa1[] = "WPA-";
 	char const wpa2[] = "WPA2-";
 	char const psk[] = "PSK";
@@ -1716,6 +1717,8 @@ static char const * _read_scan_results_flag(WPA * wpa, char const * p,
 	}
 	else
 		return p;
+	if(*p == '-')
+		p++;
 	if(strncmp(psk, p, sizeof(psk) - 1) == 0)
 	{
 		*ret |= WSRF_PSK;
@@ -1742,6 +1745,12 @@ static char const * _read_scan_results_flag(WPA * wpa, char const * p,
 	{
 		*ret |= WSRF_TKIP;
 		p += sizeof(tkip) - 1;
+	}
+	else if(strncmp(wep104, p, sizeof(wep104) - 1) == 0)
+	{
+		*ret &= ~(WSRF_IBSS | WSRF_WPA | WSRF_WPA2);
+		*ret |= WSRF_WEP;
+		p += sizeof(wep104) - 1;
 	}
 	else
 		return p;
