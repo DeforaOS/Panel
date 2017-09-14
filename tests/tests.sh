@@ -73,10 +73,13 @@ _usage()
 
 #main
 clean=0
-while getopts "cP:" name; do
+while getopts "cO:P:" name; do
 	case "$name" in
 		c)
 			clean=1
+			;;
+		O)
+			export "${OPTARG%%=*}"="${OPTARG#*=}"
 			;;
 		P)
 			#XXX ignored
