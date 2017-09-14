@@ -24,10 +24,9 @@
 /* flags */
 static int _flags(char const * flags, uint32_t expected)
 {
-	uint32_t u32 = 0;
+	uint32_t u32;
 
-	if(_read_scan_results_flag(NULL, flags, &u32) == NULL
-			|| u32 != expected)
+	if((u32 = _read_scan_results_flags(NULL, flags)) != expected)
 	{
 		printf("%s: %s: Obtained: %#x (expected: %#x)\n", PROGNAME,
 				flags, u32, expected);
@@ -42,10 +41,10 @@ int main(void)
 {
 	int ret = 0;
 
-	ret |= _flags("WPA-PSK-CCMP", (WSRF_WPA | WSRF_PSK | WSRF_CCMP));
-	ret |= _flags("WPA2-PSK-TKIP", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP));
-	ret |= _flags("WPA2-PSK-TKIP+CCMP", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP
+	ret |= _flags("[WPA-PSK-CCMP]", (WSRF_WPA | WSRF_PSK | WSRF_CCMP));
+	ret |= _flags("[WPA2-PSK-TKIP]", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP));
+	ret |= _flags("[WPA2-PSK-TKIP+CCMP]", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP
 				| WSRF_CCMP));
-	ret |= _flags("WPA--WEP104", (WSRF_WEP));
+	ret |= _flags("[WPA--WEP104][]", (WSRF_WEP));
 	return ret;
 }
