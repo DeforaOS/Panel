@@ -46,5 +46,6 @@ int main(void)
 	ret |= _flags("WPA2-PSK-TKIP", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP));
 	ret |= _flags("WPA2-PSK-TKIP+CCMP", (WSRF_WPA2 | WSRF_PSK | WSRF_TKIP
 				| WSRF_CCMP));
+	ret |= _flags("WPA--WEP104", (WSRF_WEP));
 	return ret;
 }
