@@ -846,7 +846,7 @@ static int _wpa_start(WPA * wpa)
 
 static gboolean _start_timeout(gpointer data)
 {
-	const int timeout = 5000;
+	const unsigned int timeout = 5000;
 	WPA * wpa = data;
 
 #ifdef DEBUG
