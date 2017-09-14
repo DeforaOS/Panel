@@ -498,6 +498,7 @@ static void _ask_password_window(WPA * wpa);
 static gboolean _ask_password_on_closex(gpointer data);
 static void _ask_password_on_response(GtkWidget * widget, gint response,
 		gpointer data);
+static void _ask_password_on_show(GtkWidget * widget, gpointer data);
 
 static void _wpa_ask_password(WPA * wpa, WPANetwork * network)
 {
@@ -524,7 +525,7 @@ static void _ask_password_window(WPA * wpa)
 	GtkWidget * dialog;
 	GtkWidget * vbox;
 	GtkWidget * hbox;
-	GtkWidget * label;
+	GtkWidget * widget;
 
 	dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
 			GTK_BUTTONS_OK_CANCEL, "%s", _("Password required"));
@@ -552,14 +553,25 @@ static void _ask_password_window(WPA * wpa)
 #else
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
-	label = gtk_label_new(_("Key: "));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, TRUE, 0);
+	widget = gtk_label_new(_("Key: "));
+	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 	wpa->pw_entry = gtk_entry_new();
 	gtk_entry_set_activates_default(GTK_ENTRY(wpa->pw_entry), TRUE);
 	gtk_entry_set_visibility(GTK_ENTRY(wpa->pw_entry), FALSE);
 	gtk_box_pack_start(GTK_BOX(hbox), wpa->pw_entry, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
-	gtk_widget_show_all(hbox);
+#if GTK_CHECK_VERSION(3, 0, 0)
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+#else
+	hbox = gtk_hbox_new(FALSE, 4);
+#endif
+	widget = gtk_check_button_new_with_mnemonic(_("_Show password"));
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(widget), FALSE);
+	g_signal_connect(widget, "toggled", G_CALLBACK(_ask_password_on_show),
+			wpa->pw_entry);
+	gtk_box_pack_start(GTK_BOX(hbox), widget, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+	gtk_widget_show_all(vbox);
 	g_signal_connect_swapped(wpa->pw_window, "delete-event", G_CALLBACK(
 				_ask_password_on_closex), wpa);
 	g_signal_connect(wpa->pw_window, "response", G_CALLBACK(
@@ -597,6 +609,15 @@ static void _ask_password_on_response(GtkWidget * widget, gint response,
 			_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 	}
 	gtk_widget_hide(wpa->pw_window);
+}
+
+static void _ask_password_on_show(GtkWidget * widget, gpointer data)
+{
+	GtkWidget * entry = data;
+	gboolean visible;
+
+	visible = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	gtk_entry_set_visibility(GTK_ENTRY(entry), visible);
 }
 
 
