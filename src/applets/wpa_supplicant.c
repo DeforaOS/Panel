@@ -94,8 +94,7 @@ typedef struct _WPAEntry
 
 typedef struct _WPAChannel
 {
-	/* FIXME dynamically allocate instead */
-	char path[256];
+	String * path;
 	int fd;
 	GIOChannel * channel;
 	guint rd_source;
@@ -881,9 +880,8 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 #endif
 	if((p = getenv("TMPDIR")) == NULL)
 		p = TMPDIR;
-	if(snprintf(channel->path, sizeof(channel->path), "%s%s", p,
-				"/panel_wpa_supplicant.XXXXXX")
-			>= (int)sizeof(channel->path))
+	if((channel->path = string_new_append(p, "/panel_wpa_supplicant.XXXXXX",
+					NULL)) == NULL)
 		return -wpa->helper->error(NULL, "snprintf", 1);
 	if(mktemp(channel->path) == NULL)
 		return -wpa->helper->error(NULL, "mktemp", 1);
@@ -894,20 +892,13 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	memset(&lu, 0, sizeof(lu));
 	if(snprintf(lu.sun_path, sizeof(lu.sun_path), "%s", channel->path)
 			>= (int)sizeof(lu.sun_path))
-	{
-		unlink(channel->path);
 		/* XXX make sure this error is explicit enough */
 		return -_wpa_error(wpa, channel->path, 1);
-	}
 	lu.sun_family = AF_LOCAL;
 	if((channel->fd = socket(AF_LOCAL, SOCK_DGRAM, 0)) == -1)
 		return -_wpa_error(wpa, strerror(errno), 1);
 	if(bind(channel->fd, (struct sockaddr *)&lu, SUN_LEN(&lu)) != 0)
-	{
-		close(channel->fd);
-		unlink(channel->path);
 		return -_wpa_error(wpa, channel->path, 1);
-	}
 	if((interface = wpa->helper->config_get(wpa->helper->panel,
 					"wpa_supplicant", "interface")) != NULL)
 	{
@@ -925,12 +916,6 @@ static int _timeout_channel(WPA * wpa, WPAChannel * channel)
 	}
 	else
 		ret = -wpa->helper->error(NULL, path, 1);
-	if(ret != 0)
-	{
-		close(channel->fd);
-		unlink(channel->path);
-		channel->fd = -1;
-	}
 	return ret;
 }
 
@@ -1029,9 +1014,12 @@ static void _stop_channel(WPA * wpa, WPAChannel * channel)
 		channel->channel = NULL;
 		channel->fd = -1;
 	}
-	unlink(channel->path);
+	if(channel->path != NULL)
+		unlink(channel->path);
 	if(channel->fd != -1 && close(channel->fd) != 0)
 		wpa->helper->error(NULL, channel->path, 1);
+	string_delete(channel->path);
+	channel->path = NULL;
 	channel->fd = -1;
 }
 
