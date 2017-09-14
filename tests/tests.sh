@@ -66,7 +66,7 @@ _test()
 #usage
 _usage()
 {
-	echo "Usage: $PROGNAME [-c][-P prefix]" 1>&2
+	echo "Usage: $PROGNAME [-c][-P prefix] target..." 1>&2
 	return 1
 }
 
@@ -88,24 +88,28 @@ while getopts "cP:" name; do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
 	_usage
 	exit $?
 fi
-target="$1"
 
 [ "$clean" -ne 0 ]			&& exit 0
 
-$DATE > "$target"
-FAILED=
-echo "Performing tests:" 1>&2
-_test "user"
-_test "wpa_supplicant"
-echo "Expected failures:" 1>&2
-_fail "applets"
-[ -z "$DISPLAY" ] || _fail "applets2"
-if [ -n "$FAILED" ]; then
-	echo "Failed tests:$FAILED" 1>&2
-	exit 2
-fi
-echo "All tests completed" 1>&2
+while [ $# -ge 1 ]; do
+	target="$1"
+	shift
+
+	$DATE > "$target"
+	FAILED=
+	echo "Performing tests:" 1>&2
+	_test "user"
+	_test "wpa_supplicant"
+	echo "Expected failures:" 1>&2
+	_fail "applets"
+	[ -z "$DISPLAY" ] || _fail "applets2"
+	if [ -n "$FAILED" ]; then
+		echo "Failed tests:$FAILED" 1>&2
+		exit 2
+	fi
+	echo "All tests completed" 1>&2
+done
