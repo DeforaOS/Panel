@@ -58,6 +58,9 @@ int main(void)
 	channel.channel = g_io_channel_unix_new(STDERR_FILENO);
 	if(_wpa_queue(NULL, &channel, WC_ATTACH) != 0
 			|| _wpa_queue(NULL, &channel, WC_DETACH) != 0
+			|| _wpa_queue(NULL, &channel, WC_DISABLE_NETWORK,
+				0) != 0
+			|| _wpa_queue(NULL, &channel, WC_ENABLE_NETWORK, 1) != 0
 			|| _wpa_queue(NULL, &channel, WC_LIST_NETWORKS) != 0
 			|| _wpa_queue(NULL, &channel, WC_REASSOCIATE) != 0
 			|| _wpa_queue(NULL, &channel, WC_RECONFIGURE) != 0
@@ -65,6 +68,11 @@ int main(void)
 				WC_SAVE_CONFIGURATION) != 0
 			|| _wpa_queue(NULL, &channel, WC_SCAN) != 0
 			|| _wpa_queue(NULL, &channel, WC_SCAN_RESULTS) != 0
+			|| _wpa_queue(NULL, &channel, WC_SELECT_NETWORK, 2) != 0
+			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 3, FALSE,
+				"key_mgmt", "NONE") != 0
+			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 4, TRUE,
+				"ssid", "default") != 0
 			|| _wpa_queue(NULL, &channel, WC_STATUS) != 0
 			|| _wpa_queue(NULL, &channel, WC_TERMINATE) != 0)
 		ret |= 2;
