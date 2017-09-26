@@ -75,7 +75,8 @@ typedef enum _WPACommand
 	WC_SCAN,
 	WC_SCAN_RESULTS,
 	WC_SELECT_NETWORK,	/* unsigned int id */
-	WC_SET_NETWORK,		/* unsigned int id, key, value */
+	WC_SET_NETWORK,		/* unsigned int id, gboolean quote,
+				   char const * key, char const * value */
 	WC_SET_PASSWORD,	/* unsigned int id, char const * password */
 	WC_STATUS,
 	WC_TERMINATE
@@ -707,9 +708,9 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	char const * ssid = NULL;
 	uint32_t flags = 0;
 	gboolean connect = FALSE;
+	gboolean b;
 	char const * s;
 	char const * t;
-	char const * format;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
@@ -759,11 +760,11 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			break;
 		case WC_SET_NETWORK:
 			u = va_arg(ap, unsigned int);
+			b = va_arg(ap, gboolean);
 			s = va_arg(ap, char const *);
 			t = va_arg(ap, char const *);
-			format = (t != NULL) ? "SET_NETWORK %u %s \"%s\""
-				: "SET_NETWORK %u %s NONE";
-			cmd = g_strdup_printf(format, u, s, t);
+			cmd = g_strdup_printf("SET_NETWORK %u %s %s%s%s", u, s,
+					b ? "\"" : "", t, b ? "\"" : "");
 			break;
 		case WC_SET_PASSWORD:
 			/* FIXME really uses SET_NETWORK (and may not be psk) */
@@ -1400,10 +1401,14 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %u \"%s\"\n", __func__, id, ssid);
 #endif
-	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "ssid", ssid);
-	if((flags & (WSRF_WPA | WSRF_WPA2)) == 0)
+	_wpa_queue(wpa, channel, WC_SET_NETWORK, id, TRUE, "ssid", ssid);
+	if((flags & (WSRF_WPA | WSRF_WPA2)) != 0)
+		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, FALSE, "key_mgmt",
+				"WPA-PSK");
+	else
 		/* required to be able to connect to open or WEP networks */
-		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, "key_mgmt", NULL);
+		_wpa_queue(wpa, channel, WC_SET_NETWORK, id, FALSE, "key_mgmt",
+				"NONE");
 	if(wpa->autosave)
 		_wpa_queue(wpa, channel, WC_SAVE_CONFIGURATION);
 	if(connect)
