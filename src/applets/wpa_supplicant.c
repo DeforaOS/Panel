@@ -70,6 +70,8 @@ typedef enum _WPACommand
 	WC_DISABLE_NETWORK,	/* unsigned int id */
 	WC_ENABLE_NETWORK,	/* unsigned int id */
 	WC_LIST_NETWORKS,
+	WC_LOGON,
+	WC_LOGOFF,
 	WC_REASSOCIATE,
 	WC_RECONFIGURE,
 	WC_REMOVE_NETWORK,	/* unsigned int id */
@@ -744,6 +746,12 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			break;
 		case WC_LIST_NETWORKS:
 			cmd = strdup("LIST_NETWORKS");
+			break;
+		case WC_LOGON:
+			cmd = strdup("LOGON");
+			break;
+		case WC_LOGOFF:
+			cmd = strdup("LOGOFF");
 			break;
 		case WC_REASSOCIATE:
 			cmd = strdup("REASSOCIATE");

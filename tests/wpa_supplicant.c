@@ -62,6 +62,8 @@ int main(void)
 				0) != 0
 			|| _wpa_queue(NULL, &channel, WC_ENABLE_NETWORK, 1) != 0
 			|| _wpa_queue(NULL, &channel, WC_LIST_NETWORKS) != 0
+			|| _wpa_queue(NULL, &channel, WC_LOGON) != 0
+			|| _wpa_queue(NULL, &channel, WC_LOGOFF) != 0
 			|| _wpa_queue(NULL, &channel, WC_REASSOCIATE) != 0
 			|| _wpa_queue(NULL, &channel, WC_RECONFIGURE) != 0
 			|| _wpa_queue(NULL, &channel, WC_ENABLE_NETWORK, 1) != 0
