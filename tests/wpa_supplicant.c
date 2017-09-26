@@ -64,14 +64,15 @@ int main(void)
 			|| _wpa_queue(NULL, &channel, WC_LIST_NETWORKS) != 0
 			|| _wpa_queue(NULL, &channel, WC_REASSOCIATE) != 0
 			|| _wpa_queue(NULL, &channel, WC_RECONFIGURE) != 0
+			|| _wpa_queue(NULL, &channel, WC_ENABLE_NETWORK, 1) != 0
 			|| _wpa_queue(NULL, &channel,
-				WC_SAVE_CONFIGURATION) != 0
+				WC_REMOVE_NETWORK, 2) != 0
 			|| _wpa_queue(NULL, &channel, WC_SCAN) != 0
 			|| _wpa_queue(NULL, &channel, WC_SCAN_RESULTS) != 0
-			|| _wpa_queue(NULL, &channel, WC_SELECT_NETWORK, 2) != 0
-			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 3, FALSE,
+			|| _wpa_queue(NULL, &channel, WC_SELECT_NETWORK, 3) != 0
+			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 4, FALSE,
 				"key_mgmt", "NONE") != 0
-			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 4, TRUE,
+			|| _wpa_queue(NULL, &channel, WC_SET_NETWORK, 5, TRUE,
 				"ssid", "default") != 0
 			|| _wpa_queue(NULL, &channel, WC_STATUS) != 0
 			|| _wpa_queue(NULL, &channel, WC_TERMINATE) != 0)
