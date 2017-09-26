@@ -15,6 +15,8 @@
 
 
 
+#include <unistd.h>
+#include <stdio.h>
 #include "../src/applets/wpa_supplicant.c"
 
 #define PROGNAME "wpa_supplicant"
@@ -50,6 +52,12 @@ int main(void)
 	ret |= _flags("[WPA--WEP104][]", (WSRF_WEP));
 	/* channels */
 	memset(&channel, 0, sizeof(channel));
+	_stop_channel(NULL, &channel);
+	/* queue */
+	/* XXX must initialize a channel manually */
+	channel.channel = g_io_channel_unix_new(STDERR_FILENO);
+	if(_wpa_queue(NULL, &channel, WC_STATUS) != 0)
+		ret |= 2;
 	_stop_channel(NULL, &channel);
 	return ret;
 }
