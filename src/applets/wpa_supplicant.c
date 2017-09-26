@@ -704,18 +704,17 @@ static void _wpa_notify(WPA * wpa, char const * message)
 
 
 /* wpa_queue */
+static char * _queue_cmd(WPACommand command, va_list ap, char const ** ssid,
+		uint32_t * flags, gboolean * connect);
+
 static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 {
 	va_list ap;
-	unsigned int u;
-	char * cmd = NULL;
+	char * cmd;
 	WPAEntry * p;
 	char const * ssid = NULL;
 	uint32_t flags = 0;
 	gboolean connect = FALSE;
-	gboolean b;
-	char const * s;
-	char const * t;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u, ...)\n", __func__, command);
@@ -723,13 +722,50 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 	if(channel->channel == NULL)
 		return -1;
 	va_start(ap, command);
+	cmd = _queue_cmd(command, ap, &ssid, &flags, &connect);
+	va_end(ap);
+	if(cmd == NULL)
+		return -1;
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, cmd);
+#endif
+	if((p = realloc(channel->queue, sizeof(*p) * (channel->queue_cnt + 1)))
+			== NULL)
+	{
+		free(cmd);
+		return -1;
+	}
+	channel->queue = p;
+	p = &channel->queue[channel->queue_cnt];
+	p->command = command;
+	p->buf = cmd;
+	p->buf_cnt = strlen(cmd);
+	/* XXX may fail */
+	p->ssid = (ssid != NULL) ? strdup(ssid) : NULL;
+	p->flags = flags;
+	p->connect = connect;
+	if(channel->queue_cnt++ == 0)
+		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
+				_on_watch_can_write, wpa);
+	return 0;
+}
+
+static char * _queue_cmd(WPACommand command, va_list ap, char const ** ssid,
+		uint32_t * flags, gboolean * connect)
+{
+	char * cmd = NULL;
+	gboolean b;
+	char const * s;
+	char const * t;
+	unsigned int u;
+
 	switch(command)
 	{
 		case WC_ADD_NETWORK:
 			cmd = g_strdup_printf("ADD_NETWORK");
-			ssid = va_arg(ap, char const *);
-			flags = va_arg(ap, uint32_t);
-			connect = va_arg(ap, gboolean);
+			*ssid = va_arg(ap, char const *);
+			*flags = va_arg(ap, uint32_t);
+			*connect = va_arg(ap, gboolean);
 			break;
 		case WC_ATTACH:
 			cmd = strdup("ATTACH");
@@ -802,31 +838,7 @@ static int _wpa_queue(WPA * wpa, WPAChannel * channel, WPACommand command, ...)
 			cmd = strdup("TERMINATE");
 			break;
 	}
-	va_end(ap);
-	if(cmd == NULL)
-		return -1;
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, cmd);
-#endif
-	if((p = realloc(channel->queue, sizeof(*p) * (channel->queue_cnt + 1)))
-			== NULL)
-	{
-		free(cmd);
-		return -1;
-	}
-	channel->queue = p;
-	p = &channel->queue[channel->queue_cnt];
-	p->command = command;
-	p->buf = cmd;
-	p->buf_cnt = strlen(cmd);
-	/* XXX may fail */
-	p->ssid = (ssid != NULL) ? strdup(ssid) : NULL;
-	p->flags = flags;
-	p->connect = connect;
-	if(channel->queue_cnt++ == 0)
-		channel->wr_source = g_io_add_watch(channel->channel, G_IO_OUT,
-				_on_watch_can_write, wpa);
-	return 0;
+	return cmd;
 }
 
 
