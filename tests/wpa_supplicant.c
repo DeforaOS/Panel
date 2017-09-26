@@ -56,7 +56,17 @@ int main(void)
 	/* queue */
 	/* XXX must initialize a channel manually */
 	channel.channel = g_io_channel_unix_new(STDERR_FILENO);
-	if(_wpa_queue(NULL, &channel, WC_STATUS) != 0)
+	if(_wpa_queue(NULL, &channel, WC_ATTACH) != 0
+			|| _wpa_queue(NULL, &channel, WC_DETACH) != 0
+			|| _wpa_queue(NULL, &channel, WC_LIST_NETWORKS) != 0
+			|| _wpa_queue(NULL, &channel, WC_REASSOCIATE) != 0
+			|| _wpa_queue(NULL, &channel, WC_RECONFIGURE) != 0
+			|| _wpa_queue(NULL, &channel,
+				WC_SAVE_CONFIGURATION) != 0
+			|| _wpa_queue(NULL, &channel, WC_SCAN) != 0
+			|| _wpa_queue(NULL, &channel, WC_SCAN_RESULTS) != 0
+			|| _wpa_queue(NULL, &channel, WC_STATUS) != 0
+			|| _wpa_queue(NULL, &channel, WC_TERMINATE) != 0)
 		ret |= 2;
 	_stop_channel(NULL, &channel);
 	return ret;
