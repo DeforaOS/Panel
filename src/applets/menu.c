@@ -32,6 +32,10 @@
 #define N_(string) string
 
 /* constants */
+#ifndef PROGNAME_RUN
+# define PROGNAME_RUN	"run"
+#endif
+
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
@@ -916,7 +920,7 @@ static void _menu_on_rotate(gpointer data)
 static void _menu_on_run(gpointer data)
 {
 	Menu * menu = data;
-	char * argv[] = { BINDIR "/run", NULL };
+	char * argv[] = { BINDIR "/" PROGNAME_RUN, NULL };
 	const unsigned int flags = G_SPAWN_STDOUT_TO_DEV_NULL
 		| G_SPAWN_STDERR_TO_DEV_NULL;
 	GError * error = NULL;
