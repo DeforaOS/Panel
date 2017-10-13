@@ -29,8 +29,8 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"run"
+#ifndef PROGNAME_RUN
+# define PROGNAME_RUN	"run"
 #endif
 #ifndef PROGNAME_XTERM
 # define PROGNAME_XTERM	"xterm"
@@ -211,7 +211,7 @@ static GtkWidget * _new_entry(Config * config)
 	if((p = _run_get_config_filename()) == NULL)
 		return entry;
 	if(config_load(config, p) != 0)
-		error_print(PROGNAME);
+		error_print(PROGNAME_RUN);
 	free(p);
 	completion = gtk_entry_completion_new();
 	gtk_entry_set_completion(GTK_ENTRY(entry), completion);
@@ -325,7 +325,7 @@ static void _on_run_execute(gpointer data)
 		| G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD;
 	const unsigned int timeout = 30000;
 	Run * run = data;
-	char * argv_shell[] = { "/bin/sh", PROGNAME, "-c", NULL, NULL };
+	char * argv_shell[] = { "/bin/sh", PROGNAME_RUN, "-c", NULL, NULL };
 	char * argv_xterm[] = { PROGNAME_XTERM, PROGNAME_XTERM, "-e", "sh",
 		"-c", NULL, NULL };
 	char * xterm = NULL;
@@ -386,7 +386,7 @@ static void _execute_save_config(Run * run)
 	config_reset(run->config);
 	if(config_load(run->config, filename) != 0)
 		/* XXX this risks losing the configuration */
-		error_print(PROGNAME);
+		error_print(PROGNAME_RUN);
 	p = gtk_entry_get_text(GTK_ENTRY(run->entry));
 	for(i = 0; i < 100; i++)
 	{
@@ -411,7 +411,7 @@ static void _execute_save_config(Run * run)
 			break;
 	}
 	if(config_save(run->config, filename) != 0)
-		error_print(PROGNAME);
+		error_print(PROGNAME_RUN);
 	free(filename);
 }
 
@@ -487,7 +487,7 @@ static void _on_run_terminal_toggle(GtkWidget * widget, gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s\n"), PROGNAME);
+	fprintf(stderr, _("Usage: %s\n"), PROGNAME_RUN);
 	return 1;
 }
 
@@ -501,7 +501,7 @@ int main(int argc, char * argv[])
 	Run * run;
 
 	if(setlocale(LC_ALL, "") == NULL)
-		fprintf(stderr, PROGNAME ": %s: %s\n", "setlocale",
+		fprintf(stderr, PROGNAME_RUN ": %s: %s\n", "setlocale",
 				strerror(errno));
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
