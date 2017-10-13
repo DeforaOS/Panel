@@ -976,6 +976,7 @@ static gboolean _menu_on_timeout(gpointer data)
 static void _timeout_path(Menu * menu, char const * path, char const * apppath)
 {
 	struct stat st;
+	(void) path;
 
 	if(menu->refresh != TRUE
 			&& stat(apppath, &st) == 0
