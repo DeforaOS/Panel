@@ -487,7 +487,7 @@ static void _on_run_terminal_toggle(GtkWidget * widget, gpointer data)
 /* usage */
 static int _usage(void)
 {
-	fputs(_("Usage: run\n"), stderr);
+	fprintf(stderr, _("Usage: %s\n"), PROGNAME);
 	return 1;
 }
 
