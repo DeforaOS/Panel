@@ -1531,6 +1531,10 @@ static void _read_event_ctrl(WPA * wpa, char const * event)
 		_wpa_notify(wpa, _("Password changed"));
 	else if(strncmp(event, scan_results, sizeof(scan_results) - 1) == 0)
 		_wpa_queue(wpa, &wpa->channel[0], WC_SCAN_RESULTS);
+#ifdef DEBUG
+	else
+		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, event);
+#endif
 }
 
 static void _read_event_wpa(WPA * wpa, char const * event)
