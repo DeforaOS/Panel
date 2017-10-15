@@ -190,6 +190,8 @@ static void _wpa_destroy(WPA * wpa);
 /* accessors */
 static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
 		uint32_t flags);
+static WPANetwork * _wpa_get_network(WPA * wpa, unsigned int id);
+static int _wpa_set_current_network(WPA * wpa, WPANetwork * network);
 static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 		char const * network);
 
@@ -388,6 +390,33 @@ static GdkPixbuf * _wpa_get_icon(WPA * wpa, gint size, guint level,
 		g_object_unref(pixbuf);
 	}
 	return ret;
+}
+
+
+/* wpa_get_network */
+static WPANetwork * _wpa_get_network(WPA * wpa, unsigned int id)
+{
+	size_t i;
+
+	for(i = 0; i < wpa->networks_cnt; i++)
+		if(wpa->networks[i].id == id)
+			return &wpa->networks[i];
+	return NULL;
+}
+
+
+/* wpa_set_current_network */
+static int _wpa_set_current_network(WPA * wpa, WPANetwork * network)
+{
+	size_t i;
+
+	for(i = 0; i < wpa->networks_cnt; i++)
+		if(wpa->networks[i].id == network->id)
+		{
+			wpa->networks_cur = i;
+			return 0;
+		}
+	return -1;
 }
 
 
@@ -1929,6 +1958,7 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	char * q;
 	char variable[80];
 	char value[80];
+	WPANetwork * n;
 
 	wpa->flags = 0;
 	for(i = 0; i < cnt; i = j)
@@ -1986,14 +2016,8 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 	}
 	_wpa_set_status(wpa, TRUE, associated, network);
 	free(network);
-	if(id >= 0)
-		/* set the current network */
-		for(i = 0; i < wpa->networks_cnt; i++)
-			if(wpa->networks[i].id == (unsigned int)id)
-			{
-				wpa->networks_cur = i;
-				break;
-			}
+	if(id >= 0 && (n = _wpa_get_network(wpa, id)) != NULL)
+		_wpa_set_current_network(wpa, n);
 }
 
 static void _read_unsolicited(WPA * wpa, char const * buf, size_t cnt)
