@@ -196,6 +196,9 @@ static void _wpa_set_status(WPA * wpa, gboolean connected, gboolean associated,
 /* useful */
 static int _wpa_error(WPA * wpa, char const * message, int ret);
 
+static WPANetwork * _wpa_add_network(WPA * wpa, unsigned int id,
+		char const * name, int enabled);
+
 static void _wpa_connect(WPA * wpa, char const * ssid, uint32_t flags);
 static void _wpa_connect_network(WPA * wpa, WPANetwork * network);
 static void _wpa_disconnect(WPA * wpa);
@@ -624,6 +627,26 @@ static void _ask_password_on_show(GtkWidget * widget, gpointer data)
 
 	visible = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_entry_set_visibility(GTK_ENTRY(entry), visible);
+}
+
+
+/* wpa_add_network */
+static WPANetwork * _wpa_add_network(WPA * wpa, unsigned int id,
+		char const * name, int enabled)
+{
+	WPANetwork * n;
+
+	if((n = realloc(wpa->networks, sizeof(*n) * (wpa->networks_cnt + 1)))
+			== NULL)
+		return NULL;
+	wpa->networks = n;
+	n = &wpa->networks[wpa->networks_cnt];
+	n->id = id;
+	if((n->name = strdup(name)) == NULL)
+		return NULL;
+	n->enabled = enabled;
+	wpa->networks_cnt++;
+	return n;
 }
 
 
@@ -1422,6 +1445,7 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid, uint32_t flags, gboolean connect)
 {
 	unsigned int id;
+	WPANetwork * network;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(\"%s\", 0x%08x)\n", __func__, ssid, flags);
@@ -1534,24 +1558,13 @@ static void _read_list_networks(WPA * wpa, char const * buf, size_t cnt)
 			fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, ssid);
 #endif
 			/* FIXME store the scan results instead */
-			if((n = realloc(wpa->networks, sizeof(*n)
-							* (wpa->networks_cnt
-								+ 1))) == NULL)
-				/* XXX report errors */
+			if((n = _wpa_add_network(wpa, u, ssid, 1)) == NULL)
 				continue;
-			wpa->networks = n;
-			n = &wpa->networks[wpa->networks_cnt];
-			n->id = u;
-			if((n->name = strdup(ssid)) == NULL)
-				/* XXX report errors */
-				continue;
-			n->enabled = 1;
-			wpa->networks_cnt++;
 			if(res >= 4 && strcmp(flags, "DISABLED") == 0)
 				n->enabled = 0;
 			else if(res >= 4 && strcmp(flags, "CURRENT") == 0)
 			{
-				wpa->networks_cur = wpa->networks_cnt - 1;
+				_wpa_set_current_network(wpa, n);
 				_wpa_queue(wpa, &wpa->channel[0], WC_STATUS);
 			}
 		}
