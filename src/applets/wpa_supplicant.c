@@ -1996,6 +1996,8 @@ static void _read_status(WPA * wpa, char const * buf, size_t cnt)
 				associated = FALSE;
 			else if(strcmp(value, "SCANNING") == 0)
 				associated = FALSE;
+			else if(strcmp(value, "INACTIVE") == 0)
+				associated = FALSE;
 		}
 #ifndef EMBEDDED
 		else if(strcmp(variable, "ssid") == 0)
