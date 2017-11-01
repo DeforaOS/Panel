@@ -1671,27 +1671,25 @@ static void _read_scan_results(WPA * wpa, char const * buf, size_t cnt)
 			_read_scan_results_tooltip(tooltip, sizeof(tooltip),
 					frequency, level, f);
 			if(res == 5)
+			{
 				_read_scan_results_iter_ssid(wpa, &iter, bssid,
 						ssid, level, frequency, f,
 						pixbuf, tooltip);
+				q = ssid;
+			}
 			else
+			{
 				_read_scan_results_iter(wpa, &iter, bssid);
+				snprintf(ssid, sizeof(ssid), _("Hidden (%s)"),
+						bssid);
+				q = "";;
+			}
 			gtk_tree_store_set(wpa->store, &iter, WSR_UPDATED, TRUE,
 					WSR_ICON, pixbuf, WSR_BSSID, bssid,
 					WSR_FREQUENCY, frequency,
 					WSR_LEVEL, level, WSR_FLAGS, f,
-					WSR_TOOLTIP, tooltip, -1);
-			if(res == 5)
-				gtk_tree_store_set(wpa->store, &iter,
-						WSR_SSID, ssid,
-						WSR_SSID_DISPLAY, ssid, -1);
-			else
-			{
-				snprintf(tooltip, sizeof(tooltip),
-						_("Hidden (%s)"), bssid);
-				gtk_tree_store_set(wpa->store, &iter,
-						WSR_SSID_DISPLAY, tooltip, -1);
-			}
+					WSR_TOOLTIP, tooltip, WSR_SSID, q,
+					WSR_SSID_DISPLAY, ssid, -1);
 		}
 	}
 	free(p);
