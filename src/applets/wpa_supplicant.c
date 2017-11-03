@@ -321,6 +321,7 @@ static WPA * _wpa_init(PanelAppletHelper * helper, GtkWidget ** widget)
 
 static void _init_channel(WPAChannel * channel)
 {
+	channel->path = NULL;
 	channel->fd = -1;
 	channel->channel = NULL;
 	channel->rd_source = 0;
