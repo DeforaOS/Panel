@@ -84,6 +84,7 @@ static int _pager_get_window_property(Pager * pager, Window window,
 
 /* useful */
 static void _pager_do(Pager * pager);
+static void _pager_refresh(Pager * pager);
 
 /* callbacks */
 static void _pager_on_clicked(GtkWidget * widget, gpointer data);
@@ -251,7 +252,6 @@ static void _pager_do(Pager * pager)
 	unsigned long * p;
 	unsigned long i;
 	GtkWidget ** q;
-	int cur;
 	char ** names;
 	char buf[64];
 
@@ -264,18 +264,13 @@ static void _pager_do(Pager * pager)
 	fprintf(stderr, "DEBUG: %s() l=%ld\n", __func__, l);
 #endif
 	XFree(p);
-	for(i = 0; i < pager->widgets_cnt; i++)
+	for(i = l; i < pager->widgets_cnt; i++)
 		if(pager->widgets[i] != NULL)
-		{
 			gtk_widget_destroy(pager->widgets[i]);
-			pager->widgets[i] = NULL;
-		}
 	if((q = realloc(pager->widgets, l * sizeof(*q))) == NULL
 			&& l != 0)
 		return;
 	pager->widgets = q;
-	pager->widgets_cnt = l;
-	cur = _pager_get_current_desktop(pager);
 	names = _pager_get_desktop_names(pager);
 	for(i = 0; i < l; i++)
 	{
@@ -286,25 +281,57 @@ static void _pager_do(Pager * pager)
 		}
 		else
 			snprintf(buf, sizeof(buf), _("Desk %lu"), i + 1);
-		pager->widgets[i] = gtk_button_new_with_label(buf);
-		if(cur >= 0 && i == (unsigned int)cur)
-			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
-#if GTK_CHECK_VERSION(2, 12, 0)
-		snprintf(buf, sizeof(buf), _("Switch to %s"),
-				gtk_button_get_label(
-					GTK_BUTTON(pager->widgets[i])));
-		gtk_widget_set_tooltip_text(pager->widgets[i], buf);
-#endif
-		g_signal_connect(pager->widgets[i], "clicked", G_CALLBACK(
-					_pager_on_clicked), pager);
-		gtk_box_pack_start(GTK_BOX(pager->box), pager->widgets[i],
-				FALSE, TRUE, 0);
+		if(i < pager->widgets_cnt)
+			gtk_button_set_label(GTK_BUTTON(pager->widgets[i]),
+					buf);
+		else
+		{
+			pager->widgets[i] = gtk_button_new_with_label(buf);
+			g_signal_connect(pager->widgets[i], "clicked",
+					G_CALLBACK( _pager_on_clicked), pager);
+			gtk_box_pack_start(GTK_BOX(pager->box),
+					pager->widgets[i], FALSE, TRUE, 0);
+		}
 	}
 	free(names);
+	pager->widgets_cnt = l;
+	_pager_refresh(pager);
 	if(pager->widgets_cnt <= 1)
 		gtk_widget_hide(pager->box);
 	else
 		gtk_widget_show_all(pager->box);
+}
+
+
+/* pager_refresh */
+static void _pager_refresh(Pager * pager)
+{
+	size_t i;
+	int cur;
+	char buf[64];
+
+	cur = _pager_get_current_desktop(pager);
+	for(i = 0; i < pager->widgets_cnt; i++)
+		if(cur < 0 || i != (unsigned int)cur)
+		{
+			gtk_widget_set_sensitive(pager->widgets[i], TRUE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+			snprintf(buf, sizeof(buf), _("Switch to %s"),
+					gtk_button_get_label(
+						GTK_BUTTON(pager->widgets[i])));
+			gtk_widget_set_tooltip_text(pager->widgets[i], buf);
+#endif
+		}
+		else
+		{
+			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
+#if GTK_CHECK_VERSION(2, 12, 0)
+			snprintf(buf, sizeof(buf), _("On %s"),
+					gtk_button_get_label(
+						GTK_BUTTON(pager->widgets[i])));
+			gtk_widget_set_tooltip_text(pager->widgets[i], buf);
+#endif
+		}
 }
 
 
@@ -351,17 +378,13 @@ static GdkFilterReturn _pager_on_filter(GdkXEvent * xevent, GdkEvent * event,
 	Pager * pager = data;
 	XEvent * xev = xevent;
 	int cur;
-	size_t i;
 
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
 	if(xev->xproperty.atom == pager->atoms[PAGER_ATOM_NET_CURRENT_DESKTOP])
 	{
-		if((cur = _pager_get_current_desktop(pager)) < 0)
-			return GDK_FILTER_CONTINUE;
-		for(i = 0; i < pager->widgets_cnt; i++)
-			gtk_widget_set_sensitive(pager->widgets[i],
-					(i == (size_t)cur) ? FALSE : TRUE);
+		if((cur = _pager_get_current_desktop(pager)) >= 0)
+			_pager_refresh(pager);
 		return GDK_FILTER_CONTINUE;
 	}
 	if(xev->xproperty.atom == pager->atoms[
