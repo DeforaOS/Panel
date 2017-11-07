@@ -290,7 +290,10 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkOrientation orientation;
 
 	if((tasks = malloc(sizeof(*tasks))) == NULL)
+	{
+		error_set("%s: %s", applet.name, strerror(errno));
 		return NULL;
+	}
 	tasks->helper = helper;
 	tasks->tasks = NULL;
 	tasks->tasks_cnt = 0;
