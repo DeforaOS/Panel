@@ -134,8 +134,8 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			G_CALLBACK(_pager_on_screen_changed), pager);
 	pager->widgets = NULL;
 	pager->widgets_cnt = 0;
-	pager->screen = NULL;
 	pager->display = NULL;
+	pager->screen = NULL;
 	pager->root = NULL;
 	*widget = pager->box;
 	return pager;
