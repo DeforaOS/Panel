@@ -261,7 +261,7 @@ static void _pager_do(Pager * pager)
 		return;
 	l = *p;
 #ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() => %ld\n", __func__, l);
+	fprintf(stderr, "DEBUG: %s() l=%ld\n", __func__, l);
 #endif
 	XFree(p);
 	for(i = 0; i < pager->widgets_cnt; i++)
