@@ -158,7 +158,7 @@ static void _panel_helper_about_dialog(Panel * panel)
 		p = VERSION;
 	desktop_about_dialog_set_version(panel->ab_window, p);
 	if((p = panel_get_config(panel, "about", "website")) == NULL)
-		p = "http://www.defora.org/";
+		p = "https://www.defora.org/";
 	desktop_about_dialog_set_website(panel->ab_window, p);
 	gtk_window_set_position(GTK_WINDOW(panel->ab_window),
 			GTK_WIN_POS_CENTER);
