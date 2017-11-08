@@ -1,6 +1,6 @@
 /* $Id$ */
 static char const _copyright[] =
-"Copyright © 2004-2016 DeforaOS Project <contact@defora.org>";
+"Copyright © 2004-2017 DeforaOS Project <contact@defora.org>";
 /* This file is part of DeforaOS Desktop Panel */
 static char const _license[] =
 "This program is free software: you can redistribute it and/or modify\n"
