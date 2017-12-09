@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <libintl.h>
 #include <System.h>
+#include <Desktop.h>
 #include "Panel/applet.h"
 #include "../../config.h"
 #define _(string) gettext(string)
@@ -206,9 +207,9 @@ static void _menu_destroy(Menu * menu)
 /* helpers */
 /* menu_applications */
 static void _applications_on_activate(gpointer data);
-static void _applications_on_activate_application(Config * config);
-static void _applications_on_activate_directory(Config * config);
-static void _applications_on_activate_url(Config * config);
+static void _applications_on_activate_application(MimeHandler * handler);
+static void _applications_on_activate_directory(MimeHandler * handler);
+static void _applications_on_activate_url(MimeHandler * handler);
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus);
 
 static GtkWidget * _menu_applications(Menu * menu)
@@ -217,16 +218,16 @@ static GtkWidget * _menu_applications(Menu * menu)
 	GSList * p;
 	GtkWidget * menushell;
 	GtkWidget * menuitem;
-	Config * config;
-	const char section[] = "Desktop Entry";
+	MimeHandler * handler;
 	char const * name;
 #if GTK_CHECK_VERSION(2, 12, 0)
 	char const * comment;
 #endif
 	char const * q;
-	char const * r;
-	char const * path;
+	String const ** categories;
+	String const * filename;
 	size_t i;
+	size_t j;
 
 	if(menu->apps == NULL)
 		_menu_on_idle(menu);
@@ -234,13 +235,13 @@ static GtkWidget * _menu_applications(Menu * menu)
 	menushell = gtk_menu_new();
 	for(p = menu->apps; p != NULL; p = p->next)
 	{
-		config = p->data;
+		handler = p->data;
 		/* should not fail */
-		name = config_get(config, section, "Name");
+		name = mimehandler_get_name(handler);
 #if GTK_CHECK_VERSION(2, 12, 0)
-		comment = config_get(config, section, "Comment");
+		comment = mimehandler_get_comment(handler);
 #endif
-		if((q = config_get(config, section, "GenericName")) != NULL)
+		if((q = mimehandler_get_generic_name(handler)) != NULL)
 		{
 #if GTK_CHECK_VERSION(2, 12, 0)
 			if(comment == NULL)
@@ -248,43 +249,47 @@ static GtkWidget * _menu_applications(Menu * menu)
 #endif
 			name = q;
 		}
-		path = config_get(config, NULL, "path");
-		menuitem = _menu_menuitem(menu, path, name,
-				config_get(config, section, "Icon"));
+		filename = mimehandler_get_filename(handler);
+		menuitem = _menu_menuitem(menu, filename, name,
+				mimehandler_get_icon(handler));
 #if GTK_CHECK_VERSION(2, 12, 0)
 		if(comment != NULL)
 			gtk_widget_set_tooltip_text(menuitem, comment);
 #endif
-		if((q = config_get(config, section, "Type")) != NULL
-				&& strcmp(q, "Application") == 0
-				&& config_get(config, section, "Exec") == NULL)
+		if(mimehandler_get_type(handler)
+				== MIMEHANDLER_TYPE_APPLICATION
+				&& mimehandler_can_execute(handler) == 0)
 			gtk_widget_set_sensitive(menuitem, FALSE);
 		else
 			g_signal_connect_swapped(menuitem, "activate",
 					G_CALLBACK(_applications_on_activate),
-					config);
-		if((q = config_get(config, section, "Categories")) == NULL)
-		{
-			gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
-			continue;
-		}
-		for(i = 0; i < MENU_MENUS_COUNT; i++)
-		{
-			if((r = string_find(q, _menu_menus[i].category)) == NULL)
-				continue;
-			r += string_length(_menu_menus[i].category);
-			if(*r == '\0' || *r == ';')
-				break;
-		}
-		if(i == MENU_MENUS_COUNT)
+					handler);
+		if((categories = mimehandler_get_categories(handler)) == NULL
+				|| categories[0] == NULL)
 		{
 			gtk_menu_shell_append(GTK_MENU_SHELL(menushell),
 					menuitem);
 			continue;
 		}
-		if(menus[i] == NULL)
-			menus[i] = gtk_menu_new();
-		gtk_menu_shell_append(GTK_MENU_SHELL(menus[i]), menuitem);
+		for(i = 0; i < MENU_MENUS_COUNT; i++)
+		{
+			for(j = 0; categories[j] != NULL; j++)
+				if(string_compare(_menu_menus[i].category,
+							categories[j]) == 0)
+					break;
+			if(categories[j] != NULL)
+				break;
+		}
+		if(i == MENU_MENUS_COUNT)
+			gtk_menu_shell_append(GTK_MENU_SHELL(menushell),
+					menuitem);
+		else
+		{
+			if(menus[i] == NULL)
+				menus[i] = gtk_menu_new();
+			gtk_menu_shell_append(GTK_MENU_SHELL(menus[i]),
+					menuitem);
+		}
 	}
 	_applications_categories(menushell, menus);
 	return menushell;
@@ -292,77 +297,39 @@ static GtkWidget * _menu_applications(Menu * menu)
 
 static void _applications_on_activate(gpointer data)
 {
-	Config * config = data;
-	const char section[] = "Desktop Entry";
-	char const * q;
+	MimeHandler * handler = data;
 
-	if((q = config_get(config, section, "Type")) == NULL)
-		return;
-	else if(strcmp(q, "Application") == 0)
-		_applications_on_activate_application(config);
-	else if(strcmp(q, "Directory") == 0)
-		_applications_on_activate_directory(config);
-	else if(strcmp(q, "URL") == 0)
-		_applications_on_activate_url(config);
+	switch(mimehandler_get_type(handler))
+	{
+		case MIMEHANDLER_TYPE_APPLICATION:
+			_applications_on_activate_application(handler);
+			break;
+		case MIMEHANDLER_TYPE_DIRECTORY:
+			_applications_on_activate_directory(handler);
+			break;
+		case MIMEHANDLER_TYPE_URL:
+			_applications_on_activate_url(handler);
+			break;
+		case MIMEHANDLER_TYPE_UNKNOWN:
+			break;
+	}
 }
 
-static void _applications_on_activate_application(Config * config)
+static void _applications_on_activate_application(MimeHandler * handler)
 {
-	const char section[] = "Desktop Entry";
-	char * program;
-	char * p;
-	char const * q;
-	pid_t pid;
-	GError * error = NULL;
-
-	if((q = config_get(config, section, "Exec")) == NULL)
-		return;
-	if((program = strdup(q)) == NULL)
-		return; /* XXX report error */
-	/* XXX crude way to ignore %f, %F, %u and %U */
-	if((p = strchr(program, '%')) != NULL)
-		*p = '\0';
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s() \"%s\"", __func__, program);
-#endif
-	if((q = config_get(config, section, "Path")) == NULL)
-	{
-		/* execute the program directly */
-		if(g_spawn_command_line_async(program, &error) != TRUE)
-		{
-			fprintf(stderr, "%s: %s\n", program, error->message);
-			g_error_free(error);
-		}
-	}
-	else if((pid = fork()) == 0)
-	{
-		/* change the current working directory */
-		if(chdir(q) != 0)
-			fprintf(stderr, "%s: %s: %s\n", program, q,
-					strerror(errno));
-		else if(g_spawn_command_line_async(program, &error) != TRUE)
-		{
-			fprintf(stderr, "%s: %s\n", program, error->message);
-			g_error_free(error);
-		}
-		exit(0);
-	}
-	else if(pid < 0)
-		fprintf(stderr, "%s: %s\n", program, strerror(errno));
-	free(program);
+	mimehandler_execute(handler, NULL);
 }
 
-static void _applications_on_activate_directory(Config * config)
+static void _applications_on_activate_directory(MimeHandler * handler)
 {
-	const char section[] = "Desktop Entry";
-	char const * directory;
+	String const * directory;
 	/* XXX open with the default file manager instead */
 	char * argv[] = { "browser", "--", NULL, NULL };
 	const unsigned int flags = G_SPAWN_SEARCH_PATH;
 	GError * error = NULL;
 
 	/* XXX this may not might the correct key */
-	if((directory = config_get(config, section, "Path")) == NULL)
+	if((directory = mimehandler_get_path(handler)) == NULL)
 		return;
 	if((argv[2] = strdup(directory)) == NULL)
 		fprintf(stderr, "%s: %s\n", directory, strerror(errno));
@@ -375,16 +342,15 @@ static void _applications_on_activate_directory(Config * config)
 	free(argv[2]);
 }
 
-static void _applications_on_activate_url(Config * config)
+static void _applications_on_activate_url(MimeHandler * handler)
 {
-	const char section[] = "Desktop Entry";
-	char const * url;
+	String const * url;
 	/* XXX open with the default web browser instead */
 	char * argv[] = { BINDIR "/htmlapp", "--", NULL, NULL };
 	unsigned int flags = 0;
 	GError * error = NULL;
 
-	if((url = config_get(config, section, "URL")) == NULL)
+	if((url = mimehandler_get_url(handler)) == NULL)
 		return;
 	if((argv[2] = strdup(url)) == NULL)
 		fprintf(stderr, "%s: %s\n", url, strerror(errno));
@@ -699,9 +665,6 @@ static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 
 
 /* menu_on_idle */
-static int _idle_access(Menu * menu, char const * path, int mode);
-static int _idle_access_path(Menu * menu, char const * path,
-		char const * filename, int mode);
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b);
 static void _idle_path(Menu * menu, char const * path, char const * apppath);
 
@@ -720,73 +683,18 @@ static gboolean _menu_on_idle(gpointer data)
 	return FALSE;
 }
 
-static int _idle_access(Menu * menu, char const * path, int mode)
-{
-	int ret = -1;
-	char const * p;
-	char * q;
-	size_t i;
-	size_t j;
-
-	if(path[0] == '/')
-		return access(path, mode);
-	if((p = getenv("PATH")) == NULL)
-		return 0;
-	if((q = strdup(p)) == NULL)
-	{
-		menu->helper->error(NULL, path, 1);
-		return 0;
-	}
-	errno = ENOENT;
-	for(i = 0, j = 0;; i++)
-		if(q[i] == '\0')
-		{
-			ret = _idle_access_path(menu, &q[j], path, mode);
-			break;
-		}
-		else if(q[i] == ':')
-		{
-			q[i] = '\0';
-			if((ret = _idle_access_path(menu, &q[j], path, mode))
-					== 0)
-				break;
-			j = i + 1;
-		}
-	free(q);
-	return ret;
-}
-
-static int _idle_access_path(Menu * menu, char const * path,
-		char const * filename, int mode)
-{
-	int ret;
-	char * p;
-	size_t len;
-
-	len = strlen(path) + 1 + strlen(filename) + 1;
-	if((p = malloc(len)) == NULL)
-		return -menu->helper->error(NULL, path, 1);
-	snprintf(p, len, "%s/%s", path, filename);
-	ret = access(p, mode);
-	free(p);
-	return ret;
-}
-
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
 {
-	const char section[] = "Desktop Entry";
-	const char generic[] = "GenericName";
-	const char name[] = "Name";
-	Config * ca = (Config *)a;
-	Config * cb = (Config *)b;
-	char const * cap;
-	char const * cbp;
+	MimeHandler * mha = (MimeHandler *)a;
+	MimeHandler * mhb = (MimeHandler *)b;
+	String const * mhas;
+	String const * mhbs;
 
-	if((cap = config_get(ca, section, generic)) == NULL)
-		cap = config_get(ca, section, name);
-	if((cbp = config_get(cb, section, generic)) == NULL)
-		cbp = config_get(cb, section, name);
-	return string_compare(cap, cbp);
+	if((mhas = mimehandler_get_generic_name(mha)) == NULL)
+		mhas = mimehandler_get_name(mha);
+	if((mhbs = mimehandler_get_generic_name(mhb)) == NULL)
+		mhbs = mimehandler_get_name(mhb);
+	return string_compare(mhas, mhbs);
 }
 
 static void _idle_path(Menu * menu, char const * path, char const * apppath)
@@ -797,11 +705,9 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 	struct dirent * de;
 	size_t len;
 	const char ext[] = ".desktop";
-	const char section[] = "Desktop Entry";
 	char * name = NULL;
 	char * p;
-	Config * config = NULL;
-	String const * q;
+	MimeHandler * handler;
 
 #if defined(__sun)
 	if((fd = open(apppath, O_RDONLY)) < 0
@@ -842,48 +748,23 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, name);
 #endif
-		if(config == NULL)
-			config = config_new();
-		else
-			config_reset(config);
-		if(config == NULL || config_load(config, name) != 0)
+		if((handler = mimehandler_new_open(name)) == NULL)
 		{
 			menu->helper->error(NULL, error_get(NULL), 1);
 			continue;
 		}
-		/* skip this entry if it is deleted */
-		if((q = config_get(config, section, "Hidden")) != NULL
-				&& strcmp(q, "true") == 0)
+		/* skip this entry if cannot be displayed or opened */
+		if(mimehandler_can_display(handler) == 0
+				|| mimehandler_can_open(handler) == 0)
+		{
+			mimehandler_delete(handler);
 			continue;
-		/* skip this entry if it has an unknown type */
-		if((q = config_get(config, section, "Type")) == NULL)
-			continue;
-		if(strcmp(q, "Application") != 0
-				&& strcmp(q, "Directory") != 0
-				&& strcmp(q, "URL") != 0)
-			continue;
-		/* skip this entry if there is no name defined */
-		if((q = config_get(config, section, "Name")) == NULL)
-			continue;
-		/* skip this entry if should not be displayed at all */
-		if((q = config_get(config, section, "NoDisplay")) != NULL
-				&& strcmp(q, "true") == 0)
-			continue;
-		/* skip this entry if the binary cannot be executed */
-		if((q = config_get(config, section, "TryExec")) != NULL
-				&& _idle_access(menu, q, X_OK) != 0
-				&& errno == ENOENT)
-			continue;
-		/* remember the path */
-		config_set(config, NULL, "path", path);
-		menu->apps = g_slist_insert_sorted(menu->apps, config,
+		}
+		menu->apps = g_slist_insert_sorted(menu->apps, handler,
 				_idle_apps_compare);
-		config = NULL;
 	}
 	free(name);
 	closedir(dir);
-	if(config != NULL)
-		config_delete(config);
 }
 
 
