@@ -197,7 +197,7 @@ static void _menu_destroy(Menu * menu)
 {
 	if(menu->idle != 0)
 		g_source_remove(menu->idle);
-	g_slist_foreach(menu->apps, (GFunc)config_delete, NULL);
+	g_slist_foreach(menu->apps, (GFunc)mimehandler_delete, NULL);
 	g_slist_free(menu->apps);
 	gtk_widget_destroy(menu->widget);
 	free(menu);
@@ -785,7 +785,7 @@ static gboolean _menu_on_timeout(gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() resetting the menu\n", __func__);
 #endif
-	g_slist_foreach(menu->apps, (GFunc)config_delete, NULL);
+	g_slist_foreach(menu->apps, (GFunc)mimehandler_delete, NULL);
 	g_slist_free(menu->apps);
 	menu->apps = NULL;
 	menu->idle = g_idle_add(_menu_on_idle, menu);
