@@ -317,7 +317,7 @@ static void _applications_on_activate(gpointer data)
 
 static void _applications_on_activate_application(MimeHandler * handler)
 {
-	mimehandler_execute(handler, NULL);
+	mimehandler_open(handler, NULL);
 }
 
 static void _applications_on_activate_directory(MimeHandler * handler)
@@ -748,7 +748,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 #ifdef DEBUG
 		fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, name);
 #endif
-		if((handler = mimehandler_new_open(name)) == NULL)
+		if((handler = mimehandler_new_load(name)) == NULL)
 		{
 			menu->helper->error(NULL, error_get(NULL), 1);
 			continue;
