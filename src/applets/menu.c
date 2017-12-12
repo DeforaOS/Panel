@@ -207,9 +207,6 @@ static void _menu_destroy(Menu * menu)
 /* helpers */
 /* menu_applications */
 static void _applications_on_activate(gpointer data);
-static void _applications_on_activate_application(MimeHandler * handler);
-static void _applications_on_activate_directory(MimeHandler * handler);
-static void _applications_on_activate_url(MimeHandler * handler);
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus);
 
 static GtkWidget * _menu_applications(Menu * menu)
@@ -299,68 +296,9 @@ static void _applications_on_activate(gpointer data)
 {
 	MimeHandler * handler = data;
 
-	switch(mimehandler_get_type(handler))
-	{
-		case MIMEHANDLER_TYPE_APPLICATION:
-			_applications_on_activate_application(handler);
-			break;
-		case MIMEHANDLER_TYPE_DIRECTORY:
-			_applications_on_activate_directory(handler);
-			break;
-		case MIMEHANDLER_TYPE_URL:
-			_applications_on_activate_url(handler);
-			break;
-		case MIMEHANDLER_TYPE_UNKNOWN:
-			break;
-	}
-}
-
-static void _applications_on_activate_application(MimeHandler * handler)
-{
-	mimehandler_open(handler, NULL);
-}
-
-static void _applications_on_activate_directory(MimeHandler * handler)
-{
-	String const * directory;
-	/* XXX open with the default file manager instead */
-	char * argv[] = { "browser", "--", NULL, NULL };
-	const unsigned int flags = G_SPAWN_SEARCH_PATH;
-	GError * error = NULL;
-
-	/* XXX this may not might the correct key */
-	if((directory = mimehandler_get_path(handler)) == NULL)
-		return;
-	if((argv[2] = strdup(directory)) == NULL)
-		fprintf(stderr, "%s: %s\n", directory, strerror(errno));
-	else if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
-			!= TRUE)
-	{
-		fprintf(stderr, "%s: %s\n", directory, error->message);
-		g_error_free(error);
-	}
-	free(argv[2]);
-}
-
-static void _applications_on_activate_url(MimeHandler * handler)
-{
-	String const * url;
-	/* XXX open with the default web browser instead */
-	char * argv[] = { BINDIR "/htmlapp", "--", NULL, NULL };
-	unsigned int flags = 0;
-	GError * error = NULL;
-
-	if((url = mimehandler_get_url(handler)) == NULL)
-		return;
-	if((argv[2] = strdup(url)) == NULL)
-		fprintf(stderr, "%s: %s\n", url, strerror(errno));
-	else if(g_spawn_async(NULL, argv, NULL, flags, NULL, NULL, NULL, &error)
-			!= TRUE)
-	{
-		fprintf(stderr, "%s: %s\n", url, error->message);
-		g_error_free(error);
-	}
-	free(argv[2]);
+	if(mimehandler_open(handler, NULL) != 0)
+		/* XXX really report error */
+		error_print(NULL);
 }
 
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
