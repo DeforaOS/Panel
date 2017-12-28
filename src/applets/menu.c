@@ -233,8 +233,11 @@ static GtkWidget * _menu_applications(Menu * menu)
 	for(p = menu->apps; p != NULL; p = p->next)
 	{
 		handler = p->data;
-		/* should not fail */
-		name = mimehandler_get_name(handler, 1);
+		if((name = mimehandler_get_name(handler, 1)) == NULL)
+		{
+			menu->helper->error(NULL, error_get(NULL), 0);
+			continue;
+		}
 #if GTK_CHECK_VERSION(2, 12, 0)
 		comment = mimehandler_get_comment(handler, 1);
 #endif
