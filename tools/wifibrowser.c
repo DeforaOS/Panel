@@ -29,17 +29,17 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"wifibrowser"
+#ifndef PROGNAME_WIFIBROWSER
+# define PROGNAME_WIFIBROWSER	"wifibrowser"
 #endif
 #ifndef PREFIX
-# define PREFIX		"/usr/local"
+# define PREFIX			"/usr/local"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -100,14 +100,14 @@ static int _wifibrowser(char const * configfile, char const * interface)
 	{
 		if(configfile != NULL
 				&& config_load(panel.config, configfile) != 0)
-			error_print(PROGNAME);
+			error_print(PROGNAME_WIFIBROWSER);
 		if(interface != NULL
 				&& config_set(panel.config, "wpa_supplicant",
 					"interface", interface) != 0)
-			error_print(PROGNAME);
+			error_print(PROGNAME_WIFIBROWSER);
 	}
 	else
-		error_print(PROGNAME);
+		error_print(PROGNAME_WIFIBROWSER);
 	/* FIXME load the configuration */
 	memset(&helper, 0, sizeof(helper));
 	helper.panel = &panel;
@@ -190,7 +190,7 @@ static int _error(Panel * panel, char const * message, int ret)
 {
 	(void) panel;
 
-	fputs(PROGNAME ": ", stderr);
+	fputs(PROGNAME_WIFIBROWSER ": ", stderr);
 	perror(message);
 	return ret;
 }
@@ -201,7 +201,7 @@ static int _usage(void)
 {
 	fprintf(stderr, _("Usage: %s [-c filename][-i interface]\n"
 "  -c	Path to a configuration file\n"
-"  -i	Network interface to connect to\n"), PROGNAME);
+"  -i	Network interface to connect to\n"), PROGNAME_WIFIBROWSER);
 	return 1;
 }
 
