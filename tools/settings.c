@@ -125,7 +125,7 @@ static int _settings(void)
 	gtk_window_set_title(GTK_WINDOW(settings.window),
 			_("System preferences"));
 	g_signal_connect_swapped(settings.window, "delete-event", G_CALLBACK(
-				_settings_on_closex), NULL);
+				_settings_on_closex), &settings);
 	widget = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(widget),
 			GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
