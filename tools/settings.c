@@ -377,7 +377,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 				|| string_find(p, "Settings") == NULL)
 			continue;
 		if((p = config_get(config, section, "TryExec")) != NULL
-				&& _settings_browse_folder_access(path, X_OK)
+				&& _settings_browse_folder_access(p, X_OK)
 				!= 0 && errno == ENOENT)
 				continue;
 		if((icon = config_get(config, section, "Icon")) == NULL)
