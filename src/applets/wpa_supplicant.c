@@ -1475,7 +1475,6 @@ static void _read_add_network(WPA * wpa, WPAChannel * channel, char const * buf,
 		size_t cnt, char const * ssid, uint32_t flags, gboolean connect)
 {
 	unsigned int id;
-	WPANetwork * network;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(\"%s\", 0x%08x)\n", __func__, ssid, flags);
