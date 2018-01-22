@@ -30,21 +30,21 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"settings"
+#ifndef PROGNAME_SETTINGS
+# define PROGNAME_SETTINGS	"settings"
 #endif
 
 #ifndef PREFIX
-# define PREFIX		"/usr/local"
+# define PREFIX			"/usr/local"
 #endif
 #ifndef BINDIR
-# define BINDIR		PREFIX "/bin"
+# define BINDIR			PREFIX "/bin"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -367,7 +367,7 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 		name = config_get(config, section, "Name");
 		exec = config_get(config, section, "Exec");
 		if(p == NULL || name == NULL || exec == NULL
-				|| strcmp(exec, PROGNAME) == 0)
+				|| strcmp(exec, PROGNAME_SETTINGS) == 0)
 			continue;
 		if(strcmp(p, application) != 0)
 			continue;
@@ -484,7 +484,7 @@ static int _settings_browse_home(Settings * settings, Config * config)
 /* settings_error */
 static int _settings_error(char const * message, int ret)
 {
-	fprintf(stderr, "%s: %s\n", PROGNAME, message);
+	fprintf(stderr, "%s: %s\n", PROGNAME_SETTINGS, message);
 	return ret;
 }
 
@@ -492,7 +492,7 @@ static int _settings_error(char const * message, int ret)
 /* settings_usage */
 static int _settings_usage(void)
 {
-	fputs("Usage: " PROGNAME "\n", stderr);
+	fputs("Usage: " PROGNAME_SETTINGS "\n", stderr);
 	return 1;
 }
 
