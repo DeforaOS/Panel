@@ -492,7 +492,7 @@ static int _settings_error(char const * message, int ret)
 /* settings_usage */
 static int _settings_usage(void)
 {
-	fputs("Usage: " PROGNAME_SETTINGS "\n", stderr);
+	fprintf(stderr, _("Usage: %s\n"), PROGNAME_SETTINGS);
 	return 1;
 }
 
