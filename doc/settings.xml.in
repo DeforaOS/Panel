@@ -9,8 +9,8 @@
 	<!ENTITY section   "1">
 	<!ENTITY title     "Panel User Manual">
 	<!ENTITY package   "DeforaOS Panel">
-	<!ENTITY name      "wifibrowser">
-	<!ENTITY purpose   "Wireless network settings">
+	<!ENTITY name      "settings">
+	<!ENTITY purpose   "System preferences">
 ]>
 <refentry>
 	<refentryinfo>
@@ -28,11 +28,7 @@
 			</author>
 		</authorgroup>
 		<copyright>
-			<year>2013</year>
-			<year>2014</year>
-			<year>2015</year>
-			<year>2016</year>
-			<year>2017</year>
+			<year>2018</year>
 			<holder>&firstname; &surname; &lt;&email;&gt;</holder>
 		</copyright>
 		<legalnotice>
@@ -54,36 +50,16 @@
 	<refsynopsisdiv>
 		<cmdsynopsis>
 			<command>&name;</command>
-			<arg choice="opt"><option>-c</option>
-				<replaceable>filename</replaceable></arg>
-			<arg choice="opt"><option>-i</option>
-				<replaceable>interface</replaceable></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
 	<refsect1 id="description">
 		<title>Description</title>
-		<para><command>&name;</command> is a control interface for
-			<command>wpa_supplicant<manvolnum>8</manvolnum></command>. It can list and
-			configure the wireless networks currently available, and then connect to
-			them.</para>
+		<para><command>&name;</command> gathers the system preferences available to
+			the current user within a common window.</para>
 	</refsect1>
 	<refsect1 id="options">
 		<title>Options</title>
-		<para>The following options are available:</para>
-		<variablelist>
-			<varlistentry>
-				<term><option>-c</option></term>
-				<listitem>
-					<para>Load a specific configuration file.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>-i</option></term>
-				<listitem>
-					<para>Connect to a specific network interface.</para>
-				</listitem>
-			</varlistentry>
-		</variablelist>
+		<para>This program does not accept any options from the command line.</para>
 	</refsect1>
 	<refsect1 id="bugs">
 		<title>Bugs</title>
@@ -102,12 +78,8 @@
 				<manvolnum>1</manvolnum>
 			</citerefentry>,
 			<citerefentry>
-				<refentrytitle>settings</refentrytitle>
+				<refentrytitle>wifibrowser</refentrytitle>
 				<manvolnum>1</manvolnum>
-			</citerefentry>,
-			<citerefentry>
-				<refentrytitle>wpa_supplicant</refentrytitle>
-				<manvolnum>8</manvolnum>
 			</citerefentry>
 		</para>
 	</refsect1>
