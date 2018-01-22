@@ -698,7 +698,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 		}
 		/* skip this entry if cannot be displayed or opened */
 		if(mimehandler_can_display(handler) == 0
-				|| mimehandler_can_open(handler) == 0)
+				|| mimehandler_can_execute(handler) == 0)
 		{
 			mimehandler_delete(handler);
 			continue;
