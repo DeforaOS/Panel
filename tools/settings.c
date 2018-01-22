@@ -72,6 +72,9 @@ typedef enum _SettingsColumn
 static int _settings(void);
 
 /* accessors */
+static int _mimehandler_can_display(Config * config);
+static int _mimehandler_can_execute(Config * config);
+static int _mimehandler_is_deleted(Config * config);
 static gboolean _settings_get_iter(Settings * settings, GtkTreeIter * iter,
 		GtkTreePath * path);
 static GtkTreeModel * _settings_get_model(Settings * settings);
@@ -216,6 +219,116 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 
 
 /* accessors */
+/* mimehandler_can_display */
+static gboolean _mimehandler_can_display(Config * config)
+{
+	const char section[] = "Desktop Entry";
+	String const * p;
+
+	/* FIXME re-implement with libDesktop's MimeHandler class */
+	if(_mimehandler_is_deleted(config))
+		return 0;
+	if(config_get(config, section, "OnlyShowIn") != NULL)
+		return 0;
+	return ((p = config_get(config, section, "NoDisplay")) == NULL
+			|| string_compare(p, "true") != 0) ? 1 : 0;
+}
+
+
+/* mimehandler_can_execute */
+static int _can_execute_access(char const * path, int mode);
+static int _can_execute_access_path(char const * path, char const * filename,
+		int mode);
+
+static int _mimehandler_can_execute(Config * config)
+{
+	const char section[] = "Desktop Entry";
+	String const * p;
+
+	/* FIXME re-implement with libDesktop's MimeHandler class */
+	if((p = config_get(config, section, "Type")) == NULL)
+		return 0;
+	if(string_compare(p, "Application") != 0)
+		return 0;
+	if((p = config_get(config, section, "TryExec")) != NULL
+			&& _can_execute_access(p, X_OK) <= 0)
+		return 0;
+	return (config_get(config, section, "Exec") != NULL) ? 1 : 0;
+}
+
+static int _can_execute_access(char const * path, int mode)
+{
+	int ret = -1;
+	char const * p;
+	char * q;
+	size_t i;
+	size_t j;
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\", %d)\n", __func__, path, mode);
+#endif
+	if(path[0] == '/')
+		return (access(path, mode) == 0) ? 1 : 0;
+	if((p = getenv("PATH")) == NULL)
+		return 0;
+	if((q = string_new(p)) == NULL)
+		return -1;
+	errno = ENOENT;
+	for(i = 0, j = 0;; i++)
+		if(q[i] == '\0')
+		{
+			ret = _can_execute_access_path(&q[j], path, mode);
+			break;
+		}
+		else if(q[i] == ':')
+		{
+			q[i] = '\0';
+			if((ret = _can_execute_access_path(&q[j], path, mode))
+					> 0)
+				break;
+			j = i + 1;
+		}
+	string_delete(q);
+	return ret;
+}
+
+static int _can_execute_access_path(char const * path, char const * filename,
+		int mode)
+{
+	int ret;
+	String * p;
+
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\", %d)\n", __func__, path,
+			filename, mode);
+#endif
+	if((p = string_new_append(path, "/", filename, NULL)) == NULL)
+		return -1;
+	ret = (access(p, mode) == 0) ? 1 : 0;
+	string_delete(p);
+	return ret;
+}
+
+
+/* mimehandler_is_deleted */
+static int _mimehandler_is_deleted(Config * config)
+{
+	const char section[] = "Desktop Entry";
+	String const * p;
+
+	/* FIXME re-implement with libDesktop's MimeHandler class */
+	if((p = config_get(config, section, "Hidden")) != NULL
+			&& string_compare(p, "true") == 0)
+		return 1;
+	if((p = config_get(config, section, "Type")) == NULL)
+		return 1;
+	if(string_compare(p, "Application") == 0)
+		if(_mimehandler_can_execute(config) <= 0)
+			return 1;
+	return 0;
+}
+
+
 /* settings_get_iter */
 static gboolean _settings_get_iter(Settings * settings, GtkTreeIter * iter,
 		GtkTreePath * path)
@@ -250,9 +363,6 @@ static GtkTreeModel * _settings_get_model(Settings * settings)
 /* settings_browse */
 static int _settings_browse_folder(Settings * settings, Config * config,
 		char const * folder);
-static int _settings_browse_folder_access(char const * filename, int mode);
-static int _settings_browse_folder_access_path(char const * path,
-		char const * filename, int mode);
 static int _settings_browse_home(Settings * settings, Config * config);
 
 static int _settings_browse(Settings * settings)
@@ -310,7 +420,6 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 {
 	const char ext[8] = ".desktop";
 	const char section[] = "Desktop Entry";
-	const char application[] = "Application";
 	const int flags = GTK_ICON_LOOKUP_FORCE_SIZE;
 	const gint iconsize = 48;
 	GtkIconTheme * theme;
@@ -365,21 +474,18 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 			_settings_error(error_get(NULL), 1);
 			continue;
 		}
-		p = config_get(config, section, "Type");
+		if(_mimehandler_can_display(config) == 0)
+			continue;
 		name = config_get(config, section, "Name");
 		exec = config_get(config, section, "Exec");
-		if(p == NULL || name == NULL || exec == NULL
+		if(name == NULL || exec == NULL
 				|| strcmp(exec, PROGNAME_SETTINGS) == 0)
-			continue;
-		if(strcmp(p, application) != 0)
 			continue;
 		if((p = config_get(config, section, "Categories")) == NULL
 				|| string_find(p, "Settings") == NULL)
 			continue;
-		if((p = config_get(config, section, "TryExec")) != NULL
-				&& _settings_browse_folder_access(p, X_OK)
-				!= 0 && errno == ENOENT)
-				continue;
+		if(_mimehandler_can_execute(config) <= 0)
+			continue;
 		if((icon = config_get(config, section, "Icon")) == NULL)
 			icon = GTK_STOCK_PREFERENCES;
 #ifdef DEBUG
@@ -405,60 +511,6 @@ static int _settings_browse_folder(Settings * settings, Config * config,
 	}
 	closedir(dir);
 	return FALSE;
-}
-
-static int _settings_browse_folder_access(char const * path, int mode)
-{
-	int ret = -1;
-	char const * p;
-	char * q;
-	size_t i;
-	size_t j;
-
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(\"%s\", %d)\n", __func__, path, mode);
-#endif
-	if(path[0] == '/')
-		return access(path, mode);
-	if((p = getenv("PATH")) == NULL)
-		return 0;
-	if((q = string_new(p)) == NULL)
-		return -1;
-	errno = ENOENT;
-	for(i = 0, j = 0;; i++)
-		if(q[i] == '\0')
-		{
-			ret = _settings_browse_folder_access_path(&q[j], path,
-					mode);
-			break;
-		}
-		else if(q[i] == ':')
-		{
-			q[i] = '\0';
-			if((ret = _settings_browse_folder_access_path(&q[j],
-							path, mode)) == 0)
-				break;
-			j = i + 1;
-		}
-	string_delete(q);
-	return ret;
-}
-
-static int _settings_browse_folder_access_path(char const * path,
-		char const * filename, int mode)
-{
-	int ret;
-	String * p;
-
-#ifdef DEBUG
-	fprintf(stderr, "DEBUG: %s(\"%s\", \"%s\", %d)\n", __func__, path,
-			filename, mode);
-#endif
-	if((p = string_new_append(path, "/", filename, NULL)) == NULL)
-		return -1;
-	ret = access(p, mode);
-	string_delete(p);
-	return ret;
 }
 
 static int _settings_browse_home(Settings * settings, Config * config)
