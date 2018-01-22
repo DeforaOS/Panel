@@ -170,6 +170,7 @@ static gboolean _settings_on_filter_view(GtkTreeModel * model,
 		GtkTreeIter * iter, gpointer data)
 {
 	gboolean privileged;
+	(void) data;
 
 	if(geteuid() == 0)
 		return TRUE;
@@ -196,6 +197,7 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 	gchar * exec;
 	GError * error = NULL;
 	char * argv[] = { "/bin/sh", "sh", "-c", NULL, NULL };
+	(void) widget;
 
 	if(_settings_get_iter(settings, &iter, path) == FALSE)
 		return;
