@@ -111,6 +111,8 @@ char const * panel_get_config(Panel * panel, char const * section,
 /* panel_error */
 int panel_error(Panel * panel, char const * message, int ret)
 {
+	(void) panel;
+
 	fprintf(stderr, "%s: %s\n", PROGNAME, (message != NULL) ? message
 			: error_get(NULL));
 	return ret;
@@ -120,6 +122,9 @@ int panel_error(Panel * panel, char const * message, int ret)
 /* panel_show_preferences */
 void panel_show_preferences(Panel * panel, gboolean show)
 {
+	(void) panel;
+	(void) show;
+
 	/* XXX just a stub */
 }
 
@@ -286,6 +291,8 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 		PanelWindowType type, GtkIconSize iconsize)
 {
 	char const * p;
+	(void) panel;
+	(void) iconsize;
 
 	memset(helper, 0, sizeof(*helper));
 	helper->panel = panel;
