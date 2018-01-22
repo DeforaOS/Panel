@@ -104,10 +104,8 @@ static gboolean _settings_on_closex(gpointer data);
 static gboolean _settings_on_filter_view(GtkTreeModel * model,
 		GtkTreeIter * iter, gpointer data);
 static gboolean _settings_on_idle(gpointer data);
-#if GTK_CHECK_VERSION(2, 10, 0)
 static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 		gpointer data);
-#endif
 
 static int _settings(void)
 {
@@ -149,10 +147,8 @@ static int _settings(void)
 	gtk_icon_view_set_text_column(GTK_ICON_VIEW(settings.view), SC_NAME);
 	gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(settings.view),
 			GTK_SELECTION_SINGLE);
-#if GTK_CHECK_VERSION(2, 10, 0)
 	g_signal_connect(settings.view, "item-activated", G_CALLBACK(
 				_settings_on_item_activated), &settings);
-#endif
 	gtk_container_add(GTK_CONTAINER(widget), settings.view);
 	gtk_container_add(GTK_CONTAINER(settings.window), widget);
 	gtk_widget_show_all(settings.window);
@@ -189,7 +185,6 @@ static gboolean _settings_on_idle(gpointer data)
 	return FALSE;
 }
 
-#if GTK_CHECK_VERSION(2, 10, 0)
 static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 		gpointer data)
 {
@@ -215,7 +210,6 @@ static void _settings_on_item_activated(GtkWidget * widget, GtkTreePath * path,
 		_settings_error(error->message, 1);
 	g_free(exec);
 }
-#endif
 
 
 /* accessors */
