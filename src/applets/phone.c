@@ -122,6 +122,8 @@ static int _phone_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3)
 {
 	GtkWidget * widget = data;
+	(void) value2;
+	(void) value3;
 
 	_phone_embed(widget, value1);
 	return 0;

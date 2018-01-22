@@ -168,6 +168,7 @@ static int _embed_on_desktop_message(void * data, uint32_t value1,
 	GtkWidget * socket;
 	size_t i;
 	EmbedWidget * p;
+	(void) value3;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u, %u, %u)\n", __func__, value1, value2,

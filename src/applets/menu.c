@@ -534,7 +534,7 @@ static void _menu_on_clicked(gpointer data)
 	{
 #if GTK_CHECK_VERSION(3, 10, 0)
 		menuitem = gtk_image_menu_item_new_with_mnemonic(_("_About"));
-		gtk_image_menu_item_set_image(GTK_MENU_ITEM(menuitem),
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(menuitem),
 				gtk_image_new_from_icon_name(GTK_STOCK_ABOUT,
 					GTK_ICON_SIZE_MENU));
 #else
@@ -651,6 +651,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 	char * name = NULL;
 	char * p;
 	MimeHandler * handler;
+	(void) path;
 
 #if defined(__sun)
 	if((fd = open(apppath, O_RDONLY)) < 0

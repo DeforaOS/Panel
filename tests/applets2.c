@@ -132,12 +132,16 @@ static gboolean _applets2(gpointer data)
 static char const * _applets2_helper_config_get(Panel * panel,
 		char const * section, char const * variable)
 {
+	(void) panel;
+
 	printf("%s: config_get(\"%s\", \"%s\")\n", PROGNAME, section, variable);
 	return NULL;
 }
 
 static int _applets2_helper_error(Panel * panel, char const * message, int ret)
 {
+	(void) panel;
+
 	fprintf(stderr, "%s: %s\n", PROGNAME, message);
 	return ret;
 }
@@ -176,13 +180,12 @@ static int _perror(char const * message, int ret)
 int main(int argc, char * argv[])
 {
 	int ret = 0;
-	guint source;
 
 	if(getenv("DISPLAY") == NULL)
 		/* XXX ignore this test */
 		return 0;
 	gtk_init(&argc, &argv);
-	source = g_idle_add(_applets2, &ret);
+	g_idle_add(_applets2, &ret);
 	gtk_main();
 	return (ret == 0) ? 0 : 2;
 }

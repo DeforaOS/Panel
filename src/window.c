@@ -475,6 +475,7 @@ static gboolean _panel_window_on_configure_event(GtkWidget * widget,
 {
 	PanelWindow * panel = data;
 	GdkEventConfigure * cevent = &event->configure;
+	(void) widget;
 
 	if(event->type != GDK_CONFIGURE)
 		return FALSE;

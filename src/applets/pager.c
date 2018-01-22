@@ -378,6 +378,7 @@ static GdkFilterReturn _pager_on_filter(GdkXEvent * xevent, GdkEvent * event,
 	Pager * pager = data;
 	XEvent * xev = xevent;
 	int cur;
+	(void) event;
 
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
@@ -403,6 +404,7 @@ static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	Pager * pager = data;
 	GdkEventMask events;
 	size_t i;
+	(void) previous;
 
 	if(pager->root != NULL)
 		gdk_window_remove_filter(pager->root, _pager_on_filter, pager);

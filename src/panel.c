@@ -342,6 +342,7 @@ static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
 {
 	Panel * panel = data;
 	XEvent * xe = xevent;
+	(void) event;
 
 	if(xe->type == ConfigureNotify)
 		return _event_configure_notify(panel);
@@ -1468,6 +1469,7 @@ static char const * _panel_get_section(Panel * panel, PanelPosition position)
 {
 	char const * sections[PANEL_POSITION_COUNT] = {
 		"bottom", "top", "left", "right" };
+	(void) panel;
 
 	return sections[position];
 }

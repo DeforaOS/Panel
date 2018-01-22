@@ -134,6 +134,7 @@ static GdkFilterReturn _systray_on_filter(GdkXEvent * xevent, GdkEvent * event,
 {
 	Systray * systray = data;
 	XEvent * xev = xevent;
+	(void) event;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
@@ -195,6 +196,7 @@ static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	GdkWindow * root;
 	GdkWindow * window;
 	XEvent xev;
+	(void) previous;
 
 	if(systray->owner != NULL)
 		return;

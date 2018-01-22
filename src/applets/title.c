@@ -281,6 +281,7 @@ static GdkFilterReturn _title_on_filter(GdkXEvent * xevent, GdkEvent * event,
 {
 	Title * title = data;
 	XEvent * xev = xevent;
+	(void) event;
 
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
@@ -297,6 +298,7 @@ static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 {
 	Title * title = data;
 	GdkEventMask events;
+	(void) previous;
 
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);

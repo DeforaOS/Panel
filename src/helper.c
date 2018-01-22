@@ -372,6 +372,8 @@ static void _panel_helper_preferences_dialog(Panel * panel)
 /* panel_helper_rotate_screen */
 static void _panel_helper_rotate_screen(Panel * panel)
 {
+	(void) panel;
+
 	desktop_message_send(DESKTOP_CLIENT_MESSAGE, DESKTOP_MESSAGE_SET_LAYOUT,
 			DESKTOP_LAYOUT_TOGGLE, 0);
 }
