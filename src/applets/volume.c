@@ -136,6 +136,12 @@ static Volume * _volume_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		gtk_box_pack_start(GTK_BOX(vbox), volume->widget, TRUE, TRUE,
 				0);
 		volume->progress = gtk_progress_bar_new();
+#if GTK_CHECK_VERSION(3, 0, 0)
+		gtk_progress_bar_set_show_text(
+				GTK_PROGRESS_BAR(volume->progress), TRUE);
+#endif
+		gtk_progress_bar_set_text(GTK_PROGRESS_BAR(volume->progress),
+				"");
 		gtk_box_pack_start(GTK_BOX(vbox), volume->progress, TRUE, TRUE,
 				0);
 		volume->widget = vbox;
