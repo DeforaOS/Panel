@@ -61,16 +61,16 @@ typedef struct _PanelApplet
 	GtkWidget * widget;
 } Menu;
 
-typedef struct _MenuMenu
+typedef struct _MenuCategory
 {
 	char const * category;
 	char const * label;
 	char const * stock;
-} MenuMenu;
+} MenuCategory;
 
 
 /* constants */
-static const MenuMenu _menu_menus[] =
+static const MenuCategory _menu_categories[] =
 {
 	{ "Audio",	N_("Audio"),	"gnome-mime-audio",		},
 	{ "Development",N_("Development"),"applications-development",	},
@@ -85,7 +85,7 @@ static const MenuMenu _menu_menus[] =
 	{ "Utility",	N_("Utilities"),"applications-utilities",	},
 	{ "Video",	N_("Video"),	"video",			}
 };
-#define MENU_MENUS_COUNT (sizeof(_menu_menus) / sizeof(*_menu_menus))
+#define MENU_MENUS_COUNT (sizeof(_menu_categories) / sizeof(*_menu_categories))
 
 
 /* prototypes */
@@ -276,7 +276,7 @@ static GtkWidget * _menu_applications(Menu * menu)
 		for(i = 0; i < MENU_MENUS_COUNT; i++)
 		{
 			for(j = 0; categories[j] != NULL; j++)
-				if(string_compare(_menu_menus[i].category,
+				if(string_compare(_menu_categories[i].category,
 							categories[j]) == 0)
 					break;
 			if(categories[j] != NULL)
@@ -309,7 +309,7 @@ static void _applications_on_activate(gpointer data)
 static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 {
 	size_t i;
-	MenuMenu const * m;
+	MenuCategory const * m;
 	GtkWidget * menuitem;
 	size_t pos = 0;
 
@@ -317,7 +317,7 @@ static void _applications_categories(GtkWidget * menu, GtkWidget ** menus)
 	{
 		if(menus[i] == NULL)
 			continue;
-		m = &_menu_menus[i];
+		m = &_menu_categories[i];
 		menuitem = _menu_menuitem_stock(m->stock, _(m->label), FALSE);
 		gtk_menu_item_set_submenu(GTK_MENU_ITEM(menuitem), menus[i]);
 		gtk_menu_shell_insert(GTK_MENU_SHELL(menu), menuitem, pos++);
