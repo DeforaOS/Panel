@@ -61,6 +61,12 @@ typedef struct _PanelApplet
 	GtkWidget * widget;
 } Menu;
 
+typedef struct _MenuApp
+{
+	MimeHandler * handler;
+	char * path;
+} MenuApp;
+
 typedef struct _MenuCategory
 {
 	char const * category;
@@ -117,6 +123,10 @@ static void _menu_on_run(gpointer data);
 static void _menu_on_shutdown(gpointer data);
 static void _menu_on_suspend(gpointer data);
 static gboolean _menu_on_timeout(gpointer data);
+
+/* MenuApp */
+static MenuApp * _menuapp_new(MimeHandler * handler, String const * path);
+static void _menuapp_delete(MenuApp * menuapp);
 
 
 /* public */
@@ -193,7 +203,7 @@ static void _menu_destroy(Menu * menu)
 {
 	if(menu->idle != 0)
 		g_source_remove(menu->idle);
-	g_slist_foreach(menu->apps, (GFunc)mimehandler_delete, NULL);
+	g_slist_foreach(menu->apps, (GFunc)_menuapp_delete, NULL);
 	g_slist_free(menu->apps);
 	gtk_widget_destroy(menu->widget);
 	free(menu);
@@ -211,6 +221,7 @@ static GtkWidget * _menu_applications(Menu * menu)
 	GSList * p;
 	GtkWidget * menushell;
 	GtkWidget * menuitem;
+	MenuApp * menuapp;
 	MimeHandler * handler;
 	char const * name;
 #if GTK_CHECK_VERSION(2, 12, 0)
@@ -228,7 +239,8 @@ static GtkWidget * _menu_applications(Menu * menu)
 	menushell = gtk_menu_new();
 	for(p = menu->apps; p != NULL; p = p->next)
 	{
-		handler = p->data;
+		menuapp = p->data;
+		handler = menuapp->handler;
 		if((name = mimehandler_get_name(handler, 1)) == NULL)
 		{
 			menu->helper->error(NULL, error_get(NULL), 0);
@@ -246,7 +258,7 @@ static GtkWidget * _menu_applications(Menu * menu)
 			name = q;
 		}
 		filename = mimehandler_get_filename(handler);
-		menuitem = _menu_menuitem(menu, filename, name,
+		menuitem = _menu_menuitem(menu, menuapp->path, name,
 				mimehandler_get_icon(handler, 1));
 #if GTK_CHECK_VERSION(2, 12, 0)
 		if(comment != NULL)
@@ -618,8 +630,10 @@ static gboolean _menu_on_idle(gpointer data)
 
 static gint _idle_apps_compare(gconstpointer a, gconstpointer b)
 {
-	MimeHandler * mha = (MimeHandler *)a;
-	MimeHandler * mhb = (MimeHandler *)b;
+	MenuApp * maa = (MenuApp *)a;
+	MenuApp * mab = (MenuApp *)b;
+	MimeHandler * mha = maa->handler;
+	MimeHandler * mhb = mab->handler;
 	String const * mhas;
 	String const * mhbs;
 
@@ -641,6 +655,7 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 	char * name = NULL;
 	char * p;
 	MimeHandler * handler;
+	MenuApp * menuapp;
 	(void) path;
 
 #if defined(__sun)
@@ -689,12 +704,14 @@ static void _idle_path(Menu * menu, char const * path, char const * apppath)
 		}
 		/* skip this entry if cannot be displayed or opened */
 		if(mimehandler_can_display(handler) == 0
-				|| mimehandler_can_execute(handler) == 0)
+				|| mimehandler_can_execute(handler) == 0
+				|| (menuapp = _menuapp_new(handler, path))
+				== NULL)
 		{
 			mimehandler_delete(handler);
 			continue;
 		}
-		menu->apps = g_slist_insert_sorted(menu->apps, handler,
+		menu->apps = g_slist_insert_sorted(menu->apps, menuapp,
 				_idle_apps_compare);
 	}
 	free(name);
@@ -781,7 +798,7 @@ static gboolean _menu_on_timeout(gpointer data)
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() resetting the menu\n", __func__);
 #endif
-	g_slist_foreach(menu->apps, (GFunc)mimehandler_delete, NULL);
+	g_slist_foreach(menu->apps, (GFunc)_menuapp_delete, NULL);
 	g_slist_free(menu->apps);
 	menu->apps = NULL;
 	menu->idle = g_idle_add(_menu_on_idle, menu);
@@ -797,4 +814,35 @@ static void _timeout_path(Menu * menu, char const * path, char const * apppath)
 			&& stat(apppath, &st) == 0
 			&& st.st_mtime > menu->refresh_mti)
 		menu->refresh = TRUE;
+}
+
+
+/* MenuApp */
+/* menuapp_new */
+static MenuApp * _menuapp_new(MimeHandler * handler, String const * path)
+{
+	MenuApp * menuapp;
+
+	if((menuapp = object_new(sizeof(*menuapp))) == NULL)
+		return NULL;
+	menuapp->handler = NULL;
+	if(path == NULL)
+		menuapp->path = NULL;
+	else if((menuapp->path = string_new(path)) == NULL)
+	{
+		_menuapp_delete(menuapp);
+		return NULL;
+	}
+	menuapp->handler = handler;
+	return menuapp;
+}
+
+
+/* menuapp_delete */
+static void _menuapp_delete(MenuApp * menuapp)
+{
+	if(menuapp->handler != NULL)
+		mimehandler_delete(menuapp->handler);
+	string_delete(menuapp->path);
+	object_delete(menuapp);
 }
