@@ -156,11 +156,7 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	menu->idle = g_idle_add(_menu_on_idle, menu);
 	menu->refresh_mti = 0;
 	menu->widget = gtk_button_new();
-#if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-#else
-	hbox = gtk_hbox_new(FALSE, 4);
-#endif
 	if((p = helper->config_get(helper->panel, "menu", "icon")) == NULL)
 		p = "start-here";
 	image = gtk_image_new_from_icon_name(p,
@@ -182,9 +178,7 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
 	}
 	gtk_button_set_relief(GTK_BUTTON(menu->widget), GTK_RELIEF_NONE);
-#if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(menu->widget, _("Main menu"));
-#endif
 	g_signal_connect_swapped(menu->widget, "clicked", G_CALLBACK(
 				_menu_on_clicked), menu);
 	gtk_container_add(GTK_CONTAINER(menu->widget), hbox);
@@ -596,11 +590,7 @@ static void _clicked_position_menu(GtkMenu * widget, gint * x, gint * y,
 	Menu * menu = data;
 	GtkAllocation a;
 
-#if GTK_CHECK_VERSION(2, 18, 0)
 	gtk_widget_get_allocation(menu->widget, &a);
-#else
-	a = menu->widget->allocation;
-#endif
 	*x = a.x;
 	*y = a.y;
 	menu->helper->position_menu(menu->helper->panel, widget, x, y, push_in);
