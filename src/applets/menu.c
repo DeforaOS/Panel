@@ -586,11 +586,14 @@ static void _menu_on_clicked(gpointer data)
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
 	/* shutdown */
-	menuitem = _menu_menuitem_stock("gnome-shutdown", _("_Shutdown..."),
-			TRUE);
-	g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
-				_menu_on_shutdown), data);
-	gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
+	if(menu->helper->shutdown_dialog != NULL)
+	{
+		menuitem = _menu_menuitem_stock("gnome-shutdown",
+				_("_Shutdown..."), TRUE);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_menu_on_shutdown), data);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
+	}
 	gtk_widget_show_all(menushell);
 	gtk_menu_popup(GTK_MENU(menushell), NULL, NULL, _clicked_position_menu,
 			menu, 0, gtk_get_current_event_time());
