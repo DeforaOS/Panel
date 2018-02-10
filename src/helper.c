@@ -499,8 +499,9 @@ static int _panel_helper_suspend(Panel * panel)
 		write(fd, "mem\n", 4);
 		close(fd);
 	}
-	else if(g_spawn_async(NULL, suspend, NULL, flags, NULL, NULL, NULL,
-				&error) != TRUE)
+	else if(g_spawn_async(NULL, geteuid() == 0 ? &suspend[2] : suspend,
+				NULL, geteuid() == 0 ? 0 : flags, NULL, NULL,
+				NULL, &error) != TRUE)
 	{
 		_panel_helper_error(panel, error->message, 1);
 		g_error_free(error);
