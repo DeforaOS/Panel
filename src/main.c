@@ -28,8 +28,8 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel"
+#ifndef PROGNAME_PANEL
+# define PROGNAME_PANEL	"panel"
 #endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
@@ -52,7 +52,7 @@ static int _usage(void);
 /* error */
 static int _error(char const * message, int ret)
 {
-	fprintf(stderr, "%s: ", PROGNAME);
+	fprintf(stderr, "%s: ", PROGNAME_PANEL);
 	perror(message);
 	return ret;
 }
@@ -65,7 +65,7 @@ static int _usage(void)
 "  -L	Use icons the size of a large toolbar\n"
 "  -m	Monitor to use (default: 0)\n"
 "  -S	Use icons the size of a small toolbar\n"
-"  -x	Use icons the size of menus\n"), PROGNAME);
+"  -x	Use icons the size of menus\n"), PROGNAME_PANEL);
 	return 1;
 }
 

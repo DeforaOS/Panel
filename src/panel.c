@@ -42,8 +42,8 @@
 #define N_(string) string
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel"
+#ifndef PROGNAME_PANEL
+# define PROGNAME_PANEL	"panel"
 #endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
@@ -424,9 +424,9 @@ int panel_error(Panel * panel, char const * message, int ret)
 static int _error_text(char const * message, int ret)
 {
 	if(message == NULL)
-		error_print(PROGNAME);
+		error_print(PROGNAME_PANEL);
 	else
-		fprintf(stderr, "%s: %s\n", PROGNAME, message);
+		fprintf(stderr, "%s: %s\n", PROGNAME_PANEL, message);
 	return ret;
 }
 
@@ -619,7 +619,7 @@ static void _reset_on_idle_load(Panel * panel, PanelPosition position)
 		{
 			if(panel_load(panel, position, q) != 0)
 				/* ignore errors */
-				error_print(PROGNAME);
+				error_print(PROGNAME_PANEL);
 			break;
 		}
 		if(q[i++] != ',')
@@ -627,7 +627,7 @@ static void _reset_on_idle_load(Panel * panel, PanelPosition position)
 		q[i - 1] = '\0';
 		if(panel_load(panel, position, q) != 0)
 			/* ignore errors */
-			error_print(PROGNAME);
+			error_print(PROGNAME_PANEL);
 		q += i;
 		i = 0;
 	}

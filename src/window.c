@@ -30,9 +30,6 @@
 #define N_(string) string
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel"
-#endif
 #ifndef PREFIX
 # define PREFIX		"/usr/local"
 #endif
