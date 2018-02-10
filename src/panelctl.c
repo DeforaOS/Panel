@@ -27,17 +27,17 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panelctl"
+#ifndef PROGNAME_PANELCTL
+# define PROGNAME_PANELCTL	"panelctl"
 #endif
 #ifndef PREFIX
-# define PREFIX		"/usr/local"
+# define PREFIX			"/usr/local"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -62,7 +62,7 @@ static int _panelctl(PanelMessageShow what, gboolean show)
 /* error */
 static int _error(char const * message, int ret)
 {
-	fputs(PROGNAME ": ", stderr);
+	fputs(PROGNAME_PANELCTL ": ", stderr);
 	perror(message);
 	return ret;
 }
@@ -80,7 +80,7 @@ static int _usage(void)
 "  -b	Hide the bottom panel\n"
 "  -l	Hide the left panel\n"
 "  -r	Hide the right panel\n"
-"  -t	Hide the top panel\n"), PROGNAME);
+"  -t	Hide the top panel\n"), PROGNAME_PANELCTL);
 	return 1;
 }
 
