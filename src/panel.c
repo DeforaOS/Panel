@@ -123,6 +123,7 @@ static const struct
 
 /* prototypes */
 /* accessors */
+static gboolean _panel_can_shutdown(void);
 static gboolean _panel_can_suspend(void);
 
 static char const * _panel_get_applets(Panel * panel, PanelPosition position);
@@ -246,8 +247,9 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->position_menu = positions[position];
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
 	helper->rotate_screen = _panel_helper_rotate_screen;
-	helper->shutdown_dialog = _panel_helper_shutdown_dialog;
-	helper->suspend = (_panel_can_suspend()) ? _panel_helper_suspend : NULL;
+	helper->shutdown_dialog = _panel_can_shutdown()
+		? _panel_helper_shutdown_dialog : NULL;
+	helper->suspend = _panel_can_suspend() ? _panel_helper_suspend : NULL;
 }
 
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
@@ -1394,6 +1396,17 @@ static char * _config_get_filename(void)
 
 
 /* accessors */
+/* panel_can_shutdown */
+static gboolean _panel_can_shutdown(void)
+{
+	char const shutdown[] = "/sbin/shutdown";
+
+	if(geteuid() == 0)
+		return TRUE;
+	return (access(shutdown, R_OK | X_OK) == 0) ? TRUE : FALSE;
+}
+
+
 /* panel_can_suspend */
 static gboolean _panel_can_suspend(void)
 {
