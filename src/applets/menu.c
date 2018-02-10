@@ -229,7 +229,6 @@ static GtkWidget * _menu_applications(Menu * menu)
 #endif
 	char const * q;
 	String const ** categories;
-	String const * filename;
 	size_t i;
 	size_t j;
 
@@ -257,7 +256,6 @@ static GtkWidget * _menu_applications(Menu * menu)
 #endif
 			name = q;
 		}
-		filename = mimehandler_get_filename(handler);
 		menuitem = _menu_menuitem(menu, menuapp->path, name,
 				mimehandler_get_icon(handler, 1));
 #if GTK_CHECK_VERSION(2, 12, 0)
