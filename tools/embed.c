@@ -27,17 +27,17 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel-embed"
+#ifndef PROGNAME_PANEL_EMBED
+# define PROGNAME_PANEL_EMBED	"panel-embed"
 #endif
 #ifndef PREFIX
-# define PREFIX		"/usr/local"
+# define PREFIX			"/usr/local"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -140,7 +140,7 @@ static void _embed_on_child(GPid pid, gint status, gpointer data)
 /* error */
 static int _error(char const * message, int ret)
 {
-	fprintf(stderr, "%s%s\n", PROGNAME ": ", message);
+	fprintf(stderr, "%s%s\n", PROGNAME_PANEL_EMBED ": ", message);
 	return ret;
 }
 
@@ -148,7 +148,8 @@ static int _error(char const * message, int ret)
 /* usage */
 static int _usage(void)
 {
-	fprintf(stderr, _("Usage: %s command [arguments...]\n"), PROGNAME);
+	fprintf(stderr, _("Usage: %s command [arguments...]\n"),
+			PROGNAME_PANEL_EMBED);
 	return 1;
 }
 

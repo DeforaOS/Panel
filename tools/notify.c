@@ -33,22 +33,23 @@
 #define N_(string) string
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel-notify"
+#ifndef PROGNAME_PANEL_NOTIFY
+# define PROGNAME_PANEL_NOTIFY	"panel-notify"
 #endif
+#define PROGNAME		PROGNAME_PANEL_NOTIFY
 #include "helper.c"
 
 #ifndef PREFIX
-# define PREFIX		"/usr/local"
+# define PREFIX			"/usr/local"
 #endif
 #ifndef LIBDIR
-# define LIBDIR		PREFIX "/lib"
+# define LIBDIR			PREFIX "/lib"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -84,7 +85,7 @@ static int _notify_embed(GtkIconSize iconsize, int timeout, char * applets[])
 			PANEL_WINDOW_TYPE_NOTIFICATION, iconsize);
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
-			error_print(PROGNAME);
+			error_print(PROGNAME_PANEL_NOTIFY);
 	if((xid = _panel_get_xid(&panel)) == 0)
 		/* XXX report error */
 		return -1;
@@ -105,7 +106,7 @@ static int _notify_panel(GtkIconSize iconsize, int timeout, char * applets[])
 	_panel_set_title(&panel, _("Notification"));
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
-			error_print(PROGNAME);
+			error_print(PROGNAME_PANEL_NOTIFY);
 	_panel_show(&panel, TRUE);
 	if(timeout > 0)
 		panel.timeout = g_timeout_add(timeout * 1000,
@@ -140,7 +141,8 @@ static int _usage(void)
 "  -X	Use huge icons\n"
 "  -x	Use icons the size of menus\n"
 "  -t	Time to wait before disappearing (0: unlimited)\n"
-"  -l	Lists the plug-ins available\n"), PROGNAME, PROGNAME);
+"  -l	Lists the plug-ins available\n"), PROGNAME_PANEL_NOTIFY,
+			PROGNAME_PANEL_NOTIFY);
 	return 1;
 }
 

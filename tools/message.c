@@ -31,17 +31,17 @@
 #define _(string) gettext(string)
 
 /* constants */
-#ifndef PROGNAME
-# define PROGNAME	"panel-message"
+#ifndef PROGNAME_PANEL_MESSAGE
+# define PROGNAME_PANEL_MESSAGE	"panel-message"
 #endif
 #ifndef PREFIX
-# define PREFIX         "/usr/local"
+# define PREFIX 	        "/usr/local"
 #endif
 #ifndef DATADIR
-# define DATADIR	PREFIX "/share"
+# define DATADIR		PREFIX "/share"
 #endif
 #ifndef LOCALEDIR
-# define LOCALEDIR	DATADIR "/locale"
+# define LOCALEDIR		DATADIR "/locale"
 #endif
 
 
@@ -151,7 +151,7 @@ static gboolean _message_on_timeout(gpointer data)
 /* error */
 static int _error(char const * message, int ret)
 {
-	fputs(PROGNAME ": ", stderr);
+	fputs(PROGNAME_PANEL_MESSAGE ": ", stderr);
 	perror(message);
 	return ret;
 }
@@ -161,7 +161,8 @@ static int _error(char const * message, int ret)
 static int _usage(void)
 {
 	fprintf(stderr, _("Usage: %s [-EIQW][-T title][-t timeout] message\n"
-"       %s [-N name][-T title][-t timeout] message\n"), PROGNAME, PROGNAME);
+"       %s [-N name][-T title][-t timeout] message\n"), PROGNAME_PANEL_MESSAGE,
+			PROGNAME_PANEL_MESSAGE);
 	return 1;
 }
 

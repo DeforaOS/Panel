@@ -31,9 +31,10 @@
 #define _(string) gettext(string)
 #define N_(string) string
 
-#ifndef PROGNAME
-# define PROGNAME	"panel-test"
+#ifndef PROGNAME_PANEL_TEST
+# define PROGNAME_PANEL_TEST	"panel-test"
 #endif
+#define PROGNAME		PROGNAME_PANEL_TEST
 #include "helper.c"
 
 /* constants */
@@ -71,7 +72,7 @@ static int _test(PanelWindowType type, PanelWindowPosition position,
 	_panel_set_title(&panel, "Applet tester");
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
-			error_print(PROGNAME);
+			error_print(PROGNAME_PANEL_TEST);
 	_panel_show(&panel, TRUE);
 	gtk_main();
 	_panel_destroy(&panel);
@@ -82,8 +83,8 @@ static int _test(PanelWindowType type, PanelWindowPosition position,
 /* usage */
 static int _usage(void)
 {
-	fputs("Usage: " PROGNAME " [-C|-F|-M][-L|-S|-X|-x][-n] applet...\n"
-"       " PROGNAME " -l\n"
+	fputs("Usage: " PROGNAME_PANEL_TEST " [-C|-F|-M][-L|-S|-X|-x][-n] applet...\n"
+"       " PROGNAME_PANEL_TEST " -l\n"
 "  -l	Lists the plug-ins available\n", stderr);
 	return 1;
 }
