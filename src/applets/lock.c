@@ -72,6 +72,11 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	lock->helper = helper;
+	if(helper->lock_dialog == NULL)
+	{
+		error_set("%s: %s", applet.name, _("Locking is not allowed"));
+		return NULL;
+	}
 	lock->widget = gtk_button_new();
 	iconsize = panel_window_get_icon_size(helper->window);
 	image = gtk_image_new_from_icon_name(applet.icon, iconsize);

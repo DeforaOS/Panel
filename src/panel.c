@@ -94,6 +94,7 @@ struct _Panel
 	GtkWidget * ab_window;
 	GtkWidget * lo_window;
 	GtkWidget * sh_window;
+	GtkWidget * su_window;
 };
 
 typedef void (*PanelPositionMenuHelper)(Panel * panel, GtkMenu * menu, gint * x,
@@ -173,6 +174,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->lo_window = NULL;
 #endif
 	panel->sh_window = NULL;
+	panel->su_window = NULL;
 	if(panel->config == NULL)
 	{
 		panel_error(NULL, NULL, 0); /* XXX put up a dialog box */
@@ -234,6 +236,12 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->error = _panel_helper_error;
 	helper->about_dialog = _panel_helper_about_dialog;
 	helper->lock = _panel_helper_lock;
+	if((p = panel_get_config(panel, NULL, "lock")) != NULL
+			&& strtol(p, NULL, 0) != 0)
+		helper->lock_dialog = _panel_helper_lock_dialog;
+	else
+		helper->lock_dialog = NULL;
+	helper->logout = _panel_helper_logout;
 #ifndef EMBEDDED
 	if((p = panel_get_config(panel, NULL, "logout")) == NULL
 			|| strtol(p, NULL, 0) != 0)
@@ -247,9 +255,23 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->position_menu = positions[position];
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
 	helper->rotate_screen = _panel_helper_rotate_screen;
-	helper->shutdown_dialog = _panel_can_shutdown()
-		? _panel_helper_shutdown_dialog : NULL;
+	helper->shutdown = _panel_can_shutdown()
+		? _panel_helper_shutdown : NULL;
+	if((helper->shutdown != NULL)
+			&& (p = panel_get_config(panel, NULL,
+					"shutdown")) != NULL
+			&& strtol(p, NULL, 0) != 0)
+		helper->shutdown_dialog = _panel_helper_shutdown_dialog;
+	else
+		helper->shutdown_dialog = NULL;
 	helper->suspend = _panel_can_suspend() ? _panel_helper_suspend : NULL;
+	if((helper->suspend != NULL)
+			&& (p = panel_get_config(panel, NULL,
+					"suspend")) != NULL
+			&& strtol(p, NULL, 0) != 0)
+		helper->suspend_dialog = _panel_helper_suspend_dialog;
+	else
+		helper->suspend_dialog = NULL;
 }
 
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,

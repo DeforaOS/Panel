@@ -57,6 +57,7 @@ struct _Panel
 	GtkWidget * ab_window;
 	GtkWidget * lo_window;
 	GtkWidget * sh_window;
+	GtkWidget * su_window;
 };
 
 
@@ -168,6 +169,7 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	panel->ab_window = NULL;
 	panel->lo_window = NULL;
 	panel->sh_window = NULL;
+	panel->su_window = NULL;
 	return 0;
 }
 
@@ -190,6 +192,8 @@ static void _panel_destroy(Panel * panel)
 		gtk_widget_destroy(panel->lo_window);
 	if(panel->sh_window != NULL)
 		gtk_widget_destroy(panel->sh_window);
+	if(panel->su_window != NULL)
+		gtk_widget_destroy(panel->su_window);
 }
 
 

@@ -42,7 +42,9 @@ static int _panel_helper_config_set(Panel * panel, char const * section,
 		char const * variable, char const * value);
 static int _panel_helper_error(Panel * panel, char const * message, int ret);
 static void _panel_helper_about_dialog(Panel * panel);
-static int _panel_helper_lock(Panel * panel);
+static void _panel_helper_lock(Panel * panel);
+static void _panel_helper_lock_dialog(Panel * panel);
+static void _panel_helper_logout(Panel * panel);
 static void _panel_helper_logout_dialog(Panel * panel);
 #ifndef HELPER_POSITION_MENU_WIDGET
 static void _panel_helper_position_menu(Panel * panel, GtkMenu * menu, gint * x,
@@ -57,8 +59,10 @@ static void _panel_helper_position_menu_widget(Panel * panel, GtkMenu * menu,
 #endif
 static void _panel_helper_preferences_dialog(Panel * panel);
 static void _panel_helper_rotate_screen(Panel * panel);
+static void _panel_helper_shutdown(Panel * panel, gboolean reboot);
 static void _panel_helper_shutdown_dialog(Panel * panel);
-static int _panel_helper_suspend(Panel * panel);
+static void _panel_helper_suspend(Panel * panel);
+static void _panel_helper_suspend_dialog(Panel * panel);
 
 
 /* functions */
@@ -179,10 +183,9 @@ static gboolean _about_on_closex(gpointer data)
 /* panel_helper_lock */
 static gboolean _lock_on_idle(gpointer data);
 
-static int _panel_helper_lock(Panel * panel)
+static void _panel_helper_lock(Panel * panel)
 {
 	panel->source = g_idle_add(_lock_on_idle, panel);
-	return 0;
 }
 
 static gboolean _lock_on_idle(gpointer data)
@@ -205,9 +208,28 @@ static gboolean _lock_on_idle(gpointer data)
 }
 
 
+/* panel_helper_lock_dialog */
+static void _panel_helper_lock_dialog(Panel * panel)
+{
+	/* FIXME implement */
+}
+
+
+/* panel_helper_logout */
+static void _panel_helper_logout(Panel * panel)
+{
+	gtk_main_quit();
+#ifndef DEBUG
+	/* XXX assumes the parent process is the session manager */
+	kill(getppid(), SIGHUP);
+#endif
+}
+
+
 /* panel_helper_logout_dialog */
 static gboolean _logout_dialog_on_closex(gpointer data);
-static void _logout_dialog_on_response(GtkWidget * widget, gint response);
+static void _logout_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data);
 
 static void _panel_helper_logout_dialog(Panel * panel)
 {
@@ -262,17 +284,14 @@ static gboolean _logout_dialog_on_closex(gpointer data)
 	return TRUE;
 }
 
-static void _logout_dialog_on_response(GtkWidget * widget, gint response)
+static void _logout_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data)
 {
+	Panel * panel = data;
+
 	gtk_widget_hide(widget);
 	if(response == GTK_RESPONSE_ACCEPT)
-	{
-		gtk_main_quit();
-#ifndef DEBUG
-		/* XXX assumes the parent process is the session manager */
-		kill(getppid(), SIGHUP);
-#endif
-	}
+		_panel_helper_logout(panel);
 }
 
 
@@ -379,6 +398,29 @@ static void _panel_helper_rotate_screen(Panel * panel)
 }
 
 
+/* panel_helper_shutdown */
+static void _panel_helper_shutdown(Panel * panel, gboolean reboot)
+{
+	char * reset[] = { "/sbin/shutdown", "shutdown", "-r", "now", NULL };
+	char * halt[] = { "/sbin/shutdown", "shutdown",
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+		"-p",
+#else
+		"-h",
+#endif
+		"now", NULL };
+	GError * error = NULL;
+
+	if(g_spawn_async(NULL, reboot ? reset : halt, NULL,
+				G_SPAWN_FILE_AND_ARGV_ZERO, NULL, NULL, NULL,
+				&error) != TRUE)
+	{
+		_panel_helper_error(panel, error->message, 1);
+		g_error_free(error);
+	}
+}
+
+
 /* panel_helper_shutdown_dialog */
 static gboolean _shutdown_dialog_on_closex(gpointer data);
 static void _shutdown_dialog_on_response(GtkWidget * widget, gint response,
@@ -449,35 +491,17 @@ static void _shutdown_dialog_on_response(GtkWidget * widget, gint response,
 		gpointer data)
 {
 	Panel * panel = data;
-	char * reboot[] = { "/sbin/shutdown", "shutdown", "-r", "now", NULL };
-	char * shutdown[] = { "/sbin/shutdown", "shutdown",
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-		"-p",
-#else
-		"-h",
-#endif
-		"now", NULL };
-	char ** argv;
-	GError * error = NULL;
 
 	gtk_widget_hide(widget);
 	if(response == RES_SHUTDOWN)
-		argv = shutdown;
+		_panel_helper_shutdown(panel, FALSE);
 	else if(response == RES_REBOOT)
-		argv = reboot;
-	else
-		return;
-	if(g_spawn_async(NULL, argv, NULL, G_SPAWN_FILE_AND_ARGV_ZERO, NULL,
-				NULL, NULL, &error) != TRUE)
-	{
-		_panel_helper_error(panel, error->message, 1);
-		g_error_free(error);
-	}
+		_panel_helper_shutdown(panel, TRUE);
 }
 
 
 /* panel_helper_suspend */
-static int _panel_helper_suspend(Panel * panel)
+static void _panel_helper_suspend(Panel * panel)
 {
 #ifdef __NetBSD__
 	int sleep_state = 3;
@@ -492,7 +516,10 @@ static int _panel_helper_suspend(Panel * panel)
 #ifdef __NetBSD__
 	if(sysctlbyname("machdep.sleep_state", NULL, NULL, &sleep_state,
 				sizeof(sleep_state)) != 0)
-		return -_panel_helper_error(panel, "sysctl", 1);
+	{
+		_panel_helper_error(panel, "sysctl", 1);
+		return;
+	}
 #else
 	if((fd = open("/sys/power/state", O_WRONLY)) >= 0)
 	{
@@ -505,9 +532,80 @@ static int _panel_helper_suspend(Panel * panel)
 	{
 		_panel_helper_error(panel, error->message, 1);
 		g_error_free(error);
-		return -1;
+		return;
 	}
 #endif
 	_panel_helper_lock(panel); /* XXX may already be suspended */
-	return 0;
+}
+
+
+/* panel_helper_suspend_dialog */
+static gboolean _suspend_dialog_on_closex(gpointer data);
+static void _suspend_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data);
+
+static void _panel_helper_suspend_dialog(Panel * panel)
+{
+#ifdef EMBEDDED
+	const char message[] = N_("This will suspend your device.\n"
+			"Do you really want to proceed?");
+#else
+	const char message[] = N_("This will suspend your computer.\n"
+			"Do you really want to proceed?");
+#endif
+	GtkWidget * widget;
+
+	if(panel->su_window != NULL)
+	{
+		gtk_window_present(GTK_WINDOW(panel->su_window));
+		return;
+	}
+	panel->su_window = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_NONE, "%s",
+#if GTK_CHECK_VERSION(2, 6, 0)
+			_("Shutdown"));
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(
+				panel->su_window),
+#endif
+			"%s", _(message));
+#if GTK_CHECK_VERSION(2, 10, 0)
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(panel->su_window),
+			gtk_image_new_from_icon_name("gnome-shutdown",
+				GTK_ICON_SIZE_DIALOG));
+#endif
+	gtk_dialog_add_buttons(GTK_DIALOG(panel->su_window), GTK_STOCK_CANCEL,
+			FALSE, NULL);
+	widget = gtk_button_new_with_label(_("Suspend"));
+	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_icon_name(
+				"gtk-media-pause", GTK_ICON_SIZE_BUTTON));
+	gtk_widget_show_all(widget);
+	gtk_dialog_add_action_widget(GTK_DIALOG(panel->su_window), widget,
+			TRUE);
+	gtk_window_set_keep_above(GTK_WINDOW(panel->su_window), TRUE);
+	gtk_window_set_position(GTK_WINDOW(panel->su_window),
+			GTK_WIN_POS_CENTER);
+	gtk_window_set_title(GTK_WINDOW(panel->su_window), _("Suspend"));
+	g_signal_connect(panel->su_window, "delete-event", G_CALLBACK(
+				_suspend_dialog_on_closex), panel);
+	g_signal_connect(panel->su_window, "response", G_CALLBACK(
+				_suspend_dialog_on_response), panel);
+	gtk_widget_show_all(panel->su_window);
+}
+
+static gboolean _suspend_dialog_on_closex(gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(panel->su_window);
+	return TRUE;
+}
+
+static void _suspend_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(widget);
+	if(response == TRUE)
+		_panel_helper_suspend(panel);
 }

@@ -36,14 +36,18 @@ typedef struct _PanelAppletHelper
 			char const * variable, char const * value);
 	int (*error)(Panel * panel, char const * message, int ret);
 	void (*about_dialog)(Panel * panel);
-	int (*lock)(Panel * panel);
+	void (*lock)(Panel * panel);
+	void (*lock_dialog)(Panel * panel);
+	void (*logout)(Panel * panel);
 	void (*logout_dialog)(Panel * panel);
 	void (*position_menu)(Panel * panel, GtkMenu * menu, gint * x, gint * y,
 			gboolean * push_in);
 	void (*preferences_dialog)(Panel * panel);
 	void (*rotate_screen)(Panel * panel);
+	void (*shutdown)(Panel * panel, gboolean reboot);
 	void (*shutdown_dialog)(Panel * panel);
-	int (*suspend)(Panel * panel);
+	void (*suspend)(Panel * panel);
+	void (*suspend_dialog)(Panel * panel);
 } PanelAppletHelper;
 
 typedef struct _PanelAppletDefinition
