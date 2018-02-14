@@ -61,7 +61,7 @@ static Desktop * _desktop_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkWidget * image;
 
 	ret = gtk_button_new();
-	image = gtk_image_new_from_icon_name("panel-applet-desktop",
+	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(ret), image);
 	gtk_button_set_relief(GTK_BUTTON(ret), GTK_RELIEF_NONE);

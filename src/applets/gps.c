@@ -59,7 +59,7 @@ static gboolean _gps_on_timeout(gpointer data);
 PanelAppletDefinition applet =
 {
 	"GPS",
-	"network-wireless",
+	"network-wireless", /* XXX find a better image */
 	NULL,
 	_gps_init,
 	_gps_destroy,
@@ -86,8 +86,7 @@ static GPS * _gps_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #if defined(__linux__)
 	gps->fd = -1;
 #endif
-	/* XXX find a better image */
-	gps->image = gtk_image_new_from_icon_name("network-wireless",
+	gps->image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(gps->image, _("GPS is enabled"));

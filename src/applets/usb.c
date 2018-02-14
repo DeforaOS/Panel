@@ -93,7 +93,7 @@ static USB * _usb_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	usb->fd = -1;
 	tooltip = _("USB networking device connected");
 #endif
-	usb->image = gtk_image_new_from_icon_name("panel-applet-usb",
+	usb->image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	if(tooltip != NULL)

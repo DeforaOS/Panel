@@ -168,7 +168,7 @@ static Menu * _menu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	menu->widget = gtk_button_new();
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
 	if((p = helper->config_get(helper->panel, "menu", "icon")) == NULL)
-		p = "start-here";
+		p = applet.icon;
 	image = gtk_image_new_from_icon_name(p,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, TRUE, 0);

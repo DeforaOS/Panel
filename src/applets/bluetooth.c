@@ -98,8 +98,7 @@ static Bluetooth * _bluetooth_init(PanelAppletHelper * helper,
 #else
 	*widget = gtk_hbox_new(FALSE, 0);
 #endif
-	bluetooth->image = gtk_image_new_from_icon_name(
-			"panel-applet-bluetooth", iconsize);
+	bluetooth->image = gtk_image_new_from_icon_name(applet.icon, iconsize);
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(bluetooth->image,
 			_("Bluetooth is enabled"));

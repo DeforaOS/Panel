@@ -74,7 +74,7 @@ static Lock * _lock_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	lock->helper = helper;
 	lock->widget = gtk_button_new();
 	iconsize = panel_window_get_icon_size(helper->window);
-	image = gtk_image_new_from_icon_name("gnome-lockscreen", iconsize);
+	image = gtk_image_new_from_icon_name(applet.icon, iconsize);
 	gtk_button_set_image(GTK_BUTTON(lock->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(lock->widget), GTK_RELIEF_NONE);
 #if GTK_CHECK_VERSION(2, 12, 0)

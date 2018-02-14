@@ -101,9 +101,9 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #endif
 	iconsize = panel_window_get_icon_size(helper->window);
 #if GTK_CHECK_VERSION(3, 10, 0)
-	image = gtk_image_new_from_icon_name(GTK_STOCK_CLOSE, iconsize);
+	image = gtk_image_new_from_icon_name(applet.icon, iconsize);
 #else
-	image = gtk_image_new_from_stock(GTK_STOCK_CLOSE, iconsize);
+	image = gtk_image_new_from_stock(applet.icon, iconsize);
 #endif
 	gtk_button_set_image(GTK_BUTTON(close->widget), image);
 	g_signal_connect_swapped(close->widget, "clicked", G_CALLBACK(

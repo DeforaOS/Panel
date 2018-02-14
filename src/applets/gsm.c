@@ -63,7 +63,7 @@ static gboolean _gsm_on_timeout(gpointer data);
 PanelAppletDefinition applet =
 {
 	"GSM",
-	"phone",
+	"phone",	/* XXX find a better image */
 	NULL,
 	_gsm_init,
 	_gsm_destroy,
@@ -95,8 +95,7 @@ static GSM * _gsm_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	gsm->hbox = gtk_hbox_new(FALSE, 0);
 #endif
-	/* XXX find a better image */
-	gsm->image = gtk_image_new_from_icon_name("phone",
+	gsm->image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(gsm->image, _("GSM is enabled"));

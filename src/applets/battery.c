@@ -135,7 +135,7 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	battery->box = hbox;
-	battery->image = gtk_image_new_from_icon_name("battery", iconsize);
+	battery->image = gtk_image_new_from_icon_name(applet.icon, iconsize);
 	gtk_box_pack_start(GTK_BOX(hbox), battery->image, TRUE, TRUE, 0);
 	battery->label = NULL;
 	battery->progress = NULL;

@@ -220,7 +220,7 @@ static gboolean _leds_on_timeout(gpointer data)
 		}
 #if GTK_CHECK_VERSION(3, 10, 0)
 		gtk_image_set_from_icon_name(GTK_IMAGE(leds->leds[i]),
-				GTK_STOCK_DIALOG_INFO, iconsize);
+				applet.icon, iconsize);
 #else
 		gtk_image_set_from_stock(GTK_IMAGE(leds->leds[i]),
 				GTK_STOCK_DIALOG_INFO, iconsize);

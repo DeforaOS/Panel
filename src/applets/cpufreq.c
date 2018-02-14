@@ -120,7 +120,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 #else
 	cpufreq->hbox = gtk_hbox_new(FALSE, 4);
 #endif
-	image = gtk_image_new_from_icon_name("gnome-monitor",
+	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
 	cpufreq->min = 0;

@@ -79,7 +79,7 @@ static Shutdown * _shutdown_init(PanelAppletHelper * helper,
 		return NULL;
 	}
 	shutdown->widget = gtk_button_new();
-	image = gtk_image_new_from_icon_name("gnome-shutdown",
+	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_button_set_image(GTK_BUTTON(shutdown->widget), image);
 	gtk_button_set_relief(GTK_BUTTON(shutdown->widget), GTK_RELIEF_NONE);
