@@ -19,6 +19,7 @@
 ../src/applets/pager.c
 ../src/applets/rotate.c
 ../src/applets/shutdown.c
+../src/applets/suspend.c
 ../src/applets/swap.c
 ../src/applets/systray.c
 ../src/applets/tasks.c
