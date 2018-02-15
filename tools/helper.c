@@ -267,17 +267,11 @@ static int _applet_list(void)
 /* config_get_filename */
 static char * _config_get_filename(void)
 {
-	char const * homedir;
-	size_t len;
-	char * filename;
+	String const * homedir;
 
 	if((homedir = getenv("HOME")) == NULL)
 		homedir = g_get_home_dir();
-	len = strlen(homedir) + 1 + sizeof(PANEL_CONFIG_FILE);
-	if((filename = malloc(len)) == NULL)
-		return NULL;
-	snprintf(filename, len, "%s/%s", homedir, PANEL_CONFIG_FILE);
-	return filename;
+	return string_new_append(homedir, "/", PANEL_CONFIG_FILE, NULL);
 }
 
 
