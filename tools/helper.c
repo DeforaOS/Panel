@@ -55,6 +55,7 @@ struct _Panel
 
 	/* dialogs */
 	GtkWidget * ab_window;
+	GtkWidget * lk_window;
 	GtkWidget * lo_window;
 	GtkWidget * sh_window;
 	GtkWidget * su_window;
@@ -167,6 +168,7 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	panel->source = 0;
 	panel->timeout = 0;
 	panel->ab_window = NULL;
+	panel->lk_window = NULL;
 	panel->lo_window = NULL;
 	panel->sh_window = NULL;
 	panel->su_window = NULL;
@@ -188,6 +190,8 @@ static void _panel_destroy(Panel * panel)
 			panel_window_delete(panel->windows[i]);
 	if(panel->ab_window != NULL)
 		gtk_widget_destroy(panel->ab_window);
+	if(panel->lk_window != NULL)
+		gtk_widget_destroy(panel->lk_window);
 	if(panel->lo_window != NULL)
 		gtk_widget_destroy(panel->lo_window);
 	if(panel->sh_window != NULL)

@@ -209,9 +209,74 @@ static gboolean _lock_on_idle(gpointer data)
 
 
 /* panel_helper_lock_dialog */
+static gboolean _lock_dialog_on_closex(gpointer data);
+static void _lock_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data);
+
 static void _panel_helper_lock_dialog(Panel * panel)
 {
-	/* FIXME implement */
+#ifdef EMBEDDED
+	const char message[] = N_("This will lock your device.\n"
+			"Do you really want to proceed?");
+#else
+	const char message[] = N_("This will lock your session.\n"
+			"Do you really want to proceed?");
+#endif
+	GtkWidget * widget;
+
+	if(panel->lk_window != NULL)
+	{
+		gtk_window_present(GTK_WINDOW(panel->lk_window));
+		return;
+	}
+	panel->lk_window = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_NONE, "%s",
+#if GTK_CHECK_VERSION(2, 6, 0)
+			_("Shutdown"));
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(
+				panel->lk_window),
+#endif
+			"%s", _(message));
+#if GTK_CHECK_VERSION(2, 10, 0)
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(panel->lk_window),
+			gtk_image_new_from_icon_name("gnome-lockscreen",
+				GTK_ICON_SIZE_DIALOG));
+#endif
+	gtk_dialog_add_buttons(GTK_DIALOG(panel->lk_window), GTK_STOCK_CANCEL,
+			FALSE, NULL);
+	widget = gtk_button_new_with_label(_("Lock"));
+	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_icon_name(
+				"gnome-lockscreen", GTK_ICON_SIZE_BUTTON));
+	gtk_widget_show_all(widget);
+	gtk_dialog_add_action_widget(GTK_DIALOG(panel->lk_window), widget,
+			TRUE);
+	gtk_window_set_keep_above(GTK_WINDOW(panel->lk_window), TRUE);
+	gtk_window_set_position(GTK_WINDOW(panel->lk_window),
+			GTK_WIN_POS_CENTER);
+	gtk_window_set_title(GTK_WINDOW(panel->lk_window), _("Lock"));
+	g_signal_connect(panel->lk_window, "delete-event", G_CALLBACK(
+				_lock_dialog_on_closex), panel);
+	g_signal_connect(panel->lk_window, "response", G_CALLBACK(
+				_lock_dialog_on_response), panel);
+	gtk_widget_show_all(panel->lk_window);
+}
+
+static gboolean _lock_dialog_on_closex(gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(panel->lk_window);
+	return TRUE;
+}
+
+static void _lock_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(widget);
+	if(response == TRUE)
+		_panel_helper_lock(panel);
 }
 
 
