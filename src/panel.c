@@ -255,14 +255,14 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown = _panel_can_shutdown()
 		? _panel_helper_shutdown : NULL;
-	helper->shutdown_dialog = helper->shutdown != NULL
-		&& (p = panel_get_config(panel, NULL, "shutdown")) != NULL
-		&& strtol(p, NULL, 0) != 0
+	helper->shutdown_dialog = (helper->shutdown != NULL)
+		&& ((p = panel_get_config(panel, NULL, "shutdown")) == NULL
+				|| strtol(p, NULL, 0) != 0)
 		? _panel_helper_shutdown_dialog : NULL;
 	helper->suspend = _panel_can_suspend() ? _panel_helper_suspend : NULL;
-	helper->suspend_dialog = helper->suspend != NULL
-		&& (p = panel_get_config(panel, NULL, "suspend")) != NULL
-		&& strtol(p, NULL, 0) != 0
+	helper->suspend_dialog = (helper->suspend != NULL)
+		&& ((p = panel_get_config(panel, NULL, "suspend")) == NULL
+				|| strtol(p, NULL, 0) != 0)
 		? _panel_helper_suspend_dialog : NULL;
 }
 
