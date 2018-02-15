@@ -236,8 +236,8 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->error = _panel_helper_error;
 	helper->about_dialog = _panel_helper_about_dialog;
 	helper->lock = _panel_helper_lock;
-	if((p = panel_get_config(panel, NULL, "lock")) != NULL
-			&& strtol(p, NULL, 0) != 0)
+	if((p = panel_get_config(panel, NULL, "lock")) == NULL
+			|| strtol(p, NULL, 0) != 0)
 		helper->lock_dialog = _panel_helper_lock_dialog;
 	else
 		helper->lock_dialog = NULL;
