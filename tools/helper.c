@@ -291,6 +291,9 @@ static int _error(char const * message, int ret)
 /* helpers */
 /* essential */
 /* helper_init */
+static int _init_can_shutdown(void);
+static int _init_can_suspend(void);
+
 static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 		PanelWindowType type, GtkIconSize iconsize)
 {
@@ -305,6 +308,8 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->error = _panel_helper_error;
 	helper->about_dialog = _panel_helper_about_dialog;
 	helper->lock = _panel_helper_lock;
+	helper->lock_dialog = _panel_helper_lock_dialog;
+	helper->logout = _panel_helper_logout;
 #ifndef EMBEDDED
 	if((p = config_get(panel->config, NULL, "logout")) == NULL
 			|| strtol(p, NULL, 0) != 0)
@@ -318,6 +323,50 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 	helper->position_menu = _panel_helper_position_menu_widget;
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
 	helper->rotate_screen = _panel_helper_rotate_screen;
-	helper->shutdown_dialog = _panel_helper_shutdown_dialog;
-	helper->suspend = _panel_helper_suspend;
+	helper->shutdown = _init_can_shutdown() ? _panel_helper_shutdown : NULL;
+	helper->shutdown_dialog = (helper->shutdown != NULL)
+		? _panel_helper_shutdown_dialog : NULL;
+	helper->suspend = _init_can_suspend() ? _panel_helper_suspend : NULL;
+	helper->suspend_dialog = (helper->suspend != NULL)
+		? _panel_helper_suspend_dialog : NULL;
+}
+
+static int _init_can_shutdown(void)
+{
+	/* XXX code duplicated from ../src/panel.c */
+	char const shutdown[] = "/sbin/shutdown";
+
+	if(geteuid() == 0)
+		return 1;
+	return (access(shutdown, R_OK | X_OK) == 0) ? 1 : 0;
+}
+
+static int _init_can_suspend(void)
+{
+	/* XXX code duplicated from ../src/panel.c */
+#ifdef __NetBSD__
+	char const * names[] = { "machdep.sleep_state", "hw.acpi.sleep.state" };
+	int sleep_state = -1;
+	size_t size = sizeof(sleep_state);
+
+	/* FIXME check that this works properly */
+	if(sysctlbyname(names[0], &sleep_state, &size, NULL, 0) == 0
+			&& sleep_state == 0
+			&& sysctlbyname(names[0], &sleep_state, &size,
+				&sleep_state, size) == 0)
+		return 1;
+	if(sysctlbyname(names[1], &sleep_state, &size, NULL, 0) == 0
+			&& sleep_state == 0
+			&& sysctlbyname(names[1], &sleep_state,
+				&size, &sleep_state, size) == 0)
+		return 1;
+#else
+	struct stat st;
+
+	if(access("/sys/power/state", W_OK) == 0)
+		return 1;
+	if(lstat("/proc/apm", &st) == 0)
+		return 1;
+#endif
+	return 0;
 }
