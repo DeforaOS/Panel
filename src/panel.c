@@ -236,11 +236,9 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->error = _panel_helper_error;
 	helper->about_dialog = _panel_helper_about_dialog;
 	helper->lock = _panel_helper_lock;
-	if((p = panel_get_config(panel, NULL, "lock")) == NULL
-			|| strtol(p, NULL, 0) != 0)
-		helper->lock_dialog = _panel_helper_lock_dialog;
-	else
-		helper->lock_dialog = NULL;
+	helper->lock_dialog =
+		(p = panel_get_config(panel, NULL, "lock")) == NULL
+		|| strtol(p, NULL, 0) != 0 ? _panel_helper_lock_dialog : NULL;
 	helper->logout = _panel_helper_logout;
 #ifndef EMBEDDED
 	if((p = panel_get_config(panel, NULL, "logout")) == NULL
@@ -257,21 +255,15 @@ static void _new_helper(Panel * panel, PanelPosition position)
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown = _panel_can_shutdown()
 		? _panel_helper_shutdown : NULL;
-	if((helper->shutdown != NULL)
-			&& (p = panel_get_config(panel, NULL,
-					"shutdown")) != NULL
-			&& strtol(p, NULL, 0) != 0)
-		helper->shutdown_dialog = _panel_helper_shutdown_dialog;
-	else
-		helper->shutdown_dialog = NULL;
+	helper->shutdown_dialog = helper->shutdown != NULL
+		&& (p = panel_get_config(panel, NULL, "shutdown")) != NULL
+		&& strtol(p, NULL, 0) != 0
+		? _panel_helper_shutdown_dialog : NULL;
 	helper->suspend = _panel_can_suspend() ? _panel_helper_suspend : NULL;
-	if((helper->suspend != NULL)
-			&& (p = panel_get_config(panel, NULL,
-					"suspend")) != NULL
-			&& strtol(p, NULL, 0) != 0)
-		helper->suspend_dialog = _panel_helper_suspend_dialog;
-	else
-		helper->suspend_dialog = NULL;
+	helper->suspend_dialog = helper->suspend != NULL
+		&& (p = panel_get_config(panel, NULL, "suspend")) != NULL
+		&& strtol(p, NULL, 0) != 0
+		? _panel_helper_suspend_dialog : NULL;
 }
 
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
