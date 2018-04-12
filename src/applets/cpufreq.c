@@ -101,6 +101,9 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	else if(sysctlbyname("machdep.frequency.available", &freq, &freqsize,
 				NULL, 0) == 0)
 		p = "machdep.frequency.current";
+	else if(sysctlbyname("machdep.cpu.frequency.available", &freq,
+				&freqsize, NULL, 0) == 0)
+		p = "machdep.cpu.frequency.current";
 	else
 	{
 		error_set("%s: %s", applet.name, _("No support detected"));
