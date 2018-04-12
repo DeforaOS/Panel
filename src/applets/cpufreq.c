@@ -126,13 +126,11 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
-	cpufreq->min = 0;
-	cpufreq->max = 0;
-	cpufreq->step = 1;
-	cpufreq->name = p;
 	cpufreq->max = atoi(freq);
 	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoi(p)
 		: cpufreq->max;
+	cpufreq->step = 1;
+	cpufreq->name = p;
 	cpufreq->label = gtk_label_new(" ");
 #if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_override_font(cpufreq->label, desc);
