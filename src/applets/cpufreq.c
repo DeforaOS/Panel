@@ -40,10 +40,10 @@ typedef struct _PanelApplet
 	GtkWidget * hbox;
 	GtkWidget * label;
 	guint timeout;
-	int min;
-	int max;
-	int current;
-	int step;
+	int64_t min;
+	int64_t max;
+	int64_t current;
+	int64_t step;
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	char const * name;
 #endif
@@ -127,8 +127,8 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
-	cpufreq->max = atoi(freq);
-	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoi(p)
+	cpufreq->max = atoll(freq);
+	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoll(p)
 		: cpufreq->max;
 	cpufreq->current = -1;
 	cpufreq->step = 1;
@@ -184,14 +184,19 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
-	if(cpufreq->current == (int)freq)
+	if(freq > INT64_MAX)
+	{
+		helper->error(NULL, strerror(ERANGE), 1);
+		return TRUE;
+	}
+	if(cpufreq->current == (int64_t)freq)
 		return TRUE;
 	cpufreq->current = freq;
-	snprintf(buf, sizeof(buf), "%4u", (unsigned int)freq);
+	snprintf(buf, sizeof(buf), "%4" PRIx64, freq);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
 # if GTK_CHECK_VERSION(2, 12, 0)
-	snprintf(buf, sizeof(buf), "%s%u %s", _("CPU frequency: "),
-			(unsigned int)freq, _("MHz"));
+	snprintf(buf, sizeof(buf), "%s%" PRIx64 " %s", _("CPU frequency: "),
+			freq, _("MHz"));
 	gtk_widget_set_tooltip_text(cpufreq->hbox, buf);
 # endif
 	return TRUE;
