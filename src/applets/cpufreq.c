@@ -42,6 +42,7 @@ typedef struct _PanelApplet
 	guint timeout;
 	int min;
 	int max;
+	int current;
 	int step;
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 	char const * name;
@@ -129,6 +130,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	cpufreq->max = atoi(freq);
 	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoi(p)
 		: cpufreq->max;
+	cpufreq->current = -1;
 	cpufreq->step = 1;
 	cpufreq->name = p;
 	cpufreq->label = gtk_label_new(" ");
@@ -182,6 +184,9 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
+	if(cpufreq->current == (int)freq)
+		return TRUE;
+	cpufreq->current = freq;
 	snprintf(buf, sizeof(buf), "%4u", (unsigned int)freq);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
 # if GTK_CHECK_VERSION(2, 12, 0)
