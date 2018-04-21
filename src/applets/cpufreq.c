@@ -174,7 +174,7 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 {
 	Cpufreq * cpufreq = data;
 	PanelAppletHelper * helper = cpufreq->helper;
-	uint64_t freq;
+	int freq;
 	size_t freqsize = sizeof(freq);
 	char buf[256];
 
@@ -185,19 +185,19 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
-	if(freq > INT64_MAX)
+	if(freq < 0)
 	{
 		helper->error(NULL, strerror(ERANGE), 1);
 		return TRUE;
 	}
-	if(cpufreq->current == (int64_t)freq)
+	if(cpufreq->current == freq)
 		return TRUE;
 	cpufreq->current = freq;
-	snprintf(buf, sizeof(buf), "%4" PRIx64, freq);
+	snprintf(buf, sizeof(buf), "%4" PRId64, cpufreq->current);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
 # if GTK_CHECK_VERSION(2, 12, 0)
-	snprintf(buf, sizeof(buf), "%s%" PRIx64 " %s", _("CPU frequency: "),
-			freq, _("MHz"));
+	snprintf(buf, sizeof(buf), "%s%" PRId64 " %s", _("CPU frequency: "),
+			cpufreq->current, _("MHz"));
 	gtk_widget_set_tooltip_text(cpufreq->hbox, buf);
 # endif
 	return TRUE;
