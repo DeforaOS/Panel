@@ -89,6 +89,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	char freq[256];
 	size_t freqsize = sizeof(freq);
 	char const * p;
+	char const * q;
 
 	/* detect the correct sysctl */
 	if(sysctlbyname("hw.clockrate", &freq, &freqsize, NULL, 0) == 0)
@@ -128,7 +129,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
 	cpufreq->max = atoll(freq);
-	cpufreq->min = (p = strrchr(freq, ' ')) != NULL ? atoll(p)
+	cpufreq->min = (q = strrchr(freq, ' ')) != NULL ? atoll(q)
 		: cpufreq->max;
 	cpufreq->current = -1;
 	cpufreq->step = 1;
