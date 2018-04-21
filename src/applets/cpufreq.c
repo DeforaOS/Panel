@@ -111,6 +111,9 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		error_set("%s: %s", applet.name, _("No support detected"));
 		return NULL;
 	}
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, p);
+#endif
 	if((cpufreq = malloc(sizeof(*cpufreq))) == NULL)
 	{
 		error_set("%s: %s", applet.name, strerror(errno));
@@ -192,6 +195,9 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 	}
 	if(cpufreq->current == freq)
 		return TRUE;
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s() %d\n", __func__, freq);
+#endif
 	cpufreq->current = freq;
 	snprintf(buf, sizeof(buf), "%4" PRId64, cpufreq->current);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
