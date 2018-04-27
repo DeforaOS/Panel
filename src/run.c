@@ -328,28 +328,29 @@ static void _on_run_execute(gpointer data)
 	char * argv_shell[] = { "/bin/sh", PROGNAME_RUN, "-c", NULL, NULL };
 	char * argv_xterm[] = { PROGNAME_XTERM, PROGNAME_XTERM, "-e", "sh",
 		"-c", NULL, NULL };
-	char * xterm = NULL;
+	char const * xterm;
 	char ** argv = argv_shell;
-	char const * p;
+	char * p = NULL;
+	char const * q;
 	GError * error = NULL;
 
-	p = gtk_entry_get_text(GTK_ENTRY(run->entry));
-	if((argv_shell[3] = strdup(p)) == NULL)
+	q = gtk_entry_get_text(GTK_ENTRY(run->entry));
+	if((argv_shell[3] = strdup(q)) == NULL)
 	{
 		_run_error(run, strerror(errno), 1);
 		return;
 	}
 	if(run->terminal)
 	{
-		if((p = config_get(run->config, NULL, "xterm")) != NULL)
+		if((xterm = config_get(run->config, NULL, "xterm")) != NULL)
 		{
-			if((xterm = strdup(p)) == NULL)
+			if((p = strdup(xterm)) == NULL)
 			{
 				_run_error(run, strerror(errno), 1);
 				return;
 			}
 			argv_xterm[0] = xterm;
-			argv_xterm[1] = basename(xterm);
+			argv_xterm[1] = basename(p);
 		}
 		argv_xterm[5] = argv_shell[3];
 		argv = argv_xterm;
@@ -360,11 +361,11 @@ static void _on_run_execute(gpointer data)
 		_run_error(run, error->message, 1);
 		g_error_free(error);
 		free(argv_shell[3]);
-		free(xterm);
+		free(p);
 		return;
 	}
 	free(argv_shell[3]);
-	free(xterm);
+	free(p);
 	gtk_widget_hide(run->window);
 	g_child_watch_add(run->pid, _execute_watch, run);
 	run->source = g_timeout_add(timeout, _execute_timeout, run);
