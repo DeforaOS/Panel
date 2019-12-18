@@ -375,7 +375,7 @@ static void _execute_save_config(Run * run)
 {
 	char const * p;
 	int i;
-	char buf[10];
+	char buf[11];
 	char const * q;
 	char * filename;
 
