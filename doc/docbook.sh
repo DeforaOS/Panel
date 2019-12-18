@@ -170,7 +170,7 @@ while [ $# -gt 0 ]; do
 			xpath="string(/refentry/refmeta/manvolnum)"
 			section=$($XMLLINT --xpath "$xpath" "$source")
 			if [ $? -eq 0 -a -n "$section" ]; then
-				instdir="$DATADIR/man/html$section"
+				instdir="$MANDIR/html$section"
 			fi
 			;;
 		pdf)

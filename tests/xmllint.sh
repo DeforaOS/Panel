@@ -34,7 +34,7 @@ DEBUG="_debug"
 FIND="find"
 SORT="sort -n"
 TR="tr"
-XMLLINT="xmllint"
+XMLLINT="xmllint --nonet"
 
 
 #functions
@@ -58,7 +58,7 @@ _xmllint()
 	done < "$PROJECTCONF"
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -name '*.xml' -o -name '*.xsl' | $SORT); do
+		for filename in $($FIND "../$subdir" -type f -a \( -name '*.xml' -o -name '*.xsl' \) | $SORT); do
 			$DEBUG $XMLLINT "$filename" 2>&1 > "$DEVNULL"
 			if [ $? -eq 0 ]; then
 				echo "$filename:"
