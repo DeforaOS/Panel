@@ -22,6 +22,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Lock */
@@ -46,7 +47,7 @@ static void _lock_on_clicked(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Lock screen",
+	N_("Lock screen"),
 	"gnome-lockscreen",
 	NULL,
 	_lock_init,

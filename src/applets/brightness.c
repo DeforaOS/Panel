@@ -27,6 +27,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Brightness */
@@ -61,7 +62,7 @@ static gboolean _brightness_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Brightness",
+	N_("Brightness"),
 	"video-display",
 	NULL,
 	_brightness_init,

@@ -36,6 +36,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Battery */
@@ -96,7 +97,7 @@ static gboolean _battery_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Battery",
+	N_("Battery"),
 	"battery",
 	NULL,
 	_battery_init,

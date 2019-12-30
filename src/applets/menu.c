@@ -133,7 +133,7 @@ static void _menuapp_delete(MenuApp * menuapp);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Main menu",
+	N_("Main menu"),
 	"start-here",
 	NULL,
 	_menu_init,

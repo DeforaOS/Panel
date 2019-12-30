@@ -26,6 +26,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* LEDs */
@@ -59,7 +60,7 @@ static gboolean _leds_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"LEDs",
+	N_("LEDs"),
 	GTK_STOCK_DIALOG_INFO,
 	NULL,
 	_leds_init,

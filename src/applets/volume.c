@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <System.h>
 #include "Panel/applet.h"
+#define N_(string) string
 
 
 /* Volume */
@@ -93,7 +94,7 @@ static gboolean _volume_on_volume_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Volume",
+	N_("Volume"),
 	"stock_volume",
 	NULL,
 	_volume_init,

@@ -30,6 +30,7 @@
 #endif
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Embed */
@@ -79,7 +80,7 @@ static void _embed_on_toggled(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Embed",
+	N_("Embed"),
 	"gnome-window-manager",
 	NULL,
 	_embed_init,

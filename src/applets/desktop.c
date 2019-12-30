@@ -21,6 +21,7 @@
 #include <X11/X.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Desktop */
@@ -41,7 +42,7 @@ static void _desktop_on_clicked(GtkWidget * widget);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Desktop switch",
+	N_("Desktop switch"),
 	"panel-applet-desktop",
 	NULL,
 	_desktop_init,

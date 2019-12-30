@@ -26,6 +26,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* GPS */
@@ -58,7 +59,7 @@ static gboolean _gps_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"GPS",
+	N_("GPS"),
 	"network-wireless", /* XXX find a better image */
 	NULL,
 	_gps_init,

@@ -22,6 +22,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Logout */
@@ -46,7 +47,7 @@ static void _logout_on_clicked(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Logout",
+	N_("Logout"),
 	"gnome-logout",
 	NULL,
 	_logout_init,

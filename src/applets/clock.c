@@ -26,6 +26,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Clock */
@@ -54,7 +55,7 @@ static gboolean _clock_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Clock",
+	N_("Clock"),
 	"stock_calendar",
 	NULL,
 	_clock_init,

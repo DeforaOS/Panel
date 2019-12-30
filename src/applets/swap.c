@@ -35,6 +35,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Swap */
@@ -64,7 +65,7 @@ static gboolean _swap_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Swap",
+	N_("Swap"),
 	"gnome-monitor",
 	NULL,
 	_swap_init,

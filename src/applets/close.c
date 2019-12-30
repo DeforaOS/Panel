@@ -25,6 +25,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 #if !GTK_CHECK_VERSION(3, 0, 0)
 # define gdk_error_trap_pop_ignored() gdk_error_trap_pop()
@@ -71,7 +72,7 @@ static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Close",
+	N_("Close"),
 	GTK_STOCK_CLOSE,
 	NULL,
 	_close_init,

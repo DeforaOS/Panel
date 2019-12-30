@@ -22,6 +22,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Shutdown */
@@ -46,7 +47,7 @@ static void _shutdown_on_clicked(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Shutdown",
+	N_("Shutdown"),
 	"gnome-shutdown",
 	NULL,
 	_shutdown_init,

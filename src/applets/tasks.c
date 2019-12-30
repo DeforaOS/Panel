@@ -146,7 +146,7 @@ static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Tasks",
+	N_("Tasks"),
 	"application-x-executable",
 	NULL,
 	_tasks_init,

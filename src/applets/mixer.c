@@ -36,6 +36,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Mixer */
@@ -90,7 +91,7 @@ static void _mixer_on_toggled(GtkWidget * widget, gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Mixer",
+	N_("Mixer"),
 	"stock_volume",
 	NULL,
 	_mixer_init,

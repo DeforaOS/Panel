@@ -26,6 +26,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* GSM */
@@ -62,7 +63,7 @@ static gboolean _gsm_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"GSM",
+	N_("GSM"),
 	"phone",	/* XXX find a better image */
 	NULL,
 	_gsm_init,

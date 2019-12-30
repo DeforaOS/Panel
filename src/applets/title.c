@@ -25,7 +25,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
-#define N_(string) (string)
+#define N_(string) string
 
 
 /* Title */
@@ -71,7 +71,7 @@ static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Title",
+	N_("Title"),
 	NULL,
 	NULL,
 	_title_init,

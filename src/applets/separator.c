@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <System.h>
 #include "Panel/applet.h"
+#define N_(string) string
 
 
 /* Separator */
@@ -43,7 +44,7 @@ static void _separator_destroy(Separator * separator);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Separator",
+	N_("Separator"),
 	NULL,
 	NULL,
 	_separator_init,

@@ -29,6 +29,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* USB */
@@ -61,7 +62,7 @@ static gboolean _usb_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"USB",
+	N_("USB"),
 	"panel-applet-usb",
 	NULL,
 	_usb_init,

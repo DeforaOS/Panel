@@ -33,6 +33,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Memory */
@@ -64,7 +65,7 @@ static gboolean _memory_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Memory",
+	N_("Memory"),
 	"gnome-monitor",
 	NULL,
 	_memory_init,

@@ -20,6 +20,7 @@
 #include <Desktop.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 /* constants */
 #ifndef MPD_COMMAND_FORWARD
@@ -76,7 +77,7 @@ static void _mpd_on_stop(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"MPD",
+	N_("MPD"),
 	"multimedia",
 	NULL,
 	_mpd_init,

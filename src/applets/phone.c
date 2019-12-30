@@ -25,6 +25,7 @@
 #endif
 #include <gdk/gdkx.h>
 #include "Panel/applet.h"
+#define N_(string) string
 
 
 /* Phone */
@@ -60,7 +61,7 @@ static void _phone_on_screen_changed(GtkWidget * widget, GdkScreen * previous);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Phone",
+	N_("Phone"),
 	"phone-dialer",
 	NULL,
 	_phone_init,

@@ -32,6 +32,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Bluetooth */
@@ -65,7 +66,7 @@ static gboolean _bluetooth_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Bluetooth",
+	N_("Bluetooth"),
 	"panel-applet-bluetooth",
 	NULL,
 	_bluetooth_init,

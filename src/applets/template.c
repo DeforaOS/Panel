@@ -17,6 +17,8 @@
 
 #include <System.h>
 #include "Panel/applet.h"
+#define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Template */
@@ -39,7 +41,7 @@ static void _template_destroy(Template * template);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Template",
+	N_("Template"),
 	"image-missing",
 	NULL,
 	_template_init,

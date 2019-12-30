@@ -35,6 +35,7 @@
 #include <libintl.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 /* constants */
 #ifndef PREFIX
@@ -229,7 +230,7 @@ static gboolean _on_watch_can_write(GIOChannel * source, GIOCondition condition,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Wifi",
+	N_("Wifi"),
 	"network-wireless",
 	NULL,
 	_wpa_init,

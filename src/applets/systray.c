@@ -27,6 +27,7 @@
 #include <X11/Xatom.h>
 #include <System.h>
 #include "Panel/applet.h"
+#define N_(string) string
 
 
 /* Systray */
@@ -63,7 +64,7 @@ static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"System tray",
+	N_("System tray"),
 	"gnome-monitor",
 	NULL,
 	_systray_init,

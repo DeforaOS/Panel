@@ -22,6 +22,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Suspend */
@@ -46,7 +47,7 @@ static void _suspend_on_clicked(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Suspend",
+	N_("Suspend"),
 	"gtk-media-pause",	/* XXX find a better icon */
 	NULL,
 	_suspend_init,

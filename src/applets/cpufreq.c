@@ -29,6 +29,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Cpufreq */
@@ -64,7 +65,7 @@ static gboolean _cpufreq_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"CPU frequency",
+	N_("CPU frequency"),
 	"gnome-monitor",
 	NULL,
 	_cpufreq_init,

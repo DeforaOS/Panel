@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <System.h>
 #include "Panel/applet.h"
+#define N_(string) string
 
 
 /* Spacer */
@@ -42,7 +43,7 @@ static void _spacer_destroy(Spacer * spacer);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Spacer",
+	N_("Spacer"),
 	NULL,
 	NULL,
 	_spacer_init,

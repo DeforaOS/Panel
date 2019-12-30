@@ -30,6 +30,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* CPU */
@@ -66,7 +67,7 @@ static gboolean _cpu_on_timeout(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"CPU",
+	N_("CPU"),
 	"gnome-monitor",
 	NULL,
 	_cpu_init,

@@ -32,6 +32,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Network */
@@ -97,7 +98,7 @@ static void _networkinterface_update(NetworkInterface * ni, char const * icon,
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Network",
+	N_("Network"),
 	"network-idle",
 	NULL,
 	_network_init,

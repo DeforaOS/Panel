@@ -19,6 +19,7 @@
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)
+#define N_(string) string
 
 
 /* Rotate */
@@ -43,7 +44,7 @@ static void _rotate_on_clicked(gpointer data);
 /* variables */
 PanelAppletDefinition applet =
 {
-	"Rotate",
+	N_("Rotate"),
 	GTK_STOCK_REFRESH, /* XXX use a more adequate image */
 	NULL,
 	_rotate_init,
