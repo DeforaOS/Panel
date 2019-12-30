@@ -973,7 +973,8 @@ static void _preferences_window_panels_add(GtkListStore * store,
 		pixbuf = gtk_icon_theme_load_icon(theme, "gnome-settings", 24,
 				0, NULL);
 	gtk_list_store_append(store, &iter);
-	gtk_list_store_set(store, &iter, 0, name, 1, pixbuf, 2, pad->name, -1);
+	gtk_list_store_set(store, &iter, 0, name, 1, pixbuf, 2, _(pad->name),
+			-1);
 	plugin_delete(p);
 }
 
