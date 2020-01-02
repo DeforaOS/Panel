@@ -419,7 +419,12 @@ static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 	/* read through every XDG application folder */
 	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
 	{
+#if defined(__NetBSD__)
+		/* XXX include the default path for pkgsrc */
+		path = "/usr/pkg/share:" DATADIR ":/usr/share";
+#else
 		path = "/usr/local/share:" DATADIR ":/usr/share";
+#endif
 		datadir = 0;
 	}
 	if((p = strdup(path)) == NULL)
