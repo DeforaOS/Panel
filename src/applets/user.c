@@ -147,7 +147,7 @@ static String * _init_tooltip(struct passwd * pw)
 		if(len > 0 && (p = string_new_length(&pw->pw_gecos[i], len))
 				!= NULL)
 		{
-			if(string_length(ret) > 0)
+			if(string_get_length(ret) > 0)
 				string_append(&ret, "\n");
 			if(pos < sizeof(fields) / sizeof(*fields))
 			{
@@ -159,7 +159,7 @@ static String * _init_tooltip(struct passwd * pw)
 		}
 		i += len + 1;
 	}
-	if(string_length(ret) == 0)
+	if(string_get_length(ret) == 0)
 	{
 		string_delete(ret);
 		return NULL;

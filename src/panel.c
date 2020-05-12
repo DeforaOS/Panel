@@ -528,7 +528,7 @@ int panel_reset(Panel * panel)
 		iconsize = _reset_iconsize(panel, s);
 		/* applets */
 		if((applets = panel_get_config(panel, s, "applets")) != NULL
-				&& string_length(applets) == 0)
+				&& string_get_length(applets) == 0)
 			applets = NULL;
 		string_delete(s);
 		if(enabled == FALSE || applets == NULL)
