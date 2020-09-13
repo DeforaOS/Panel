@@ -137,7 +137,7 @@ static void _panel_reset(Panel * panel, GdkRectangle * rect);
 /* helpers */
 #include "helper.c"
 
-static char * _config_get_filename(void);
+static String * _config_get_filename(void);
 
 
 /* public */
@@ -204,7 +204,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 
 static int _new_config(Panel * panel)
 {
-	char * filename;
+	String * filename;
 
 	if((panel->config = config_new()) == NULL)
 		return -1;
@@ -213,7 +213,7 @@ static int _new_config(Panel * panel)
 	if(config_load(panel->config, filename) != 0)
 		/* we can ignore this error */
 		panel_error(NULL, _("Could not load configuration"), 1);
-	free(filename);
+	string_delete(filename);
 	return 0;
 }
 
@@ -1400,7 +1400,7 @@ static void _preferences_on_panel_up(gpointer data)
 /* private */
 /* functions */
 /* config_get_filename */
-static char * _config_get_filename(void)
+static String * _config_get_filename(void)
 {
 	char const * homedir;
 
