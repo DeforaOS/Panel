@@ -608,7 +608,6 @@ static gboolean _reset_on_idle(gpointer data)
 	for(position = 0; position < PANEL_POSITION_COUNT; position++)
 		if(panel->windows[position] != NULL)
 			_reset_on_idle_load(panel, position);
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(panel->pr_notebook), 0);
 	return FALSE;
 }
 
@@ -1155,6 +1154,7 @@ static void _preferences_on_response_cancel(gpointer data)
 			continue;
 		pad->settings(pa, FALSE, TRUE);
 	}
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(panel->pr_notebook), 0);
 }
 
 static void _cancel_applets(Panel * panel)
