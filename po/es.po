@@ -609,7 +609,9 @@ msgstr "Panel para el escritorio de DeforaOS"
 
 #: ../src/helper.c:159
 msgid "translator-credits"
-msgstr "Pierre Pronchery <khorben@defora.org>"
+msgstr ""
+"Ana Carolina Rocha <carolina@defora.org>\n"
+"Pierre Pronchery <khorben@defora.org>"
 
 #: ../src/helper.c:219
 msgid ""
