@@ -204,8 +204,21 @@ Panel * panel_new(PanelPrefs const * prefs)
 
 static int _new_config(Panel * panel)
 {
+	size_t i;
+	gint width;
+	gint height;
 	String * filename;
 
+	for(i = 0; i < sizeof(_panel_sizes) / sizeof(*_panel_sizes); i++)
+	{
+		if(gtk_icon_size_from_name(_panel_sizes[i].name)
+				!= GTK_ICON_SIZE_INVALID)
+			continue;
+		if(gtk_icon_size_lookup(_panel_sizes[i].iconsize, &width,
+					&height) != TRUE)
+			width = height = _panel_sizes[i].size;
+		gtk_icon_size_register(_panel_sizes[i].name, width, height);
+	}
 	if((panel->config = config_new()) == NULL)
 		return -1;
 	if((filename = _config_get_filename()) == NULL)
@@ -269,22 +282,9 @@ static void _new_helper(Panel * panel, PanelPosition position)
 static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 		PanelPrefs const * user)
 {
-	size_t i;
-	gint width;
-	gint height;
 	char const * p;
 	char * q;
 
-	for(i = 0; i < sizeof(_panel_sizes) / sizeof(*_panel_sizes); i++)
-	{
-		if(gtk_icon_size_from_name(_panel_sizes[i].name)
-				!= GTK_ICON_SIZE_INVALID)
-			continue;
-		if(gtk_icon_size_lookup(_panel_sizes[i].iconsize, &width,
-					&height) != TRUE)
-			width = height = _panel_sizes[i].size;
-		gtk_icon_size_register(_panel_sizes[i].name, width, height);
-	}
 	if(user != NULL)
 		memcpy(prefs, user, sizeof(*prefs));
 	else
