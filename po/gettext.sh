@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2010-2017 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2010-2020 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -25,8 +25,8 @@
 
 
 #variables
+CONFIGSH="${0%/gettext.sh}/../config.sh"
 PREFIX="/usr/local"
-[ -f "../config.sh" ] && . "../config.sh"
 LOCALEDIR="$PREFIX/share/locale"
 POTFILES="POTFILES"
 PROGNAME="gettext.sh"
@@ -39,6 +39,8 @@ MSGINIT="msginit"
 MSGMERGE="msgmerge"
 RM="rm -f"
 XGETTEXT="xgettext --force-po"
+
+[ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
 
 #functions
