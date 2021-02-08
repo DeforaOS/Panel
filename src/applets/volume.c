@@ -23,7 +23,7 @@
 # include <sys/audioio.h>
 #elif defined(__linux__)
 # include <alsa/asoundlib.h>
-#else
+#elif !defined(__APPLE__)
 # include <sys/soundcard.h>
 #endif
 #include <fcntl.h>
@@ -348,7 +348,7 @@ static gdouble _volume_get(Volume * volume)
 		return ret;
 	ret = value;
 	ret /= volume->mixer_elem_max;
-#else
+#elif !defined(__APPLE__)
 	int value;
 
 	if(volume->fd < 0)
@@ -417,7 +417,7 @@ int _volume_set(Volume * volume, gdouble value)
 	if(volume->mixer_elem == NULL)
 		return 0;
 	snd_mixer_selem_set_playback_volume_all(volume->mixer_elem, v);
-#else
+#elif !defined(__APPLE__)
 	int v = value * 100;
 
 	if(volume->fd < 0)

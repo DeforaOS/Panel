@@ -152,8 +152,10 @@ static CPU * _cpu_init(PanelAppletHelper * helper, GtkWidget ** widget)
 				FALSE, 0);
 	}
 	cpu->timeout = g_timeout_add(timeout, _cpu_on_timeout, cpu);
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 	cpu->used = 0;
 	cpu->total = 0;
+#endif
 	_cpu_on_timeout(cpu);
 	pango_font_description_free(desc);
 	gtk_widget_show_all(cpu->widget);
