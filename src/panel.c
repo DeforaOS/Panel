@@ -137,8 +137,6 @@ static void _panel_reset(Panel * panel, GdkRectangle * rect);
 /* helpers */
 #include "helper.c"
 
-static String * _config_get_filename(void);
-
 
 /* public */
 /* panel_new */
@@ -207,7 +205,6 @@ static int _new_config(Panel * panel)
 	size_t i;
 	gint width;
 	gint height;
-	String * filename;
 
 	for(i = 0; i < sizeof(_panel_sizes) / sizeof(*_panel_sizes); i++)
 	{
@@ -221,12 +218,10 @@ static int _new_config(Panel * panel)
 	}
 	if((panel->config = config_new()) == NULL)
 		return -1;
-	if((filename = _config_get_filename()) == NULL)
-		return -1;
-	if(config_load(panel->config, filename) != 0)
+	if(config_load_preferences(panel->config, PANEL_CONFIG_VENDOR,
+				PACKAGE, PANEL_CONFIG_FILE) != 0)
 		/* we can ignore this error */
 		panel_error(NULL, _("Could not load configuration"), 1);
-	string_delete(filename);
 	return 0;
 }
 
@@ -651,14 +646,8 @@ static void _reset_on_idle_load(Panel * panel, PanelPosition position)
 /* panel_save */
 int panel_save(Panel * panel)
 {
-	int ret;
-	String * filename;
-
-	if((filename = _config_get_filename()) == NULL)
-		return -1;
-	ret = config_save(panel->config, filename);
-	string_delete(filename);
-	return ret;
+	return config_save_preferences_user(panel->config, PANEL_CONFIG_VENDOR,
+			PACKAGE, PANEL_CONFIG_FILE);
 }
 
 
@@ -1399,17 +1388,6 @@ static void _preferences_on_panel_up(gpointer data)
 
 /* private */
 /* functions */
-/* config_get_filename */
-static String * _config_get_filename(void)
-{
-	char const * homedir;
-
-	if((homedir = getenv("HOME")) == NULL)
-		homedir = g_get_home_dir();
-	return string_new_format("%s/%s", homedir, PANEL_CONFIG_FILE);
-}
-
-
 /* accessors */
 /* panel_can_shutdown */
 static gboolean _panel_can_shutdown(void)

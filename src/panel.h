@@ -18,15 +18,17 @@
 #ifndef PANEL_PANEL_H
 # define PANEL_PANEL_H
 
-# include <gtk/gtk.h>
+# include <System/string.h>
+# include <Desktop.h>
 # include "../include/Panel/panel.h"
+# include "../config.h"
 
 
 /* Panel */
 /* types */
 typedef struct _PanelPrefs
 {
-	char const * iconsize;
+	String const * iconsize;
 	int monitor;
 } PanelPrefs;
 
@@ -34,7 +36,8 @@ typedef struct _PanelPrefs
 /* constants */
 # define PANEL_BORDER_WIDTH		4
 
-# define PANEL_CONFIG_FILE		".panel"
+# define PANEL_CONFIG_FILE		"Panel.conf"
+# define PANEL_CONFIG_VENDOR		"DeforaOS/" VENDOR
 
 # define PANEL_ICON_SIZE_DEFAULT	"panel-large"
 # define PANEL_ICON_SIZE_UNSET		NULL
@@ -48,12 +51,12 @@ Panel * panel_new(PanelPrefs const * prefs);
 void panel_delete(Panel * panel);
 
 /* accessors */
-char const * panel_get_config(Panel * panel, char const * section,
-		char const * variable);
+String const * panel_get_config(Panel * panel, String const * section,
+		String const * variable);
 
 /* useful */
-int panel_error(Panel * panel, char const * message, int ret);
-int panel_load(Panel * panel, PanelPosition position, char const * applet);
+int panel_error(Panel * panel, String const * message, int ret);
+int panel_load(Panel * panel, PanelPosition position, String const * applet);
 int panel_reset(Panel * panel);
 int panel_save(Panel * panel);
 
