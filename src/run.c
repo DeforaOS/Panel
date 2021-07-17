@@ -202,7 +202,7 @@ static GtkWidget * _new_entry(Config * config)
 	GtkEntryCompletion * completion;
 	GtkListStore * store;
 	int i;
-	char buf[10];
+	char buf[16];
 	GtkTreeIter iter;
 
 	entry = gtk_entry_new();
