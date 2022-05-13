@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-13 05:12+0200\n"
+"POT-Creation-Date: 2022-05-14 00:16+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -30,7 +30,7 @@ msgid "Unknown"
 msgstr "Desconocido"
 
 #: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
-#: ../src/panel.c:424 ../src/panel.c:429 ../src/run.c:256 ../src/run.c:262
+#: ../src/panel.c:419 ../src/panel.c:424 ../src/run.c:256 ../src/run.c:262
 #: ../tools/message.c:191
 msgid "Error"
 msgstr "Error"
@@ -81,23 +81,23 @@ msgstr "CPU"
 msgid "CPU:"
 msgstr "CPU:"
 
-#: ../src/applets/cpufreq.c:68
+#: ../src/applets/cpufreq.c:72
 msgid "CPU frequency"
 msgstr "Frecuancia de CPU"
 
-#: ../src/applets/cpufreq.c:112
+#: ../src/applets/cpufreq.c:108 ../src/applets/cpufreq.c:133
 msgid "No support detected"
 msgstr "No se ha encontrado soporte"
 
-#: ../src/applets/cpufreq.c:149 ../src/applets/cpufreq.c:207
+#: ../src/applets/cpufreq.c:176 ../src/applets/cpufreq.c:247
 msgid "MHz"
 msgstr "MHz"
 
-#: ../src/applets/cpufreq.c:159 ../src/applets/memory.c:142
+#: ../src/applets/cpufreq.c:186 ../src/applets/memory.c:142
 msgid "Unsupported platform"
 msgstr "Plataforma no admitida"
 
-#: ../src/applets/cpufreq.c:206
+#: ../src/applets/cpufreq.c:246
 msgid "CPU frequency: "
 msgstr "Frecuancia de CPU: "
 
@@ -402,11 +402,11 @@ msgstr "Suspender"
 msgid "Suspending is not allowed"
 msgstr "Está deshabilitado suspender"
 
-#: ../src/applets/swap.c:68
+#: ../src/applets/swap.c:70
 msgid "Swap"
 msgstr "Swap"
 
-#: ../src/applets/swap.c:108
+#: ../src/applets/swap.c:110
 msgid "Swap:"
 msgstr "Swap:"
 
@@ -708,55 +708,55 @@ msgstr "Pequeño"
 msgid "Smaller"
 msgstr "Más quequeño"
 
-#: ../src/panel.c:228
+#: ../src/panel.c:224
 msgid "Could not load configuration"
 msgstr "No se pudo cargar configuración"
 
-#: ../src/panel.c:707
+#: ../src/panel.c:696
 msgid "Panel preferences"
 msgstr "Preferencias del panel"
 
-#: ../src/panel.c:724
+#: ../src/panel.c:713
 msgid "General"
 msgstr "General"
 
-#: ../src/panel.c:728
+#: ../src/panel.c:717
 msgid "Panels"
 msgstr "Paneles"
 
-#: ../src/panel.c:749
+#: ../src/panel.c:738
 msgid "Accept focus"
 msgstr "Aceptar enfoque"
 
-#: ../src/panel.c:753
+#: ../src/panel.c:742
 msgid "Keep above other windows"
 msgstr "Mantener encima de otras ventanas"
 
-#: ../src/panel.c:761
+#: ../src/panel.c:750
 msgid "Bottom panel:"
 msgstr "Panel inferior:"
 
-#: ../src/panel.c:761
+#: ../src/panel.c:750
 msgid "Top panel:"
 msgstr "Panel superior:"
 
-#: ../src/panel.c:762
+#: ../src/panel.c:751
 msgid "Left panel:"
 msgstr "Panel izquierdo"
 
-#: ../src/panel.c:762
+#: ../src/panel.c:751
 msgid "Right panel:"
 msgstr "Panel derecho"
 
-#: ../src/panel.c:794
+#: ../src/panel.c:783
 msgid "_Enabled"
 msgstr "_Habilitado"
 
-#: ../src/panel.c:806 ../src/panel.c:811
+#: ../src/panel.c:795 ../src/panel.c:800
 msgid "Default"
 msgstr "Por Defecto"
 
-#: ../src/panel.c:866
+#: ../src/panel.c:855
 msgid "Applets:"
 msgstr "Applets:"
 
