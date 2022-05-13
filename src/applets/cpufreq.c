@@ -116,8 +116,6 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	/* detect the correct sysctl */
 	if(sysctlbyname("hw.clockrate", &freq, &freqsize, NULL, 0) == 0)
 		p = "hw.clockrate";
-	else if(sysctlbyname("hw.cpufrequency", &i, &isize, NULL, 0) == 0)
-		p = "hw.cpufrequency";
 	else if(sysctlbyname("machdep.est.frequency.available", &freq,
 				&freqsize, NULL, 0) == 0)
 		p = "machdep.est.frequency.current";
