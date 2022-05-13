@@ -64,6 +64,7 @@ static int _embed(int argc, char * argv[])
 	int fd;
 	GError * error = NULL;
 	GIOChannel * channel;
+	(void) argc;
 
 	if(g_spawn_async_with_pipes(NULL, argv, NULL, flags, NULL, NULL, &pid,
 				NULL, &fd, NULL, &error) == FALSE)
@@ -93,6 +94,7 @@ static gboolean _embed_on_can_read(GIOChannel * channel, GIOCondition condition,
 	GIOStatus status;
 	uint32_t xid;
 	char * p;
+	(void) data;
 
 	status = g_io_channel_read_line(channel, &str, &length, NULL, &error);
 	switch(status)
@@ -129,6 +131,8 @@ static gboolean _embed_on_can_read(GIOChannel * channel, GIOCondition condition,
 /* embed_on_child */
 static void _embed_on_child(GPid pid, gint status, gpointer data)
 {
+	(void) data;
+
 	if(WIFEXITED(status) || WIFSIGNALED(status))
 	{
 		g_spawn_close_pid(pid);
