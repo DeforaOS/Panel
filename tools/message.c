@@ -143,6 +143,8 @@ static int _message(unsigned int timeout, char const * stock,
 /* message_on_timeout */
 static gboolean _message_on_timeout(gpointer data)
 {
+	(void) data;
+
 	gtk_main_quit();
 	return FALSE;
 }
