@@ -57,6 +57,8 @@
 /* prototypes */
 static int _notify(int embed, GtkIconSize iconsize, int timeout,
 		char * applets[]);
+/* accessors */
+static uint32_t _notify_get_xid(Panel * panel);
 /* callbacks */
 static gboolean _notify_on_timeout(gpointer data);
 
@@ -86,7 +88,7 @@ static int _notify_embed(GtkIconSize iconsize, int timeout, char * applets[])
 	for(i = 0; applets[i] != NULL; i++)
 		if(_panel_append(&panel, PANEL_POSITION_TOP, applets[i]) != 0)
 			error_print(PROGNAME_PANEL_NOTIFY);
-	if((xid = _panel_get_xid(&panel)) == 0)
+	if((xid = _notify_get_xid(&panel)) == 0)
 		/* XXX report error */
 		return -1;
 	desktop_message_send(PANEL_CLIENT_MESSAGE, PANEL_MESSAGE_EMBED, xid, 0);
@@ -114,6 +116,14 @@ static int _notify_panel(GtkIconSize iconsize, int timeout, char * applets[])
 	gtk_main();
 	_panel_destroy(&panel);
 	return 0;
+}
+
+
+/* accessors */
+/* notify_get_xid */
+static uint32_t _notify_get_xid(Panel * panel)
+{
+	return panel_window_get_xid(panel->windows[PANEL_POSITION_TOP]);
 }
 
 

@@ -77,7 +77,6 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 static void _panel_destroy(Panel * panel);
 
 /* accessors */
-static uint32_t _panel_get_xid(Panel * panel);
 static void _panel_set_title(Panel * panel, char const * title);
 
 /* useful */
@@ -202,13 +201,6 @@ static void _panel_destroy(Panel * panel)
 
 
 /* accessors */
-/* panel_get_xid */
-static uint32_t _panel_get_xid(Panel * panel)
-{
-	return panel_window_get_xid(panel->windows[PANEL_POSITION_TOP]);
-}
-
-
 /* panel_set_title */
 static void _panel_set_title(Panel * panel, char const * title)
 {
@@ -297,6 +289,7 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 {
 	char const * p;
 	(void) panel;
+	(void) type;
 	(void) iconsize;
 
 	memset(helper, 0, sizeof(*helper));
