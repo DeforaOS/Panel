@@ -1,11 +1,12 @@
 # $Id$
-# Copyright (c) 2010-2015 Pierre Pronchery <khorben@defora.org>
+# Copyright (c) 2010-2022 Pierre Pronchery <khorben@defora.org>
+# French translations for the Panel package.
 # This file is distributed under the same license as the Panel package.
 # Pierre Pronchery <khorben@defora.org>, 2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Panel 0.4.1\n"
+"Project-Id-Version: Panel 0.4.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-05-14 00:16+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
