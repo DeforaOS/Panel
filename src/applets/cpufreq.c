@@ -16,11 +16,15 @@
 
 
 #include <sys/time.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__)
+# include <sys/param.h>
+# include <sys/sysctl.h>
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
 # include <sys/param.h>
 # include <sys/sched.h>
 # include <sys/sysctl.h>
@@ -45,7 +49,7 @@ typedef struct _PanelApplet
 	int64_t max;
 	int64_t current;
 	int64_t step;
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 	char const * name;
 #endif
 } Cpufreq;
@@ -56,7 +60,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _cpufreq_destroy(Cpufreq * cpufreq);
 
 /* callbacks */
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 static gboolean _cpufreq_on_timeout(gpointer data);
 #endif
 
@@ -82,19 +86,38 @@ PanelAppletDefinition applet =
 static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
 	const int timeout = 1000;
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 	Cpufreq * cpufreq;
 	PangoFontDescription * desc;
 	GtkWidget * image;
 	GtkWidget * label;
+	char const * p;
+#if defined(__APPLE__)
+	int64_t i;
+	int64_t imin;
+	int64_t imax;
+	size_t isize = sizeof(i);
+
+	p = "hw.cpufrequency";
+	if(sysctlbyname(p, &i, &isize, NULL, 0) != 0
+			|| sysctlbyname("hw.cpufrequency_min", &imin, &isize,
+				NULL, 0) != 0
+			|| sysctlbyname("hw.cpufrequency_max", &imax, &isize,
+				NULL, 0) != 0)
+	{
+		error_set("%s: %s", applet.name, _("No support detected"));
+		return NULL;
+	}
+#else
 	char freq[256];
 	size_t freqsize = sizeof(freq);
-	char const * p;
 	char const * q;
 
 	/* detect the correct sysctl */
 	if(sysctlbyname("hw.clockrate", &freq, &freqsize, NULL, 0) == 0)
 		p = "hw.clockrate";
+	else if(sysctlbyname("hw.cpufrequency", &i, &isize, NULL, 0) == 0)
+		p = "hw.cpufrequency";
 	else if(sysctlbyname("machdep.est.frequency.available", &freq,
 				&freqsize, NULL, 0) == 0)
 		p = "machdep.est.frequency.current";
@@ -112,6 +135,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		error_set("%s: %s", applet.name, _("No support detected"));
 		return NULL;
 	}
+#endif
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, p);
 #endif
@@ -132,9 +156,14 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
+#if defined(__APPLE__)
+	cpufreq->max = imax / 1000000;
+	cpufreq->min = imin / 1000000;
+#else
 	cpufreq->max = atoll(freq);
 	cpufreq->min = (q = strrchr(freq, ' ')) != NULL ? atoll(q)
 		: cpufreq->max;
+#endif
 	cpufreq->current = -1;
 	cpufreq->step = 1;
 	cpufreq->name = p;
@@ -172,17 +201,28 @@ static void _cpufreq_destroy(Cpufreq * cpufreq)
 
 
 /* callbacks */
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 /* cpufreq_on_timeout */
 static gboolean _cpufreq_on_timeout(gpointer data)
 {
 	Cpufreq * cpufreq = data;
 	PanelAppletHelper * helper = cpufreq->helper;
-	int freq;
-	size_t freqsize = sizeof(freq);
 	char buf[256];
+	int64_t freq;
+# if defined(__APPLE__)
+	size_t freqsize = sizeof(freqsize);
 
-	if(sysctlbyname(cpufreq->name, &freq, &freqsize, NULL, 0) < 0)
+	if(sysctlbyname(cpufreq->name, &freq, &freqsize, NULL, 0) == 0)
+		freq /= 1000000;
+	else
+# else
+	int i;
+	size_t isize = sizeof(i);
+
+	if(sysctlbyname(cpufreq->name, &i, &isize, NULL, 0) == 0)
+		freq = i;
+	else
+# endif
 	{
 		error_set("%s: %s: %s", applet.name, cpufreq->name,
 				strerror(errno));
@@ -191,14 +231,16 @@ static gboolean _cpufreq_on_timeout(gpointer data)
 	}
 	if(freq < 0)
 	{
-		helper->error(NULL, strerror(ERANGE), 1);
+		error_set("%s: %s: %s", applet.name, cpufreq->name,
+				strerror(ERANGE));
+		helper->error(NULL, error_get(NULL), 1);
 		return TRUE;
 	}
 	if(cpufreq->current == freq)
 		return TRUE;
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() %d\n", __func__, freq);
-#endif
+# endif
 	cpufreq->current = freq;
 	snprintf(buf, sizeof(buf), "%4" PRId64, cpufreq->current);
 	gtk_label_set_text(GTK_LABEL(cpufreq->label), buf);
