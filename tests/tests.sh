@@ -20,9 +20,23 @@
 PROGNAME="tests.sh"
 #executables
 DATE="date"
+ECHO="echo"
+UNAME="uname"
+[ $($UNAME -s) != "Darwin" ] || ECHO="/bin/echo"
 
 
 #functions
+#date
+_date()
+{
+	if [ -n "$SOURCE_DATE_EPOCH" ]; then
+		TZ=UTC $DATE -d "@$SOURCE_DATE_EPOCH" '+%a %b %d %T %Z %Y'
+	else
+		$DATE
+	fi
+}
+
+
 #fail
 _fail()
 {
@@ -36,7 +50,7 @@ _run()
 	test="$1"
 
 	shift
-	echo -n "$test:" 1>&2
+	$ECHO -n "$test:" 1>&2
 	(echo
 	echo "Testing: $OBJDIR$test" "$@"
 	LD_LIBRARY_PATH="$OBJDIR../src" "$OBJDIR$test" "$@") 2>&1
@@ -102,7 +116,7 @@ while [ $# -ge 1 ]; do
 	target="$1"
 	shift
 
-	$DATE > "$target"
+	_date > "$target"
 	FAILED=
 	echo "Performing tests:" 1>&2
 	_test "user"
