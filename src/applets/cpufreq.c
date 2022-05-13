@@ -92,7 +92,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	GtkWidget * image;
 	GtkWidget * label;
 	char const * p;
-#if defined(__APPLE__)
+# if defined(__APPLE__)
 	int64_t i;
 	int64_t imin;
 	int64_t imax;
@@ -108,7 +108,7 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		error_set("%s: %s", applet.name, _("No support detected"));
 		return NULL;
 	}
-#else
+# else
 	char freq[256];
 	size_t freqsize = sizeof(freq);
 	char const * q;
@@ -133,10 +133,10 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		error_set("%s: %s", applet.name, _("No support detected"));
 		return NULL;
 	}
-#endif
-#ifdef DEBUG
+# endif
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() \"%s\"\n", __func__, p);
-#endif
+# endif
 	if((cpufreq = malloc(sizeof(*cpufreq))) == NULL)
 	{
 		error_set("%s: %s", applet.name, strerror(errno));
@@ -146,31 +146,31 @@ static Cpufreq * _cpufreq_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	desc = pango_font_description_new();
 	pango_font_description_set_family(desc, "Monospace");
 	pango_font_description_set_weight(desc, PANGO_WEIGHT_BOLD);
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	cpufreq->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-#else
+# else
 	cpufreq->hbox = gtk_hbox_new(FALSE, 4);
-#endif
+# endif
 	image = gtk_image_new_from_icon_name(applet.icon,
 			panel_window_get_icon_size(helper->window));
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), image, FALSE, TRUE, 0);
-#if defined(__APPLE__)
+# if defined(__APPLE__)
 	cpufreq->max = imax / 1000000;
 	cpufreq->min = imin / 1000000;
-#else
+# else
 	cpufreq->max = atoll(freq);
 	cpufreq->min = (q = strrchr(freq, ' ')) != NULL ? atoll(q)
 		: cpufreq->max;
-#endif
+# endif
 	cpufreq->current = -1;
 	cpufreq->step = 1;
 	cpufreq->name = p;
 	cpufreq->label = gtk_label_new(" ");
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_override_font(cpufreq->label, desc);
-#else
+# else
 	gtk_widget_modify_font(cpufreq->label, desc);
-#endif
+# endif
 	gtk_box_pack_start(GTK_BOX(cpufreq->hbox), cpufreq->label, FALSE, TRUE,
 			0);
 	label = gtk_label_new(_("MHz"));
