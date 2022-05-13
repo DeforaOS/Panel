@@ -162,7 +162,7 @@ PanelWindow * panel_window_new(PanelAppletHelper * helper,
 			gtk_window_set_position(GTK_WINDOW(panel->window),
 					GTK_WIN_POS_CENTER_ALWAYS);
 			gtk_window_stick(GTK_WINDOW(panel->window));
-			/* fallback */
+			/* fallthrough */
 		case PANEL_WINDOW_POSITION_FLOATING:
 			gtk_window_set_accept_focus(GTK_WINDOW(panel->window),
 					FALSE);
