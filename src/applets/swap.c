@@ -19,11 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 # include <sys/types.h>
 # include <sys/sysctl.h>
 # include <sys/vmmeter.h>
-# include <vm/vm_param.h>
+# if defined(__FreeBSD__)
+#  include <vm/vm_param.h>
+# endif
 #elif defined(__linux__)
 # include <sys/sysinfo.h>
 #elif defined(__NetBSD__)
@@ -151,6 +153,9 @@ static void _swap_destroy(Swap * swap)
 /* accessors */
 static void _swap_set(Swap * swap, gdouble level)
 {
+#ifdef DEBUG
+	fprintf(stderr, "DEBUG: %s(%f)\n", __func__, level);
+#endif
 #if GTK_CHECK_VERSION(3, 8, 0)
 	gtk_level_bar_set_value(GTK_LEVEL_BAR(swap->scale), level);
 #elif GTK_CHECK_VERSION(3, 6, 0)
@@ -166,21 +171,36 @@ static void _swap_set(Swap * swap, gdouble level)
 /* swap_on_timeout */
 static gboolean _swap_on_timeout(gpointer data)
 {
-#if defined(__FreeBSD__)
 	Swap * swap = data;
-	int mib[] = { CTL_VM, VM_TOTAL };
-	struct vmmeter t;
-	size_t size = sizeof(t);
+#if defined(__APPLE__)
+	int mib[] = { CTL_VM, VM_SWAPUSAGE };
+	struct xsw_usage sw;
+	size_t size = sizeof(sw);
 	gdouble value;
 
-	if(sysctl(mib, 2, &t, &size, NULL, 0) < 0)
+	if(sysctl(mib, 2, &sw, &size, NULL, 0) != 0)
+	{
+		error_set("%s: %s: %s", applet.name, "sysctl",
+				strerror(errno));
+		return swap->helper->error(NULL, error_get(NULL), TRUE);
+	}
+	value = sw.xsu_used;
+	value /= sw.xsu_total;
+	_swap_set(swap, value);
+	return TRUE;
+#elif defined(__FreeBSD__)
+	int mib[] = { CTL_VM, VM_TOTAL };
+	struct vmmeter vm;
+	size_t size = sizeof(vm);
+	gdouble value;
+
+	if(sysctl(mib, 2, &vm, &size, NULL, 0) < 0)
 		return TRUE;
-	value = t.t_rm;
-	value /= t.t_vm;
+	value = vm.t_avm;
+	value /= vm.t_vm;
 	_swap_set(swap, value);
 	return TRUE;
 #elif defined(__linux__)
-	Swap * swap = data;
 	struct sysinfo sy;
 	gdouble value;
 
@@ -192,7 +212,6 @@ static gboolean _swap_on_timeout(gpointer data)
 	_swap_set(swap, value);
 	return TRUE;
 #elif defined(__NetBSD__)
-	Swap * swap = data;
 	int mib[] = { CTL_VM, VM_UVMEXP };
 	struct uvmexp ue;
 	size_t size = sizeof(ue);
@@ -205,7 +224,6 @@ static gboolean _swap_on_timeout(gpointer data)
 	_swap_set(swap, value);
 	return TRUE;
 #else
-	Swap * swap = data;
 
 	/* FIXME not supported */
 	swap->timeout = 0;
