@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2014-2020 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2014-2021 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -32,6 +32,7 @@ PROJECTCONF="../project.conf"
 #executables
 DATE="date"
 DEBUG="_debug"
+ECHO="/bin/echo"
 FIND="find"
 HTMLLINT="xmllint --html --nonet"
 MKDIR="mkdir -p"
@@ -46,9 +47,9 @@ TR="tr"
 _htmllint()
 {
 	res=0
+	subdirs=
 
 	$DATE
-	echo
 	while read line; do
 		case "$line" in
 			"["*)
@@ -60,17 +61,28 @@ _htmllint()
 				;;
 		esac
 	done < "$PROJECTCONF"
+	if [ ! -n "$subdirs" ]; then
+		_error "Could not locate directories to analyze"
+		return $?
+	fi
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -type f -a \( -iname '*.html' -o -iname '*.htm' \) | $SORT); do
+		while read filename; do
+			[ -n "$filename" ] || continue
+			echo
+			$ECHO -n "$filename:"
 			$DEBUG $HTMLLINT "$filename" 2>&1 > "$DEVNULL"
 			if [ $? -eq 0 ]; then
-				echo "$filename:"
+				echo " OK"
+				echo "$PROGNAME: $filename: OK" 1>&2
 			else
+				echo "FAIL"
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 				res=2
 			fi
-		done
+		done << EOF
+$($FIND "../$subdir" -type f -a \( -iname '*.html' -o -iname '*.htm' \) | $SORT)
+EOF
 	done
 	return $res
 }
@@ -81,10 +93,14 @@ _debug()
 {
 	echo "$@" 1>&3
 	"$@"
-	res=$?
-	#ignore errors when the command is not available
-	[ $res -eq 127 ]					&& return 0
-	return $res
+}
+
+
+#error
+_error()
+{
+	echo "$PROGNAME: $@" 1>&2
+	return 2
 }
 
 

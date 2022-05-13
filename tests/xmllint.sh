@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2014-2020 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2014-2021 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -32,11 +32,12 @@ PROJECTCONF="../project.conf"
 #executables
 DATE="date"
 DEBUG="_debug"
+ECHO="/bin/echo"
 FIND="find"
 MKDIR="mkdir -p"
 SORT="sort -n"
 TR="tr"
-XMLLINT="xmllint --nonet"
+XMLLINT="xmllint --nonet --xinclude"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
 
@@ -49,7 +50,6 @@ _xmllint()
 	subdirs=
 
 	$DATE
-	echo
 	while read line; do
 		case "$line" in
 			"["*)
@@ -67,15 +67,22 @@ _xmllint()
 	fi
 	for subdir in $subdirs; do
 		[ -d "../$subdir" ] || continue
-		for filename in $($FIND "../$subdir" -type f -a \( -name '*.xml' -o -name '*.xsl' \) | $SORT); do
+		while read filename; do
+			[ -n "$filename" ] || continue
+			echo
+			$ECHO -n "$filename:"
 			$DEBUG $XMLLINT "$filename" 2>&1 > "$DEVNULL"
 			if [ $? -eq 0 ]; then
-				echo "$filename:"
+				echo " OK"
+				echo "$PROGNAME: $filename: OK" 1>&2
 			else
+				echo "FAIL"
 				echo "$PROGNAME: $filename: FAIL" 1>&2
 				res=2
 			fi
-		done
+		done << EOF
+$($FIND "../$subdir" -type f -a \( -iname '*.xml' -o -iname '*.xsl' \) | $SORT)
+EOF
 	done
 	return $res
 }
@@ -86,10 +93,6 @@ _debug()
 {
 	echo "$@" 1>&3
 	"$@"
-	res=$?
-	#ignore errors when the command is not available
-	[ $res -eq 127 ]					&& return 0
-	return $res
 }
 
 
