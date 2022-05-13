@@ -283,6 +283,8 @@ static void _lock_dialog_on_response(GtkWidget * widget, gint response,
 /* panel_helper_logout */
 static void _panel_helper_logout(Panel * panel)
 {
+	(void) panel;
+
 	gtk_main_quit();
 #ifndef DEBUG
 	/* XXX assumes the parent process is the session manager */
