@@ -24,7 +24,7 @@
 #endif
 #include <string.h>
 #include <errno.h>
-#ifdef __NetBSD__
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 # include <ifaddrs.h>
 #endif
 #include <libintl.h>
@@ -176,7 +176,7 @@ static void _refresh_reset(Network * network);
 static void _network_refresh(Network * network)
 {
 	char const * p;
-#ifdef __NetBSD__
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 	struct ifaddrs * ifa;
 	struct ifaddrs * ifp;
 #endif
@@ -192,7 +192,7 @@ static void _network_refresh(Network * network)
 #endif
 		return;
 	}
-#ifdef __NetBSD__
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
 	if(getifaddrs(&ifa) != 0)
 		return;
 	_refresh_reset(network);
