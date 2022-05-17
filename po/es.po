@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-14 00:16+0200\n"
+"POT-Creation-Date: 2022-05-18 01:25+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -31,7 +31,7 @@ msgstr "Desconocido"
 
 #: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
 #: ../src/panel.c:419 ../src/panel.c:424 ../src/run.c:256 ../src/run.c:262
-#: ../tools/message.c:191
+#: ../tools/message.c:193
 msgid "Error"
 msgstr "Error"
 
@@ -172,8 +172,8 @@ msgstr "Bloquear pantalla"
 msgid "Locking is not allowed"
 msgstr "Está deshabilitado bloquear pantalla"
 
-#: ../src/applets/logout.c:50 ../src/applets/logout.c:86 ../src/helper.c:315
-#: ../src/helper.c:327 ../src/helper.c:336
+#: ../src/applets/logout.c:50 ../src/applets/logout.c:86 ../src/helper.c:317
+#: ../src/helper.c:329 ../src/helper.c:338
 msgid "Logout"
 msgstr "Cerrar sesión"
 
@@ -384,8 +384,8 @@ msgid "Rotate the screen"
 msgstr "Rotar pantalla"
 
 #: ../src/applets/shutdown.c:50 ../src/applets/shutdown.c:88
-#: ../src/helper.c:235 ../src/helper.c:518 ../src/helper.c:530
-#: ../src/helper.c:539 ../src/helper.c:631
+#: ../src/helper.c:235 ../src/helper.c:520 ../src/helper.c:532
+#: ../src/helper.c:541 ../src/helper.c:633
 msgid "Shutdown"
 msgstr "Apagar"
 
@@ -393,8 +393,8 @@ msgstr "Apagar"
 msgid "Shutting down is not allowed"
 msgstr "Está deshabilitado apagar"
 
-#: ../src/applets/suspend.c:50 ../src/applets/suspend.c:88 ../src/helper.c:643
-#: ../src/helper.c:652
+#: ../src/applets/suspend.c:50 ../src/applets/suspend.c:88 ../src/helper.c:645
+#: ../src/helper.c:654
 msgid "Suspend"
 msgstr "Suspender"
 
@@ -402,11 +402,11 @@ msgstr "Suspender"
 msgid "Suspending is not allowed"
 msgstr "Está deshabilitado suspender"
 
-#: ../src/applets/swap.c:70
+#: ../src/applets/swap.c:72
 msgid "Swap"
 msgstr "Swap"
 
-#: ../src/applets/swap.c:110
+#: ../src/applets/swap.c:112
 msgid "Swap:"
 msgstr "Swap:"
 
@@ -631,7 +631,7 @@ msgstr ""
 msgid "Lock"
 msgstr "Bloquear"
 
-#: ../src/helper.c:301
+#: ../src/helper.c:303
 msgid ""
 "This will log you out of the current session, therefore closing any "
 "application currently opened and losing any unsaved data.\n"
@@ -641,7 +641,7 @@ msgstr ""
 "abierta y perdiendo todos los datos sin guardar.\n"
 "¿Realmente deseas continuar?"
 
-#: ../src/helper.c:498
+#: ../src/helper.c:500
 msgid ""
 "This will shutdown your device, therefore closing any application currently "
 "opened and losing any unsaved data.\n"
@@ -651,7 +651,7 @@ msgstr ""
 "abierta y perdiendo todos los datos sin guardar.\n"
 "¿Realmente deseas continuar?"
 
-#: ../src/helper.c:503
+#: ../src/helper.c:505
 msgid ""
 "This will shutdown your computer, therefore closing any application "
 "currently opened and losing any unsaved data.\n"
@@ -661,11 +661,11 @@ msgstr ""
 "actualmente abierta y perdiendo los datos sin guardar.\n"
 "¿Realmente deseas continuar?"
 
-#: ../src/helper.c:529
+#: ../src/helper.c:531
 msgid "Restart"
 msgstr "Reiniciar"
 
-#: ../src/helper.c:615
+#: ../src/helper.c:617
 msgid ""
 "This will suspend your device.\n"
 "Do you really want to proceed?"
@@ -673,7 +673,7 @@ msgstr ""
 "Esto hará que se suspender tu dispositivo.\n"
 "¿Realmente deseas continuar?"
 
-#: ../src/helper.c:618
+#: ../src/helper.c:620
 msgid ""
 "This will suspend your computer.\n"
 "Do you really want to proceed?"
@@ -838,24 +838,24 @@ msgstr "Uso: %s\n"
 msgid "Invalid panel size"
 msgstr "Tamaño de panel inválido"
 
-#: ../tools/embed.c:112
+#: ../tools/embed.c:114
 msgid "Could not obtain the XID"
 msgstr "No se pudo obtener el XID"
 
-#: ../tools/embed.c:151
+#: ../tools/embed.c:155
 #, c-format
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s command [arguments...]\n"
 
-#: ../tools/helper.c:227
+#: ../tools/helper.c:219
 msgid "Invalid panel position"
 msgstr "Posición de panel inválida"
 
-#: ../tools/helper.c:252
+#: ../tools/helper.c:244
 msgid "Applets available:"
 msgstr "Applets disponibles:"
 
-#: ../tools/message.c:163
+#: ../tools/message.c:165
 #, c-format
 msgid ""
 "Usage: %s [-EIQW][-T title][-t timeout] message\n"
@@ -864,23 +864,23 @@ msgstr ""
 "Usage: %s [-EIQW][-T título][-t timeout] mensaje\n"
 "       %s [-N nombre][-T título][-t timeout] mensaje\n"
 
-#: ../tools/message.c:177 ../tools/message.c:195
+#: ../tools/message.c:179 ../tools/message.c:197
 msgid "Information"
 msgstr "Información"
 
-#: ../tools/message.c:202
+#: ../tools/message.c:204
 msgid "Question"
 msgstr "Pregunta"
 
-#: ../tools/message.c:209
+#: ../tools/message.c:211
 msgid "Warning"
 msgstr "Advertencia"
 
-#: ../tools/notify.c:106
+#: ../tools/notify.c:108
 msgid "Notification"
 msgstr "Notificación"
 
-#: ../tools/notify.c:136
+#: ../tools/notify.c:146
 #, c-format
 msgid ""
 "Usage: %s [-e][-L|-S|-X|-x][-t timeout] applet...\n"
