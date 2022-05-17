@@ -52,6 +52,9 @@ Manual pages for each of the executables installed are available in the `doc`
 folder. They are written in the DocBook-XML format, and need libxslt and
 DocBook-XSL to be installed for conversion to the HTML or man file format.
 
+Likewise, the API reference for Panel (applets) is available in the
+`doc/gtkdoc` folder, and is generated using gtk-doc.
+
 Extending Panel
 ---------------
 
