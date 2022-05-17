@@ -18,6 +18,8 @@
 #ifndef DESKTOP_PANEL_WINDOW_H
 # define DESKTOP_PANEL_WINDOW_H
 
+# include <gtk/gtk.h>
+
 
 /* PanelWindow */
 /* types */
@@ -35,4 +37,4 @@ GtkIconSize panel_window_get_icon_size(PanelWindow * panel);
 GtkOrientation panel_window_get_orientation(PanelWindow * panel);
 PanelWindowType panel_window_get_type(PanelWindow * panel);
 
-#endif /* !DESKTOP_PANEL_H */
+#endif /* !DESKTOP_PANEL_WINDOW_H */

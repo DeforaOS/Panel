@@ -18,8 +18,6 @@
 #ifndef DESKTOP_PANEL_PANEL_H
 # define DESKTOP_PANEL_PANEL_H
 
-# include <gtk/gtk.h>
-
 
 /* Panel */
 /* types */
