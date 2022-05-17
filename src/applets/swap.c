@@ -19,13 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__)
 # include <sys/types.h>
 # include <sys/sysctl.h>
 # include <sys/vmmeter.h>
-# if defined(__FreeBSD__)
-#  include <vm/vm_param.h>
-# endif
+#elif defined(__FreeBSD__)
+# include <sys/types.h>
+# include <sys/sysctl.h>
+# include <sys/vmmeter.h>
+# include <vm/vm_param.h>
 #elif defined(__linux__)
 # include <sys/sysinfo.h>
 #elif defined(__NetBSD__)
@@ -190,7 +192,7 @@ static gboolean _swap_on_timeout(gpointer data)
 	return TRUE;
 #elif defined(__FreeBSD__)
 	int mib[] = { CTL_VM, VM_TOTAL };
-	struct vmmeter vm;
+	struct vmtotal vm;
 	size_t size = sizeof(vm);
 	gdouble value;
 
