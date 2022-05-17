@@ -1,0 +1,888 @@
+# $Id$
+# Copyright (c) 2022 Pierre Pronchery <khorben@defora.org>
+# German translations for DeforaOS Panel.
+# This file is distributed under the same license as the Panel package.
+# Pierre Pronchery <khorben@defora.org>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Panel 0.4.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-05-18 01:25+0200\n"
+"PO-Revision-Date: 2022-05-18 01:28+0200\n"
+"Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../src/applets/battery.c:100
+msgid "Battery"
+msgstr "Akku"
+
+#: ../src/applets/battery.c:212
+msgid "Show the battery level"
+msgstr ""
+
+#: ../src/applets/battery.c:430
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
+#: ../src/panel.c:419 ../src/panel.c:424 ../src/run.c:256 ../src/run.c:262
+#: ../tools/message.c:193
+msgid "Error"
+msgstr "Fehler"
+
+#: ../src/applets/battery.c:454
+#, c-format
+msgid "Battery level: %.0f%%%s"
+msgstr "Restliche Akku: %.0f%%%s"
+
+#: ../src/applets/battery.c:455
+msgid " (charging)"
+msgstr " (laden)"
+
+#: ../src/applets/bluetooth.c:69
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: ../src/applets/bluetooth.c:105
+msgid "Bluetooth is enabled"
+msgstr "Bluetooth ist aktiv"
+
+#: ../src/applets/clock.c:58
+msgid "Clock"
+msgstr "Uhr"
+
+#: ../src/applets/clock.c:88 ../src/applets/clock.c:99
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: ../src/applets/clock.c:97 ../src/applets/clock.c:148
+msgid ""
+"%H:%M:%S\n"
+"%d/%m/%Y"
+msgstr ""
+"%H:%M:%S\n"
+"%d/%m/%Y"
+
+#: ../src/applets/close.c:75 ../src/applets/close.c:101
+#: ../src/applets/tasks.c:845
+msgid "Close"
+msgstr "Schliessen"
+
+#: ../src/applets/cpu.c:70
+msgid "CPU"
+msgstr ""
+
+#: ../src/applets/cpu.c:118
+msgid "CPU:"
+msgstr ""
+
+#: ../src/applets/cpufreq.c:72
+msgid "CPU frequency"
+msgstr ""
+
+#: ../src/applets/cpufreq.c:108 ../src/applets/cpufreq.c:133
+msgid "No support detected"
+msgstr ""
+
+#: ../src/applets/cpufreq.c:176 ../src/applets/cpufreq.c:247
+msgid "MHz"
+msgstr "MHz"
+
+#: ../src/applets/cpufreq.c:186 ../src/applets/memory.c:142
+msgid "Unsupported platform"
+msgstr ""
+
+#: ../src/applets/cpufreq.c:246
+msgid "CPU frequency: "
+msgstr ""
+
+#: ../src/applets/desktop.c:45
+msgid "Desktop switch"
+msgstr ""
+
+#: ../src/applets/desktop.c:70
+msgid "Show desktop"
+msgstr ""
+
+#: ../src/applets/embed.c:83
+msgid "Embed"
+msgstr ""
+
+#: ../src/applets/embed.c:113
+msgid "Desktop notifications"
+msgstr ""
+
+#: ../src/applets/gps.c:62
+msgid "GPS"
+msgstr "GPS"
+
+#: ../src/applets/gps.c:93
+msgid "GPS is enabled"
+msgstr "GPS ist aktiv"
+
+#: ../src/applets/gsm.c:66
+msgid "GSM"
+msgstr "GSM"
+
+#: ../src/applets/gsm.c:102
+msgid "GSM is enabled"
+msgstr "GSM ist aktiv"
+
+#: ../src/applets/leds.c:63
+msgid "LEDs"
+msgstr ""
+
+#: ../src/applets/leds.c:152
+#, c-format
+msgid "XKB library mismatch (%d.%d)"
+msgstr ""
+
+#: ../src/applets/leds.c:159
+#, c-format
+msgid "XKB extension mismatch (%d.%d)"
+msgstr ""
+
+#: ../src/applets/leds.c:167
+msgid "Could not obtain XKB map"
+msgstr ""
+
+#: ../src/applets/leds.c:175
+msgid "Could not obtain XKB indicator map"
+msgstr ""
+
+#: ../src/applets/leds.c:183
+msgid "Could not obtain XKB names"
+msgstr ""
+
+#: ../src/applets/leds.c:234
+#, c-format
+msgid "LED %u"
+msgstr ""
+
+#: ../src/applets/lock.c:50 ../src/applets/lock.c:87
+msgid "Lock screen"
+msgstr "Bildschirm sperren"
+
+#: ../src/applets/lock.c:78
+msgid "Locking is not allowed"
+msgstr "Sperren ist nicht erlaubt"
+
+#: ../src/applets/logout.c:50 ../src/applets/logout.c:86 ../src/helper.c:317
+#: ../src/helper.c:329 ../src/helper.c:338
+msgid "Logout"
+msgstr "Ausloggen"
+
+#: ../src/applets/logout.c:77
+msgid "Logging out is disabled"
+msgstr "Sich ausloggen ist nicht erlaubt"
+
+#: ../src/applets/menu.c:81
+msgid "Audio"
+msgstr "Audio"
+
+#: ../src/applets/menu.c:82
+msgid "Development"
+msgstr "Entwicklung"
+
+#: ../src/applets/menu.c:83
+msgid "Education"
+msgstr "Ausbildung"
+
+#: ../src/applets/menu.c:84
+msgid "Games"
+msgstr "Spiele"
+
+#: ../src/applets/menu.c:85
+msgid "Graphics"
+msgstr ""
+
+#: ../src/applets/menu.c:86
+msgid "Multimedia"
+msgstr "Multimedia"
+
+#: ../src/applets/menu.c:87 ../src/applets/network.c:101
+msgid "Network"
+msgstr "Netzwerk"
+
+#: ../src/applets/menu.c:88
+msgid "Office"
+msgstr ""
+
+#: ../src/applets/menu.c:89
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: ../src/applets/menu.c:90
+msgid "System"
+msgstr ""
+
+#: ../src/applets/menu.c:91
+msgid "Utilities"
+msgstr ""
+
+#: ../src/applets/menu.c:92
+msgid "Video"
+msgstr "Video"
+
+#: ../src/applets/menu.c:136 ../src/applets/menu.c:191
+msgid "Main menu"
+msgstr "HauptmenÃŒ"
+
+#: ../src/applets/menu.c:523
+msgid "A_pplications"
+msgstr ""
+
+#: ../src/applets/menu.c:533
+msgid "_Run..."
+msgstr ""
+
+#: ../src/applets/menu.c:545
+msgid "_About"
+msgstr "_Info"
+
+#: ../src/applets/menu.c:560
+msgid "_Lock screen"
+msgstr "Bildschirm _sperren"
+
+#: ../src/applets/menu.c:568
+msgid "R_otate"
+msgstr "R_otieren"
+
+#: ../src/applets/menu.c:576
+msgid "Lo_gout..."
+msgstr "Aus_loggen..."
+
+#: ../src/applets/menu.c:586
+msgid "S_uspend"
+msgstr ""
+
+#: ../src/applets/menu.c:595
+msgid "_Shutdown..."
+msgstr "_Ausschalten..."
+
+#: ../src/applets/memory.c:68
+msgid "Memory"
+msgstr "Speicher"
+
+#: ../src/applets/memory.c:109
+msgid "RAM:"
+msgstr ""
+
+#: ../src/applets/mixer.c:94
+msgid "Mixer"
+msgstr ""
+
+#: ../src/applets/mixer.c:133
+msgid "Show mixer"
+msgstr ""
+
+#: ../src/applets/mixer.c:295 ../src/run.c:123
+msgid "Command:"
+msgstr ""
+
+#: ../src/applets/mixer.c:301
+msgid "Size:"
+msgstr ""
+
+#: ../src/applets/mixer.c:314
+msgid "Width:"
+msgstr "Breite:"
+
+#: ../src/applets/mixer.c:329
+msgid "Height:"
+msgstr "HÃ¶he:"
+
+#: ../src/applets/mixer.c:340
+msgid "Keep ratio"
+msgstr ""
+
+#: ../src/applets/mixer.c:409
+msgid "Could not start mixer"
+msgstr ""
+
+#: ../src/applets/mpd.c:80
+msgid "MPD"
+msgstr "MPD"
+
+#: ../src/applets/mpd.c:114
+msgid "Previous"
+msgstr "Vorherige"
+
+#: ../src/applets/mpd.c:116
+msgid "Rewind"
+msgstr "RÃŒckwÃ€rts"
+
+#: ../src/applets/mpd.c:118
+msgid "Play"
+msgstr "Spielen"
+
+#: ../src/applets/mpd.c:120
+msgid "Pause"
+msgstr "Pause"
+
+#: ../src/applets/mpd.c:122
+msgid "Stop"
+msgstr "Stoppen"
+
+#: ../src/applets/mpd.c:124
+msgid "Forward"
+msgstr "VorwÃ€rts"
+
+#: ../src/applets/mpd.c:126
+msgid "Next"
+msgstr "NÃ€chste"
+
+#: ../src/applets/network.c:345
+#, c-format
+msgid ""
+"%s\n"
+"In: %lu kB/s\n"
+"Out: %lu kB/s"
+msgstr ""
+"%s\n"
+"In: %lu kB/s\n"
+"Aus: %lu kB/s"
+
+#: ../src/applets/network.c:397
+msgid "Show local interfaces"
+msgstr ""
+
+#: ../src/applets/network.c:403
+msgid "Show the interfaces disabled"
+msgstr ""
+
+#: ../src/applets/pager.c:102
+msgid "Pager"
+msgstr ""
+
+#: ../src/applets/pager.c:284
+#, c-format
+msgid "Desk %lu"
+msgstr ""
+
+#: ../src/applets/pager.c:320
+#, c-format
+msgid "Switch to %s"
+msgstr ""
+
+#: ../src/applets/pager.c:330
+#, c-format
+msgid "On %s"
+msgstr ""
+
+#: ../src/applets/rotate.c:47
+msgid "Rotate"
+msgstr "Rotieren"
+
+#: ../src/applets/rotate.c:79
+msgid "Rotate the screen"
+msgstr ""
+
+#: ../src/applets/shutdown.c:50 ../src/applets/shutdown.c:88
+#: ../src/helper.c:235 ../src/helper.c:520 ../src/helper.c:532
+#: ../src/helper.c:541 ../src/helper.c:633
+msgid "Shutdown"
+msgstr "Ausschalten"
+
+#: ../src/applets/shutdown.c:79
+msgid "Shutting down is not allowed"
+msgstr "Ausschalten ist nicht erlaubt"
+
+#: ../src/applets/suspend.c:50 ../src/applets/suspend.c:88 ../src/helper.c:645
+#: ../src/helper.c:654
+msgid "Suspend"
+msgstr ""
+
+#: ../src/applets/suspend.c:79
+msgid "Suspending is not allowed"
+msgstr ""
+
+#: ../src/applets/swap.c:72
+msgid "Swap"
+msgstr ""
+
+#: ../src/applets/swap.c:112
+msgid "Swap:"
+msgstr ""
+
+#: ../src/applets/systray.c:67
+msgid "System tray"
+msgstr ""
+
+#: ../src/applets/tasks.c:149
+msgid "Tasks"
+msgstr ""
+
+#: ../src/applets/tasks.c:531 ../src/applets/title.c:248
+msgid "(Untitled)"
+msgstr "(Ohne Titel)"
+
+#: ../src/applets/tasks.c:824
+msgid "Move"
+msgstr ""
+
+#: ../src/applets/tasks.c:826
+msgid "Resize"
+msgstr ""
+
+#: ../src/applets/tasks.c:828
+msgid "Minimize"
+msgstr "Minimieren"
+
+#: ../src/applets/tasks.c:830
+msgid "Shade"
+msgstr ""
+
+#: ../src/applets/tasks.c:832
+msgid "Stick"
+msgstr ""
+
+#: ../src/applets/tasks.c:835
+msgid "Maximize horizontally"
+msgstr ""
+
+#: ../src/applets/tasks.c:838
+msgid "Maximize vertically"
+msgstr ""
+
+#: ../src/applets/tasks.c:840
+msgid "Fullscreen"
+msgstr ""
+
+#: ../src/applets/tasks.c:843
+msgid "Change desktop"
+msgstr ""
+
+#: ../src/applets/tasks.c:896
+msgid "Maximize"
+msgstr ""
+
+#: ../src/applets/title.c:74
+msgid "Title"
+msgstr "Titel"
+
+#: ../src/applets/usb.c:65
+msgid "USB"
+msgstr "USB"
+
+#: ../src/applets/usb.c:95
+msgid "USB networking device connected"
+msgstr ""
+
+#: ../src/applets/user.c:93
+msgid "Unknown user"
+msgstr "Unbekannte Benutzer"
+
+#: ../src/applets/user.c:131
+msgid "Username"
+msgstr "Benutzer"
+
+#: ../src/applets/user.c:131
+msgid "Full name"
+msgstr "Vollname"
+
+#: ../src/applets/user.c:132
+msgid "Office location"
+msgstr ""
+
+#: ../src/applets/user.c:132
+msgid "Work phone"
+msgstr ""
+
+#: ../src/applets/user.c:132
+msgid "Home phone"
+msgstr ""
+
+#: ../src/applets/user.c:141 ../src/applets/user.c:155
+msgid ": "
+msgstr ": "
+
+#: ../src/applets/wpa_supplicant.c:233
+msgid "Wifi"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:310
+msgid "Wireless networking"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:318 ../src/applets/wpa_supplicant.c:1074
+msgid "Unavailable"
+msgstr "Nicht verfÃŒgbar"
+
+#: ../src/applets/wpa_supplicant.c:467
+#, c-format
+msgid "Connected to interface %s"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:471
+msgid "Connecting..."
+msgstr "Verbindung..."
+
+#: ../src/applets/wpa_supplicant.c:479
+msgid "Scanning..."
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:489
+#, c-format
+msgid "Connected to network %s"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:553
+#, c-format
+msgid "The network \"%s\" is protected by a key."
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:570
+msgid "Password required"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:584
+msgid "Wireless key"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:596
+msgid "Key: "
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:608
+msgid "_Show password"
+msgstr "Password _zeigen"
+
+#: ../src/applets/wpa_supplicant.c:1154 ../tools/wifibrowser.c:119
+msgid "Reassociate"
+msgstr "Erneut verbinden"
+
+#: ../src/applets/wpa_supplicant.c:1170 ../tools/wifibrowser.c:315
+msgid "Disconnect"
+msgstr "Trennen"
+
+#: ../src/applets/wpa_supplicant.c:1182 ../tools/wifibrowser.c:120
+msgid "Rescan"
+msgstr "Erneut scannen"
+
+#: ../src/applets/wpa_supplicant.c:1255
+msgid "Preferences"
+msgstr "Einstellungen"
+
+#: ../src/applets/wpa_supplicant.c:1434
+msgid "Unknown error"
+msgstr "Unbekannte Fehler"
+
+#: ../src/applets/wpa_supplicant.c:1436
+msgid "Could not save the configuration"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:1532
+msgid "Password changed"
+msgstr "Passwort geÃ€ndert"
+
+#: ../src/applets/wpa_supplicant.c:1684
+#, c-format
+msgid "Hidden (%s)"
+msgstr "Versteckt (%s)"
+
+#: ../src/applets/wpa_supplicant.c:1948
+#, c-format
+msgid ""
+"Frequency: %u\n"
+"Level: %u%s%s"
+msgstr ""
+
+#: ../src/applets/wpa_supplicant.c:1949
+msgid ""
+"\n"
+"Security: "
+msgstr ""
+"\n"
+"Sicherheit: "
+
+#: ../src/helper.c:144
+msgid "Panel for the DeforaOS desktop"
+msgstr "Panel fÃŒr den DeforaOS-Desktop"
+
+#: ../src/helper.c:159
+msgid "translator-credits"
+msgstr "Pierre Pronchery <khorben@defora.org>"
+
+#: ../src/helper.c:219
+msgid ""
+"This will lock your device.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:222
+msgid ""
+"This will lock your session.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:247 ../src/helper.c:256
+msgid "Lock"
+msgstr ""
+
+#: ../src/helper.c:303
+msgid ""
+"This will log you out of the current session, therefore closing any "
+"application currently opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:500
+msgid ""
+"This will shutdown your device, therefore closing any application currently "
+"opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:505
+msgid ""
+"This will shutdown your computer, therefore closing any application "
+"currently opened and losing any unsaved data.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:531
+msgid "Restart"
+msgstr "Neu starten"
+
+#: ../src/helper.c:617
+msgid ""
+"This will suspend your device.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/helper.c:620
+msgid ""
+"This will suspend your computer.\n"
+"Do you really want to proceed?"
+msgstr ""
+
+#: ../src/main.c:64
+#, c-format
+msgid ""
+"Usage: %s [-L|-S|-x][-m monitor]\n"
+"  -L\tUse icons the size of a large toolbar\n"
+"  -m\tMonitor to use (default: 0)\n"
+"  -S\tUse icons the size of a small toolbar\n"
+"  -x\tUse icons the size of menus\n"
+msgstr ""
+
+#: ../src/panel.c:120
+msgid "Large"
+msgstr ""
+
+#: ../src/panel.c:121
+msgid "Small"
+msgstr "Klein"
+
+#: ../src/panel.c:122
+msgid "Smaller"
+msgstr "Kleiner"
+
+#: ../src/panel.c:224
+msgid "Could not load configuration"
+msgstr ""
+
+#: ../src/panel.c:696
+msgid "Panel preferences"
+msgstr ""
+
+#: ../src/panel.c:713
+msgid "General"
+msgstr "Generell"
+
+#: ../src/panel.c:717
+msgid "Panels"
+msgstr "Panele"
+
+#: ../src/panel.c:738
+msgid "Accept focus"
+msgstr ""
+
+#: ../src/panel.c:742
+msgid "Keep above other windows"
+msgstr ""
+
+#: ../src/panel.c:750
+msgid "Bottom panel:"
+msgstr "Untere Panel:"
+
+#: ../src/panel.c:750
+msgid "Top panel:"
+msgstr "Obere Panel:"
+
+#: ../src/panel.c:751
+msgid "Left panel:"
+msgstr "Linke Panel:"
+
+#: ../src/panel.c:751
+msgid "Right panel:"
+msgstr "Rechte Panel:"
+
+#: ../src/panel.c:783
+msgid "_Enabled"
+msgstr "_Aktiv"
+
+#: ../src/panel.c:795 ../src/panel.c:800
+msgid "Default"
+msgstr ""
+
+#: ../src/panel.c:855
+msgid "Applets:"
+msgstr ""
+
+#: ../src/panelctl.c:74
+#, c-format
+msgid ""
+"Usage: %s [-B|-L|-R|-S|-T|-b|-l|-r|-t]\n"
+"  -B\tShow the bottom panel\n"
+"  -L\tShow the left panel\n"
+"  -R\tShow the right panel\n"
+"  -S\tDisplay or change settings\n"
+"  -T\tShow the top panel\n"
+"  -b\tHide the bottom panel\n"
+"  -l\tHide the left panel\n"
+"  -r\tHide the right panel\n"
+"  -t\tHide the top panel\n"
+msgstr ""
+
+#: ../src/run.c:112 ../src/run.c:130
+msgid "Run program..."
+msgstr ""
+
+#: ../src/run.c:135
+msgid "Executable files"
+msgstr ""
+
+#: ../src/run.c:140
+msgid "Perl scripts"
+msgstr ""
+
+#: ../src/run.c:144
+msgid "Python scripts"
+msgstr ""
+
+#: ../src/run.c:148
+msgid "Shell scripts"
+msgstr ""
+
+#: ../src/run.c:152
+msgid "All files"
+msgstr "Alle Dateien"
+
+#: ../src/run.c:160
+msgid "Run in a terminal"
+msgstr ""
+
+#: ../src/run.c:172
+msgid "Run"
+msgstr "Laufen"
+
+#: ../src/run.c:183
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: ../src/run.c:440
+msgid "Command not found"
+msgstr ""
+
+#: ../src/run.c:443
+msgid "Permission denied"
+msgstr ""
+
+#: ../src/run.c:491 ../tools/settings.c:543
+#, c-format
+msgid "Usage: %s\n"
+msgstr ""
+
+#: ../src/window.c:95
+msgid "Invalid panel size"
+msgstr ""
+
+#: ../tools/embed.c:114
+msgid "Could not obtain the XID"
+msgstr ""
+
+#: ../tools/embed.c:155
+#, c-format
+msgid "Usage: %s command [arguments...]\n"
+msgstr ""
+
+#: ../tools/helper.c:219
+msgid "Invalid panel position"
+msgstr ""
+
+#: ../tools/helper.c:244
+msgid "Applets available:"
+msgstr ""
+
+#: ../tools/message.c:165
+#, c-format
+msgid ""
+"Usage: %s [-EIQW][-T title][-t timeout] message\n"
+"       %s [-N name][-T title][-t timeout] message\n"
+msgstr ""
+
+#: ../tools/message.c:179 ../tools/message.c:197
+msgid "Information"
+msgstr "Information"
+
+#: ../tools/message.c:204
+msgid "Question"
+msgstr "Frage"
+
+#: ../tools/message.c:211
+msgid "Warning"
+msgstr "Warnung"
+
+#: ../tools/notify.c:108
+msgid "Notification"
+msgstr ""
+
+#: ../tools/notify.c:146
+#, c-format
+msgid ""
+"Usage: %s [-e][-L|-S|-X|-x][-t timeout] applet...\n"
+"       %s -l\n"
+"  -e\tEmbed the notification in the panel\n"
+"  -L\tUse icons the size of a large toolbar\n"
+"  -S\tUse icons the size of a small toolbar\n"
+"  -X\tUse huge icons\n"
+"  -x\tUse icons the size of menus\n"
+"  -t\tTime to wait before disappearing (0: unlimited)\n"
+"  -l\tLists the plug-ins available\n"
+msgstr ""
+
+#: ../tools/settings.c:127
+msgid "System preferences"
+msgstr ""
+
+#: ../tools/wifibrowser.c:118
+msgid "Wireless browser"
+msgstr ""
+
+#: ../tools/wifibrowser.c:161
+msgid "SSID"
+msgstr "SSID"
+
+#: ../tools/wifibrowser.c:168
+msgid "BSSID"
+msgstr "BSSID"
+
+#: ../tools/wifibrowser.c:202
+#, c-format
+msgid ""
+"Usage: %s [-c filename][-i interface]\n"
+"  -c\tPath to a configuration file\n"
+"  -i\tNetwork interface to connect to\n"
+msgstr ""
+
+#: ../tools/wifibrowser.c:302
+msgid "Connect"
+msgstr "Verbinden"
