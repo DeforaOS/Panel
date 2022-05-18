@@ -1,6 +1,5 @@
 # $Id$
 # Copyright (c) 2022 Pierre Pronchery <khorben@defora.org>
-# German translations for DeforaOS Panel.
 # This file is distributed under the same license as the Panel package.
 # Pierre Pronchery <khorben@defora.org>, 2022.
 #
