@@ -296,7 +296,11 @@ static void _refresh_interface_flags(Network * network, NetworkInterface * ni,
 	gboolean active = TRUE;
 	char const * icon = "network-offline";
 #ifdef SIOCGIFDATA
+# if defined(__NetBSD__)
 	struct ifdatareq ifdr;
+# else
+	struct if_data ifdr;
+# endif
 # if GTK_CHECK_VERSION(2, 12, 0)
 	unsigned long ibytes;
 	unsigned long obytes;
