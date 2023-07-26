@@ -390,12 +390,12 @@ static gboolean _battery_get(Battery * battery, gdouble * level,
 		gboolean * charging)
 {
 	const gdouble error = 0.0 / 0.0;
-	PanelAppletHelper * helper = battery->helper;
+	(void) battery;
 
 	*level = error;
 	*charging = FALSE;
 	error_set("%s: %s", applet.name, strerror(ENOSYS));
-	return 0.0 / 0.0;
+	return FALSE;
 }
 #endif
 
