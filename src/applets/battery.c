@@ -371,7 +371,7 @@ static gboolean _battery_get(Battery * battery, gdouble * level,
 		return TRUE;
 	}
 	buf[--buf_cnt] = '\0';
-	if(sscanf(buf, "%f %f %x %x %x %x %d%% %d min", &d, &d, &u, &x, &u,
+	if(sscanf(buf, "%lf %lf %x %x %x %x %d%% %d min", &d, &d, &u, &x, &u,
 				&u, &b, &i) != 8)
 	{
 		error_set("%s: %s: %s", applet.name, apm, strerror(errno));
