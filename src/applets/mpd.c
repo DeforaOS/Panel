@@ -24,25 +24,25 @@
 
 /* constants */
 #ifndef MPD_COMMAND_FORWARD
-# define MPD_COMMAND_FORWARD	"mpd --forward"
+# define MPD_COMMAND_FORWARD	"mpc seek +00:00:05"
 #endif
 #ifndef MPD_COMMAND_NEXT
-# define MPD_COMMAND_NEXT	"mpd --next"
+# define MPD_COMMAND_NEXT	"mpc next"
 #endif
 #ifndef MPD_COMMAND_PAUSE
-# define MPD_COMMAND_PAUSE	"mpd --play-pause"
+# define MPD_COMMAND_PAUSE	"mpc toggle"
 #endif
 #ifndef MPD_COMMAND_PLAY
-# define MPD_COMMAND_PLAY	"mpd --play"
+# define MPD_COMMAND_PLAY	"mpc play"
 #endif
 #ifndef MPD_COMMAND_PREVIOUS
-# define MPD_COMMAND_PREVIOUS	"mpd --previous"
+# define MPD_COMMAND_PREVIOUS	"mpc prev"
 #endif
 #ifndef MPD_COMMAND_REWIND
-# define MPD_COMMAND_REWIND	"mpd --rewind"
+# define MPD_COMMAND_REWIND	"mpc seek -00:00:05"
 #endif
 #ifndef MPD_COMMAND_STOP
-# define MPD_COMMAND_STOP	"mpd --stop"
+# define MPD_COMMAND_STOP	"mpc stop"
 #endif
 
 
