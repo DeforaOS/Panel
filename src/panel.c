@@ -33,7 +33,9 @@
 #include <errno.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+#endif
 #include <X11/X.h>
 #include "window.h"
 #include "panel.h"
@@ -147,8 +149,10 @@ static void _new_prefs(Config * config, GdkScreen * screen, PanelPrefs * prefs,
 /* callbacks */
 static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 		uint32_t value3);
+#ifdef GDK_WINDOWING_X11
 static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
+#endif
 static GdkFilterReturn _event_configure_notify(Panel * panel);
 
 Panel * panel_new(PanelPrefs const * prefs)
@@ -196,7 +200,9 @@ Panel * panel_new(PanelPrefs const * prefs)
 	/* manage root window events */
 	gdk_window_set_events(panel->root, gdk_window_get_events(panel->root)
 			| GDK_PROPERTY_CHANGE_MASK);
+#ifdef GDK_WINDOWING_X11
 	gdk_window_add_filter(panel->root, _on_root_event, panel);
+#endif
 	return panel;
 }
 
@@ -348,6 +354,7 @@ static int _new_on_message(void * data, uint32_t value1, uint32_t value2,
 	return 0;
 }
 
+#ifdef GDK_WINDOWING_X11
 static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data)
 {
@@ -359,6 +366,7 @@ static GdkFilterReturn _on_root_event(GdkXEvent * xevent, GdkEvent * event,
 		return _event_configure_notify(panel);
 	return GDK_FILTER_CONTINUE;
 }
+#endif
 
 static GdkFilterReturn _event_configure_notify(Panel * panel)
 {
