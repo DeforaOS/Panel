@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-18 01:25+0200\n"
+"POT-Creation-Date: 2023-10-08 21:55+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: Spanish\n"
@@ -30,7 +30,7 @@ msgid "Unknown"
 msgstr "Desconocido"
 
 #: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
-#: ../src/panel.c:419 ../src/panel.c:424 ../src/run.c:256 ../src/run.c:262
+#: ../src/panel.c:427 ../src/panel.c:432 ../src/run.c:256 ../src/run.c:262
 #: ../tools/message.c:193
 msgid "Error"
 msgstr "Error"
@@ -68,8 +68,8 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:75 ../src/applets/close.c:101
-#: ../src/applets/tasks.c:845
+#: ../src/applets/close.c:77 ../src/applets/close.c:103
+#: ../src/applets/tasks.c:847
 msgid "Close"
 msgstr "Cerrar"
 
@@ -101,11 +101,11 @@ msgstr "Plataforma no admitida"
 msgid "CPU frequency: "
 msgstr "Frecuancia de CPU: "
 
-#: ../src/applets/desktop.c:45
+#: ../src/applets/desktop.c:47
 msgid "Desktop switch"
 msgstr "Ver el escritorio"
 
-#: ../src/applets/desktop.c:70
+#: ../src/applets/desktop.c:72
 msgid "Show desktop"
 msgstr "Mostrar el escritorio"
 
@@ -133,33 +133,33 @@ msgstr "GSM"
 msgid "GSM is enabled"
 msgstr "GSM habilitado"
 
-#: ../src/applets/leds.c:63
+#: ../src/applets/leds.c:65
 msgid "LEDs"
 msgstr "LEDs"
 
-#: ../src/applets/leds.c:152
+#: ../src/applets/leds.c:154
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:159
+#: ../src/applets/leds.c:161
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:167
+#: ../src/applets/leds.c:169
 msgid "Could not obtain XKB map"
 msgstr "No se pudo obtener el map de XKB"
 
-#: ../src/applets/leds.c:175
+#: ../src/applets/leds.c:177
 msgid "Could not obtain XKB indicator map"
 msgstr "No se pudo obtener el map de indicadores de XKB"
 
-#: ../src/applets/leds.c:183
+#: ../src/applets/leds.c:185
 msgid "Could not obtain XKB names"
 msgstr "No se pudo obtener los nombres de XKB"
 
-#: ../src/applets/leds.c:234
+#: ../src/applets/leds.c:236
 #, c-format
 msgid "LED %u"
 msgstr "LED %u"
@@ -273,35 +273,35 @@ msgstr "Memoria"
 msgid "RAM:"
 msgstr "RAM:"
 
-#: ../src/applets/mixer.c:94
+#: ../src/applets/mixer.c:96
 msgid "Mixer"
 msgstr "Mezclador de volumen"
 
-#: ../src/applets/mixer.c:133
+#: ../src/applets/mixer.c:135
 msgid "Show mixer"
 msgstr "Mostrar mezclador de volumen"
 
-#: ../src/applets/mixer.c:295 ../src/run.c:123
+#: ../src/applets/mixer.c:297 ../src/run.c:123
 msgid "Command:"
 msgstr "Commando:"
 
-#: ../src/applets/mixer.c:301
+#: ../src/applets/mixer.c:303
 msgid "Size:"
 msgstr "Tamaño:"
 
-#: ../src/applets/mixer.c:314
+#: ../src/applets/mixer.c:316
 msgid "Width:"
 msgstr "Ancho:"
 
-#: ../src/applets/mixer.c:329
+#: ../src/applets/mixer.c:331
 msgid "Height:"
 msgstr "Alto:"
 
-#: ../src/applets/mixer.c:340
+#: ../src/applets/mixer.c:342
 msgid "Keep ratio"
 msgstr "Mantener proporciones"
 
-#: ../src/applets/mixer.c:409
+#: ../src/applets/mixer.c:411
 msgid "Could not start mixer"
 msgstr "No se pudo iniciar el control de volumen"
 
@@ -337,7 +337,7 @@ msgstr "Adelantar"
 msgid "Next"
 msgstr "Siguiente"
 
-#: ../src/applets/network.c:345
+#: ../src/applets/network.c:353
 #, c-format
 msgid ""
 "%s\n"
@@ -348,29 +348,29 @@ msgstr ""
 "In: %lu kB/s\n"
 "Out: %lu kB/s"
 
-#: ../src/applets/network.c:397
+#: ../src/applets/network.c:405
 msgid "Show local interfaces"
 msgstr "Mostrar las interfaces locales"
 
-#: ../src/applets/network.c:403
+#: ../src/applets/network.c:411
 msgid "Show the interfaces disabled"
 msgstr "Mostrar las interfaces desabilitadas"
 
-#: ../src/applets/pager.c:102
+#: ../src/applets/pager.c:104
 msgid "Pager"
 msgstr ""
 
-#: ../src/applets/pager.c:284
+#: ../src/applets/pager.c:286
 #, c-format
 msgid "Desk %lu"
 msgstr "Escritorio %lu"
 
-#: ../src/applets/pager.c:320
+#: ../src/applets/pager.c:322
 #, c-format
 msgid "Switch to %s"
 msgstr "Cambiar a %s"
 
-#: ../src/applets/pager.c:330
+#: ../src/applets/pager.c:332
 #, c-format
 msgid "On %s"
 msgstr ""
@@ -410,59 +410,59 @@ msgstr "Swap"
 msgid "Swap:"
 msgstr "Swap:"
 
-#: ../src/applets/systray.c:67
+#: ../src/applets/systray.c:69
 msgid "System tray"
 msgstr "Área de notificación"
 
-#: ../src/applets/tasks.c:149
+#: ../src/applets/tasks.c:151
 msgid "Tasks"
 msgstr "Tareas"
 
-#: ../src/applets/tasks.c:531 ../src/applets/title.c:248
+#: ../src/applets/tasks.c:533 ../src/applets/title.c:250
 msgid "(Untitled)"
 msgstr "(Sin Título)"
 
-#: ../src/applets/tasks.c:824
+#: ../src/applets/tasks.c:826
 msgid "Move"
 msgstr "Mover"
 
-#: ../src/applets/tasks.c:826
+#: ../src/applets/tasks.c:828
 msgid "Resize"
 msgstr "Ajustar tamaño"
 
-#: ../src/applets/tasks.c:828
+#: ../src/applets/tasks.c:830
 msgid "Minimize"
 msgstr "Minimizar"
 
-#: ../src/applets/tasks.c:830
+#: ../src/applets/tasks.c:832
 msgid "Shade"
 msgstr "Shade"
 
-#: ../src/applets/tasks.c:832
+#: ../src/applets/tasks.c:834
 msgid "Stick"
 msgstr "Stick"
 
-#: ../src/applets/tasks.c:835
+#: ../src/applets/tasks.c:837
 msgid "Maximize horizontally"
 msgstr "Maximizar horizontalmente"
 
-#: ../src/applets/tasks.c:838
+#: ../src/applets/tasks.c:840
 msgid "Maximize vertically"
 msgstr "Maximizar verticalemnte"
 
-#: ../src/applets/tasks.c:840
+#: ../src/applets/tasks.c:842
 msgid "Fullscreen"
 msgstr "Pantalla completa"
 
-#: ../src/applets/tasks.c:843
+#: ../src/applets/tasks.c:845
 msgid "Change desktop"
 msgstr "Cambiar escritorio"
 
-#: ../src/applets/tasks.c:896
+#: ../src/applets/tasks.c:898
 msgid "Maximize"
 msgstr "Maximizar"
 
-#: ../src/applets/title.c:74
+#: ../src/applets/title.c:76
 msgid "Title"
 msgstr "Título"
 
@@ -696,67 +696,67 @@ msgstr ""
 "  -S\tUsar íconos pequeños de barra de herramientas\n"
 "  -x\tUsar íconos del tamaño de los menús\n"
 
-#: ../src/panel.c:120
+#: ../src/panel.c:122
 msgid "Large"
 msgstr "Grande"
 
-#: ../src/panel.c:121
+#: ../src/panel.c:123
 msgid "Small"
 msgstr "Pequeño"
 
-#: ../src/panel.c:122
+#: ../src/panel.c:124
 msgid "Smaller"
 msgstr "Más quequeño"
 
-#: ../src/panel.c:224
+#: ../src/panel.c:230
 msgid "Could not load configuration"
 msgstr "No se pudo cargar configuración"
 
-#: ../src/panel.c:696
+#: ../src/panel.c:704
 msgid "Panel preferences"
 msgstr "Preferencias del panel"
 
-#: ../src/panel.c:713
+#: ../src/panel.c:721
 msgid "General"
 msgstr "General"
 
-#: ../src/panel.c:717
+#: ../src/panel.c:725
 msgid "Panels"
 msgstr "Paneles"
 
-#: ../src/panel.c:738
+#: ../src/panel.c:746
 msgid "Accept focus"
 msgstr "Aceptar enfoque"
 
-#: ../src/panel.c:742
+#: ../src/panel.c:750
 msgid "Keep above other windows"
 msgstr "Mantener encima de otras ventanas"
 
-#: ../src/panel.c:750
+#: ../src/panel.c:758
 msgid "Bottom panel:"
 msgstr "Panel inferior:"
 
-#: ../src/panel.c:750
+#: ../src/panel.c:758
 msgid "Top panel:"
 msgstr "Panel superior:"
 
-#: ../src/panel.c:751
+#: ../src/panel.c:759
 msgid "Left panel:"
 msgstr "Panel izquierdo"
 
-#: ../src/panel.c:751
+#: ../src/panel.c:759
 msgid "Right panel:"
 msgstr "Panel derecho"
 
-#: ../src/panel.c:783
+#: ../src/panel.c:791
 msgid "_Enabled"
 msgstr "_Habilitado"
 
-#: ../src/panel.c:795 ../src/panel.c:800
+#: ../src/panel.c:803 ../src/panel.c:808
 msgid "Default"
 msgstr "Por Defecto"
 
-#: ../src/panel.c:855
+#: ../src/panel.c:863
 msgid "Applets:"
 msgstr "Applets:"
 

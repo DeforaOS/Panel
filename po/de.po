@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-18 01:25+0200\n"
+"POT-Creation-Date: 2023-10-08 21:55+0200\n"
 "PO-Revision-Date: 2022-05-18 01:28+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: German\n"
@@ -30,7 +30,7 @@ msgid "Unknown"
 msgstr "Unbekannt"
 
 #: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
-#: ../src/panel.c:419 ../src/panel.c:424 ../src/run.c:256 ../src/run.c:262
+#: ../src/panel.c:427 ../src/panel.c:432 ../src/run.c:256 ../src/run.c:262
 #: ../tools/message.c:193
 msgid "Error"
 msgstr "Fehler"
@@ -68,8 +68,8 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:75 ../src/applets/close.c:101
-#: ../src/applets/tasks.c:845
+#: ../src/applets/close.c:77 ../src/applets/close.c:103
+#: ../src/applets/tasks.c:847
 msgid "Close"
 msgstr "Schliessen"
 
@@ -101,11 +101,11 @@ msgstr ""
 msgid "CPU frequency: "
 msgstr ""
 
-#: ../src/applets/desktop.c:45
+#: ../src/applets/desktop.c:47
 msgid "Desktop switch"
 msgstr ""
 
-#: ../src/applets/desktop.c:70
+#: ../src/applets/desktop.c:72
 msgid "Show desktop"
 msgstr ""
 
@@ -133,33 +133,33 @@ msgstr "GSM"
 msgid "GSM is enabled"
 msgstr "GSM ist aktiv"
 
-#: ../src/applets/leds.c:63
+#: ../src/applets/leds.c:65
 msgid "LEDs"
 msgstr ""
 
-#: ../src/applets/leds.c:152
+#: ../src/applets/leds.c:154
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:159
+#: ../src/applets/leds.c:161
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:167
+#: ../src/applets/leds.c:169
 msgid "Could not obtain XKB map"
 msgstr ""
 
-#: ../src/applets/leds.c:175
+#: ../src/applets/leds.c:177
 msgid "Could not obtain XKB indicator map"
 msgstr ""
 
-#: ../src/applets/leds.c:183
+#: ../src/applets/leds.c:185
 msgid "Could not obtain XKB names"
 msgstr ""
 
-#: ../src/applets/leds.c:234
+#: ../src/applets/leds.c:236
 #, c-format
 msgid "LED %u"
 msgstr ""
@@ -273,35 +273,35 @@ msgstr "Speicher"
 msgid "RAM:"
 msgstr ""
 
-#: ../src/applets/mixer.c:94
+#: ../src/applets/mixer.c:96
 msgid "Mixer"
 msgstr ""
 
-#: ../src/applets/mixer.c:133
+#: ../src/applets/mixer.c:135
 msgid "Show mixer"
 msgstr ""
 
-#: ../src/applets/mixer.c:295 ../src/run.c:123
+#: ../src/applets/mixer.c:297 ../src/run.c:123
 msgid "Command:"
 msgstr ""
 
-#: ../src/applets/mixer.c:301
+#: ../src/applets/mixer.c:303
 msgid "Size:"
 msgstr ""
 
-#: ../src/applets/mixer.c:314
+#: ../src/applets/mixer.c:316
 msgid "Width:"
 msgstr "Breite:"
 
-#: ../src/applets/mixer.c:329
+#: ../src/applets/mixer.c:331
 msgid "Height:"
 msgstr "HÃ¶he:"
 
-#: ../src/applets/mixer.c:340
+#: ../src/applets/mixer.c:342
 msgid "Keep ratio"
 msgstr ""
 
-#: ../src/applets/mixer.c:409
+#: ../src/applets/mixer.c:411
 msgid "Could not start mixer"
 msgstr ""
 
@@ -337,7 +337,7 @@ msgstr "VorwÃ€rts"
 msgid "Next"
 msgstr "NÃ€chste"
 
-#: ../src/applets/network.c:345
+#: ../src/applets/network.c:353
 #, c-format
 msgid ""
 "%s\n"
@@ -348,29 +348,29 @@ msgstr ""
 "In: %lu kB/s\n"
 "Aus: %lu kB/s"
 
-#: ../src/applets/network.c:397
+#: ../src/applets/network.c:405
 msgid "Show local interfaces"
 msgstr ""
 
-#: ../src/applets/network.c:403
+#: ../src/applets/network.c:411
 msgid "Show the interfaces disabled"
 msgstr ""
 
-#: ../src/applets/pager.c:102
+#: ../src/applets/pager.c:104
 msgid "Pager"
 msgstr ""
 
-#: ../src/applets/pager.c:284
+#: ../src/applets/pager.c:286
 #, c-format
 msgid "Desk %lu"
 msgstr ""
 
-#: ../src/applets/pager.c:320
+#: ../src/applets/pager.c:322
 #, c-format
 msgid "Switch to %s"
 msgstr ""
 
-#: ../src/applets/pager.c:330
+#: ../src/applets/pager.c:332
 #, c-format
 msgid "On %s"
 msgstr ""
@@ -410,59 +410,59 @@ msgstr ""
 msgid "Swap:"
 msgstr ""
 
-#: ../src/applets/systray.c:67
+#: ../src/applets/systray.c:69
 msgid "System tray"
 msgstr ""
 
-#: ../src/applets/tasks.c:149
+#: ../src/applets/tasks.c:151
 msgid "Tasks"
 msgstr ""
 
-#: ../src/applets/tasks.c:531 ../src/applets/title.c:248
+#: ../src/applets/tasks.c:533 ../src/applets/title.c:250
 msgid "(Untitled)"
 msgstr "(Ohne Titel)"
 
-#: ../src/applets/tasks.c:824
+#: ../src/applets/tasks.c:826
 msgid "Move"
 msgstr ""
 
-#: ../src/applets/tasks.c:826
+#: ../src/applets/tasks.c:828
 msgid "Resize"
 msgstr ""
 
-#: ../src/applets/tasks.c:828
+#: ../src/applets/tasks.c:830
 msgid "Minimize"
 msgstr "Minimieren"
 
-#: ../src/applets/tasks.c:830
+#: ../src/applets/tasks.c:832
 msgid "Shade"
 msgstr ""
 
-#: ../src/applets/tasks.c:832
+#: ../src/applets/tasks.c:834
 msgid "Stick"
 msgstr ""
 
-#: ../src/applets/tasks.c:835
+#: ../src/applets/tasks.c:837
 msgid "Maximize horizontally"
 msgstr ""
 
-#: ../src/applets/tasks.c:838
+#: ../src/applets/tasks.c:840
 msgid "Maximize vertically"
 msgstr ""
 
-#: ../src/applets/tasks.c:840
+#: ../src/applets/tasks.c:842
 msgid "Fullscreen"
 msgstr ""
 
-#: ../src/applets/tasks.c:843
+#: ../src/applets/tasks.c:845
 msgid "Change desktop"
 msgstr ""
 
-#: ../src/applets/tasks.c:896
+#: ../src/applets/tasks.c:898
 msgid "Maximize"
 msgstr ""
 
-#: ../src/applets/title.c:74
+#: ../src/applets/title.c:76
 msgid "Title"
 msgstr "Titel"
 
@@ -672,67 +672,67 @@ msgid ""
 "  -x\tUse icons the size of menus\n"
 msgstr ""
 
-#: ../src/panel.c:120
+#: ../src/panel.c:122
 msgid "Large"
 msgstr ""
 
-#: ../src/panel.c:121
+#: ../src/panel.c:123
 msgid "Small"
 msgstr "Klein"
 
-#: ../src/panel.c:122
+#: ../src/panel.c:124
 msgid "Smaller"
 msgstr "Kleiner"
 
-#: ../src/panel.c:224
+#: ../src/panel.c:230
 msgid "Could not load configuration"
 msgstr ""
 
-#: ../src/panel.c:696
+#: ../src/panel.c:704
 msgid "Panel preferences"
 msgstr ""
 
-#: ../src/panel.c:713
+#: ../src/panel.c:721
 msgid "General"
 msgstr "Generell"
 
-#: ../src/panel.c:717
+#: ../src/panel.c:725
 msgid "Panels"
 msgstr "Panele"
 
-#: ../src/panel.c:738
+#: ../src/panel.c:746
 msgid "Accept focus"
 msgstr ""
 
-#: ../src/panel.c:742
+#: ../src/panel.c:750
 msgid "Keep above other windows"
 msgstr ""
 
-#: ../src/panel.c:750
+#: ../src/panel.c:758
 msgid "Bottom panel:"
 msgstr "Untere Panel:"
 
-#: ../src/panel.c:750
+#: ../src/panel.c:758
 msgid "Top panel:"
 msgstr "Obere Panel:"
 
-#: ../src/panel.c:751
+#: ../src/panel.c:759
 msgid "Left panel:"
 msgstr "Linke Panel:"
 
-#: ../src/panel.c:751
+#: ../src/panel.c:759
 msgid "Right panel:"
 msgstr "Rechte Panel:"
 
-#: ../src/panel.c:783
+#: ../src/panel.c:791
 msgid "_Enabled"
 msgstr "_Aktiv"
 
-#: ../src/panel.c:795 ../src/panel.c:800
+#: ../src/panel.c:803 ../src/panel.c:808
 msgid "Default"
 msgstr ""
 
-#: ../src/panel.c:855
+#: ../src/panel.c:863
 msgid "Applets:"
 msgstr ""
 
