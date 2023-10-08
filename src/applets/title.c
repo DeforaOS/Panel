@@ -20,6 +20,7 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
+#include <gdk/gdk.h>
 #ifdef GDK_WINDOWING_X11
 # include <gdk/gdkx.h>
 # include <X11/Xatom.h>
