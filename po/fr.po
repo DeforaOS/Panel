@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-08 21:55+0200\n"
+"POT-Creation-Date: 2023-10-08 23:46+0200\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -68,8 +68,8 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:77 ../src/applets/close.c:103
-#: ../src/applets/tasks.c:847
+#: ../src/applets/close.c:78 ../src/applets/close.c:104
+#: ../src/applets/tasks.c:848
 msgid "Close"
 msgstr "Fermer"
 
@@ -101,11 +101,11 @@ msgstr "Plate-forme non supportée"
 msgid "CPU frequency: "
 msgstr "Fréquence CPU : "
 
-#: ../src/applets/desktop.c:47
+#: ../src/applets/desktop.c:48
 msgid "Desktop switch"
 msgstr "Afficher le bureau"
 
-#: ../src/applets/desktop.c:72
+#: ../src/applets/desktop.c:73
 msgid "Show desktop"
 msgstr "Afficher le bureau"
 
@@ -133,33 +133,33 @@ msgstr "GSM"
 msgid "GSM is enabled"
 msgstr "GSM actif"
 
-#: ../src/applets/leds.c:65
+#: ../src/applets/leds.c:66
 msgid "LEDs"
 msgstr "DELs"
 
-#: ../src/applets/leds.c:154
+#: ../src/applets/leds.c:155
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr "Bibliothèque XKB inattendue (%d.%d)"
 
-#: ../src/applets/leds.c:161
+#: ../src/applets/leds.c:162
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr "Extension XKB inattendue (%d.%d)"
 
-#: ../src/applets/leds.c:169
+#: ../src/applets/leds.c:170
 msgid "Could not obtain XKB map"
 msgstr "Impossible d'obtenir la table XKB"
 
-#: ../src/applets/leds.c:177
+#: ../src/applets/leds.c:178
 msgid "Could not obtain XKB indicator map"
 msgstr "Impossible d'obtenir les indicateurs XKB"
 
-#: ../src/applets/leds.c:185
+#: ../src/applets/leds.c:186
 msgid "Could not obtain XKB names"
 msgstr "Impossible d'obtenir les noms XKB"
 
-#: ../src/applets/leds.c:236
+#: ../src/applets/leds.c:237
 #, c-format
 msgid "LED %u"
 msgstr "DEL %u"
@@ -356,21 +356,21 @@ msgstr "Lister les interfaces locales"
 msgid "Show the interfaces disabled"
 msgstr "Afficher les interfaces inactives"
 
-#: ../src/applets/pager.c:104
+#: ../src/applets/pager.c:105
 msgid "Pager"
 msgstr "Pageur"
 
-#: ../src/applets/pager.c:286
+#: ../src/applets/pager.c:287
 #, c-format
 msgid "Desk %lu"
 msgstr "Bureau %lu"
 
-#: ../src/applets/pager.c:322
+#: ../src/applets/pager.c:323
 #, c-format
 msgid "Switch to %s"
 msgstr "Basculer vers %s"
 
-#: ../src/applets/pager.c:332
+#: ../src/applets/pager.c:333
 #, c-format
 msgid "On %s"
 msgstr "Dans %s"
@@ -414,55 +414,55 @@ msgstr "Échange :"
 msgid "System tray"
 msgstr "Système"
 
-#: ../src/applets/tasks.c:151
+#: ../src/applets/tasks.c:152
 msgid "Tasks"
 msgstr "Tâches"
 
-#: ../src/applets/tasks.c:533 ../src/applets/title.c:250
+#: ../src/applets/tasks.c:534 ../src/applets/title.c:251
 msgid "(Untitled)"
 msgstr "(Sans titre)"
 
-#: ../src/applets/tasks.c:826
+#: ../src/applets/tasks.c:827
 msgid "Move"
 msgstr "Déplacer"
 
-#: ../src/applets/tasks.c:828
+#: ../src/applets/tasks.c:829
 msgid "Resize"
 msgstr "Redimensionner"
 
-#: ../src/applets/tasks.c:830
+#: ../src/applets/tasks.c:831
 msgid "Minimize"
 msgstr "Réduire"
 
-#: ../src/applets/tasks.c:832
+#: ../src/applets/tasks.c:833
 msgid "Shade"
 msgstr "Masquer"
 
-#: ../src/applets/tasks.c:834
+#: ../src/applets/tasks.c:835
 msgid "Stick"
 msgstr "Attacher"
 
-#: ../src/applets/tasks.c:837
+#: ../src/applets/tasks.c:838
 msgid "Maximize horizontally"
 msgstr "Maximiser horizontalement"
 
-#: ../src/applets/tasks.c:840
+#: ../src/applets/tasks.c:841
 msgid "Maximize vertically"
 msgstr "Maximiser verticalement"
 
-#: ../src/applets/tasks.c:842
+#: ../src/applets/tasks.c:843
 msgid "Fullscreen"
 msgstr "Plein écran"
 
-#: ../src/applets/tasks.c:845
+#: ../src/applets/tasks.c:846
 msgid "Change desktop"
 msgstr "Déplacer vers le bureau"
 
-#: ../src/applets/tasks.c:898
+#: ../src/applets/tasks.c:899
 msgid "Maximize"
 msgstr "Maximiser"
 
-#: ../src/applets/title.c:76
+#: ../src/applets/title.c:77
 msgid "Title"
 msgstr "Titre"
 
