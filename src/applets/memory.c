@@ -198,11 +198,11 @@ static gboolean _memory_on_timeout(gpointer data)
 	size_t size = sizeof(vm);
 	gdouble value;
 
-	if(sysctl(mib, 2, &vm, &size, NULL, 0) < 0)
+	if(sysctl(mib, 2, &vm, &size, NULL, 0) != 0)
 	{
 		error_set("%s: %s: %s", applet.name, "sysctl",
 				strerror(errno));
-		return TRUE;
+		return memory->helper->error(NULL, error_get(NULL), TRUE);
 	}
 	value = vm.t_arm * 100;
 	value /= (vm.t_rm + vm.t_free);
