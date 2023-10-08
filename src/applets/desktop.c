@@ -17,8 +17,10 @@
 
 #include <string.h>
 #include <libintl.h>
-#include <gdk/gdkx.h>
-#include <X11/X.h>
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+# include <X11/X.h>
+#endif
 #include "Panel/applet.h"
 #define _(string) gettext(string)
 #define N_(string) string

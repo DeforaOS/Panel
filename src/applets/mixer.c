@@ -29,7 +29,9 @@
 #include <errno.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
-#include <gdk/gdkx.h>
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+#endif
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif

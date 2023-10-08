@@ -20,8 +20,10 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
-#include <gdk/gdkx.h>
-#include <X11/Xatom.h>
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+# include <X11/Xatom.h>
+#endif
 #include <System.h>
 #include "Panel/applet.h"
 #define _(string) gettext(string)

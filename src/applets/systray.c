@@ -23,8 +23,10 @@
 #if GTK_CHECK_VERSION(3, 0, 0)
 # include <gtk/gtkx.h>
 #endif
-#include <gdk/gdkx.h>
-#include <X11/Xatom.h>
+#ifdef GDK_WINDOWING_X11
+# include <gdk/gdkx.h>
+# include <X11/Xatom.h>
+#endif
 #include <System.h>
 #include "Panel/applet.h"
 #define N_(string) string
