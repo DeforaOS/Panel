@@ -92,6 +92,7 @@ static void _desktop_destroy(Desktop * desktop)
 /* on_clicked */
 static void _desktop_on_clicked(GtkWidget * widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	GdkScreen * screen;
 	GdkDisplay * display;
 	GdkWindow * root;
@@ -113,4 +114,5 @@ static void _desktop_on_clicked(GtkWidget * widget)
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
 	gdk_error_trap_pop();
+#endif
 }

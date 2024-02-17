@@ -48,10 +48,12 @@ typedef struct _PanelApplet
 	GdkScreen * screen;
 	GdkWindow * root;
 
+#if defined(GDK_WINDOWING_X11)
 	Atom atom_active;
 	Atom atom_close;
 	Window window;
 	Window panel;
+#endif
 } Close;
 
 
@@ -64,11 +66,13 @@ static void _close_destroy(Close * close);
 static void _close_do(Close * close);
 
 /* callbacks */
+#if defined(GDK_WINDOWING_X11)
 static void _close_on_close(gpointer data);
 static GdkFilterReturn _close_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
 static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+#endif
 
 
 /* public */
@@ -110,17 +114,23 @@ static Close * _close_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	image = gtk_image_new_from_stock(applet.icon, iconsize);
 #endif
 	gtk_button_set_image(GTK_BUTTON(close->widget), image);
+#if defined(GDK_WINDOWING_X11)
 	g_signal_connect_swapped(close->widget, "clicked", G_CALLBACK(
 				_close_on_close), close);
 	close->source = g_signal_connect(close->widget, "screen-changed",
 			G_CALLBACK(_close_on_screen_changed), close);
+#else
+	close->source = 0;
+#endif
 	close->display = NULL;
 	close->screen = NULL;
 	close->root = NULL;
+#if defined(GDK_WINDOWING_X11)
 	close->atom_active = 0;
 	close->atom_close = 0;
 	close->window = None;
 	close->panel = None;
+#endif
 	gtk_widget_show(close->widget);
 	*widget = close->widget;
 	return close;
@@ -132,13 +142,16 @@ static void _close_destroy(Close * close)
 {
 	if(close->source != 0)
 		g_signal_handler_disconnect(close->widget, close->source);
+#if defined(GDK_WINDOWING_X11)
 	if(close->root != NULL)
 		gdk_window_remove_filter(close->root, _close_on_filter, close);
+#endif
 	gtk_widget_destroy(close->widget);
 	object_delete(close);
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 /* close_get_window_property */
 static int _close_get_window_property(Close * close, Window window,
@@ -269,3 +282,4 @@ static void _close_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 			close->display, "_NET_CLOSE_WINDOW");
 	_close_do(close);
 }
+#endif

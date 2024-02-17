@@ -26,7 +26,10 @@
 #include <System.h>
 #include <Desktop.h>
 #if GTK_CHECK_VERSION(3, 0, 0)
-# include <gtk/gtkx.h>
+# include <gdk/gdk.h>
+# if defined(GDK_WINDOWING_X11)
+#  include <gtk/gtkx.h>
+# endif
 #endif
 #include "Panel/applet.h"
 #define _(string) gettext(string)
@@ -36,15 +39,17 @@
 /* Embed */
 /* private */
 /* types */
+#if defined(GDK_WINDOWING_X11)
 typedef struct _EmbedWidget
 {
 	GtkWidget * socket;
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	unsigned long id;
-#else
+# else
 	GdkNativeWindow id;
-#endif
+# endif
 } EmbedWidget;
+#endif
 
 typedef struct _PanelApplet
 {
@@ -57,8 +62,10 @@ typedef struct _PanelApplet
 	GtkWidget * window;
 	GtkWidget * vbox;
 
+#if defined(GDK_WINDOWING_X11)
 	EmbedWidget * widgets;
 	size_t widgets_cnt;
+#endif
 } Embed;
 
 
@@ -107,8 +114,10 @@ static Embed * _embed_init(PanelAppletHelper * helper,
 	embed->window = NULL;
 	embed->vbox = NULL;
 	embed->button = gtk_toggle_button_new();
+#if defined(GDK_WINDOWING_X11)
 	embed->widgets = NULL;
 	embed->widgets_cnt = 0;
+#endif
 #if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(embed->button, _("Desktop notifications"));
 #endif
@@ -138,7 +147,9 @@ static void _embed_destroy(Embed * embed)
 		g_source_remove(embed->source);
 	if(embed->vbox != NULL)
 		g_object_unref(embed->vbox);
+#if defined(GDK_WINDOWING_X11)
 	free(embed->widgets);
+#endif
 	gtk_widget_destroy(embed->button);
 	object_delete(embed);
 }
@@ -165,6 +176,7 @@ static void _embed_on_added(gpointer data)
 static int _embed_on_desktop_message(void * data, uint32_t value1,
 		uint32_t value2, uint32_t value3)
 {
+#if defined(GDK_WINDOWING_X11)
 	Embed * embed = data;
 	GtkWidget * socket;
 	size_t i;
@@ -197,6 +209,7 @@ static int _embed_on_desktop_message(void * data, uint32_t value1,
 	gtk_widget_show(socket);
 	gtk_box_pack_start(GTK_BOX(embed->vbox), socket, FALSE, TRUE, 0);
 	gtk_socket_add_id(GTK_SOCKET(socket), value2);
+#endif
 	return 0;
 }
 
@@ -236,12 +249,13 @@ static gboolean _embed_on_idle(gpointer data)
 /* embed_on_removed */
 static gboolean _embed_on_removed(GtkWidget * widget, gpointer data)
 {
+#if defined(GDK_WINDOWING_X11)
 	Embed * embed = data;
 	size_t i;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	for(i = 0; i < embed->widgets_cnt; i++)
 	{
 		if(embed->widgets[i].socket != widget)
@@ -257,10 +271,11 @@ static gboolean _embed_on_removed(GtkWidget * widget, gpointer data)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(embed->button),
 				FALSE);
 		gtk_widget_set_sensitive(embed->button, FALSE);
-#ifdef EMBEDDED
+# ifdef EMBEDDED
 		gtk_widget_hide(embed->button);
-#endif
+# endif
 	}
+#endif
 	return FALSE;
 }
 
