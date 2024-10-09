@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012-2022 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2024 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,16 @@
 #include <string.h>
 #include <locale.h>
 #include <libintl.h>
+#include <System/error.h>
 #include <Desktop.h>
-#if GTK_CHECK_VERSION(3, 0, 0)
-# include <gtk/gtkx.h>
+#if defined(GDK_WINDOWING_X11)
+# if GTK_CHECK_VERSION(3, 0, 0)
+#  include <gtk/gtkx.h>
+# endif
 #endif
 #include "../include/Panel.h"
 #include "../config.h"
+
 #define _(string) gettext(string)
 
 /* constants */
@@ -50,8 +54,10 @@
 static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message);
 
+#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 static gboolean _message_on_timeout(gpointer data);
+#endif
 
 static int _error(char const * message, int ret);
 static int _usage(void);
@@ -62,6 +68,7 @@ static int _usage(void);
 static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message)
 {
+#if defined(GDK_WINDOWING_X11)
 	PangoFontDescription * bold;
 	GtkWidget * plug;
 	GtkWidget * hbox;
@@ -136,9 +143,19 @@ static int _message(unsigned int timeout, char const * stock,
 	pango_font_description_free(bold);
 	gtk_main();
 	return 0;
+#else
+	(void) timeout;
+	(void) stock;
+	(void) title;
+	(void) message;
+
+	return error_set_print(PROGNAME_PANEL_MESSAGE, 2, "%s",
+		"X11 support not detected");
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 /* message_on_timeout */
 static gboolean _message_on_timeout(gpointer data)
@@ -148,6 +165,7 @@ static gboolean _message_on_timeout(gpointer data)
 	gtk_main_quit();
 	return FALSE;
 }
+#endif
 
 
 /* error */

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2012-2023 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2012-2024 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,16 @@
 #include <errno.h>
 #include <libintl.h>
 #include <gtk/gtk.h>
-#ifdef GDK_WINDOWING_X11
-# include <gdk/gdkx.h>
-#endif
-#if GTK_CHECK_VERSION(3, 0, 0)
-# include <gtk/gtkx.h>
+#if defined(GDK_WINDOWING_X11)
+# if GTK_CHECK_VERSION(3, 0, 0)
+#  include <gtk/gtkx.h>
+# else
+#  include <gdk/gdkx.h>
+# endif
 #endif
 #include <System.h>
 #include "Panel/applet.h"
+
 #define _(string) gettext(string)
 #define N_(string) string
 
@@ -47,6 +49,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+#if defined(GDK_WINDOWING_X11)
 	GtkWidget * widget;
 
 	guint source;
@@ -65,6 +68,7 @@ typedef struct _PanelApplet
 	GtkWidget * pr_width;
 	GtkWidget * pr_height;
 	GtkWidget * pr_ratio;
+#endif
 } Mixer;
 
 
@@ -76,6 +80,7 @@ static void _mixer_destroy(Mixer * mixer);
 static GtkWidget * _mixer_settings(Mixer * mixer, gboolean apply,
 		gboolean reset);
 
+#if defined(GDK_WINDOWING_X11)
 /* useful */
 static int _mixer_spawn(Mixer * mixer, unsigned long * xid);
 
@@ -83,6 +88,7 @@ static int _mixer_spawn(Mixer * mixer, unsigned long * xid);
 static void _mixer_on_child(GPid pid, gint status, gpointer data);
 static gboolean _mixer_on_removed(void);
 static void _mixer_on_toggled(GtkWidget * widget, gpointer data);
+#endif
 
 
 /* constants */
@@ -107,13 +113,16 @@ PanelAppletDefinition applet =
 /* private */
 /* functions */
 /* mixer_init */
+#if defined(GDK_WINDOWING_X11)
 static void _init_size(Mixer * mixer, PanelAppletHelper * helper);
 /* callbacks */
 static gboolean _init_idle(gpointer data);
+#endif
 
 static Mixer * _mixer_init(PanelAppletHelper * helper,
 		GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	Mixer * mixer;
 	GtkWidget * image;
 
@@ -131,9 +140,9 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 	mixer->pr_box = NULL;
 	_init_size(mixer, helper);
 	mixer->widget = gtk_toggle_button_new();
-#if GTK_CHECK_VERSION(2, 12, 0)
+# if GTK_CHECK_VERSION(2, 12, 0)
 	gtk_widget_set_tooltip_text(mixer->widget, _("Show mixer"));
-#endif
+# endif
 	gtk_button_set_relief(GTK_BUTTON(mixer->widget), GTK_RELIEF_NONE);
 	g_signal_connect(mixer->widget, "toggled", G_CALLBACK(
 				_mixer_on_toggled), mixer);
@@ -144,8 +153,16 @@ static Mixer * _mixer_init(PanelAppletHelper * helper,
 	mixer->source = g_idle_add(_init_idle, mixer);
 	*widget = mixer->widget;
 	return mixer;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
+#if defined(GDK_WINDOWING_X11)
 static void _init_size(Mixer * mixer, PanelAppletHelper * helper)
 {
 	char const * p;
@@ -169,10 +186,10 @@ static void _init_size(Mixer * mixer, PanelAppletHelper * helper)
 		mixer->width = mixer->height * 3;
 	else if(mixer->height == -1)
 		mixer->height = mixer->width / 3;
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() width=%d height=%d\n", __func__,
 			mixer->width, mixer->height);
-#endif
+# endif
 }
 
 /* callbacks */
@@ -185,9 +202,9 @@ static gboolean _init_idle(gpointer data)
 		return FALSE;
 	mixer->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_accept_focus(GTK_WINDOW(mixer->window), FALSE);
-#if GTK_CHECK_VERSION(2, 6, 0)
+# if GTK_CHECK_VERSION(2, 6, 0)
 	gtk_window_set_focus_on_map(GTK_WINDOW(mixer->window), FALSE);
-#endif
+# endif
 	/* XXX let this be configurable (resize applications automatically) */
 	gtk_window_set_type_hint(GTK_WINDOW(mixer->window),
 			GDK_WINDOW_TYPE_HINT_DOCK);
@@ -200,20 +217,26 @@ static gboolean _init_idle(gpointer data)
 	gtk_widget_show(mixer->socket);
 	return FALSE;
 }
+#endif
 
 
 /* mixer_destroy */
 static void _mixer_destroy(Mixer * mixer)
 {
+#if defined(GDK_WINDOWING_X11)
 	if(mixer->source > 0)
 		g_source_remove(mixer->source);
 	if(mixer->pid > 0)
 		g_spawn_close_pid(mixer->pid);
 	gtk_widget_destroy(mixer->widget);
 	free(mixer);
+#else
+	(void) mixer;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* mixer_settings */
 static void _settings_apply(Mixer * mixer, PanelAppletHelper * helper);
 static void _settings_reset(Mixer * mixer, PanelAppletHelper * helper);
@@ -221,16 +244,18 @@ static GtkWidget * _settings_widget(Mixer * mixer);
 /* callbacks */
 static void _settings_on_width_value_changed(gpointer data);
 static void _settings_on_height_value_changed(gpointer data);
+#endif
 
 static GtkWidget * _mixer_settings(Mixer * mixer, gboolean apply,
 		gboolean reset)
 {
+#if defined(GDK_WINDOWING_X11)
 	PanelAppletHelper * helper = mixer->helper;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%p, %s, %s)\n", __func__, (void *)mixer,
 			apply ? "TRUE" : "FALSE", reset ? "TRUE" : "FALSE");
-#endif
+# endif
 	if(mixer->pr_box == NULL)
 	{
 		mixer->pr_box = _settings_widget(mixer);
@@ -241,8 +266,16 @@ static GtkWidget * _mixer_settings(Mixer * mixer, gboolean apply,
 	if(apply == TRUE)
 		_settings_apply(mixer, helper);
 	return mixer->pr_box;
+#else
+	(void) mixer;
+	(void) apply;
+	(void) reset;
+
+	return NULL;
+#endif
 }
 
+#if defined(GDK_WINDOWING_X11)
 static void _settings_apply(Mixer * mixer, PanelAppletHelper * helper)
 {
 	char const * p;
@@ -287,13 +320,13 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	GtkWidget * widget;
 
 	group = gtk_size_group_new(GTK_SIZE_GROUP_HORIZONTAL);
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-#else
+# else
 	vbox = gtk_vbox_new(FALSE, 4);
 	hbox = gtk_hbox_new(FALSE, 4);
-#endif
+# endif
 	widget = gtk_label_new(_("Command:"));
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 	mixer->pr_command = gtk_entry_new();
@@ -301,18 +334,18 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
 	/* frame */
 	frame = gtk_frame_new(_("Size:"));
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	vbox2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
-#else
+# else
 	vbox2 = gtk_vbox_new(FALSE, 4);
-#endif
+# endif
 	gtk_container_set_border_width(GTK_CONTAINER(vbox2), 4);
 	/* width */
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-#else
+# else
 	hbox = gtk_hbox_new(FALSE, 4);
-#endif
+# endif
 	widget = gtk_label_new(_("Width:"));
 	gtk_size_group_add_widget(group, widget);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
@@ -323,11 +356,11 @@ static GtkWidget * _settings_widget(Mixer * mixer)
 	gtk_box_pack_start(GTK_BOX(hbox), mixer->pr_width, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(vbox2), hbox, FALSE, TRUE, 0);
 	/* height */
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
-#else
+# else
 	hbox = gtk_hbox_new(FALSE, 4);
-#endif
+# endif
 	widget = gtk_label_new(_("Height:"));
 	gtk_size_group_add_widget(group, widget);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
@@ -424,9 +457,9 @@ static void _mixer_on_child(GPid pid, gint status, gpointer data)
 	const int timeout = 1000;
 	Mixer * mixer = data;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(%u) %u\n", __func__, pid, mixer->pid);
-#endif
+# endif
 	if(mixer->source != 0 || mixer->pid != pid)
 		return;
 	if(WIFEXITED(status) || WIFSIGNALED(status))
@@ -485,3 +518,4 @@ static void _mixer_on_toggled(GtkWidget * widget, gpointer data)
 	else
 		gtk_widget_hide(mixer->window);
 }
+#endif

@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2023 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2024 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,19 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
-#include <gdk/gdk.h>
-#ifdef GDK_WINDOWING_X11
-# include <gdk/gdkx.h>
+#include <gtk/gtk.h>
+#if defined(GDK_WINDOWING_X11)
+# if GTK_CHECK_VERSION(3, 0, 0)
+#  include <gtk/gtkx.h>
+# else
+#  include <gdk/gdkx.h>
+# endif
 # include <X11/Xatom.h>
 #endif
 #include <System.h>
 #include <Desktop.h>
 #include "Panel/applet.h"
+
 #define _(string) gettext(string)
 #define N_(string) string
 
@@ -39,17 +44,20 @@
 /* Tasks */
 /* private */
 /* types */
-#define atom(a) TASKS_ATOM_ ## a
+#if defined(GDK_WINDOWING_X11)
+# define atom(a) TASKS_ATOM_ ## a
 typedef enum _TasksAtom
 {
-#include "tasks.atoms"
+# include "tasks.atoms"
 } TasksAtom;
-#define TASKS_ATOM_LAST TASKS_ATOM_UTF8_STRING
-#define TASKS_ATOM_COUNT (TASKS_ATOM_LAST + 1)
-#undef atom
+# define TASKS_ATOM_LAST TASKS_ATOM_UTF8_STRING
+# define TASKS_ATOM_COUNT (TASKS_ATOM_LAST + 1)
+# undef atom
+#endif
 
 typedef struct _PanelApplet Tasks;
 
+#if defined(GDK_WINDOWING_X11)
 typedef struct _Task
 {
 	Tasks * tasks;
@@ -60,10 +68,12 @@ typedef struct _Task
 	gboolean delete;
 	gboolean reorder;
 } Task;
+#endif
 
 struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+#if defined(GDK_WINDOWING_X11)
 	Task ** tasks;
 	size_t tasks_cnt;
 	gboolean label;
@@ -81,23 +91,27 @@ struct _PanelApplet
 	GdkDisplay * display;
 	GdkScreen * screen;
 	GdkWindow * root;
+#endif
 };
 
 
+#if defined(GDK_WINDOWING_X11)
 /* constants */
-#define atom(a) "" # a
+# define atom(a) "" # a
 static const char * _tasks_atom[TASKS_ATOM_COUNT] =
 {
-#include "tasks.atoms"
+# include "tasks.atoms"
 };
-#undef atom
+# undef atom
 
-#define _NET_WM_MOVERESIZE_MOVE			 8 /* movement only */
-#define _NET_WM_MOVERESIZE_SIZE_KEYBOARD	 9 /* size via keyboard */
-#define _NET_WM_MOVERESIZE_MOVE_KEYBOARD	10 /* move via keyboard */
+# define _NET_WM_MOVERESIZE_MOVE		 8 /* movement only */
+# define _NET_WM_MOVERESIZE_SIZE_KEYBOARD	 9 /* size via keyboard */
+# define _NET_WM_MOVERESIZE_MOVE_KEYBOARD	10 /* move via keyboard */
+#endif
 
 
 /* prototypes */
+#if defined(GDK_WINDOWING_X11)
 /* task */
 static Task * _task_new(Tasks * tasks, gboolean label, gboolean reorder,
 		Window window, char const * name, GdkPixbuf * pixbuf);
@@ -106,11 +120,13 @@ static void _task_set(Task * task, char const * name, GdkPixbuf * pixbuf);
 static void _task_toggle_state(Task * task, TasksAtom state);
 static void _task_toggle_state2(Task * task, TasksAtom state1,
 		TasksAtom state2);
+#endif
 
 /* tasks */
 static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _tasks_destroy(Tasks * tasks);
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 static int _tasks_get_current_desktop(Tasks * tasks);
 static int _tasks_get_text_property(Tasks * tasks, Window window, Atom property,
@@ -143,6 +159,7 @@ static void _task_on_popup_shade(gpointer data);
 static void _task_on_popup_stick(gpointer data);
 static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+#endif
 
 
 /* public */
@@ -164,6 +181,7 @@ PanelAppletDefinition applet =
 };
 
 
+#if defined(GDK_WINDOWING_X11)
 /* private */
 /* functions */
 /* Task */
@@ -193,11 +211,11 @@ static Task * _task_new(Tasks * tasks, gboolean label, gboolean reorder,
 	task->image = gtk_image_new();
 	task->delete = FALSE;
 	task->reorder = reorder;
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-#else
+# else
 	hbox = gtk_hbox_new(FALSE, 0);
-#endif
+# endif
 	gtk_box_pack_start(GTK_BOX(hbox), task->image, FALSE, TRUE, 0);
 	if(label)
 	{
@@ -282,12 +300,14 @@ static void _task_toggle_state2(Task * task, TasksAtom state1,
 			&xev);
 	gdk_error_trap_pop_ignored();
 }
+#endif
 
 
 /* Tasks */
 /* tasks_init */
 static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	Tasks * tasks;
 	char const * p;
 	GtkOrientation orientation;
@@ -361,12 +381,20 @@ static Tasks * _tasks_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show_all(tasks->widget);
 	*widget = tasks->widget;
 	return tasks;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
 
 /* tasks_destroy */
 static void _tasks_destroy(Tasks * tasks)
 {
+#if defined(GDK_WINDOWING_X11)
 	size_t i;
 
 	if(tasks->source != 0)
@@ -381,9 +409,13 @@ static void _tasks_destroy(Tasks * tasks)
 	tasks->tasks_cnt = 0;
 	gtk_widget_destroy(tasks->widget);
 	free(tasks);
+#else
+	(void) tasks;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 /* tasks_get_current_desktop */
 static int _tasks_get_current_desktop(Tasks * tasks)
@@ -415,22 +447,22 @@ static int _tasks_get_text_property(Tasks * tasks, Window window, Atom property,
 	char ** list;
 	int i;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(tasks, window, %lu)\n", __func__, property);
-#endif
+# endif
 	gdk_error_trap_push();
 	res = XGetTextProperty(GDK_DISPLAY_XDISPLAY(tasks->display), window,
 			&text, property);
 	if(gdk_error_trap_pop() != 0 || res == 0)
 		return -1;
 	atom = gdk_x11_xatom_to_atom(text.encoding);
-#if GTK_CHECK_VERSION(2, 24, 0)
+# if GTK_CHECK_VERSION(2, 24, 0)
 	cnt = gdk_x11_display_text_property_to_text_list(tasks->display,
 			atom, text.format, text.value, text.nitems, &list);
-#else
+# else
 	cnt = gdk_text_property_to_utf8_list(atom, text.format, text.value,
 			text.nitems, &list);
-#endif
+# endif
 	if(cnt > 0)
 	{
 		*ret = list[0];
@@ -456,10 +488,10 @@ static int _tasks_get_window_property(Tasks * tasks, Window window,
 	int format;
 	unsigned long bytes;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(tasks, window, %s, %lu)\n", __func__,
 			_tasks_atom[property], atom);
-#endif
+# endif
 	gdk_error_trap_push();
 	res = XGetWindowProperty(GDK_DISPLAY_XDISPLAY(tasks->display), window,
 			tasks->atom[property], 0, G_MAXLONG, False, atom,
@@ -495,9 +527,9 @@ static void _tasks_do(Tasks * tasks)
 	unsigned long i;
 	char * name;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	if(_tasks_get_window_property(tasks, GDK_WINDOW_XID(tasks->root),
 				TASKS_ATOM__NET_CLIENT_LIST,
 				XA_WINDOW, &cnt, (void *)&windows) != 0)
@@ -628,14 +660,14 @@ static int _do_tasks_add(Tasks * tasks, int desktop, Window window,
 {
 	size_t i;
 	Task * p = NULL;
-#ifndef EMBEDDED
+# ifndef EMBEDDED
 	unsigned long * l;
 	unsigned long cnt;
 	int cur = -1;
-#endif
+# endif
 	Task ** q;
 
-#ifndef EMBEDDED
+# ifndef EMBEDDED
 	if(_tasks_get_window_property(tasks, window, TASKS_ATOM__NET_WM_DESKTOP,
 			XA_CARDINAL, &cnt, (void *)&l) == 0)
 	{
@@ -645,7 +677,7 @@ static int _do_tasks_add(Tasks * tasks, int desktop, Window window,
 	}
 	if(cur >= 0 && cur != desktop)
 		return 0;
-#endif
+# endif
 	for(i = 0; i < tasks->tasks_cnt; i++)
 		if(tasks->tasks[i]->window == window)
 			break;
@@ -747,9 +779,9 @@ static void _clicked_activate(Task * task)
 {
 	GdkDisplay * display;
 	XEvent xev;
-#ifdef DEBUG
+# ifdef DEBUG
 	int res;
-#endif
+# endif
 
 	display = task->tasks->display;
 	memset(&xev, 0, sizeof(xev));
@@ -762,19 +794,19 @@ static void _clicked_activate(Task * task)
 	xev.xclient.data.l[1] = gdk_x11_display_get_user_time(display);
 	xev.xclient.data.l[2] = 0;
 	gdk_error_trap_push();
-#ifdef DEBUG
+# ifdef DEBUG
 	res =
-#endif
+# endif
 		XSendEvent(GDK_DISPLAY_XDISPLAY(display),
 			GDK_WINDOW_XID(task->tasks->root), False,
 			SubstructureNotifyMask | SubstructureRedirectMask,
 			&xev);
-#ifdef DEBUG
+# ifdef DEBUG
 	if(gdk_error_trap_pop() != 0 || res != Success)
 		fprintf(stderr, "DEBUG: %s() error\n", __func__);
-#else
+# else
 	gdk_error_trap_pop_ignored();
-#endif
+# endif
 }
 
 
@@ -799,10 +831,10 @@ static GdkFilterReturn _task_on_filter(GdkXEvent * xevent, GdkEvent * event,
 	if(xev->type != PropertyNotify)
 		return GDK_FILTER_CONTINUE;
 	if(xev->xproperty.atom != tasks->atom[TASKS_ATOM__NET_CLIENT_LIST]
-#ifndef EMBEDDED
+# ifndef EMBEDDED
 			&& xev->xproperty.atom
 			!= tasks->atom[TASKS_ATOM__NET_CURRENT_DESKTOP]
-#endif
+# endif
 			)
 		return GDK_FILTER_CONTINUE;
 	_tasks_do(tasks);
@@ -869,7 +901,7 @@ static gboolean _task_on_popup(gpointer data)
 		if(menu == NULL)
 			menu = gtk_menu_new();
 		if(items[j].stock != NULL)
-#if GTK_CHECK_VERSION(3, 10, 0)
+# if GTK_CHECK_VERSION(3, 10, 0)
 		{
 			menuitem = gtk_image_menu_item_new_with_label(
 					items[j].label);
@@ -879,10 +911,10 @@ static gboolean _task_on_popup(gpointer data)
 						items[j].stock,
 						GTK_ICON_SIZE_MENU));
 		}
-#else
+# else
 			menuitem = gtk_image_menu_item_new_from_stock(
 					items[j].stock, NULL);
-#endif
+# endif
 		else
 			menuitem = gtk_menu_item_new_with_label(
 					_(items[j].label));
@@ -1073,9 +1105,9 @@ static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	size_t i;
 	(void) previous;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	if(tasks->root != NULL)
 		gdk_window_remove_filter(tasks->root, _task_on_filter, tasks);
 	tasks->screen = gtk_widget_get_screen(widget);
@@ -1090,3 +1122,4 @@ static void _task_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 				tasks->display, _tasks_atom[i]);
 	_tasks_do(tasks);
 }
+#endif

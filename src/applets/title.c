@@ -1,5 +1,5 @@
 /* $Id$ */
-/* Copyright (c) 2011-2023 Pierre Pronchery <khorben@defora.org> */
+/* Copyright (c) 2011-2024 Pierre Pronchery <khorben@defora.org> */
 /* This file is part of DeforaOS Desktop Panel */
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,14 @@
 #include <string.h>
 #include <errno.h>
 #include <libintl.h>
-#include <gdk/gdk.h>
-#ifdef GDK_WINDOWING_X11
+#include <gtk/gtk.h>
+#if defined(GDK_WINDOWING_X11)
 # include <gdk/gdkx.h>
 # include <X11/Xatom.h>
 #endif
 #include <System.h>
 #include "Panel/applet.h"
+
 #define _(string) gettext(string)
 #define N_(string) string
 
@@ -37,6 +38,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+#if defined(GDK_WINDOWING_X11)
 	GtkWidget * widget;
 	gulong source;
 
@@ -48,6 +50,7 @@ typedef struct _PanelApplet
 	Atom atom_name;
 	Atom atom_utf8_string;
 	Atom atom_visible_name;
+#endif
 } Title;
 
 
@@ -56,6 +59,7 @@ typedef struct _PanelApplet
 static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _title_destroy(Title * title);
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 static int _title_get_text_property(Title * title, Window window, Atom property,
 		char ** ret);
@@ -68,6 +72,7 @@ static GdkFilterReturn _title_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
 static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+#endif
 
 
 /* public */
@@ -90,6 +95,7 @@ PanelAppletDefinition applet =
 /* title_init */
 static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	Title * title;
 	PangoFontDescription * bold;
 
@@ -102,11 +108,11 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
 	title->widget = gtk_label_new("");
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	gtk_widget_override_font(title->widget, bold);
-#else
+# else
 	gtk_widget_modify_font(title->widget, bold);
-#endif
+# endif
 	pango_font_description_free(bold);
 	title->source = g_signal_connect(title->widget, "screen-changed",
 			G_CALLBACK(_title_on_screen_changed), title);
@@ -119,12 +125,20 @@ static Title * _title_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show(title->widget);
 	*widget = title->widget;
 	return title;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
 
 /* title_destroy */
 static void _title_destroy(Title * title)
 {
+#if defined(GDK_WINDOWING_X11)
 	if(title->source != 0)
 		g_signal_handler_disconnect(title->widget, title->source);
 	title->source = 0;
@@ -132,9 +146,13 @@ static void _title_destroy(Title * title)
 		gdk_window_remove_filter(title->root, _title_on_filter, title);
 	gtk_widget_destroy(title->widget);
 	free(title);
+#else
+	(void) title;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 /* title_get_window_property */
 static int _title_get_window_property(Title * title, Window window,
@@ -146,10 +164,10 @@ static int _title_get_window_property(Title * title, Window window,
 	int format;
 	unsigned long bytes;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(title, window, %lu, %lu)\n", __func__,
 			property, atom);
-#endif
+# endif
 	gdk_error_trap_push();
 	res = XGetWindowProperty(GDK_DISPLAY_XDISPLAY(title->display), window,
 			property, 0, G_MAXLONG, False, atom, &type, &format,
@@ -178,22 +196,22 @@ static int _title_get_text_property(Title * title, Window window, Atom property,
 	char ** list;
 	int i;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(title, window, %lu)\n", __func__, property);
-#endif
+# endif
 	gdk_error_trap_push();
 	res = XGetTextProperty(GDK_DISPLAY_XDISPLAY(title->display), window,
 			&text, property);
 	if(gdk_error_trap_pop() != 0 || res == 0)
 		return 1;
 	atom = gdk_x11_xatom_to_atom(text.encoding);
-#if GTK_CHECK_VERSION(2, 24, 0)
+# if GTK_CHECK_VERSION(2, 24, 0)
 	cnt = gdk_x11_display_text_property_to_text_list(title->display,
 			atom, text.format, text.value, text.nitems, &list);
-#else
+# else
 	cnt = gdk_text_property_to_utf8_list(atom, text.format, text.value,
 			text.nitems, &list);
-#endif
+# endif
 	if(cnt > 0)
 	{
 		*ret = list[0];
@@ -220,9 +238,9 @@ static void _title_do(Title * title)
 	Window * window;
 	char * name;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	if(_title_get_window_property(title, GDK_WINDOW_XID(title->root),
 				title->atom_active, XA_WINDOW, &cnt,
 				(void*)&window) != 0 || cnt != 1)
@@ -303,9 +321,9 @@ static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 	GdkEventMask events;
 	(void) previous;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	if(title->root != NULL)
 		gdk_window_remove_filter(title->root, _title_on_filter, title);
 	title->screen = gtk_widget_get_screen(widget);
@@ -325,3 +343,4 @@ static void _title_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 			title->display, "_NET_WM_VISIBLE_NAME");
 	_title_do(title);
 }
+#endif
