@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Panel 0.4.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-08 23:46+0200\n"
+"POT-Creation-Date: 2024-10-10 01:48+0200\n"
 "PO-Revision-Date: 2022-05-18 01:28+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: German\n"
@@ -31,7 +31,7 @@ msgstr "Unbekannt"
 
 #: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
 #: ../src/panel.c:427 ../src/panel.c:432 ../src/run.c:256 ../src/run.c:262
-#: ../tools/message.c:193
+#: ../tools/message.c:211
 msgid "Error"
 msgstr "Fehler"
 
@@ -68,8 +68,8 @@ msgstr ""
 "%H:%M:%S\n"
 "%d/%m/%Y"
 
-#: ../src/applets/close.c:78 ../src/applets/close.c:104
-#: ../src/applets/tasks.c:848
+#: ../src/applets/close.c:82 ../src/applets/close.c:108
+#: ../src/applets/tasks.c:880
 msgid "Close"
 msgstr "Schliessen"
 
@@ -109,11 +109,11 @@ msgstr ""
 msgid "Show desktop"
 msgstr ""
 
-#: ../src/applets/embed.c:83
+#: ../src/applets/embed.c:90
 msgid "Embed"
 msgstr ""
 
-#: ../src/applets/embed.c:113
+#: ../src/applets/embed.c:122
 msgid "Desktop notifications"
 msgstr ""
 
@@ -133,33 +133,33 @@ msgstr "GSM"
 msgid "GSM is enabled"
 msgstr "GSM ist aktiv"
 
-#: ../src/applets/leds.c:66
+#: ../src/applets/leds.c:70
 msgid "LEDs"
 msgstr ""
 
-#: ../src/applets/leds.c:155
+#: ../src/applets/leds.c:172
 #, c-format
 msgid "XKB library mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:162
+#: ../src/applets/leds.c:179
 #, c-format
 msgid "XKB extension mismatch (%d.%d)"
 msgstr ""
 
-#: ../src/applets/leds.c:170
+#: ../src/applets/leds.c:187
 msgid "Could not obtain XKB map"
 msgstr ""
 
-#: ../src/applets/leds.c:178
+#: ../src/applets/leds.c:195
 msgid "Could not obtain XKB indicator map"
 msgstr ""
 
-#: ../src/applets/leds.c:186
+#: ../src/applets/leds.c:203
 msgid "Could not obtain XKB names"
 msgstr ""
 
-#: ../src/applets/leds.c:237
+#: ../src/applets/leds.c:254
 #, c-format
 msgid "LED %u"
 msgstr ""
@@ -233,35 +233,35 @@ msgstr "Video"
 msgid "Main menu"
 msgstr "HauptmenÃŒ"
 
-#: ../src/applets/menu.c:523
+#: ../src/applets/menu.c:526
 msgid "A_pplications"
 msgstr ""
 
-#: ../src/applets/menu.c:533
+#: ../src/applets/menu.c:536
 msgid "_Run..."
 msgstr ""
 
-#: ../src/applets/menu.c:545
+#: ../src/applets/menu.c:548
 msgid "_About"
 msgstr "_Info"
 
-#: ../src/applets/menu.c:560
+#: ../src/applets/menu.c:563
 msgid "_Lock screen"
 msgstr "Bildschirm _sperren"
 
-#: ../src/applets/menu.c:568
+#: ../src/applets/menu.c:571
 msgid "R_otate"
 msgstr "R_otieren"
 
-#: ../src/applets/menu.c:576
+#: ../src/applets/menu.c:579
 msgid "Lo_gout..."
 msgstr "Aus_loggen..."
 
-#: ../src/applets/menu.c:586
+#: ../src/applets/menu.c:589
 msgid "S_uspend"
 msgstr ""
 
-#: ../src/applets/menu.c:595
+#: ../src/applets/menu.c:598
 msgid "_Shutdown..."
 msgstr "_Ausschalten..."
 
@@ -273,35 +273,35 @@ msgstr "Speicher"
 msgid "RAM:"
 msgstr ""
 
-#: ../src/applets/mixer.c:96
+#: ../src/applets/mixer.c:102
 msgid "Mixer"
 msgstr ""
 
-#: ../src/applets/mixer.c:135
+#: ../src/applets/mixer.c:144
 msgid "Show mixer"
 msgstr ""
 
-#: ../src/applets/mixer.c:297 ../src/run.c:123
+#: ../src/applets/mixer.c:330 ../src/run.c:123
 msgid "Command:"
 msgstr ""
 
-#: ../src/applets/mixer.c:303
+#: ../src/applets/mixer.c:336
 msgid "Size:"
 msgstr ""
 
-#: ../src/applets/mixer.c:316
+#: ../src/applets/mixer.c:349
 msgid "Width:"
 msgstr "Breite:"
 
-#: ../src/applets/mixer.c:331
+#: ../src/applets/mixer.c:364
 msgid "Height:"
 msgstr "HÃ¶he:"
 
-#: ../src/applets/mixer.c:342
+#: ../src/applets/mixer.c:375
 msgid "Keep ratio"
 msgstr ""
 
-#: ../src/applets/mixer.c:411
+#: ../src/applets/mixer.c:444
 msgid "Could not start mixer"
 msgstr ""
 
@@ -356,21 +356,21 @@ msgstr ""
 msgid "Show the interfaces disabled"
 msgstr ""
 
-#: ../src/applets/pager.c:105
+#: ../src/applets/pager.c:111
 msgid "Pager"
 msgstr ""
 
-#: ../src/applets/pager.c:287
+#: ../src/applets/pager.c:306
 #, c-format
 msgid "Desk %lu"
 msgstr ""
 
-#: ../src/applets/pager.c:323
+#: ../src/applets/pager.c:342
 #, c-format
 msgid "Switch to %s"
 msgstr ""
 
-#: ../src/applets/pager.c:333
+#: ../src/applets/pager.c:352
 #, c-format
 msgid "On %s"
 msgstr ""
@@ -410,59 +410,59 @@ msgstr ""
 msgid "Swap:"
 msgstr ""
 
-#: ../src/applets/systray.c:69
+#: ../src/applets/systray.c:75
 msgid "System tray"
 msgstr ""
 
-#: ../src/applets/tasks.c:152
+#: ../src/applets/tasks.c:169
 msgid "Tasks"
 msgstr ""
 
-#: ../src/applets/tasks.c:534 ../src/applets/title.c:251
+#: ../src/applets/tasks.c:566 ../src/applets/title.c:269
 msgid "(Untitled)"
 msgstr "(Ohne Titel)"
 
-#: ../src/applets/tasks.c:827
+#: ../src/applets/tasks.c:859
 msgid "Move"
 msgstr ""
 
-#: ../src/applets/tasks.c:829
+#: ../src/applets/tasks.c:861
 msgid "Resize"
 msgstr ""
 
-#: ../src/applets/tasks.c:831
+#: ../src/applets/tasks.c:863
 msgid "Minimize"
 msgstr "Minimieren"
 
-#: ../src/applets/tasks.c:833
+#: ../src/applets/tasks.c:865
 msgid "Shade"
 msgstr ""
 
-#: ../src/applets/tasks.c:835
+#: ../src/applets/tasks.c:867
 msgid "Stick"
 msgstr ""
 
-#: ../src/applets/tasks.c:838
+#: ../src/applets/tasks.c:870
 msgid "Maximize horizontally"
 msgstr ""
 
-#: ../src/applets/tasks.c:841
+#: ../src/applets/tasks.c:873
 msgid "Maximize vertically"
 msgstr ""
 
-#: ../src/applets/tasks.c:843
+#: ../src/applets/tasks.c:875
 msgid "Fullscreen"
 msgstr ""
 
-#: ../src/applets/tasks.c:846
+#: ../src/applets/tasks.c:878
 msgid "Change desktop"
 msgstr ""
 
-#: ../src/applets/tasks.c:899
+#: ../src/applets/tasks.c:931
 msgid "Maximize"
 msgstr ""
 
-#: ../src/applets/title.c:77
+#: ../src/applets/title.c:82
 msgid "Title"
 msgstr "Titel"
 
@@ -800,8 +800,12 @@ msgstr ""
 msgid "Usage: %s\n"
 msgstr ""
 
-#: ../src/window.c:95
+#: ../src/window.c:97
 msgid "Invalid panel size"
+msgstr ""
+
+#: ../src/window.c:122
+msgid "Unsupported panel position"
 msgstr ""
 
 #: ../tools/embed.c:114
@@ -821,22 +825,22 @@ msgstr ""
 msgid "Applets available:"
 msgstr ""
 
-#: ../tools/message.c:165
+#: ../tools/message.c:183
 #, c-format
 msgid ""
 "Usage: %s [-EIQW][-T title][-t timeout] message\n"
 "       %s [-N name][-T title][-t timeout] message\n"
 msgstr ""
 
-#: ../tools/message.c:179 ../tools/message.c:197
+#: ../tools/message.c:197 ../tools/message.c:215
 msgid "Information"
 msgstr "Information"
 
-#: ../tools/message.c:204
+#: ../tools/message.c:222
 msgid "Question"
 msgstr "Frage"
 
-#: ../tools/message.c:211
+#: ../tools/message.c:229
 msgid "Warning"
 msgstr "Warnung"
 
