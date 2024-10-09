@@ -1,6 +1,6 @@
 #!/bin/sh
 #$Id$
-#Copyright (c) 2012-2023 Pierre Pronchery <khorben@defora.org>
+#Copyright (c) 2012-2024 Pierre Pronchery <khorben@defora.org>
 #
 #Redistribution and use in source and binary forms, with or without
 #modification, are permitted provided that the following conditions are met:
@@ -37,7 +37,7 @@ FOP="fop"
 INSTALL="install -m 0644"
 MKDIR="mkdir -m 0755 -p"
 RM="rm -f"
-XMLLINT="xmllint --nonet --xinclude --path ${PWD}"
+XMLLINT="xmllint --noent --nonet --xinclude --path ${PWD}"
 XSLTPROC="xsltproc --nonet --xinclude --path ${PWD}"
 
 [ -f "$CONFIGSH" ] && . "$CONFIGSH"
