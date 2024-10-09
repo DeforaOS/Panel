@@ -52,6 +52,7 @@ typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
 
+#if defined(GDK_WINDOWING_X11)
 	GtkWidget * box;
 	gulong source;
 
@@ -62,10 +63,12 @@ typedef struct _PanelApplet
 	GdkDisplay * display;
 	GdkScreen * screen;
 	GdkWindow * root;
+#endif
 } Pager;
 
 
 /* constants */
+#if defined(GDK_WINDOWING_X11)
 static const char * _pager_atom[PAGER_ATOM_COUNT] =
 {
 	"_NET_CURRENT_DESKTOP",
@@ -73,12 +76,14 @@ static const char * _pager_atom[PAGER_ATOM_COUNT] =
 	"_NET_NUMBER_OF_DESKTOPS",
 	"UTF8_STRING"
 };
+#endif
 
 
 /* prototypes */
 static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _pager_destroy(Pager * pager);
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 static int _pager_get_current_desktop(Pager * pager);
 static char ** _pager_get_desktop_names(Pager * pager);
@@ -96,6 +101,7 @@ static GdkFilterReturn _pager_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
 static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+#endif
 
 
 /* public */
@@ -118,6 +124,7 @@ PanelAppletDefinition applet =
 /* pager_init */
 static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	Pager * pager;
 	GtkOrientation orientation;
 
@@ -128,13 +135,13 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	}
 	pager->helper = helper;
 	orientation = panel_window_get_orientation(helper->window);
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	pager->box = gtk_box_new(orientation, 0);
 	gtk_box_set_homogeneous(GTK_BOX(pager->box), TRUE);
-#else
+# else
 	pager->box = (orientation == GTK_ORIENTATION_VERTICAL)
 		? gtk_vbox_new(TRUE, 0) : gtk_hbox_new(TRUE, 0);
-#endif
+# endif
 	pager->source = g_signal_connect(pager->box, "screen-changed",
 			G_CALLBACK(_pager_on_screen_changed), pager);
 	pager->widgets = NULL;
@@ -144,12 +151,20 @@ static Pager * _pager_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	pager->root = NULL;
 	*widget = pager->box;
 	return pager;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
 
 /* pager_destroy */
 static void _pager_destroy(Pager * pager)
 {
+#if defined(GDK_WINDOWING_X11)
 	if(pager->source != 0)
 		g_signal_handler_disconnect(pager->box, pager->source);
 	pager->source = 0;
@@ -157,9 +172,13 @@ static void _pager_destroy(Pager * pager)
 		gdk_window_remove_filter(pager->root, _pager_on_filter, pager);
 	gtk_widget_destroy(pager->box);
 	free(pager);
+#else
+	(void) pager;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* accessors */
 /* pager_get_current_desktop */
 static int _pager_get_current_desktop(Pager * pager)
@@ -226,10 +245,10 @@ static int _pager_get_window_property(Pager * pager, Window window,
 	int format;
 	unsigned long bytes;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s(pager, window, %s, %lu)\n", __func__,
 			_pager_atom[property], atom);
-#endif
+# endif
 	gdk_error_trap_push();
 	res = XGetWindowProperty(GDK_DISPLAY_XDISPLAY(pager->display), window,
 			pager->atoms[property], 0, G_MAXLONG, False, atom,
@@ -264,9 +283,9 @@ static void _pager_do(Pager * pager)
 				XA_CARDINAL, &cnt, (void*)&p) != 0)
 		return;
 	l = *p;
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s() l=%ld\n", __func__, l);
-#endif
+# endif
 	XFree(p);
 	for(i = l; i < pager->widgets_cnt; i++)
 		if(pager->widgets[i] != NULL)
@@ -319,22 +338,22 @@ static void _pager_refresh(Pager * pager)
 		if(cur < 0 || i != (unsigned int)cur)
 		{
 			gtk_widget_set_sensitive(pager->widgets[i], TRUE);
-#if GTK_CHECK_VERSION(2, 12, 0)
+# if GTK_CHECK_VERSION(2, 12, 0)
 			snprintf(buf, sizeof(buf), _("Switch to %s"),
 					gtk_button_get_label(
 						GTK_BUTTON(pager->widgets[i])));
 			gtk_widget_set_tooltip_text(pager->widgets[i], buf);
-#endif
+# endif
 		}
 		else
 		{
 			gtk_widget_set_sensitive(pager->widgets[i], FALSE);
-#if GTK_CHECK_VERSION(2, 12, 0)
+# if GTK_CHECK_VERSION(2, 12, 0)
 			snprintf(buf, sizeof(buf), _("On %s"),
 					gtk_button_get_label(
 						GTK_BUTTON(pager->widgets[i])));
 			gtk_widget_set_tooltip_text(pager->widgets[i], buf);
-#endif
+# endif
 		}
 }
 
@@ -424,3 +443,4 @@ static void _pager_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 				pager->display, _pager_atom[i]);
 	_pager_do(pager);
 }
+#endif

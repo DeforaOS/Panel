@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <libintl.h>
 #include <gdk/gdk.h>
-#ifdef GDK_WINDOWING_X11
+#if defined(GDK_WINDOWING_X11)
 # include <gdk/gdkx.h>
 # include <X11/XKBlib.h>
 # include <X11/extensions/XKBfile.h>
@@ -38,6 +38,7 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+#if defined(GDK_WINDOWING_X11)
 	GtkWidget * widget;
 	GtkWidget * leds[XkbNumIndicators];
 	gulong source;
@@ -45,6 +46,7 @@ typedef struct _PanelApplet
 
 	GdkDisplay * display;
 	XkbDescPtr xkb;
+#endif
 } LEDs;
 
 
@@ -54,9 +56,11 @@ static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _leds_destroy(LEDs * leds);
 
 /* callbacks */
+#if defined(GDK_WINDOWING_X11)
 static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
 static gboolean _leds_on_timeout(gpointer data);
+#endif
 
 
 /* public */
@@ -79,6 +83,7 @@ PanelAppletDefinition applet =
 /* leds_init */
 static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	LEDs * leds;
 	size_t i;
 
@@ -104,12 +109,20 @@ static LEDs * _leds_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show(leds->widget);
 	*widget = leds->widget;
 	return leds;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
 
 /* leds_destroy */
 static void _leds_destroy(LEDs * leds)
 {
+#if defined(GDK_WINDOWING_X11)
 	/* XXX free xkb? */
 	if(leds->timeout != 0)
 		g_source_remove(leds->timeout);
@@ -117,9 +130,13 @@ static void _leds_destroy(LEDs * leds)
 		g_signal_handler_disconnect(leds->widget, leds->source);
 	gtk_widget_destroy(leds->widget);
 	object_delete(leds);
+#else
+	(void) leds;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 /* leds_on_screen_changed */
 static void _leds_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
@@ -245,3 +262,4 @@ static gboolean _leds_on_timeout(gpointer data)
 	}
 	return TRUE;
 }
+#endif

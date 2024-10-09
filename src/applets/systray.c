@@ -20,15 +20,17 @@
 #include <string.h>
 #include <errno.h>
 #include <gtk/gtk.h>
-#if GTK_CHECK_VERSION(3, 0, 0)
-# include <gtk/gtkx.h>
-#endif
-#ifdef GDK_WINDOWING_X11
-# include <gdk/gdkx.h>
-# include <X11/Xatom.h>
+#if defined(GDK_WINDOWING_X11)
+# if GTK_CHECK_VERSION(3, 0, 0)
+#  include <gtk/gtkx.h>
+# else
+#  include <gdk/gdkx.h>
+#  include <X11/Xatom.h>
+# endif
 #endif
 #include <System.h>
 #include "Panel/applet.h"
+
 #define N_(string) string
 
 
@@ -38,9 +40,11 @@
 typedef struct _PanelApplet
 {
 	PanelAppletHelper * helper;
+#if defined(GDK_WINDOWING_X11)
 	GtkWidget * hbox;
 	GtkWidget * owner;
 	gulong source;
+#endif
 } Systray;
 
 
@@ -54,12 +58,14 @@ typedef struct _PanelApplet
 static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget);
 static void _systray_destroy(Systray * systray);
 
+#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 static GdkFilterReturn _systray_on_filter(GdkXEvent * xevent, GdkEvent * event,
 		gpointer data);
 static void _systray_on_owner_destroy(gpointer data);
 static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 		gpointer data);
+#endif
 
 
 /* public */
@@ -82,6 +88,7 @@ PanelAppletDefinition applet =
 /* systray_init */
 static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 {
+#if defined(GDK_WINDOWING_X11)
 	Systray * systray;
 	gint height = 24;
 
@@ -91,11 +98,11 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 		return NULL;
 	}
 	systray->helper = helper;
-#if GTK_CHECK_VERSION(3, 0, 0)
+# if GTK_CHECK_VERSION(3, 0, 0)
 	systray->hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-#else
+# else
 	systray->hbox = gtk_hbox_new(FALSE, 0);
-#endif
+# endif
 	gtk_icon_size_lookup(panel_window_get_icon_size(helper->window), NULL,
 			&height);
 	gtk_widget_set_size_request(systray->hbox, -1, height);
@@ -105,12 +112,20 @@ static Systray * _systray_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	gtk_widget_show(systray->hbox);
 	*widget = systray->hbox;
 	return systray;
+#else
+	(void) helper;
+	(void) widget;
+
+	error_set_code(-ENOSYS, "X11 support not detected");
+	return NULL;
+#endif
 }
 
 
 /* systray_destroy */
 static void _systray_destroy(Systray * systray)
 {
+#if defined(GDK_WINDOWING_X11)
 	GdkWindow * window;
 
 	if(systray->source != 0)
@@ -124,9 +139,13 @@ static void _systray_destroy(Systray * systray)
 	}
 	gtk_widget_destroy(systray->hbox);
 	free(systray);
+#else
+	(void) systray;
+#endif
 }
 
 
+#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 /* systray_on_filter */
 static GdkFilterReturn _filter_clientmessage(Systray * systray,
@@ -139,9 +158,9 @@ static GdkFilterReturn _systray_on_filter(GdkXEvent * xevent, GdkEvent * event,
 	XEvent * xev = xevent;
 	(void) event;
 
-#ifdef DEBUG
+# ifdef DEBUG
 	fprintf(stderr, "DEBUG: %s()\n", __func__);
-#endif
+# endif
 	if(xev->type == ClientMessage)
 		return _filter_clientmessage(systray, &xev->xclient);
 	return GDK_FILTER_CONTINUE;
@@ -162,10 +181,10 @@ static GdkFilterReturn _filter_clientmessage(Systray * systray,
 			gtk_box_pack_start(GTK_BOX(systray->hbox), socket,
 					FALSE, TRUE, 0);
 			gtk_socket_add_id(GTK_SOCKET(socket), xev->data.l[2]);
-#ifdef DEBUG
+# ifdef DEBUG
 			fprintf(stderr, "DEBUG: %s() %ld\n", __func__,
 					xev->data.l[2]);
-#endif
+# endif
 			return GDK_FILTER_REMOVE;
 	}
 	return GDK_FILTER_CONTINUE;
@@ -233,3 +252,4 @@ static void _systray_on_screen_changed(GtkWidget * widget, GdkScreen * previous,
 			| GDK_STRUCTURE_MASK);
 	gdk_window_add_filter(window, _systray_on_filter, systray);
 }
+#endif

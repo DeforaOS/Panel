@@ -22,7 +22,9 @@
 #include <libintl.h>
 #include <gtk/gtk.h>
 #if GTK_CHECK_VERSION(3, 0, 0)
-# include <gtk/gtkx.h>
+# if defined(GDK_WINDOWING_X11)
+#  include <gtk/gtkx.h>
+# endif
 #endif
 #include "window.h"
 #include "../config.h"
@@ -113,8 +115,14 @@ PanelWindow * panel_window_new(PanelAppletHelper * helper,
 	}
 	else
 	{
+#if defined(GDK_WINDOWING_X11)
 		panel->window = gtk_plug_new(0);
 		gtk_widget_show(panel->window);
+#else
+		error_set_code(1, _("Unsupported panel position"));
+		object_delete(panel);
+		return NULL;
+#endif
 	}
 	gtk_container_set_border_width(GTK_CONTAINER(panel->window), 2);
 	panel->height = icon_height + (PANEL_BORDER_WIDTH * 4);
@@ -266,8 +274,14 @@ int panel_window_get_width(PanelWindow * panel)
 /* panel_window_get_xid */
 uint32_t panel_window_get_xid(PanelWindow * panel)
 {
-	return (panel->position == PANEL_WINDOW_POSITION_EMBEDDED)
-		? gtk_plug_get_id(GTK_PLUG(panel->window)) : 0;
+#if !defined(GDK_WINDOWING_X11)
+	(void) panel;
+
+#else
+	if(panel->position == PANEL_WINDOW_POSITION_EMBEDDED)
+		return gtk_plug_get_id(GTK_PLUG(panel->window));
+#endif
+	return 0;
 }
 
 
