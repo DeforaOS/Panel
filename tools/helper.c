@@ -138,16 +138,14 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 		PanelWindowType type, GtkIconSize iconsize)
 {
 	const PanelPosition top = PANEL_POSITION_TOP;
-	char * filename;
 	GdkRectangle rect;
 	size_t i;
 
 	if((panel->config = config_new()) == NULL)
 		return -1;
-	if((filename = _config_get_filename()) != NULL
-			&& config_load(panel->config, filename) != 0)
+	if(config_load_preferences(panel->config, PANEL_CONFIG_VENDOR,
+				PACKAGE, PANEL_CONFIG_FILE) != 0)
 		error_print(PROGNAME);
-	free(filename);
 	panel->prefs.iconsize = NULL;
 	panel->prefs.monitor = -1;
 	/* root window */
@@ -257,17 +255,6 @@ static int _applet_list(void)
 	putchar('\n');
 	closedir(dir);
 	return 0;
-}
-
-
-/* config_get_filename */
-static char * _config_get_filename(void)
-{
-	String const * homedir;
-
-	if((homedir = getenv("HOME")) == NULL)
-		homedir = g_get_home_dir();
-	return string_new_append(homedir, "/", PANEL_CONFIG_FILE, NULL);
 }
 
 
