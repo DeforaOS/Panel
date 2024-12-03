@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <libintl.h>
 #include "Panel/applet.h"
+#include "../../config.h"
 #define _(string) gettext(string)
 #define N_(string) string
 
