@@ -96,6 +96,8 @@ static gboolean _embed_on_can_read(GIOChannel * channel, GIOCondition condition,
 	char * p;
 	(void) data;
 
+	if(condition != G_IO_IN)
+		return FALSE; /* should not happen */
 	status = g_io_channel_read_line(channel, &str, &length, NULL, &error);
 	switch(status)
 	{
