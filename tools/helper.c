@@ -87,7 +87,6 @@ static int _panel_append(Panel * panel, PanelPosition position,
 static void _panel_show(Panel * panel, gboolean show);
 
 static int _applet_list(void);
-static char * _config_get_filename(void);
 
 static int _error(char const * message, int ret);
 
