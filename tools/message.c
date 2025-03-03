@@ -54,10 +54,8 @@
 static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message);
 
-#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 static gboolean _message_on_timeout(gpointer data);
-#endif
 
 static int _error(char const * message, int ret);
 static int _usage(void);
@@ -68,18 +66,28 @@ static int _usage(void);
 static int _message(unsigned int timeout, char const * stock,
 		char const * title, char const * message)
 {
-#if defined(GDK_WINDOWING_X11)
 	PangoFontDescription * bold;
 	GtkWidget * plug;
 	GtkWidget * hbox;
 	GtkWidget * vbox;
 	GtkWidget * image;
 	GtkWidget * widget;
+#if defined(GDK_WINDOWING_X11)
 	uint32_t xid;
+#endif
 
+#if !defined(GDK_WINDOWING_X11)
+	error_set_print(PROGNAME_PANEL_MESSAGE, 2, "%s",
+			"X11 support not detected");
+#endif
 	bold = pango_font_description_new();
 	pango_font_description_set_weight(bold, PANGO_WEIGHT_BOLD);
+#if defined(GDK_WINDOWING_X11)
 	plug = gtk_plug_new(0);
+#else
+	plug = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(plug), "Message");
+#endif
 	gtk_container_set_border_width(GTK_CONTAINER(plug), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
@@ -136,26 +144,18 @@ static int _message(unsigned int timeout, char const * stock,
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
 	gtk_container_add(GTK_CONTAINER(plug), hbox);
 	gtk_widget_show_all(plug);
+#if defined(GDK_WINDOWING_X11)
 	xid = gtk_plug_get_id(GTK_PLUG(plug));
 	desktop_message_send(PANEL_CLIENT_MESSAGE, PANEL_MESSAGE_EMBED, xid, 0);
+#endif
 	if(timeout > 0)
 		g_timeout_add(timeout * 1000, _message_on_timeout, NULL);
 	pango_font_description_free(bold);
 	gtk_main();
 	return 0;
-#else
-	(void) timeout;
-	(void) stock;
-	(void) title;
-	(void) message;
-
-	return error_set_print(PROGNAME_PANEL_MESSAGE, 2, "%s",
-		"X11 support not detected");
-#endif
 }
 
 
-#if defined(GDK_WINDOWING_X11)
 /* callbacks */
 /* message_on_timeout */
 static gboolean _message_on_timeout(gpointer data)
@@ -165,7 +165,6 @@ static gboolean _message_on_timeout(gpointer data)
 	gtk_main_quit();
 	return FALSE;
 }
-#endif
 
 
 /* error */
