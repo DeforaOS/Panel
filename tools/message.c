@@ -180,7 +180,14 @@ static int _error(char const * message, int ret)
 static int _usage(void)
 {
 	fprintf(stderr, _("Usage: %s [-EIQW][-T title][-t timeout] message\n"
-"       %s [-N name][-T title][-t timeout] message\n"), PROGNAME_PANEL_MESSAGE,
+"       %s [-N name][-T title][-t timeout] message\n"
+"  -E	Create an error dialog\n"
+"  -I	Create an informational message\n"
+"  -N	Choose a specific icon\n"
+"  -Q	Create a question dialog\n"
+"  -T	Set the dialog title\n"
+"  -W	Create a warning dialog\n"
+"  -t	Set the dialog timeout\n"), PROGNAME_PANEL_MESSAGE,
 			PROGNAME_PANEL_MESSAGE);
 	return 1;
 }
