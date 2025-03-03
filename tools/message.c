@@ -95,7 +95,7 @@ static int _message(unsigned int timeout, char const * stock,
 	hbox = gtk_hbox_new(FALSE, 4);
 #endif
 	/* icon */
-#if !GTK_CHECK_VERSION(3, 10, 0)
+#if !GTK_CHECK_VERSION(2, 6, 0)
 	if(strncmp(stock, "stock_", 6) == 0)
 		widget = gtk_image_new_from_stock(stock, GTK_ICON_SIZE_DIALOG);
 	else
@@ -133,12 +133,13 @@ static int _message(unsigned int timeout, char const * stock,
 	/* button */
 	widget = gtk_button_new();
 	gtk_button_set_relief(GTK_BUTTON(widget), GTK_RELIEF_NONE);
-#if GTK_CHECK_VERSION(3, 10, 0)
+#if GTK_CHECK_VERSION(2, 6, 0)
 	image = gtk_image_new_from_icon_name(
+			"gtk-close", GTK_ICON_SIZE_BUTTON);
 #else
 	image = gtk_image_new_from_stock(
-#endif
 			GTK_STOCK_CLOSE, GTK_ICON_SIZE_BUTTON);
+#endif
 	gtk_button_set_image(GTK_BUTTON(widget), image);
 	g_signal_connect(widget, "clicked", G_CALLBACK(gtk_main_quit), NULL);
 	gtk_box_pack_start(GTK_BOX(hbox), widget, FALSE, TRUE, 0);
@@ -199,7 +200,7 @@ static int _usage(void)
 int main(int argc, char * argv[])
 {
 	unsigned int timeout = 3;
-	char const * stock = GTK_STOCK_DIALOG_INFO;
+	char const * stock = "gtk-stock-info";
 	char const * title = _("Information");
 	int o;
 	char * p;
@@ -213,25 +214,25 @@ int main(int argc, char * argv[])
 		switch(o)
 		{
 			case 'E':
-				stock = GTK_STOCK_DIALOG_ERROR;
+				stock = "gtk-dialog-error";
 				title = _("Error");
 				break;
 			case 'I':
-				stock = GTK_STOCK_DIALOG_INFO;
+				stock = "gtk-dialog-info";
 				title = _("Information");
 				break;
 			case 'N':
 				stock = optarg;
 				break;
 			case 'Q':
-				stock = GTK_STOCK_DIALOG_QUESTION;
+				stock = "gtk-dialog-question";
 				title = _("Question");
 				break;
 			case 'T':
 				title = optarg;
 				break;
 			case 'W':
-				stock = GTK_STOCK_DIALOG_WARNING;
+				stock = "gtk-dialog-warning";
 				title = _("Warning");
 				break;
 			case 't':
