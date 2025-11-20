@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Panel 0.4.2\n"
+"Project-Id-Version: Panel 0.4.6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 01:48+0200\n"
+"POT-Creation-Date: 2025-11-20 02:42+0100\n"
 "PO-Revision-Date: 2022-05-18 01:28+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: German\n"
@@ -23,15 +23,15 @@ msgstr "Akku"
 
 #: ../src/applets/battery.c:212
 msgid "Show the battery level"
-msgstr ""
+msgstr "Restliche Akku zeigen"
 
 #: ../src/applets/battery.c:430
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
+#: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:456
 #: ../src/panel.c:427 ../src/panel.c:432 ../src/run.c:256 ../src/run.c:262
-#: ../tools/message.c:211
+#: ../tools/message.c:218
 msgid "Error"
 msgstr "Fehler"
 
@@ -75,11 +75,11 @@ msgstr "Schliessen"
 
 #: ../src/applets/cpu.c:70
 msgid "CPU"
-msgstr ""
+msgstr "Prozessor"
 
 #: ../src/applets/cpu.c:118
 msgid "CPU:"
-msgstr ""
+msgstr "Prozessor:"
 
 #: ../src/applets/cpufreq.c:72
 msgid "CPU frequency"
@@ -87,7 +87,7 @@ msgstr ""
 
 #: ../src/applets/cpufreq.c:108 ../src/applets/cpufreq.c:133
 msgid "No support detected"
-msgstr ""
+msgstr "Nicht unterstützt"
 
 #: ../src/applets/cpufreq.c:176 ../src/applets/cpufreq.c:247
 msgid "MHz"
@@ -95,7 +95,7 @@ msgstr "MHz"
 
 #: ../src/applets/cpufreq.c:186 ../src/applets/memory.c:142
 msgid "Unsupported platform"
-msgstr ""
+msgstr "Plattform nicht unterstützt"
 
 #: ../src/applets/cpufreq.c:246
 msgid "CPU frequency: "
@@ -107,7 +107,7 @@ msgstr ""
 
 #: ../src/applets/desktop.c:73
 msgid "Show desktop"
-msgstr ""
+msgstr "Desktop zeigen"
 
 #: ../src/applets/embed.c:90
 msgid "Embed"
@@ -115,7 +115,7 @@ msgstr ""
 
 #: ../src/applets/embed.c:122
 msgid "Desktop notifications"
-msgstr ""
+msgstr "Desktopnachrichten"
 
 #: ../src/applets/gps.c:62
 msgid "GPS"
@@ -219,7 +219,7 @@ msgstr "Einstellungen"
 
 #: ../src/applets/menu.c:90
 msgid "System"
-msgstr ""
+msgstr "System"
 
 #: ../src/applets/menu.c:91
 msgid "Utilities"
@@ -235,11 +235,11 @@ msgstr "HauptmenÃŒ"
 
 #: ../src/applets/menu.c:526
 msgid "A_pplications"
-msgstr ""
+msgstr "_Anwendungen"
 
 #: ../src/applets/menu.c:536
 msgid "_Run..."
-msgstr ""
+msgstr "Ausfüh_ren..."
 
 #: ../src/applets/menu.c:548
 msgid "_About"
@@ -271,7 +271,7 @@ msgstr "Speicher"
 
 #: ../src/applets/memory.c:109
 msgid "RAM:"
-msgstr ""
+msgstr "Arbeitsspeicher:"
 
 #: ../src/applets/mixer.c:102
 msgid "Mixer"
@@ -287,7 +287,7 @@ msgstr ""
 
 #: ../src/applets/mixer.c:336
 msgid "Size:"
-msgstr ""
+msgstr "Größe:"
 
 #: ../src/applets/mixer.c:349
 msgid "Width:"
@@ -315,7 +315,7 @@ msgstr "Vorherige"
 
 #: ../src/applets/mpd.c:116
 msgid "Rewind"
-msgstr "RÃŒckwÃ€rts"
+msgstr "Rückwärts"
 
 #: ../src/applets/mpd.c:118
 msgid "Play"
@@ -331,11 +331,11 @@ msgstr "Stoppen"
 
 #: ../src/applets/mpd.c:124
 msgid "Forward"
-msgstr "VorwÃ€rts"
+msgstr "Vorwärts"
 
 #: ../src/applets/mpd.c:126
 msgid "Next"
-msgstr "NÃ€chste"
+msgstr "Nächste"
 
 #: ../src/applets/network.c:353
 #, c-format
@@ -363,7 +363,7 @@ msgstr ""
 #: ../src/applets/pager.c:306
 #, c-format
 msgid "Desk %lu"
-msgstr ""
+msgstr "Büro %lu"
 
 #: ../src/applets/pager.c:342
 #, c-format
@@ -452,7 +452,7 @@ msgstr ""
 
 #: ../src/applets/tasks.c:875
 msgid "Fullscreen"
-msgstr ""
+msgstr "Vollbild"
 
 #: ../src/applets/tasks.c:878
 msgid "Change desktop"
@@ -460,7 +460,7 @@ msgstr ""
 
 #: ../src/applets/tasks.c:931
 msgid "Maximize"
-msgstr ""
+msgstr "Vergrößen"
 
 #: ../src/applets/title.c:82
 msgid "Title"
@@ -472,7 +472,7 @@ msgstr "USB"
 
 #: ../src/applets/usb.c:95
 msgid "USB networking device connected"
-msgstr ""
+msgstr "Netzwerkfähige USB Gerät verbunden"
 
 #: ../src/applets/user.c:93
 msgid "Unknown user"
@@ -502,98 +502,98 @@ msgstr ""
 msgid ": "
 msgstr ": "
 
-#: ../src/applets/wpa_supplicant.c:233
+#: ../src/applets/wpa_supplicant.c:234
 msgid "Wifi"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:310
+#: ../src/applets/wpa_supplicant.c:311
 msgid "Wireless networking"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:318 ../src/applets/wpa_supplicant.c:1074
+#: ../src/applets/wpa_supplicant.c:319 ../src/applets/wpa_supplicant.c:1075
 msgid "Unavailable"
 msgstr "Nicht verfÃŒgbar"
 
-#: ../src/applets/wpa_supplicant.c:467
+#: ../src/applets/wpa_supplicant.c:468
 #, c-format
 msgid "Connected to interface %s"
-msgstr ""
+msgstr "Mit Schnittstelle %s verbunden"
 
-#: ../src/applets/wpa_supplicant.c:471
+#: ../src/applets/wpa_supplicant.c:472
 msgid "Connecting..."
 msgstr "Verbindung..."
 
-#: ../src/applets/wpa_supplicant.c:479
+#: ../src/applets/wpa_supplicant.c:480
 msgid "Scanning..."
-msgstr ""
+msgstr "Scannen..."
 
-#: ../src/applets/wpa_supplicant.c:489
+#: ../src/applets/wpa_supplicant.c:490
 #, c-format
 msgid "Connected to network %s"
-msgstr ""
+msgstr "Mit Netzwerk %s verbunden"
 
-#: ../src/applets/wpa_supplicant.c:553
+#: ../src/applets/wpa_supplicant.c:554
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:570
+#: ../src/applets/wpa_supplicant.c:571
 msgid "Password required"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:584
+#: ../src/applets/wpa_supplicant.c:585
 msgid "Wireless key"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:596
+#: ../src/applets/wpa_supplicant.c:597
 msgid "Key: "
-msgstr ""
+msgstr "Schlüssel: "
 
-#: ../src/applets/wpa_supplicant.c:608
+#: ../src/applets/wpa_supplicant.c:609
 msgid "_Show password"
-msgstr "Password _zeigen"
+msgstr "Passwort _zeigen"
 
-#: ../src/applets/wpa_supplicant.c:1154 ../tools/wifibrowser.c:119
+#: ../src/applets/wpa_supplicant.c:1155 ../tools/wifibrowser.c:119
 msgid "Reassociate"
 msgstr "Erneut verbinden"
 
-#: ../src/applets/wpa_supplicant.c:1170 ../tools/wifibrowser.c:315
+#: ../src/applets/wpa_supplicant.c:1171 ../tools/wifibrowser.c:315
 msgid "Disconnect"
 msgstr "Trennen"
 
-#: ../src/applets/wpa_supplicant.c:1182 ../tools/wifibrowser.c:120
+#: ../src/applets/wpa_supplicant.c:1183 ../tools/wifibrowser.c:120
 msgid "Rescan"
 msgstr "Erneut scannen"
 
-#: ../src/applets/wpa_supplicant.c:1255
+#: ../src/applets/wpa_supplicant.c:1256
 msgid "Preferences"
 msgstr "Einstellungen"
 
-#: ../src/applets/wpa_supplicant.c:1434
+#: ../src/applets/wpa_supplicant.c:1435
 msgid "Unknown error"
 msgstr "Unbekannte Fehler"
 
-#: ../src/applets/wpa_supplicant.c:1436
+#: ../src/applets/wpa_supplicant.c:1437
 msgid "Could not save the configuration"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:1532
+#: ../src/applets/wpa_supplicant.c:1533
 msgid "Password changed"
-msgstr "Passwort geÃ€ndert"
+msgstr "Passwort geändert"
 
-#: ../src/applets/wpa_supplicant.c:1684
+#: ../src/applets/wpa_supplicant.c:1685
 #, c-format
 msgid "Hidden (%s)"
 msgstr "Versteckt (%s)"
 
-#: ../src/applets/wpa_supplicant.c:1948
+#: ../src/applets/wpa_supplicant.c:1949
 #, c-format
 msgid ""
 "Frequency: %u\n"
 "Level: %u%s%s"
 msgstr ""
 
-#: ../src/applets/wpa_supplicant.c:1949
+#: ../src/applets/wpa_supplicant.c:1950
 msgid ""
 "\n"
 "Security: "
@@ -603,7 +603,7 @@ msgstr ""
 
 #: ../src/helper.c:144
 msgid "Panel for the DeforaOS desktop"
-msgstr "Panel fÃŒr den DeforaOS-Desktop"
+msgstr "Panel für den DeforaOS-Desktop"
 
 #: ../src/helper.c:159
 msgid "translator-credits"
@@ -674,7 +674,7 @@ msgstr ""
 
 #: ../src/panel.c:122
 msgid "Large"
-msgstr ""
+msgstr "Groß"
 
 #: ../src/panel.c:123
 msgid "Small"
@@ -690,7 +690,7 @@ msgstr ""
 
 #: ../src/panel.c:704
 msgid "Panel preferences"
-msgstr ""
+msgstr "Paneleinstellungen"
 
 #: ../src/panel.c:721
 msgid "General"
@@ -702,11 +702,11 @@ msgstr "Panele"
 
 #: ../src/panel.c:746
 msgid "Accept focus"
-msgstr ""
+msgstr "Fokus akzeptieren"
 
 #: ../src/panel.c:750
 msgid "Keep above other windows"
-msgstr ""
+msgstr "Über andere Fenster behalten"
 
 #: ../src/panel.c:758
 msgid "Bottom panel:"
@@ -734,7 +734,7 @@ msgstr ""
 
 #: ../src/panel.c:863
 msgid "Applets:"
-msgstr ""
+msgstr "Applets:"
 
 #: ../src/panelctl.c:74
 #, c-format
@@ -757,19 +757,19 @@ msgstr ""
 
 #: ../src/run.c:135
 msgid "Executable files"
-msgstr ""
+msgstr "Ausführbare Datei"
 
 #: ../src/run.c:140
 msgid "Perl scripts"
-msgstr ""
+msgstr "Perlskripte"
 
 #: ../src/run.c:144
 msgid "Python scripts"
-msgstr ""
+msgstr "Pythonskripte"
 
 #: ../src/run.c:148
 msgid "Shell scripts"
-msgstr ""
+msgstr "Shellskripte"
 
 #: ../src/run.c:152
 msgid "All files"
@@ -798,7 +798,7 @@ msgstr ""
 #: ../src/run.c:491 ../tools/settings.c:543
 #, c-format
 msgid "Usage: %s\n"
-msgstr ""
+msgstr "Usage: %s\n"
 
 #: ../src/window.c:97
 msgid "Invalid panel size"
@@ -808,45 +808,56 @@ msgstr ""
 msgid "Unsupported panel position"
 msgstr ""
 
-#: ../tools/embed.c:114
+#: ../tools/embed.c:116
 msgid "Could not obtain the XID"
 msgstr ""
 
-#: ../tools/embed.c:155
+#: ../tools/embed.c:157
 #, c-format
 msgid "Usage: %s command [arguments...]\n"
 msgstr ""
 
-#: ../tools/helper.c:219
+#: ../tools/helper.c:216
 msgid "Invalid panel position"
 msgstr ""
 
-#: ../tools/helper.c:244
+#: ../tools/helper.c:241
 msgid "Applets available:"
-msgstr ""
+msgstr "Verfügbare Applets:"
+
+#: ../tools/message.c:89
+msgid "Message"
+msgstr "Mitteilung"
 
 #: ../tools/message.c:183
 #, c-format
 msgid ""
 "Usage: %s [-EIQW][-T title][-t timeout] message\n"
 "       %s [-N name][-T title][-t timeout] message\n"
+"  -E\tCreate an error dialog\n"
+"  -I\tCreate an informational message\n"
+"  -N\tChoose a specific icon\n"
+"  -Q\tCreate a question dialog\n"
+"  -T\tSet the dialog title\n"
+"  -W\tCreate a warning dialog\n"
+"  -t\tSet the dialog timeout\n"
 msgstr ""
 
-#: ../tools/message.c:197 ../tools/message.c:215
+#: ../tools/message.c:204 ../tools/message.c:222
 msgid "Information"
 msgstr "Information"
 
-#: ../tools/message.c:222
+#: ../tools/message.c:229
 msgid "Question"
 msgstr "Frage"
 
-#: ../tools/message.c:229
+#: ../tools/message.c:236
 msgid "Warning"
 msgstr "Warnung"
 
 #: ../tools/notify.c:108
 msgid "Notification"
-msgstr ""
+msgstr "Nachricht"
 
 #: ../tools/notify.c:146
 #, c-format
@@ -864,7 +875,7 @@ msgstr ""
 
 #: ../tools/settings.c:127
 msgid "System preferences"
-msgstr ""
+msgstr "Systemeinstellungen"
 
 #: ../tools/wifibrowser.c:118
 msgid "Wireless browser"

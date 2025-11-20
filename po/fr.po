@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Panel 0.4.1\n"
+"Project-Id-Version: Panel 0.4.6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 01:48+0200\n"
+"POT-Creation-Date: 2025-11-20 02:42+0100\n"
 "PO-Revision-Date: 2015-08-11 01:31+0200\n"
 "Last-Translator: Pierre Pronchery <khorben@defora.org>\n"
 "Language-Team: French\n"
@@ -29,9 +29,9 @@ msgstr "Afficher le niveau de batterie"
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:455
+#: ../src/applets/battery.c:446 ../src/applets/wpa_supplicant.c:456
 #: ../src/panel.c:427 ../src/panel.c:432 ../src/run.c:256 ../src/run.c:262
-#: ../tools/message.c:211
+#: ../tools/message.c:218
 msgid "Error"
 msgstr "Erreur"
 
@@ -502,91 +502,91 @@ msgstr "Téléphone personel"
 msgid ": "
 msgstr " : "
 
-#: ../src/applets/wpa_supplicant.c:233
+#: ../src/applets/wpa_supplicant.c:234
 msgid "Wifi"
 msgstr "Wifi"
 
-#: ../src/applets/wpa_supplicant.c:310
+#: ../src/applets/wpa_supplicant.c:311
 msgid "Wireless networking"
 msgstr "Réseaux sans fil"
 
-#: ../src/applets/wpa_supplicant.c:318 ../src/applets/wpa_supplicant.c:1074
+#: ../src/applets/wpa_supplicant.c:319 ../src/applets/wpa_supplicant.c:1075
 msgid "Unavailable"
 msgstr "Indisponible"
 
-#: ../src/applets/wpa_supplicant.c:467
+#: ../src/applets/wpa_supplicant.c:468
 #, c-format
 msgid "Connected to interface %s"
 msgstr "Connecté à l'interface %s"
 
-#: ../src/applets/wpa_supplicant.c:471
+#: ../src/applets/wpa_supplicant.c:472
 msgid "Connecting..."
 msgstr "Connexion..."
 
-#: ../src/applets/wpa_supplicant.c:479
+#: ../src/applets/wpa_supplicant.c:480
 msgid "Scanning..."
 msgstr "Recherche..."
 
-#: ../src/applets/wpa_supplicant.c:489
+#: ../src/applets/wpa_supplicant.c:490
 #, c-format
 msgid "Connected to network %s"
 msgstr "Connecté au réseau %s"
 
-#: ../src/applets/wpa_supplicant.c:553
+#: ../src/applets/wpa_supplicant.c:554
 #, c-format
 msgid "The network \"%s\" is protected by a key."
 msgstr "Le réseau \"%s\" est protégé par une clé."
 
-#: ../src/applets/wpa_supplicant.c:570
+#: ../src/applets/wpa_supplicant.c:571
 msgid "Password required"
 msgstr "Mot de passe requis"
 
-#: ../src/applets/wpa_supplicant.c:584
+#: ../src/applets/wpa_supplicant.c:585
 msgid "Wireless key"
 msgstr "Clé du réseau"
 
-#: ../src/applets/wpa_supplicant.c:596
+#: ../src/applets/wpa_supplicant.c:597
 msgid "Key: "
 msgstr "Clé : "
 
-#: ../src/applets/wpa_supplicant.c:608
+#: ../src/applets/wpa_supplicant.c:609
 msgid "_Show password"
 msgstr "_Afficher le mot de passe"
 
-#: ../src/applets/wpa_supplicant.c:1154 ../tools/wifibrowser.c:119
+#: ../src/applets/wpa_supplicant.c:1155 ../tools/wifibrowser.c:119
 msgid "Reassociate"
 msgstr "Réassocier"
 
-#: ../src/applets/wpa_supplicant.c:1170 ../tools/wifibrowser.c:315
+#: ../src/applets/wpa_supplicant.c:1171 ../tools/wifibrowser.c:315
 msgid "Disconnect"
 msgstr "Déconnecter"
 
-#: ../src/applets/wpa_supplicant.c:1182 ../tools/wifibrowser.c:120
+#: ../src/applets/wpa_supplicant.c:1183 ../tools/wifibrowser.c:120
 msgid "Rescan"
 msgstr "Rechercher"
 
-#: ../src/applets/wpa_supplicant.c:1255
+#: ../src/applets/wpa_supplicant.c:1256
 msgid "Preferences"
 msgstr "Préférences"
 
-#: ../src/applets/wpa_supplicant.c:1434
+#: ../src/applets/wpa_supplicant.c:1435
 msgid "Unknown error"
 msgstr "Erreur inconnue"
 
-#: ../src/applets/wpa_supplicant.c:1436
+#: ../src/applets/wpa_supplicant.c:1437
 msgid "Could not save the configuration"
 msgstr "Impossible de sauvegarder la configuration"
 
-#: ../src/applets/wpa_supplicant.c:1532
+#: ../src/applets/wpa_supplicant.c:1533
 msgid "Password changed"
 msgstr "Mot de passe changé"
 
-#: ../src/applets/wpa_supplicant.c:1684
+#: ../src/applets/wpa_supplicant.c:1685
 #, c-format
 msgid "Hidden (%s)"
 msgstr "Masqué (%s)"
 
-#: ../src/applets/wpa_supplicant.c:1948
+#: ../src/applets/wpa_supplicant.c:1949
 #, c-format
 msgid ""
 "Frequency: %u\n"
@@ -595,7 +595,7 @@ msgstr ""
 "Fréquence : %u\n"
 "Niveau : %u%s%s"
 
-#: ../src/applets/wpa_supplicant.c:1949
+#: ../src/applets/wpa_supplicant.c:1950
 msgid ""
 "\n"
 "Security: "
@@ -845,41 +845,50 @@ msgstr "Taille invalide pour le panel"
 msgid "Unsupported panel position"
 msgstr "Position invalide pour le panel"
 
-#: ../tools/embed.c:114
+#: ../tools/embed.c:116
 msgid "Could not obtain the XID"
 msgstr "Impossible d'obtenir le XID"
 
-#: ../tools/embed.c:155
+#: ../tools/embed.c:157
 #, c-format
 msgid "Usage: %s command [arguments...]\n"
 msgstr "Usage: %s commande [arguments...]\n"
 
-#: ../tools/helper.c:219
+#: ../tools/helper.c:216
 msgid "Invalid panel position"
 msgstr "Position invalide pour le panel"
 
-#: ../tools/helper.c:244
+#: ../tools/helper.c:241
 msgid "Applets available:"
 msgstr "Applets disponibles :"
+
+#: ../tools/message.c:89
+msgid "Message"
+msgstr "Message"
 
 #: ../tools/message.c:183
 #, c-format
 msgid ""
 "Usage: %s [-EIQW][-T title][-t timeout] message\n"
 "       %s [-N name][-T title][-t timeout] message\n"
+"  -E\tCreate an error dialog\n"
+"  -I\tCreate an informational message\n"
+"  -N\tChoose a specific icon\n"
+"  -Q\tCreate a question dialog\n"
+"  -T\tSet the dialog title\n"
+"  -W\tCreate a warning dialog\n"
+"  -t\tSet the dialog timeout\n"
 msgstr ""
-"Usage: %s [-EIQW][-T titre][-t durée] message\n"
-"       %s [-N nom][-T titre][-t durée] message\n"
 
-#: ../tools/message.c:197 ../tools/message.c:215
+#: ../tools/message.c:204 ../tools/message.c:222
 msgid "Information"
 msgstr "Information"
 
-#: ../tools/message.c:222
+#: ../tools/message.c:229
 msgid "Question"
 msgstr "Question"
 
-#: ../tools/message.c:229
+#: ../tools/message.c:236
 msgid "Warning"
 msgstr "Attention"
 
