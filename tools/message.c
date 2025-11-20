@@ -86,7 +86,7 @@ static int _message(unsigned int timeout, char const * stock,
 	plug = gtk_plug_new(0);
 #else
 	plug = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(plug), "Message");
+	gtk_window_set_title(GTK_WINDOW(plug), _("Message"));
 #endif
 	gtk_container_set_border_width(GTK_CONTAINER(plug), 4);
 #if GTK_CHECK_VERSION(3, 0, 0)
