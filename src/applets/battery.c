@@ -20,7 +20,11 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
-#if defined(__NetBSD__)
+#if defined(__FreeBSD__)
+# include <sys/ioctl.h>
+# include <dev/acpica/acpiio.h>
+# include <fcntl.h>
+#elif defined(__NetBSD__)
 # include <sys/types.h>
 # include <sys/ioctl.h>
 # include <sys/envsys.h>
@@ -72,7 +76,7 @@ typedef struct _PanelApplet
 	GtkWidget * pr_level;
 
 	/* platform-specific */
-#if defined(__NetBSD__) || defined(__linux__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
 	int fd;
 #endif
 } Battery;
@@ -126,7 +130,7 @@ static Battery * _battery_init(PanelAppletHelper * helper, GtkWidget ** widget)
 	battery->level = -1;
 	battery->charging = -1;
 	battery->timeout = 0;
-#if defined(__NetBSD__) || defined(__linux__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
 	battery->fd = -1;
 #endif
 	iconsize = panel_window_get_icon_size(helper->window);
@@ -188,7 +192,7 @@ static void _battery_destroy(Battery * battery)
 {
 	if(battery->timeout > 0)
 		g_source_remove(battery->timeout);
-#if defined(__NetBSD__) || defined(__linux__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__linux__)
 	if(battery->fd != -1)
 		close(battery->fd);
 #endif
@@ -255,7 +259,45 @@ static void _settings_reset(Battery * battery, PanelAppletHelper * helper)
 
 /* accessors */
 /* battery_get */
-#if defined(__NetBSD__)
+#if defined(__FreeBSD__)
+static gboolean _battery_get(Battery * battery, gdouble * level,
+		gboolean * charging)
+{
+	union acpi_battery_ioctl_arg info;
+
+	*charging = FALSE;
+	if(battery->fd < 0 && (battery->fd = open("/dev/acpi", O_RDONLY)) < 0)
+	{
+		error_set("%s: %s: %s", applet.name, "/dev/acpi",
+				strerror(errno));
+		*level = -1.0;
+		return TRUE;
+	}
+	info.unit = 0;
+	if(ioctl(battery->fd, ACPIIO_BATT_GET_BST, &info) != 0)
+	{
+		close(battery->fd);
+		battery->fd = -1;
+		error_set("%s: %s: %s", applet.name, "ACPIIO_BATT_GET_BATTINFO",
+				strerror(errno));
+		*level = -1.0;
+		return TRUE;
+	}
+	*charging = (info.bst.state == ACPI_BATT_STAT_CHARGING) ? TRUE : FALSE;
+	info.unit = 0;
+	if(ioctl(battery->fd, ACPIIO_BATT_GET_BATTINFO, &info) != 0)
+	{
+		close(battery->fd);
+		battery->fd = -1;
+		error_set("%s: %s: %s", applet.name, "ACPIIO_BATT_GET_BATTINFO",
+				strerror(errno));
+		*level = -1.0;
+		return TRUE;
+	}
+	*level = info.battinfo.cap;
+	return TRUE;
+}
+#elif defined(__NetBSD__)
 static int _get_tre(int fd, int sensor, envsys_tre_data_t * tre);
 
 static gboolean _battery_get(Battery * battery, gdouble * level,
