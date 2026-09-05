@@ -57,6 +57,7 @@ struct _Panel
 	GtkWidget * ab_window;
 	GtkWidget * lk_window;
 	GtkWidget * lo_window;
+	GtkWidget * rb_window;
 	GtkWidget * sh_window;
 	GtkWidget * su_window;
 };
@@ -166,6 +167,7 @@ static int _panel_init(Panel * panel, PanelWindowPosition position,
 	panel->ab_window = NULL;
 	panel->lk_window = NULL;
 	panel->lo_window = NULL;
+	panel->rb_window = NULL;
 	panel->sh_window = NULL;
 	panel->su_window = NULL;
 	return 0;
@@ -190,6 +192,8 @@ static void _panel_destroy(Panel * panel)
 		gtk_widget_destroy(panel->lk_window);
 	if(panel->lo_window != NULL)
 		gtk_widget_destroy(panel->lo_window);
+	if(panel->rb_window != NULL)
+		gtk_widget_destroy(panel->rb_window);
 	if(panel->sh_window != NULL)
 		gtk_widget_destroy(panel->sh_window);
 	if(panel->su_window != NULL)
@@ -299,6 +303,9 @@ static void _helper_init(PanelAppletHelper * helper, Panel * panel,
 		helper->logout_dialog = NULL;
 	helper->position_menu = _panel_helper_position_menu_widget;
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
+	helper->reboot = _init_can_shutdown() ? _panel_helper_reboot : NULL;
+	helper->reboot_dialog = (helper->reboot != NULL)
+		? _panel_helper_reboot_dialog : NULL;
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown = _init_can_shutdown() ? _panel_helper_shutdown : NULL;
 	helper->shutdown_dialog = (helper->shutdown != NULL)

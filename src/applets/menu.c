@@ -116,6 +116,7 @@ static void _menu_on_clicked(gpointer data);
 static gboolean _menu_on_idle(gpointer data);
 static void _menu_on_lock(gpointer data);
 static void _menu_on_logout(gpointer data);
+static void _menu_on_restart(gpointer data);
 #ifdef EMBEDDED
 static void _menu_on_rotate(gpointer data);
 #endif
@@ -591,6 +592,15 @@ static void _menu_on_clicked(gpointer data)
 					_menu_on_suspend), data);
 		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
 	}
+	/* restart */
+	if(menu->helper->reboot_dialog != NULL)
+	{
+		menuitem = _menu_menuitem_stock("gtk-refresh",
+				_("_Restart..."), TRUE);
+		g_signal_connect_swapped(menuitem, "activate", G_CALLBACK(
+					_menu_on_restart), data);
+		gtk_menu_shell_append(GTK_MENU_SHELL(menushell), menuitem);
+	}
 	/* shutdown */
 	if(menu->helper->shutdown_dialog != NULL)
 	{
@@ -743,6 +753,15 @@ static void _menu_on_logout(gpointer data)
 	Menu * menu = data;
 
 	menu->helper->logout_dialog(menu->helper->panel);
+}
+
+
+/* menu_on_restart */
+static void _menu_on_restart(gpointer data)
+{
+	Menu * menu = data;
+
+	menu->helper->reboot_dialog(menu->helper->panel);
 }
 
 

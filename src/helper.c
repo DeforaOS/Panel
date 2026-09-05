@@ -58,8 +58,10 @@ static void _panel_helper_position_menu_widget(Panel * panel, GtkMenu * menu,
 		gint * x, gint * y, gboolean * push_in);
 #endif
 static void _panel_helper_preferences_dialog(Panel * panel);
+static void _panel_helper_reboot(Panel * panel);
+static void _panel_helper_reboot_dialog(Panel * panel);
 static void _panel_helper_rotate_screen(Panel * panel);
-static void _panel_helper_shutdown(Panel * panel, gboolean reboot);
+static void _panel_helper_shutdown(Panel * panel, gboolean poweroff);
 static void _panel_helper_shutdown_dialog(Panel * panel);
 static void _panel_helper_suspend(Panel * panel);
 static void _panel_helper_suspend_dialog(Panel * panel);
@@ -455,6 +457,99 @@ static void _panel_helper_preferences_dialog(Panel * panel)
 }
 
 
+/* panel_helper_reboot */
+static void _panel_helper_reboot(Panel * panel)
+{
+	char * cmd_reboot[] = { "/sbin/shutdown", "shutdown", "-r", "now",
+		NULL };
+	GError * error = NULL;
+
+	if(g_spawn_async(NULL, cmd_reboot, NULL, G_SPAWN_FILE_AND_ARGV_ZERO,
+				NULL, NULL, NULL, &error) != TRUE)
+	{
+		_panel_helper_error(panel, error->message, 1);
+		g_error_free(error);
+	}
+}
+
+
+/* panel_helper_reboot_dialog */
+static gboolean _reboot_dialog_on_closex(gpointer data);
+static void _reboot_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data);
+
+static void _panel_helper_reboot_dialog(Panel * panel)
+{
+#ifdef EMBEDDED
+	const char message[] = N_("This will restart your device,"
+			" therefore closing any application currently opened"
+			" and losing any unsaved data.\n"
+			"Do you really want to proceed?");
+#else
+	const char message[] = N_("This will restart your computer,"
+			" therefore closing any application currently opened"
+			" and losing any unsaved data.\n"
+			"Do you really want to proceed?");
+#endif
+	GtkWidget * widget;
+
+	if(panel->rb_window != NULL)
+	{
+		gtk_window_present(GTK_WINDOW(panel->rb_window));
+		return;
+	}
+	panel->rb_window = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_NONE, "%s",
+#if GTK_CHECK_VERSION(2, 6, 0)
+			_("Restart"));
+	gtk_message_dialog_format_secondary_text(GTK_MESSAGE_DIALOG(
+				panel->rb_window),
+#endif
+			"%s", _(message));
+#if GTK_CHECK_VERSION(2, 10, 0)
+	gtk_message_dialog_set_image(GTK_MESSAGE_DIALOG(panel->rb_window),
+			gtk_image_new_from_icon_name("gnome-shutdown",
+				GTK_ICON_SIZE_DIALOG));
+#endif
+	gtk_dialog_add_buttons(GTK_DIALOG(panel->rb_window), GTK_STOCK_CANCEL,
+			GTK_RESPONSE_CANCEL, NULL);
+	widget = gtk_button_new_with_label(_("Restart"));
+	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_icon_name(
+				"gtk-refresh", GTK_ICON_SIZE_BUTTON));
+	gtk_widget_show_all(widget);
+	gtk_dialog_add_action_widget(GTK_DIALOG(panel->rb_window), widget,
+			GTK_RESPONSE_OK);
+	gtk_window_set_keep_above(GTK_WINDOW(panel->rb_window), TRUE);
+	gtk_window_set_position(GTK_WINDOW(panel->rb_window),
+			GTK_WIN_POS_CENTER);
+	gtk_window_set_title(GTK_WINDOW(panel->rb_window), _("Restart"));
+	g_signal_connect(panel->rb_window, "delete-event", G_CALLBACK(
+				_reboot_dialog_on_closex), panel);
+	g_signal_connect(panel->rb_window, "response", G_CALLBACK(
+				_reboot_dialog_on_response), panel);
+	gtk_widget_show_all(panel->rb_window);
+}
+
+static gboolean _reboot_dialog_on_closex(gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(panel->rb_window);
+	return TRUE;
+}
+
+static void _reboot_dialog_on_response(GtkWidget * widget, gint response,
+		gpointer data)
+{
+	Panel * panel = data;
+
+	gtk_widget_hide(widget);
+	if(response == GTK_RESPONSE_OK)
+		_panel_helper_reboot(panel);
+
+}
+
+
 /* panel_helper_rotate_screen */
 static void _panel_helper_rotate_screen(Panel * panel)
 {
@@ -466,19 +561,26 @@ static void _panel_helper_rotate_screen(Panel * panel)
 
 
 /* panel_helper_shutdown */
-static void _panel_helper_shutdown(Panel * panel, gboolean reboot)
+static void _panel_helper_shutdown(Panel * panel, gboolean poweroff)
 {
-	char * reset[] = { "/sbin/shutdown", "shutdown", "-r", "now", NULL };
-	char * halt[] = { "/sbin/shutdown", "shutdown",
+	char * cmd_poweroff[] = { "/sbin/shutdown", "shutdown",
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 		"-p",
 #else
 		"-h",
 #endif
 		"now", NULL };
+	char * cmd_halt[] = { "/sbin/shutdown", "shutdown",
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+		"-h",
+#else
+		/* FIXME really implement */
+		"-h",
+#endif
+		"now", NULL };
 	GError * error = NULL;
 
-	if(g_spawn_async(NULL, reboot ? reset : halt, NULL,
+	if(g_spawn_async(NULL, poweroff ? cmd_poweroff : cmd_halt, NULL,
 				G_SPAWN_FILE_AND_ARGV_ZERO, NULL, NULL, NULL,
 				&error) != TRUE)
 	{
@@ -492,7 +594,7 @@ static void _panel_helper_shutdown(Panel * panel, gboolean reboot)
 static gboolean _shutdown_dialog_on_closex(gpointer data);
 static void _shutdown_dialog_on_response(GtkWidget * widget, gint response,
 		gpointer data);
-enum { RES_CANCEL, RES_REBOOT, RES_SHUTDOWN };
+enum { RES_CANCEL, RES_HALT, RES_POWEROFF };
 
 static void _panel_helper_shutdown_dialog(Panel * panel)
 {
@@ -527,14 +629,15 @@ static void _panel_helper_shutdown_dialog(Panel * panel)
 			gtk_image_new_from_icon_name("gnome-shutdown",
 				GTK_ICON_SIZE_DIALOG));
 #endif
+	/* FIXME use a checkbox instead */
 	gtk_dialog_add_buttons(GTK_DIALOG(panel->sh_window), GTK_STOCK_CANCEL,
-			RES_CANCEL, _("Restart"), RES_REBOOT, NULL);
+			RES_CANCEL, _("Halt"), RES_HALT, NULL);
 	widget = gtk_button_new_with_label(_("Shutdown"));
 	gtk_button_set_image(GTK_BUTTON(widget), gtk_image_new_from_icon_name(
 				"gnome-shutdown", GTK_ICON_SIZE_BUTTON));
 	gtk_widget_show_all(widget);
 	gtk_dialog_add_action_widget(GTK_DIALOG(panel->sh_window), widget,
-			RES_SHUTDOWN);
+			RES_POWEROFF);
 	gtk_window_set_keep_above(GTK_WINDOW(panel->sh_window), TRUE);
 	gtk_window_set_position(GTK_WINDOW(panel->sh_window),
 			GTK_WIN_POS_CENTER);
@@ -560,10 +663,11 @@ static void _shutdown_dialog_on_response(GtkWidget * widget, gint response,
 	Panel * panel = data;
 
 	gtk_widget_hide(widget);
-	if(response == RES_SHUTDOWN)
+	if(response == RES_HALT)
 		_panel_helper_shutdown(panel, FALSE);
-	else if(response == RES_REBOOT)
+	else if(response == RES_POWEROFF)
 		_panel_helper_shutdown(panel, TRUE);
+
 }
 
 

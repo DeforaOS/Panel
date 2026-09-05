@@ -43,8 +43,10 @@ typedef struct _PanelAppletHelper
 	void (*position_menu)(Panel * panel, GtkMenu * menu, gint * x, gint * y,
 			gboolean * push_in);
 	void (*preferences_dialog)(Panel * panel);
+	void (*reboot)(Panel * panel);
+	void (*reboot_dialog)(Panel * panel);
 	void (*rotate_screen)(Panel * panel);
-	void (*shutdown)(Panel * panel, gboolean reboot);
+	void (*shutdown)(Panel * panel, gboolean poweroff);
 	void (*shutdown_dialog)(Panel * panel);
 	void (*suspend)(Panel * panel);
 	void (*suspend_dialog)(Panel * panel);

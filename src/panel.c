@@ -96,6 +96,7 @@ struct _Panel
 	GtkWidget * ab_window;
 	GtkWidget * lk_window;
 	GtkWidget * lo_window;
+	GtkWidget * rb_window;
 	GtkWidget * sh_window;
 	GtkWidget * su_window;
 };
@@ -175,6 +176,7 @@ Panel * panel_new(PanelPrefs const * prefs)
 	panel->ab_window = NULL;
 	panel->lk_window = NULL;
 	panel->lo_window = NULL;
+	panel->rb_window = NULL;
 	panel->sh_window = NULL;
 	panel->su_window = NULL;
 	if(panel->config == NULL)
@@ -266,6 +268,12 @@ static void _new_helper(Panel * panel, PanelPosition position)
 		helper->logout_dialog = NULL;
 	helper->position_menu = positions[position];
 	helper->preferences_dialog = _panel_helper_preferences_dialog;
+	helper->reboot = _panel_can_shutdown()
+		? _panel_helper_reboot : NULL;
+	helper->reboot_dialog = (helper->shutdown != NULL)
+		&& ((p = panel_get_config(panel, NULL, "reboot")) == NULL
+				|| strtol(p, NULL, 0) != 0)
+		? _panel_helper_reboot_dialog : NULL;
 	helper->rotate_screen = _panel_helper_rotate_screen;
 	helper->shutdown = _panel_can_shutdown()
 		? _panel_helper_shutdown : NULL;
