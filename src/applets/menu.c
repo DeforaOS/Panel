@@ -420,14 +420,11 @@ static void _menu_xdg_dirs(Menu * menu, void (*callback)(Menu * menu,
 	/* read through every XDG application folder */
 	if((path = getenv("XDG_DATA_DIRS")) == NULL || strlen(path) == 0)
 	{
-#if defined(__FreeBSD__)
-		/* XXX really detect if DATADIR is already included */
-		path = DATADIR ":/usr/share";
-#elif defined(__NetBSD__)
+#if defined(__NetBSD__)
 		/* XXX include the default path for pkgsrc */
-		path = "/usr/pkg/share:" DATADIR ":/usr/share";
+		path = "/usr/pkg/share:/usr/local/share:/usr/share";
 #else
-		path = "/usr/local/share:" DATADIR ":/usr/share";
+		path = "/usr/local/share:/usr/share";
 #endif
 		datadir = 0;
 	}
